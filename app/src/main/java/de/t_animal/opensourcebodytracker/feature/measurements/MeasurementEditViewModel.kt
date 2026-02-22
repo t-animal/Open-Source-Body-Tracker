@@ -7,6 +7,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import java.time.Instant
 import java.time.ZoneId
+import java.text.DecimalFormatSymbols
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,12 +51,12 @@ class MeasurementEditViewModel(
                         measurementId = measurement.id,
                         dateEpochMillis = measurement.dateEpochMillis,
                         dateText = formatDate(measurement.dateEpochMillis),
-                        weightKgText = measurement.weightKg?.toString().orEmpty(),
-                        neckCmText = measurement.neckCircumferenceCm?.toString().orEmpty(),
-                        chestCmText = measurement.chestCircumferenceCm?.toString().orEmpty(),
-                        waistCmText = measurement.waistCircumferenceCm?.toString().orEmpty(),
-                        abdomenCmText = measurement.abdomenCircumferenceCm?.toString().orEmpty(),
-                        hipCmText = measurement.hipCircumferenceCm?.toString().orEmpty(),
+                        weightKgText = measurement.weightKg?.let(::formatDecimalForInput).orEmpty(),
+                        neckCmText = measurement.neckCircumferenceCm?.let(::formatDecimalForInput).orEmpty(),
+                        chestCmText = measurement.chestCircumferenceCm?.let(::formatDecimalForInput).orEmpty(),
+                        waistCmText = measurement.waistCircumferenceCm?.let(::formatDecimalForInput).orEmpty(),
+                        abdomenCmText = measurement.abdomenCircumferenceCm?.let(::formatDecimalForInput).orEmpty(),
+                        hipCmText = measurement.hipCircumferenceCm?.let(::formatDecimalForInput).orEmpty(),
                     )
                 }
             }
@@ -79,6 +80,16 @@ class MeasurementEditViewModel(
     fun onAbdomenChanged(text: String) = update { it.copy(abdomenCmText = text, errorMessage = null) }
 
     fun onHipChanged(text: String) = update { it.copy(hipCmText = text, errorMessage = null) }
+
+    fun onDateChanged(epochMillis: Long) {
+        update {
+            it.copy(
+                dateEpochMillis = epochMillis,
+                dateText = formatDate(epochMillis),
+                errorMessage = null,
+            )
+        }
+    }
 
     fun onSaveClicked() {
         val current = _uiState.value
@@ -147,7 +158,17 @@ class MeasurementEditViewModelFactory(
 private fun parseDoubleOrNull(text: String): Double? {
     val trimmed = text.trim()
     if (trimmed.isBlank()) return null
-    return trimmed.replace(',', '.').toDoubleOrNull()
+    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
+    return trimmed
+        .replace(decimalSeparator, '.')
+        .replace(',', '.')
+        .toDoubleOrNull()
+}
+
+private fun formatDecimalForInput(value: Double): String {
+    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
+    val text = value.toString()
+    return if (decimalSeparator == '.') text else text.replace('.', decimalSeparator)
 }
 
 private fun formatDate(epochMillis: Long): String {

@@ -24,9 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import de.t_animal.opensourcebodytracker.ui.components.formatEpochMillisToLocalizedNumericDate
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
-import java.time.Instant
-import java.time.ZoneId
+import java.text.NumberFormat
 
 @Composable
 fun MeasurementListRoute(
@@ -99,22 +99,22 @@ private fun MeasurementRow(
             .padding(vertical = 12.dp),
     ) {
         Text(
-            text = formatDate(measurement.dateEpochMillis),
+            text = formatEpochMillisToLocalizedNumericDate(measurement.dateEpochMillis),
             style = MaterialTheme.typography.titleMedium,
         )
 
         val weight = measurement.weightKg
         if (weight != null) {
-            Text(text = "Weight: $weight kg")
+            Text(text = "Weight: ${formatDecimal(weight)} kg")
         }
     }
 }
 
-private fun formatDate(epochMillis: Long): String {
-    return Instant.ofEpochMilli(epochMillis)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-        .toString()
+private fun formatDecimal(value: Double): String {
+    val nf = NumberFormat.getNumberInstance()
+    nf.isGroupingUsed = false
+    nf.maximumFractionDigits = 2
+    return nf.format(value)
 }
 
 @Preview(showBackground = true)

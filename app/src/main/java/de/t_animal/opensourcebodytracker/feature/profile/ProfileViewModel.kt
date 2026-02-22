@@ -9,6 +9,7 @@ import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.text.DecimalFormatSymbols
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,7 +50,7 @@ class ProfileViewModel(
                         _uiState.value = _uiState.value.copy(
                             sex = profile.sex,
                             dateOfBirthText = epochMillisToLocalDate(profile.dateOfBirthEpochMillis).toString(),
-                            heightCmText = profile.heightCm.toString(),
+                            heightCmText = formatDecimalForInput(profile.heightCm.toDouble()),
                             errorMessage = null,
                         )
                     }
@@ -83,7 +84,7 @@ class ProfileViewModel(
             return
         }
 
-        val height = current.heightCmText.trim().replace(',', '.').toFloatOrNull()
+        val height = parseFloatOrNull(current.heightCmText)
         if (height == null || height <= 0f) {
             _uiState.value = current.copy(errorMessage = "Height must be a positive number")
             return
@@ -118,4 +119,20 @@ private fun localDateToEpochMillis(localDate: LocalDate): Long {
 
 private fun epochMillisToLocalDate(epochMillis: Long): LocalDate {
     return Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+}
+
+private fun parseFloatOrNull(text: String): Float? {
+    val trimmed = text.trim()
+    if (trimmed.isBlank()) return null
+    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
+    return trimmed
+        .replace(decimalSeparator, '.')
+        .replace(',', '.')
+        .toFloatOrNull()
+}
+
+private fun formatDecimalForInput(value: Double): String {
+    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
+    val text = value.toString()
+    return if (decimalSeparator == '.') text else text.replace('.', decimalSeparator)
 }

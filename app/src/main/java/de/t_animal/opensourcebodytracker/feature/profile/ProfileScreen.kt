@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,13 +19,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.ui.components.DateInputField
+import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Composable
 fun ProfileRoute(
@@ -63,6 +68,8 @@ fun ProfileScreen(
     onHeightChanged: (String) -> Unit,
     onSaveClicked: () -> Unit,
 ) {
+    val initialDobMillis = localDateTextToEpochMillisOrNull(state.dateOfBirthText)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -101,22 +108,22 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
-                value = state.dateOfBirthText,
-                onValueChange = onDateOfBirthChanged,
-                label = { Text("Date of birth (YYYY-MM-DD)") },
+            DateInputField(
+                label = "Date of birth",
+                valueText = state.dateOfBirthText,
+                selectedDateMillis = initialDobMillis,
+                onDateSelected = { onDateOfBirthChanged(epochMillisToIsoLocalDate(it)) },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            DecimalNumberInputField(
+                label = "Height (cm)",
                 value = state.heightCmText,
                 onValueChange = onHeightChanged,
-                label = { Text("Height (cm)") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
+                imeAction = ImeAction.Done,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -159,7 +166,7 @@ private fun ProfileScreenPreview_Onboarding() {
             state = ProfileUiState(
                 mode = ProfileMode.Onboarding,
                 sex = Sex.Male,
-                dateOfBirthText = "1990-01-01",
+                dateOfBirthText = "1990-01-02",
                 heightCmText = "180",
             ),
             onSexChanged = {},
@@ -188,4 +195,16 @@ private fun ProfileScreenPreview_Error() {
             onSaveClicked = {},
         )
     }
+}
+
+private fun localDateTextToEpochMillisOrNull(text: String): Long? {
+    val date = runCatching { LocalDate.parse(text.trim()) }.getOrNull() ?: return null
+    return date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+}
+
+private fun epochMillisToIsoLocalDate(epochMillis: Long): String {
+    return Instant.ofEpochMilli(epochMillis)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
+        .toString()
 }

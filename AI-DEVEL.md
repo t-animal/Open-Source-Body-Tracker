@@ -13,8 +13,15 @@ Implemented Phase 1: profile onboarding (DataStore) + measurement CRUD (Room) wi
 - Profile persistence via Preferences DataStore: sex, date of birth, height.
 - Measurement persistence via Room: list + add/edit.
 - Validation rules:
-  - Profile: sex required; DOB parse format `YYYY-MM-DD`; height > 0.
+  - Profile: sex required; DOB must be a valid ISO `LocalDate` string (`YYYY-MM-DD` in state/storage); height > 0.
   - Measurement: at least one numeric value required.
+
+**Input UX (Phase 1 polish):**
+- Profile + Measurement edit no longer allow arbitrary text input for dates; they use a Material3 date picker.
+- Date text is displayed in the user’s locale using a numeric full-year format (e.g. `31.12.2026` / `12/31/2026`).
+- Decimal inputs (height, weight, circumferences) use a decimal keyboard and normalize input to the current locale’s decimal separator.
+- Date picker selection is converted UTC↔local-midnight to avoid off-by-one-day errors in some time zones.
+- Measurement list shows dates (and displayed decimals like weight) using locale-aware numeric formatting.
 
 **UI screens present (Compose):**
 - Onboarding/Profile setup screen
@@ -72,6 +79,11 @@ source /etc/profile && ./gradlew ktlintCheck --console=plain
   - `feature/profile/ProfileViewModel`
   - `feature/profile/ProfileScreen`
 
+### Shared UI components
+- `ui/components/InputFields.kt`
+  - `DateInputField`: read-only text field + date picker dialog, tap-anywhere opens picker, locale-numeric display, UTC/local conversion.
+  - `DecimalNumberInputField`: decimal keyboard + locale-aware input normalization.
+
 ### Measurements (Room)
 - Model:
   - `core/model/BodyMeasurement`
@@ -102,7 +114,7 @@ source /etc/profile && ./gradlew ktlintCheck --console=plain
 ## Recommended Next Steps
 1. Phase 1 polish (if desired):
    - Ensure navigation UX is exactly as intended (e.g., Settings returns to list).
-   - Improve input UX (number keyboard, better error messaging) without changing requirements.
+   - Consider adding small unit tests for the date/number parsing helpers (locale separators, date conversions).
 2. Add derived metrics (Phase 2):
    - Add calculation layer using profile + measurement.
    - Display derived values in list/details.
