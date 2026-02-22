@@ -1,0 +1,40 @@
+package de.t_animal.opensourcebodytracker
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
+import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val container = (application as BodyTrackerApplication).container
+
+        setContent {
+            BodyTrackerTheme {
+                Surface(modifier = Modifier) {
+                    BodyTrackerApp(
+                        profileRepository = container.profileRepository,
+                        measurementRepository = container.measurementRepository,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BodyTrackerApp(
+    profileRepository: de.t_animal.opensourcebodytracker.data.profile.ProfileRepository,
+    measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
+) {
+    BodyTrackerNavHost(
+        profileRepository = profileRepository,
+        measurementRepository = measurementRepository,
+    )
+}
