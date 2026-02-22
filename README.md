@@ -139,7 +139,7 @@ These values are calculated dynamically based on:
 * Profile data (height, sex, age)
 * Measurement-specific values (weight, circumferences)
 
-The exact formulas remain tbd.
+The exact formulas are documented in [FORMULAS.md](FORMULAS.md)
 
 ---
 
