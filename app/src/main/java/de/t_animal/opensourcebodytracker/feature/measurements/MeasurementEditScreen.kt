@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -17,11 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import de.t_animal.opensourcebodytracker.ui.components.DateInputField
+import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -45,6 +47,7 @@ fun MeasurementEditRoute(
 
     MeasurementEditScreen(
         state = state,
+        onDateChanged = vm::onDateChanged,
         onWeightChanged = vm::onWeightChanged,
         onNeckChanged = vm::onNeckChanged,
         onChestChanged = vm::onChestChanged,
@@ -59,6 +62,7 @@ fun MeasurementEditRoute(
 @Composable
 fun MeasurementEditScreen(
     state: MeasurementEditUiState,
+    onDateChanged: (Long) -> Unit,
     onWeightChanged: (String) -> Unit,
     onNeckChanged: (String) -> Unit,
     onChestChanged: (String) -> Unit,
@@ -80,60 +84,67 @@ fun MeasurementEditScreen(
                 .padding(padding)
                 .padding(16.dp),
         ) {
-            Text(text = "Date: ${state.dateText}")
+            DateInputField(
+                label = "Date",
+                valueText = state.dateText,
+                selectedDateMillis = state.dateEpochMillis,
+                onDateSelected = onDateChanged,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            OutlinedTextField(
+            DecimalNumberInputField(
+                label = "Weight (kg)",
                 value = state.weightKgText,
                 onValueChange = onWeightChanged,
-                label = { Text("Weight (kg)") },
-                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                imeAction = ImeAction.Next,
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            DecimalNumberInputField(
+                label = "Neck (cm)",
                 value = state.neckCmText,
                 onValueChange = onNeckChanged,
-                label = { Text("Neck (cm)") },
-                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                imeAction = ImeAction.Next,
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            DecimalNumberInputField(
+                label = "Chest (cm)",
                 value = state.chestCmText,
                 onValueChange = onChestChanged,
-                label = { Text("Chest (cm)") },
-                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                imeAction = ImeAction.Next,
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            DecimalNumberInputField(
+                label = "Waist (cm)",
                 value = state.waistCmText,
                 onValueChange = onWaistChanged,
-                label = { Text("Waist (cm)") },
-                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                imeAction = ImeAction.Next,
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            DecimalNumberInputField(
+                label = "Abdomen (cm)",
                 value = state.abdomenCmText,
                 onValueChange = onAbdomenChanged,
-                label = { Text("Abdomen (cm)") },
-                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                imeAction = ImeAction.Next,
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            OutlinedTextField(
+            DecimalNumberInputField(
+                label = "Hip (cm)",
                 value = state.hipCmText,
                 onValueChange = onHipChanged,
-                label = { Text("Hip (cm)") },
-                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
+                imeAction = ImeAction.Done,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -161,6 +172,7 @@ private fun MeasurementEditScreenPreview_Add() {
                 dateEpochMillis = 1_700_000_000_000,
                 dateText = "2024-01-01",
             ),
+            onDateChanged = {},
             onWeightChanged = {},
             onNeckChanged = {},
             onChestChanged = {},
@@ -183,6 +195,7 @@ private fun MeasurementEditScreenPreview_Error() {
                 dateText = "2024-01-01",
                 errorMessage = "Enter at least one value",
             ),
+            onDateChanged = {},
             onWeightChanged = {},
             onNeckChanged = {},
             onChestChanged = {},
