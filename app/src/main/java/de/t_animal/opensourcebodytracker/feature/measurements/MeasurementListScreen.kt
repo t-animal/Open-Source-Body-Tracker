@@ -23,19 +23,30 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.ui.components.formatEpochMillisToLocalizedNumericDate
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.text.NumberFormat
 
 @Composable
 fun MeasurementListRoute(
-    repository: MeasurementRepository,
+    measurementRepository: MeasurementRepository,
+    profileRepository: ProfileRepository,
+    calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     onAdd: () -> Unit,
     onEdit: (Long) -> Unit,
     onOpenSettings: () -> Unit,
 ) {
-    val vm: MeasurementListViewModel = viewModel(factory = MeasurementListViewModelFactory(repository))
+    val vm: MeasurementListViewModel = viewModel(
+        factory = MeasurementListViewModelFactory(
+            measurementRepository = measurementRepository,
+            profileRepository = profileRepository,
+            calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
+        ),
+    )
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     MeasurementListScreen(
@@ -77,10 +88,10 @@ fun MeasurementListScreen(
                 .padding(padding),
             contentPadding = PaddingValues(16.dp),
         ) {
-            items(items = state.measurements, key = { it.id }) { measurement ->
+            items(items = state.measurements, key = { it.measurement.id }) { measurement ->
                 MeasurementRow(
-                    measurement = measurement,
-                    onClick = { onEdit(measurement.id) },
+                    item = measurement,
+                    onClick = { onEdit(measurement.measurement.id) },
                 )
             }
         }
@@ -89,9 +100,11 @@ fun MeasurementListScreen(
 
 @Composable
 private fun MeasurementRow(
-    measurement: BodyMeasurement,
+    item: MeasurementListItemUiModel,
     onClick: () -> Unit,
 ) {
+    val measurement = item.measurement
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -107,6 +120,12 @@ private fun MeasurementRow(
         if (weight != null) {
             Text(text = "Weight: ${formatDecimal(weight)} kg")
         }
+
+        item.derivedMetrics.bmi?.let { Text(text = "BMI: ${formatDecimal(it)}") }
+        item.derivedMetrics.bodyFatPercent?.let { Text(text = "Body Fat: ${formatDecimal(it)} %") }
+        item.derivedMetrics.waistHipRatio?.let { Text(text = "WHR: ${formatDecimal(it)}") }
+        item.derivedMetrics.waistHeightRatio?.let { Text(text = "WHtR: ${formatDecimal(it)}") }
+        item.derivedMetrics.hipHeightRatio?.let { Text(text = "Hip/Height: ${formatDecimal(it)}") }
     }
 }
 
@@ -124,8 +143,22 @@ private fun MeasurementListScreenPreview() {
         MeasurementListScreen(
             state = MeasurementListUiState(
                 measurements = listOf(
-                    BodyMeasurement(id = 1, dateEpochMillis = 1_700_000_000_000, weightKg = 80.0),
-                    BodyMeasurement(id = 2, dateEpochMillis = 1_710_000_000_000, neckCircumferenceCm = 40.0),
+                    MeasurementListItemUiModel(
+                        measurement = BodyMeasurement(
+                            id = 1,
+                            dateEpochMillis = 1_700_000_000_000,
+                            weightKg = 80.0,
+                        ),
+                        derivedMetrics = DerivedMetrics(bmi = 24.69, waistHeightRatio = 0.50),
+                    ),
+                    MeasurementListItemUiModel(
+                        measurement = BodyMeasurement(
+                            id = 2,
+                            dateEpochMillis = 1_710_000_000_000,
+                            neckCircumferenceCm = 40.0,
+                        ),
+                        derivedMetrics = DerivedMetrics(),
+                    ),
                 ),
             ),
             onAdd = {},

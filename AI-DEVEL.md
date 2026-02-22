@@ -1,12 +1,16 @@
-# AI Development Handoff (Phase 1)
+# AI Development Handoff (Phase 1 + Phase 2)
 
 This document describes the current implementation state and the key constraints/gotchas so another coding agent can continue work quickly.
 
-## Project Goal (README Phase 1)
-Implemented Phase 1: profile onboarding (DataStore) + measurement CRUD (Room) with Compose UI + MVVM.
+## Project Goal (README Phases 1-2)
+Implemented:
+- Phase 1: profile onboarding (DataStore) + measurement CRUD (Room) with Compose UI + MVVM.
+- Phase 2: derived metrics in the measurement list via a domain calculation layer.
 
 ## Status Summary
 **Build:** `assembleDebug` succeeds.
+**Tests:** `test` succeeds.
+**Lint:** `ktlintCheck` succeeds.
 
 **Phase 1 feature coverage:**
 - Profile gate on startup (if profile missing → onboarding).
@@ -31,12 +35,31 @@ Implemented Phase 1: profile onboarding (DataStore) + measurement CRUD (Room) wi
 
 All screens have Compose previews.
 
+**Phase 2 feature coverage (implemented):**
+- Domain-derived metrics are calculated dynamically from profile + measurement input.
+- Metrics currently shown on measurement list rows:
+  - BMI
+  - Estimated body-fat percentage (Navy method)
+  - WHR
+  - WHtR
+  - Hip/Height ratio
+- Missing/invalid inputs do not show placeholder text; unavailable metrics are hidden.
+- Derived values are not persisted in Room (computed at runtime in domain layer).
+- Existing locale-aware numeric/date display behavior is retained.
+
 ## How to Build / Lint
 This environment requires sourcing `/etc/profile` before running Gradle:
 
 ```bash
 source /etc/profile && ./gradlew assembleDebug --console=plain
+source /etc/profile && ./gradlew test --console=plain
 source /etc/profile && ./gradlew ktlintCheck --console=plain
+```
+
+If root `ktlintCheck` is unavailable in a given environment setup, use:
+
+```bash
+source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 ```
 
 ## Toolchain Constraints / Gotchas
@@ -58,6 +81,8 @@ source /etc/profile && ./gradlew ktlintCheck --console=plain
   - Simple manual DI:
     - `PreferencesProfileRepository` (DataStore)
     - `AppDatabase` + `RoomMeasurementRepository` (Room)
+    - `DerivedMetricsCalculator`
+    - `CalculateMeasurementDerivedMetricsUseCase`
 - `de.t_animal.opensourcebodytracker.MainActivity`
   - Hosts Compose content + navigation.
 
@@ -67,6 +92,7 @@ source /etc/profile && ./gradlew ktlintCheck --console=plain
 - `de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost`
   - NavHost for onboarding/settings/list/add/edit.
   - Gating logic: starts on onboarding; when profile becomes non-null, navigates to measurement list and pops onboarding.
+  - Injects derived-metrics use-case into measurement list route.
 
 ### Profile (DataStore)
 - Model:
@@ -87,15 +113,24 @@ source /etc/profile && ./gradlew ktlintCheck --console=plain
 ### Measurements (Room)
 - Model:
   - `core/model/BodyMeasurement`
+  - `core/model/DerivedMetrics`
 - Data:
   - `data/measurements/MeasurementEntity`
   - `data/measurements/MeasurementDao`
   - `data/measurements/AppDatabase`
   - `data/measurements/MeasurementRepository`
   - `data/measurements/RoomMeasurementRepository`
+- Domain:
+  - `domain/metrics/DerivedMetricsCalculator`
+  - `domain/metrics/CalculateMeasurementDerivedMetricsUseCase`
 - Feature UI:
   - `feature/measurements/MeasurementListViewModel` + `MeasurementListScreen`
+    - List state now combines profile + measurements and exposes per-row derived metrics.
   - `feature/measurements/MeasurementEditViewModel` + `MeasurementEditScreen`
+
+### Tests
+- `app/src/test/java/de/t_animal/opensourcebodytracker/domain/metrics/DerivedMetricsCalculatorTest.kt`
+  - Covers BMI/ratio calculations, body-fat availability for male/female, and invalid log-input handling.
 
 ### Theme
 - `ui/theme/Theme`
@@ -106,6 +141,12 @@ source /etc/profile && ./gradlew ktlintCheck --console=plain
 - `BodyMeasurement` contains:
   - date epoch millis
   - optional numeric metrics (weight/circumferences)
+- `DerivedMetrics` contains nullable dynamic outputs:
+  - BMI
+  - body-fat percentage
+  - WHR
+  - WHtR
+  - hip-height ratio
 
 ## Known Warnings
 - Gradle warning about `android.disallowKotlinSourceSets=false` being experimental.
@@ -115,15 +156,21 @@ source /etc/profile && ./gradlew ktlintCheck --console=plain
 1. Phase 1 polish (if desired):
    - Ensure navigation UX is exactly as intended (e.g., Settings returns to list).
    - Consider adding small unit tests for the date/number parsing helpers (locale separators, date conversions).
-2. Add derived metrics (Phase 2):
-   - Add calculation layer using profile + measurement.
-   - Display derived values in list/details.
-3. Testing:
+2. Testing:
    - Add unit tests for parsing/validation logic (profile + measurement).
    - Add basic repository tests where feasible.
+3. Phase 2 completion/polish:
+  - Optionally move new list labels (BMI/WHR/WHtR/etc.) to string resources for i18n consistency.
+4. Testing:
+  - Add targeted tests for metric formatting/presentation mapping in list UI state.
+  - Add additional edge-case tests (zero/negative values across all metrics).
+5. Phase 3 prep:
+  - Start skinfold input/domain scaffolding without changing existing Phase 1/2 persistence behavior.
 
 ## Quick Sanity Checklist for Future Agents
-- `./gradlew assembleDebug` passes.
-- `./gradlew ktlintCheck` passes.
+- `source /etc/profile && ./gradlew assembleDebug --console=plain` passes.
+- `source /etc/profile && ./gradlew test --console=plain` passes.
+- `source /etc/profile && ./gradlew ktlintCheck --console=plain` passes.
 - On fresh install: app shows onboarding until profile saved.
 - After profile save: measurement list shows; FAB opens add; tap row opens edit.
+- Measurement list row shows only computable derived metrics (no placeholder for unavailable ones).

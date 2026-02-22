@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRoute
 import de.t_animal.opensourcebodytracker.feature.profile.ProfileRoute
@@ -24,6 +25,7 @@ import de.t_animal.opensourcebodytracker.feature.profile.ProfileRoute
 fun BodyTrackerNavHost(
     profileRepository: ProfileRepository,
     measurementRepository: MeasurementRepository,
+    calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
 ) {
     val navController = rememberNavController()
 
@@ -64,7 +66,9 @@ fun BodyTrackerNavHost(
 
         composable(Routes.MeasurementList) {
             MeasurementListRoute(
-                repository = measurementRepository,
+                measurementRepository = measurementRepository,
+                profileRepository = profileRepository,
+                calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
                 onAdd = { navController.navigate(Routes.MeasurementAdd) },
                 onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },

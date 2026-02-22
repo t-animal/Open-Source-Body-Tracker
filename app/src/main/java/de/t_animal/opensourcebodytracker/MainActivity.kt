@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
                     BodyTrackerApp(
                         profileRepository = container.profileRepository,
                         measurementRepository = container.measurementRepository,
+                        calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
                     )
                 }
             }
@@ -32,9 +33,11 @@ class MainActivity : ComponentActivity() {
 private fun BodyTrackerApp(
     profileRepository: de.t_animal.opensourcebodytracker.data.profile.ProfileRepository,
     measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
+    calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
 ) {
     BodyTrackerNavHost(
         profileRepository = profileRepository,
         measurementRepository = measurementRepository,
+        calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
     )
 }
