@@ -14,7 +14,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 data class MeasurementListUiState(
-    val measurements: List<MeasurementListItemUiModel> = emptyList(),
+    val latestMeasurement: MeasurementListItemUiModel? = null,
+    val previewMeasurements: List<MeasurementListItemUiModel> = emptyList(),
+    val allMeasurements: List<MeasurementListItemUiModel> = emptyList(),
+    val hasMoreMeasurements: Boolean = false,
+    val isEmpty: Boolean = true,
+    val isLoading: Boolean = true,
 )
 
 data class MeasurementListItemUiModel(
@@ -38,13 +43,24 @@ class MeasurementListViewModel(
             )
         }
 
-        MeasurementListUiState(measurements = items)
+        MeasurementListUiState(
+            latestMeasurement = items.firstOrNull(),
+            previewMeasurements = items.take(PREVIEW_LIMIT),
+            allMeasurements = items,
+            hasMoreMeasurements = items.size > PREVIEW_LIMIT,
+            isEmpty = items.isEmpty(),
+            isLoading = false,
+        )
     }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = MeasurementListUiState(),
         )
+
+    companion object {
+        private const val PREVIEW_LIMIT = 20
+    }
 }
 
 class MeasurementListViewModelFactory(

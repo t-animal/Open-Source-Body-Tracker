@@ -1,13 +1,14 @@
-# AI Development Handoff (Phase 1-4.1)
+# AI Development Handoff (Phase 1-4.2)
 
 This document describes the current implementation state and the key constraints/gotchas so another coding agent can continue work quickly.
 
-## Project Goal (README phases through 4.1)
+## Project Goal (README phases through 4.2)
 Implemented:
 - Phase 1: profile onboarding (DataStore) + measurement CRUD (Room) with Compose UI + MVVM.
 - Phase 2: derived metrics in the measurement list via a domain calculation layer.
 - Phase 3: skinfold-based derived body-fat support in add/edit and domain metrics.
 - Phase 4.1 (navigation shell): top app bar + overflow menu + bottom navigation structure with placeholder Analysis/Photos/Settings screens.
+- Phase 4.2 (measurements redesign): latest measurement card + preview table (20) + full-list "More" screen.
 
 ## Status Summary
 **Build:** `assembleDebug` succeeds.
@@ -77,6 +78,19 @@ All screens have Compose previews.
 - Measurement list was refactored to render inside shared scaffold content; FAB was extracted as reusable composable.
 - Onboarding gate behavior was tightened to auto-navigate to the list only when currently on onboarding.
 
+**Phase 4.2 measurements screen redesign coverage (implemented):**
+- Measurements main tab now contains:
+  - "Latest Measurement" card
+  - 2-column metrics grid with strong value emphasis
+  - "All Measurements" table preview (first 20 newest entries)
+  - conditional "More" button when additional entries exist
+- Added explicit placeholder rendering (`--`) for missing raw/derived values in the latest card and table cells.
+- Added dedicated full-list route/screen opened via "More":
+  - top app bar with back button
+  - full measurements table
+  - no bottom nav and no FAB
+- Main Measurements tab still keeps the Add FAB and supports tap-to-edit from preview table rows.
+
 ## How to Build / Lint
 This environment requires sourcing `/etc/profile` before running Gradle:
 
@@ -119,13 +133,13 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 ### Navigation
 - `de.t_animal.opensourcebodytracker.ui.navigation.Routes`
   - Route constants and helper for edit route.
-  - Includes onboarding, measurement list/add/edit, profile, settings, analysis, photos.
+  - Includes onboarding, measurement list/add/edit/full-list, profile, settings, analysis, photos.
 - `de.t_animal.opensourcebodytracker.ui.navigation.MainDestination`
   - Main-tab model for Measurements/Analysis/Photos.
 - `de.t_animal.opensourcebodytracker.ui.navigation.MainScreenScaffold`
   - Shared main-screen scaffold (top bar, overflow menu, bottom nav, optional FAB slot).
 - `de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost`
-  - NavHost for onboarding/profile/settings/measurements/analysis/photos/add/edit.
+  - NavHost for onboarding/profile/settings/measurements/analysis/photos/add/edit/full-list.
   - Gating logic: starts on onboarding; when profile becomes non-null **and current route is onboarding**, navigates to measurement list and pops onboarding.
   - Wires shared scaffold to main tabs and keeps add/edit flows separate.
 
@@ -220,6 +234,7 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 - `source /etc/profile && ./gradlew ktlintCheck --console=plain` passes.
 - On fresh install: app shows onboarding until profile saved.
 - After profile save: Measurements tab shows; FAB opens add; tap row opens edit.
+- Measurements tab shows Latest card + preview table; More opens full-list screen with back button only.
 - Bottom nav switches between Measurements/Analysis/Photos and updates title.
 - Overflow on main tabs opens Profile and Settings screens.
-- Measurement list row shows only computable derived metrics (no placeholder for unavailable ones).
+- Missing raw/derived values in latest card/table render as `--`.
