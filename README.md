@@ -139,7 +139,7 @@ These values are calculated dynamically based on:
 * Profile data (height, sex, age)
 * Measurement-specific values (weight, circumferences)
 
-The exact formulas are documented in [FORMULAS.md](FORMULAS.md)
+The exact formulas are documented in [FORMULAS.md](documents/FORMULAS.md)
 
 ---
 
@@ -189,7 +189,7 @@ This phase introduces visual data analysis and statistical summaries.
 
 #### Phase 4.1 Main Navigation Layout
 
-See [NAVIGATON.md](NAVIGATION.md)
+See [NAVIGATON.md](documents/NAVIGATION.md)
 
 #### Phase 4.2 Measurements screen redesign
 
@@ -279,4 +279,4 @@ License to be defined.
 # 📌 Status
 
 🚧 In Active Development – Phase 1, 2 and 3 (JP 3-site skinfold) implemented
-If you're an AI Agent, check AI-DEVEL.md for details.
+If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
