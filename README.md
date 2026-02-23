@@ -193,6 +193,8 @@ See [NAVIGATON.md](documents/NAVIGATION.md)
 
 #### Phase 4.2 Measurements screen redesign
 
+See [MEASUREMENT-SCREEN.md](documents/MEASUREMENT-SCREEN.md)
+
 #### Phase 4.3 Chart generation
 
 ---
