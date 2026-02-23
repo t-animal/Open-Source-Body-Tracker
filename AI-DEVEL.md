@@ -1,11 +1,13 @@
-# AI Development Handoff (Phase 1 + Phase 2)
+# AI Development Handoff (Phase 1-4.1)
 
 This document describes the current implementation state and the key constraints/gotchas so another coding agent can continue work quickly.
 
-## Project Goal (README Phases 1-2)
+## Project Goal (README phases through 4.1)
 Implemented:
 - Phase 1: profile onboarding (DataStore) + measurement CRUD (Room) with Compose UI + MVVM.
 - Phase 2: derived metrics in the measurement list via a domain calculation layer.
+- Phase 3: skinfold-based derived body-fat support in add/edit and domain metrics.
+- Phase 4.1 (navigation shell): top app bar + overflow menu + bottom navigation structure with placeholder Analysis/Photos/Settings screens.
 
 ## Status Summary
 **Build:** `assembleDebug` succeeds.
@@ -29,9 +31,12 @@ Implemented:
 
 **UI screens present (Compose):**
 - Onboarding/Profile setup screen
-- Settings/Profile screen
+- Profile screen (editable)
 - Measurement list screen
 - Add/Edit measurement screen
+- Settings screen (placeholder)
+- Analysis screen (placeholder)
+- Photos screen (placeholder)
 
 All screens have Compose previews.
 
@@ -58,6 +63,19 @@ All screens have Compose previews.
 - Skinfold calculations use age at measurement date (derived from profile DOB + measurement date).
 - Minimal validation for skinfold inputs is enforced in the edit flow (> 0 for provided values).
 - Room schema version was intentionally not bumped in this phase.
+
+**Phase 4.1 navigation shell coverage (implemented):**
+- Main screens now share a common scaffold structure:
+  - top app bar with dynamic title
+  - overflow menu (Profile, Settings)
+  - bottom navigation tabs (M/A/P)
+- Added placeholder screens:
+  - Analysis ("Analysis Coming Soon")
+  - Photos ("Photos Coming Soon")
+  - Settings ("Settings Coming Soon")
+- Added dedicated route for Profile (editable profile form).
+- Measurement list was refactored to render inside shared scaffold content; FAB was extracted as reusable composable.
+- Onboarding gate behavior was tightened to auto-navigate to the list only when currently on onboarding.
 
 ## How to Build / Lint
 This environment requires sourcing `/etc/profile` before running Gradle:
@@ -101,10 +119,15 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 ### Navigation
 - `de.t_animal.opensourcebodytracker.ui.navigation.Routes`
   - Route constants and helper for edit route.
+  - Includes onboarding, measurement list/add/edit, profile, settings, analysis, photos.
+- `de.t_animal.opensourcebodytracker.ui.navigation.MainDestination`
+  - Main-tab model for Measurements/Analysis/Photos.
+- `de.t_animal.opensourcebodytracker.ui.navigation.MainScreenScaffold`
+  - Shared main-screen scaffold (top bar, overflow menu, bottom nav, optional FAB slot).
 - `de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost`
-  - NavHost for onboarding/settings/list/add/edit.
-  - Gating logic: starts on onboarding; when profile becomes non-null, navigates to measurement list and pops onboarding.
-  - Injects derived-metrics use-case into measurement list route.
+  - NavHost for onboarding/profile/settings/measurements/analysis/photos/add/edit.
+  - Gating logic: starts on onboarding; when profile becomes non-null **and current route is onboarding**, navigates to measurement list and pops onboarding.
+  - Wires shared scaffold to main tabs and keeps add/edit flows separate.
 
 ### Profile (DataStore)
 - Model:
@@ -137,8 +160,14 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
   - `domain/metrics/CalculateMeasurementDerivedMetricsUseCase`
 - Feature UI:
   - `feature/measurements/MeasurementListViewModel` + `MeasurementListScreen`
-    - List state now combines profile + measurements and exposes per-row derived metrics.
+    - List state combines profile + measurements and exposes per-row derived metrics.
+    - Rendered as scaffold content (no local top app bar); `MeasurementListAddButton` hosts FAB UI.
   - `feature/measurements/MeasurementEditViewModel` + `MeasurementEditScreen`
+
+### New placeholder features
+- `feature/analysis/AnalysisScreen`
+- `feature/photos/PhotosScreen`
+- `feature/settings/SettingsScreen`
 
 ### Tests
 - `app/src/test/java/de/t_animal/opensourcebodytracker/domain/metrics/DerivedMetricsCalculatorTest.kt`
@@ -166,26 +195,31 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 - Packaging warning: some native libs can’t be stripped (does not fail the build).
 
 ## Recommended Next Steps
-1. Phase 1 polish (if desired):
-   - Ensure navigation UX is exactly as intended (e.g., Settings returns to list).
-   - Consider adding small unit tests for the date/number parsing helpers (locale separators, date conversions).
-2. Testing:
+1. Navigation polish:
+   - Move new top-bar/overflow/bottom-nav labels to string resources for EN/DE consistency.
+   - Decide final behavior for tab back stack (currently simple single-stack behavior).
+2. UX consistency:
+   - Confirm Profile/Settings app bar behavior (e.g., optional back affordance/title consistency).
+   - Verify desired system bar styling behavior across gesture and 3-button navigation modes.
+3. Testing:
    - Add unit tests for parsing/validation logic (profile + measurement).
    - Add basic repository tests where feasible.
-3. Phase 2 completion/polish:
-  - Optionally move new list labels (BMI/WHR/WHtR/etc.) to string resources for i18n consistency.
-4. Testing:
-  - Add targeted tests for metric formatting/presentation mapping in list UI state.
-  - Add additional edge-case tests (zero/negative values across all metrics).
-5. Phase 3 follow-up:
-  - Optionally localize new Phase 3 labels/errors to string resources for EN/DE consistency.
-  - Consider range warnings (2–50mm/site) as non-blocking UX feedback.
-  - If existing local installs must be supported, add a proper Room migration and bump DB version.
+4. Phase 2 completion/polish:
+   - Optionally move new list labels (BMI/WHR/WHtR/etc.) to string resources for i18n consistency.
+5. Testing:
+   - Add targeted tests for metric formatting/presentation mapping in list UI state.
+   - Add additional edge-case tests (zero/negative values across all metrics).
+6. Phase 3 follow-up:
+   - Optionally localize new Phase 3 labels/errors to string resources for EN/DE consistency.
+   - Consider range warnings (2–50mm/site) as non-blocking UX feedback.
+   - If existing local installs must be supported, add a proper Room migration and bump DB version.
 
 ## Quick Sanity Checklist for Future Agents
 - `source /etc/profile && ./gradlew assembleDebug --console=plain` passes.
 - `source /etc/profile && ./gradlew test --console=plain` passes.
 - `source /etc/profile && ./gradlew ktlintCheck --console=plain` passes.
 - On fresh install: app shows onboarding until profile saved.
-- After profile save: measurement list shows; FAB opens add; tap row opens edit.
+- After profile save: Measurements tab shows; FAB opens add; tap row opens edit.
+- Bottom nav switches between Measurements/Analysis/Photos and updates title.
+- Overflow on main tabs opens Profile and Settings screens.
 - Measurement list row shows only computable derived metrics (no placeholder for unavailable ones).

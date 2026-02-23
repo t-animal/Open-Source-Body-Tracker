@@ -2,6 +2,7 @@ package de.t_animal.opensourcebodytracker.ui.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -12,14 +13,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
+import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisScreen
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRoute
+import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListAddButton
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRoute
+import de.t_animal.opensourcebodytracker.feature.photos.PhotosScreen
 import de.t_animal.opensourcebodytracker.feature.profile.ProfileRoute
+import de.t_animal.opensourcebodytracker.feature.settings.SettingsScreen
 
 @Composable
 fun BodyTrackerNavHost(
@@ -30,9 +36,11 @@ fun BodyTrackerNavHost(
     val navController = rememberNavController()
 
     val profileOrNull by profileRepository.profileFlow.collectAsStateWithLifecycle(initialValue = null)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    LaunchedEffect(profileOrNull) {
-        if (profileOrNull != null) {
+    LaunchedEffect(profileOrNull, currentRoute) {
+        if (profileOrNull != null && currentRoute == Routes.Onboarding) {
             navController.navigate(Routes.MeasurementList) {
                 popUpTo(Routes.Onboarding) { inclusive = true }
                 launchSingleTop = true
@@ -56,7 +64,7 @@ fun BodyTrackerNavHost(
             )
         }
 
-        composable(Routes.Settings) {
+        composable(Routes.Profile) {
             ProfileRoute(
                 repository = profileRepository,
                 mode = de.t_animal.opensourcebodytracker.feature.profile.ProfileMode.Settings,
@@ -64,15 +72,74 @@ fun BodyTrackerNavHost(
             )
         }
 
+        composable(Routes.Settings) {
+            SettingsScreen()
+        }
+
         composable(Routes.MeasurementList) {
-            MeasurementListRoute(
-                measurementRepository = measurementRepository,
-                profileRepository = profileRepository,
-                calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-                onAdd = { navController.navigate(Routes.MeasurementAdd) },
-                onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
+            MainScreenScaffold(
+                selectedDestination = MainDestination.Measurements,
+                onMainDestinationSelected = { destination ->
+                    navController.navigate(destination.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
-            )
+                floatingActionButton = {
+                    MeasurementListAddButton(onAdd = { navController.navigate(Routes.MeasurementAdd) })
+                },
+            ) { contentPadding ->
+                MeasurementListRoute(
+                    measurementRepository = measurementRepository,
+                    profileRepository = profileRepository,
+                    calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
+                    onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
+                    contentPadding = contentPadding,
+                )
+            }
+        }
+
+        composable(Routes.Analysis) {
+            MainScreenScaffold(
+                selectedDestination = MainDestination.Analysis,
+                onMainDestinationSelected = { destination ->
+                    navController.navigate(destination.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onOpenProfile = { navController.navigate(Routes.Profile) },
+                onOpenSettings = { navController.navigate(Routes.Settings) },
+            ) { contentPadding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                ) {
+                    AnalysisScreen()
+                }
+            }
+        }
+
+        composable(Routes.Photos) {
+            MainScreenScaffold(
+                selectedDestination = MainDestination.Photos,
+                onMainDestinationSelected = { destination ->
+                    navController.navigate(destination.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onOpenProfile = { navController.navigate(Routes.Profile) },
+                onOpenSettings = { navController.navigate(Routes.Settings) },
+            ) { contentPadding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                ) {
+                    PhotosScreen()
+                }
+            }
         }
 
         composable(Routes.MeasurementAdd) {

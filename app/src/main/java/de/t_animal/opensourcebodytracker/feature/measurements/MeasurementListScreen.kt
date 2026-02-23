@@ -8,13 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -36,9 +32,8 @@ fun MeasurementListRoute(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
-    onAdd: () -> Unit,
     onEdit: (Long) -> Unit,
-    onOpenSettings: () -> Unit,
+    contentPadding: PaddingValues,
 ) {
     val vm: MeasurementListViewModel = viewModel(
         factory = MeasurementListViewModelFactory(
@@ -51,50 +46,38 @@ fun MeasurementListRoute(
 
     MeasurementListScreen(
         state = state,
-        onAdd = onAdd,
         onEdit = onEdit,
-        onOpenSettings = onOpenSettings,
+        contentPadding = contentPadding,
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeasurementListScreen(
     state: MeasurementListUiState,
-    onAdd: () -> Unit,
     onEdit: (Long) -> Unit,
-    onOpenSettings: () -> Unit,
+    contentPadding: PaddingValues,
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Measurements") },
-                actions = {
-                    TextButton(onClick = onOpenSettings) {
-                        Text("Settings")
-                    }
-                },
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding),
+        contentPadding = PaddingValues(16.dp),
+    ) {
+        items(items = state.measurements, key = { it.measurement.id }) { measurement ->
+            MeasurementRow(
+                item = measurement,
+                onClick = { onEdit(measurement.measurement.id) },
             )
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = onAdd) {
-                Text("Add")
-            }
-        },
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-        ) {
-            items(items = state.measurements, key = { it.measurement.id }) { measurement ->
-                MeasurementRow(
-                    item = measurement,
-                    onClick = { onEdit(measurement.measurement.id) },
-                )
-            }
         }
+    }
+}
+
+@Composable
+fun MeasurementListAddButton(
+    onAdd: () -> Unit,
+) {
+    ExtendedFloatingActionButton(onClick = onAdd) {
+        Text("Add")
     }
 }
 
@@ -164,9 +147,8 @@ private fun MeasurementListScreenPreview() {
                     ),
                 ),
             ),
-            onAdd = {},
             onEdit = {},
-            onOpenSettings = {},
+            contentPadding = PaddingValues(0.dp),
         )
     }
 }
