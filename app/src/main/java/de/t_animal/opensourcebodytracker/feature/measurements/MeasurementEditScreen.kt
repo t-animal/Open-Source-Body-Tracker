@@ -21,7 +21,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
 import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -29,11 +31,16 @@ import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 @Composable
 fun MeasurementEditRoute(
     repository: MeasurementRepository,
+    profileRepository: ProfileRepository,
     measurementId: Long?,
     onFinished: () -> Unit,
 ) {
     val vm: MeasurementEditViewModel = viewModel(
-        factory = MeasurementEditViewModelFactory(repository = repository, measurementId = measurementId),
+        factory = MeasurementEditViewModelFactory(
+            repository = repository,
+            profileRepository = profileRepository,
+            measurementId = measurementId,
+        ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
 
@@ -54,6 +61,11 @@ fun MeasurementEditRoute(
         onWaistChanged = vm::onWaistChanged,
         onAbdomenChanged = vm::onAbdomenChanged,
         onHipChanged = vm::onHipChanged,
+        onChestSkinfoldChanged = vm::onChestSkinfoldChanged,
+        onAbdomenSkinfoldChanged = vm::onAbdomenSkinfoldChanged,
+        onThighSkinfoldChanged = vm::onThighSkinfoldChanged,
+        onTricepsSkinfoldChanged = vm::onTricepsSkinfoldChanged,
+        onSuprailiacSkinfoldChanged = vm::onSuprailiacSkinfoldChanged,
         onSaveClicked = vm::onSaveClicked,
     )
 }
@@ -69,6 +81,11 @@ fun MeasurementEditScreen(
     onWaistChanged: (String) -> Unit,
     onAbdomenChanged: (String) -> Unit,
     onHipChanged: (String) -> Unit,
+    onChestSkinfoldChanged: (String) -> Unit,
+    onAbdomenSkinfoldChanged: (String) -> Unit,
+    onThighSkinfoldChanged: (String) -> Unit,
+    onTricepsSkinfoldChanged: (String) -> Unit,
+    onSuprailiacSkinfoldChanged: (String) -> Unit,
     onSaveClicked: () -> Unit,
 ) {
     val title = if (state.measurementId == null) "Add Measurement" else "Edit Measurement"
@@ -144,8 +161,72 @@ fun MeasurementEditScreen(
                 value = state.hipCmText,
                 onValueChange = onHipChanged,
                 modifier = Modifier.fillMaxWidth(),
-                imeAction = ImeAction.Done,
+                imeAction = ImeAction.Next,
             )
+
+            when (state.sex) {
+                Sex.Male -> {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    DecimalNumberInputField(
+                        label = "Chest Skinfold (mm)",
+                        value = state.chestSkinfoldMmText,
+                        onValueChange = onChestSkinfoldChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        imeAction = ImeAction.Next,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    DecimalNumberInputField(
+                        label = "Abdomen Skinfold (mm)",
+                        value = state.abdomenSkinfoldMmText,
+                        onValueChange = onAbdomenSkinfoldChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        imeAction = ImeAction.Next,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    DecimalNumberInputField(
+                        label = "Thigh Skinfold (mm)",
+                        value = state.thighSkinfoldMmText,
+                        onValueChange = onThighSkinfoldChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        imeAction = ImeAction.Done,
+                    )
+                }
+
+                Sex.Female -> {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    DecimalNumberInputField(
+                        label = "Triceps Skinfold (mm)",
+                        value = state.tricepsSkinfoldMmText,
+                        onValueChange = onTricepsSkinfoldChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        imeAction = ImeAction.Next,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    DecimalNumberInputField(
+                        label = "Suprailiac Skinfold (mm)",
+                        value = state.suprailiacSkinfoldMmText,
+                        onValueChange = onSuprailiacSkinfoldChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        imeAction = ImeAction.Next,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    DecimalNumberInputField(
+                        label = "Thigh Skinfold (mm)",
+                        value = state.thighSkinfoldMmText,
+                        onValueChange = onThighSkinfoldChanged,
+                        modifier = Modifier.fillMaxWidth(),
+                        imeAction = ImeAction.Done,
+                    )
+                }
+
+                null -> Unit
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -179,6 +260,11 @@ private fun MeasurementEditScreenPreview_Add() {
             onWaistChanged = {},
             onAbdomenChanged = {},
             onHipChanged = {},
+            onChestSkinfoldChanged = {},
+            onAbdomenSkinfoldChanged = {},
+            onThighSkinfoldChanged = {},
+            onTricepsSkinfoldChanged = {},
+            onSuprailiacSkinfoldChanged = {},
             onSaveClicked = {},
         )
     }
@@ -202,6 +288,11 @@ private fun MeasurementEditScreenPreview_Error() {
             onWaistChanged = {},
             onAbdomenChanged = {},
             onHipChanged = {},
+            onChestSkinfoldChanged = {},
+            onAbdomenSkinfoldChanged = {},
+            onThighSkinfoldChanged = {},
+            onTricepsSkinfoldChanged = {},
+            onSuprailiacSkinfoldChanged = {},
             onSaveClicked = {},
         )
     }

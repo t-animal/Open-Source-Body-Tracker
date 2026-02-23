@@ -122,7 +122,10 @@ private fun MeasurementRow(
         }
 
         item.derivedMetrics.bmi?.let { Text(text = "BMI: ${formatDecimal(it)}") }
-        item.derivedMetrics.bodyFatPercent?.let { Text(text = "Body Fat: ${formatDecimal(it)} %") }
+        item.derivedMetrics.navyBodyFatPercent?.let { Text(text = "Body Fat (Navy): ${formatDecimal(it)} %") }
+        item.derivedMetrics.skinfold3SiteBodyFatPercent?.let {
+            Text(text = "Body Fat (Skinfold 3-site): ${formatDecimal(it)} %")
+        }
         item.derivedMetrics.waistHipRatio?.let { Text(text = "WHR: ${formatDecimal(it)}") }
         item.derivedMetrics.waistHeightRatio?.let { Text(text = "WHtR: ${formatDecimal(it)}") }
         item.derivedMetrics.hipHeightRatio?.let { Text(text = "Hip/Height: ${formatDecimal(it)}") }

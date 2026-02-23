@@ -4,6 +4,9 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
+import java.time.Instant
+import java.time.Period
+import java.time.ZoneId
 import kotlin.math.log10
 
 class DerivedMetricsCalculator {
@@ -16,14 +19,27 @@ class DerivedMetricsCalculator {
         val waistCm = measurement.waistCircumferenceCm
         val hipCm = measurement.hipCircumferenceCm
         val neckCm = measurement.neckCircumferenceCm
+        val ageYears = calculateAgeYearsAtMeasurement(
+            dateOfBirthEpochMillis = profile.dateOfBirthEpochMillis,
+            measurementEpochMillis = measurement.dateEpochMillis,
+        )
 
         val bmi = calculateBmi(heightCm = heightCm, weightKg = weightKg)
-        val bodyFatPercent = calculateBodyFatPercent(
+        val navyBodyFatPercent = calculateNavyBodyFatPercent(
             sex = profile.sex,
             heightCm = heightCm,
             waistCm = waistCm,
             hipCm = hipCm,
             neckCm = neckCm,
+        )
+        val skinfold3SiteBodyFatPercent = calculate3SiteSkinfoldBodyFatPercent(
+            sex = profile.sex,
+            ageYears = ageYears,
+            chestSkinfoldMm = measurement.chestSkinfoldMm,
+            abdomenSkinfoldMm = measurement.abdomenSkinfoldMm,
+            thighSkinfoldMm = measurement.thighSkinfoldMm,
+            tricepsSkinfoldMm = measurement.tricepsSkinfoldMm,
+            suprailiacSkinfoldMm = measurement.suprailiacSkinfoldMm,
         )
         val waistHipRatio = calculateWaistHipRatio(waistCm = waistCm, hipCm = hipCm)
         val waistHeightRatio = calculateWaistHeightRatio(waistCm = waistCm, heightCm = heightCm)
@@ -31,7 +47,8 @@ class DerivedMetricsCalculator {
 
         return DerivedMetrics(
             bmi = bmi,
-            bodyFatPercent = bodyFatPercent,
+            navyBodyFatPercent = navyBodyFatPercent,
+            skinfold3SiteBodyFatPercent = skinfold3SiteBodyFatPercent,
             waistHipRatio = waistHipRatio,
             waistHeightRatio = waistHeightRatio,
             hipHeightRatio = hipHeightRatio,
@@ -50,7 +67,7 @@ class DerivedMetricsCalculator {
         return weightKg / (heightM * heightM)
     }
 
-    private fun calculateBodyFatPercent(
+    private fun calculateNavyBodyFatPercent(
         sex: Sex,
         heightCm: Double,
         waistCm: Double?,
@@ -88,6 +105,91 @@ class DerivedMetricsCalculator {
                     104.912
             }
         }
+    }
+
+    private fun calculate3SiteSkinfoldBodyFatPercent(
+        sex: Sex,
+        ageYears: Int?,
+        chestSkinfoldMm: Double?,
+        abdomenSkinfoldMm: Double?,
+        thighSkinfoldMm: Double?,
+        tricepsSkinfoldMm: Double?,
+        suprailiacSkinfoldMm: Double?,
+    ): Double? {
+        if (ageYears == null || ageYears <= 0) {
+            return null
+        }
+
+        val sum3 = when (sex) {
+            Sex.Male -> {
+                if (
+                    chestSkinfoldMm == null || chestSkinfoldMm <= 0 ||
+                    abdomenSkinfoldMm == null || abdomenSkinfoldMm <= 0 ||
+                    thighSkinfoldMm == null || thighSkinfoldMm <= 0
+                ) {
+                    return null
+                }
+
+                chestSkinfoldMm + abdomenSkinfoldMm + thighSkinfoldMm
+            }
+
+            Sex.Female -> {
+                if (
+                    tricepsSkinfoldMm == null || tricepsSkinfoldMm <= 0 ||
+                    suprailiacSkinfoldMm == null || suprailiacSkinfoldMm <= 0 ||
+                    thighSkinfoldMm == null || thighSkinfoldMm <= 0
+                ) {
+                    return null
+                }
+
+                tricepsSkinfoldMm + suprailiacSkinfoldMm + thighSkinfoldMm
+            }
+        }
+
+        if (sum3 <= 0) {
+            return null
+        }
+
+        val bodyDensity = when (sex) {
+            Sex.Male -> {
+                1.10938 -
+                    (0.0008267 * sum3) +
+                    (0.0000016 * sum3 * sum3) -
+                    (0.0002574 * ageYears)
+            }
+
+            Sex.Female -> {
+                1.0994921 -
+                    (0.0009929 * sum3) +
+                    (0.0000023 * sum3 * sum3) -
+                    (0.0001392 * ageYears)
+            }
+        }
+
+        if (bodyDensity <= 0) {
+            return null
+        }
+
+        return (495.0 / bodyDensity) - 450.0
+    }
+
+    private fun calculateAgeYearsAtMeasurement(
+        dateOfBirthEpochMillis: Long,
+        measurementEpochMillis: Long,
+    ): Int? {
+        val zoneId = ZoneId.systemDefault()
+        val dateOfBirth = Instant.ofEpochMilli(dateOfBirthEpochMillis)
+            .atZone(zoneId)
+            .toLocalDate()
+        val measurementDate = Instant.ofEpochMilli(measurementEpochMillis)
+            .atZone(zoneId)
+            .toLocalDate()
+
+        if (measurementDate.isBefore(dateOfBirth)) {
+            return null
+        }
+
+        return Period.between(dateOfBirth, measurementDate).years
     }
 
     private fun calculateWaistHipRatio(
