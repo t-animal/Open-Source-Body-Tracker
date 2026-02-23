@@ -185,6 +185,16 @@ This phase introduces visual data analysis and statistical summaries.
 * Efficient data querying
 * Smooth Compose-based chart rendering
 
+### Subphases
+
+#### Phase 4.1 Main Navigation Layout
+
+See [NAVIGATON.md](NAVIGATION.md)
+
+#### Phase 4.2 Measurements screen redesign
+
+#### Phase 4.3 Chart generation
+
 ---
 
 ## Phase 5 – Photo Progress Tracking
