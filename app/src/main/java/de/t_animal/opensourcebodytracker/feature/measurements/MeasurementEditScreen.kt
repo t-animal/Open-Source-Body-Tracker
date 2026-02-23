@@ -9,15 +9,24 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +46,7 @@ fun MeasurementEditRoute(
     profileRepository: ProfileRepository,
     measurementId: Long?,
     onFinished: () -> Unit,
+    onCancel: () -> Unit,
 ) {
     val vm: MeasurementEditViewModel = viewModel(
         factory = MeasurementEditViewModelFactory(
@@ -70,6 +80,7 @@ fun MeasurementEditRoute(
         onTricepsSkinfoldChanged = vm::onTricepsSkinfoldChanged,
         onSuprailiacSkinfoldChanged = vm::onSuprailiacSkinfoldChanged,
         onSaveClicked = vm::onSaveClicked,
+        onBackClicked = onCancel,
     )
 }
 
@@ -90,12 +101,46 @@ fun MeasurementEditScreen(
     onTricepsSkinfoldChanged: (String) -> Unit,
     onSuprailiacSkinfoldChanged: (String) -> Unit,
     onSaveClicked: () -> Unit,
+    onBackClicked: () -> Unit,
 ) {
     val title = if (state.measurementId == null) "Add Measurement" else "Edit Measurement"
+    var showDiscardDialog by remember { mutableStateOf(false) }
+
+    val hasEnteredAnyInput = listOf(
+        state.weightKgText,
+        state.neckCmText,
+        state.chestCmText,
+        state.waistCmText,
+        state.abdomenCmText,
+        state.hipCmText,
+        state.chestSkinfoldMmText,
+        state.abdomenSkinfoldMmText,
+        state.thighSkinfoldMmText,
+        state.tricepsSkinfoldMmText,
+        state.suprailiacSkinfoldMmText,
+    ).any { it.isNotBlank() }
+
+    val handleBackClick = {
+        if (hasEnteredAnyInput) {
+            showDiscardDialog = true
+        } else {
+            onBackClicked()
+        }
+    }
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(title) })
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = {
+                    IconButton(onClick = handleBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                },
+            )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -254,6 +299,29 @@ fun MeasurementEditScreen(
             Spacer(modifier = Modifier.height(96.dp))
         }
     }
+
+    if (showDiscardDialog) {
+        AlertDialog(
+            onDismissRequest = { showDiscardDialog = false },
+            title = { Text("Discard input?") },
+            text = { Text("You have entered values. Discard them and go back?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDiscardDialog = false
+                        onBackClicked()
+                    },
+                ) {
+                    Text("Discard")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscardDialog = false }) {
+                    Text("Keep editing")
+                }
+            },
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -279,6 +347,7 @@ private fun MeasurementEditScreenPreview_Add() {
             onTricepsSkinfoldChanged = {},
             onSuprailiacSkinfoldChanged = {},
             onSaveClicked = {},
+            onBackClicked = {},
         )
     }
 }
@@ -307,6 +376,7 @@ private fun MeasurementEditScreenPreview_Error() {
             onTricepsSkinfoldChanged = {},
             onSuprailiacSkinfoldChanged = {},
             onSaveClicked = {},
+            onBackClicked = {},
         )
     }
 }
