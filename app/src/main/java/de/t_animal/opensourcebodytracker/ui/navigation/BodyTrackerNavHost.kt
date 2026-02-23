@@ -81,6 +81,7 @@ fun BodyTrackerNavHost(
                 profileRepository = profileRepository,
                 measurementId = null,
                 onFinished = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() },
             )
         }
 
@@ -103,6 +104,7 @@ fun BodyTrackerNavHost(
                 profileRepository = profileRepository,
                 measurementId = id,
                 onFinished = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() },
             )
         }
     }
