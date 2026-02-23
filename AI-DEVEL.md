@@ -47,6 +47,18 @@ All screens have Compose previews.
 - Derived values are not persisted in Room (computed at runtime in domain layer).
 - Existing locale-aware numeric/date display behavior is retained.
 
+**Phase 3 feature coverage (implemented):**
+- Add/Edit measurement now supports sex-specific 3-site skinfold inputs:
+  - Male: chest, abdomen, thigh
+  - Female: triceps, suprailiac, thigh
+- Derived metrics now expose two separate body-fat outputs:
+  - Navy body-fat %
+  - Skinfold body-fat % (Jackson & Pollock 3-site + Siri conversion)
+- Skinfold output is exposed as a dedicated 3-site metric field (`skinfold3SiteBodyFatPercent`).
+- Skinfold calculations use age at measurement date (derived from profile DOB + measurement date).
+- Minimal validation for skinfold inputs is enforced in the edit flow (> 0 for provided values).
+- Room schema version was intentionally not bumped in this phase.
+
 ## How to Build / Lint
 This environment requires sourcing `/etc/profile` before running Gradle:
 
@@ -130,7 +142,7 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 
 ### Tests
 - `app/src/test/java/de/t_animal/opensourcebodytracker/domain/metrics/DerivedMetricsCalculatorTest.kt`
-  - Covers BMI/ratio calculations, body-fat availability for male/female, and invalid log-input handling.
+  - Covers BMI/ratio calculations, separate navy/skinfold body-fat paths, sex-specific 3-site requirements, age-at-measurement constraints, and invalid navy log-input handling.
 
 ### Theme
 - `ui/theme/Theme`
@@ -143,7 +155,8 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
   - optional numeric metrics (weight/circumferences)
 - `DerivedMetrics` contains nullable dynamic outputs:
   - BMI
-  - body-fat percentage
+  - navy body-fat percentage
+  - skinfold 3-site body-fat percentage
   - WHR
   - WHtR
   - hip-height ratio
@@ -164,8 +177,10 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 4. Testing:
   - Add targeted tests for metric formatting/presentation mapping in list UI state.
   - Add additional edge-case tests (zero/negative values across all metrics).
-5. Phase 3 prep:
-  - Start skinfold input/domain scaffolding without changing existing Phase 1/2 persistence behavior.
+5. Phase 3 follow-up:
+  - Optionally localize new Phase 3 labels/errors to string resources for EN/DE consistency.
+  - Consider range warnings (2–50mm/site) as non-blocking UX feedback.
+  - If existing local installs must be supported, add a proper Room migration and bump DB version.
 
 ## Quick Sanity Checklist for Future Agents
 - `source /etc/profile && ./gradlew assembleDebug --console=plain` passes.

@@ -78,6 +78,7 @@ fun BodyTrackerNavHost(
         composable(Routes.MeasurementAdd) {
             MeasurementEditRoute(
                 repository = measurementRepository,
+                profileRepository = profileRepository,
                 measurementId = null,
                 onFinished = { navController.popBackStack() },
             )
@@ -99,6 +100,7 @@ fun BodyTrackerNavHost(
 
             MeasurementEditRoute(
                 repository = measurementRepository,
+                profileRepository = profileRepository,
                 measurementId = id,
                 onFinished = { navController.popBackStack() },
             )

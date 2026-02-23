@@ -268,5 +268,5 @@ License to be defined.
 
 # 📌 Status
 
-🚧 In Active Development – Phase 1 and 2 Completed, Phase 3 Ready for Implementation
+🚧 In Active Development – Phase 1, 2 and 3 (JP 3-site skinfold) implemented
 If you're an AI Agent, check AI-DEVEL.md for details.

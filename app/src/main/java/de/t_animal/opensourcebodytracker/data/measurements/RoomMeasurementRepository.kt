@@ -31,6 +31,11 @@ private fun MeasurementEntity.toDomain(): BodyMeasurement = BodyMeasurement(
     waistCircumferenceCm = waistCircumferenceCm,
     abdomenCircumferenceCm = abdomenCircumferenceCm,
     hipCircumferenceCm = hipCircumferenceCm,
+    chestSkinfoldMm = chestSkinfoldMm,
+    abdomenSkinfoldMm = abdomenSkinfoldMm,
+    thighSkinfoldMm = thighSkinfoldMm,
+    tricepsSkinfoldMm = tricepsSkinfoldMm,
+    suprailiacSkinfoldMm = suprailiacSkinfoldMm,
 )
 
 private fun BodyMeasurement.toEntityForInsert(): MeasurementEntity = MeasurementEntity(
@@ -42,15 +47,11 @@ private fun BodyMeasurement.toEntityForInsert(): MeasurementEntity = Measurement
     waistCircumferenceCm = waistCircumferenceCm,
     abdomenCircumferenceCm = abdomenCircumferenceCm,
     hipCircumferenceCm = hipCircumferenceCm,
+    chestSkinfoldMm = chestSkinfoldMm,
+    abdomenSkinfoldMm = abdomenSkinfoldMm,
+    thighSkinfoldMm = thighSkinfoldMm,
+    tricepsSkinfoldMm = tricepsSkinfoldMm,
+    suprailiacSkinfoldMm = suprailiacSkinfoldMm,
 )
 
-private fun BodyMeasurement.toEntityForUpdate(): MeasurementEntity = MeasurementEntity(
-    id = id,
-    dateEpochMillis = dateEpochMillis,
-    weightKg = weightKg,
-    neckCircumferenceCm = neckCircumferenceCm,
-    chestCircumferenceCm = chestCircumferenceCm,
-    waistCircumferenceCm = waistCircumferenceCm,
-    abdomenCircumferenceCm = abdomenCircumferenceCm,
-    hipCircumferenceCm = hipCircumferenceCm,
-)
+private fun BodyMeasurement.toEntityForUpdate(): MeasurementEntity = toEntityForInsert().copy(id = id)

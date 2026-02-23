@@ -132,6 +132,177 @@ val hhr = hipCm / heightCm
 
 ---
 
+## 6️⃣ Jackson & Pollock 3-Site Skinfold Method
+
+This section defines the formulas required to implement the **3-site skinfold body fat estimation** based on the equations developed by Jackson & Pollock.
+
+The method estimates:
+
+1. **Body Density**
+2. **Body Fat Percentage** (using Siri equation)
+
+---
+
+### 📌 Required Inputs
+
+* `sex` (MALE / FEMALE)
+* `ageYears`
+* Skinfold measurements in **millimeters (mm)**
+
+#### Measurement Sites
+
+**Male (3-site):**
+
+* Chest
+* Abdomen
+* Thigh
+
+**Female (3-site):**
+
+* Triceps
+* Suprailiac
+* Thigh
+
+---
+
+### 1️⃣ Step 1 – Sum of Skinfolds
+
+```text
+sum3 = site1 + site2 + site3
+```
+
+Example (male):
+
+```kotlin
+val sum3 = chestMm + abdomenMm + thighMm
+```
+
+---
+
+### 2️⃣ Step 2 – Body Density Calculation
+
+#### Male Formula
+
+```text
+bodyDensity =
+1.10938
+- (0.0008267 * sum3)
++ (0.0000016 * sum3²)
+- (0.0002574 * ageYears)
+```
+
+#### Female Formula
+
+```text
+bodyDensity =
+1.0994921
+- (0.0009929 * sum3)
++ (0.0000023 * sum3²)
+- (0.0001392 * ageYears)
+```
+
+#### Kotlin Implementation
+
+```kotlin
+val bodyDensity = when (sex) {
+    Sex.MALE -> {
+        1.10938 -
+        (0.0008267 * sum3) +
+        (0.0000016 * sum3 * sum3) -
+        (0.0002574 * ageYears)
+    }
+    Sex.FEMALE -> {
+        1.0994921 -
+        (0.0009929 * sum3) +
+        (0.0000023 * sum3 * sum3) -
+        (0.0001392 * ageYears)
+    }
+}
+```
+
+---
+
+### 3️⃣ Step 3 – Convert Body Density to Body Fat %
+
+Using the **Siri Equation**:
+
+```text
+bodyFatPercent = (495 / bodyDensity) - 450
+```
+
+#### Kotlin
+
+```kotlin
+val bodyFatPercent = (495.0 / bodyDensity) - 450.0
+```
+
+---
+
+### 📌 Full Calculation Example (Combined)
+
+```kotlin
+val sum3 = site1Mm + site2Mm + site3Mm
+
+val bodyDensity = when (sex) {
+    Sex.MALE -> {
+        1.10938 -
+        (0.0008267 * sum3) +
+        (0.0000016 * sum3 * sum3) -
+        (0.0002574 * ageYears)
+    }
+    Sex.FEMALE -> {
+        1.0994921 -
+        (0.0009929 * sum3) +
+        (0.0000023 * sum3 * sum3) -
+        (0.0001392 * ageYears)
+    }
+}
+
+val bodyFatPercent = (495.0 / bodyDensity) - 450.0
+```
+
+---
+
+### ✅ Validation Rules
+
+Before calculation:
+
+```text
+ageYears > 0
+each skinfold > 0
+sum3 > 0
+```
+
+Recommended realistic ranges:
+
+```text
+skinfold: 2–50 mm per site
+sum3: 6–150 mm
+```
+
+---
+
+### 📌 Units & Precision
+
+* Skinfold values must be in **millimeters (mm)**
+* Age in **years**
+* Output body fat in **percentage**
+* Recommended rounding:
+
+  * Body Density → 4 decimal places
+  * Body Fat % → 1 decimal place
+
+---
+
+### ⚠️ Important Notes
+
+* Equations are population-based regression models.
+* Accuracy depends heavily on correct caliper technique.
+* Consistency of measurement site placement is critical.
+* Not recommended for extreme obesity or elite bodybuilding without calibration.
+
+---
+
 # ✅ Recommended Validation Rules
 
 Before calculation:

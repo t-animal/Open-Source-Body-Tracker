@@ -4,19 +4,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import java.text.DecimalFormatSymbols
 import java.time.Instant
 import java.time.ZoneId
-import java.text.DecimalFormatSymbols
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class MeasurementEditUiState(
     val measurementId: Long? = null,
+    val sex: Sex? = null,
     val dateEpochMillis: Long? = null,
     val dateText: String = "",
     val weightKgText: String = "",
@@ -25,6 +29,11 @@ data class MeasurementEditUiState(
     val waistCmText: String = "",
     val abdomenCmText: String = "",
     val hipCmText: String = "",
+    val chestSkinfoldMmText: String = "",
+    val abdomenSkinfoldMmText: String = "",
+    val thighSkinfoldMmText: String = "",
+    val tricepsSkinfoldMmText: String = "",
+    val suprailiacSkinfoldMmText: String = "",
     val errorMessage: String? = null,
 )
 
@@ -34,6 +43,7 @@ sealed interface MeasurementEditEvent {
 
 class MeasurementEditViewModel(
     private val repository: MeasurementRepository,
+    private val profileRepository: ProfileRepository,
     private val measurementId: Long?,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MeasurementEditUiState(measurementId = measurementId))
@@ -43,12 +53,18 @@ class MeasurementEditViewModel(
     val events = _events.asSharedFlow()
 
     init {
+        viewModelScope.launch {
+            val profile = profileRepository.profileFlow.first()
+            update { it.copy(sex = profile?.sex) }
+        }
+
         if (measurementId != null) {
             viewModelScope.launch {
                 val measurement = repository.getById(measurementId)
                 if (measurement != null) {
                     _uiState.value = MeasurementEditUiState(
                         measurementId = measurement.id,
+                        sex = _uiState.value.sex,
                         dateEpochMillis = measurement.dateEpochMillis,
                         dateText = formatDate(measurement.dateEpochMillis),
                         weightKgText = measurement.weightKg?.let(::formatDecimalForInput).orEmpty(),
@@ -57,6 +73,11 @@ class MeasurementEditViewModel(
                         waistCmText = measurement.waistCircumferenceCm?.let(::formatDecimalForInput).orEmpty(),
                         abdomenCmText = measurement.abdomenCircumferenceCm?.let(::formatDecimalForInput).orEmpty(),
                         hipCmText = measurement.hipCircumferenceCm?.let(::formatDecimalForInput).orEmpty(),
+                        chestSkinfoldMmText = measurement.chestSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
+                        abdomenSkinfoldMmText = measurement.abdomenSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
+                        thighSkinfoldMmText = measurement.thighSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
+                        tricepsSkinfoldMmText = measurement.tricepsSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
+                        suprailiacSkinfoldMmText = measurement.suprailiacSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
                     )
                 }
             }
@@ -81,6 +102,26 @@ class MeasurementEditViewModel(
 
     fun onHipChanged(text: String) = update { it.copy(hipCmText = text, errorMessage = null) }
 
+    fun onChestSkinfoldChanged(text: String) = update {
+        it.copy(chestSkinfoldMmText = text, errorMessage = null)
+    }
+
+    fun onAbdomenSkinfoldChanged(text: String) = update {
+        it.copy(abdomenSkinfoldMmText = text, errorMessage = null)
+    }
+
+    fun onThighSkinfoldChanged(text: String) = update {
+        it.copy(thighSkinfoldMmText = text, errorMessage = null)
+    }
+
+    fun onTricepsSkinfoldChanged(text: String) = update {
+        it.copy(tricepsSkinfoldMmText = text, errorMessage = null)
+    }
+
+    fun onSuprailiacSkinfoldChanged(text: String) = update {
+        it.copy(suprailiacSkinfoldMmText = text, errorMessage = null)
+    }
+
     fun onDateChanged(epochMillis: Long) {
         update {
             it.copy(
@@ -101,8 +142,37 @@ class MeasurementEditViewModel(
         val waist = parseDoubleOrNull(current.waistCmText)
         val abdomen = parseDoubleOrNull(current.abdomenCmText)
         val hip = parseDoubleOrNull(current.hipCmText)
+        val chestSkinfold = parseDoubleOrNull(current.chestSkinfoldMmText)
+        val abdomenSkinfold = parseDoubleOrNull(current.abdomenSkinfoldMmText)
+        val thighSkinfold = parseDoubleOrNull(current.thighSkinfoldMmText)
+        val tricepsSkinfold = parseDoubleOrNull(current.tricepsSkinfoldMmText)
+        val suprailiacSkinfold = parseDoubleOrNull(current.suprailiacSkinfoldMmText)
 
-        val hasAnyValue = listOf(weight, neck, chest, waist, abdomen, hip).any { it != null }
+        val invalidSkinfoldInput = listOf(
+            chestSkinfold,
+            abdomenSkinfold,
+            thighSkinfold,
+            tricepsSkinfold,
+            suprailiacSkinfold,
+        ).any { it != null && it <= 0.0 }
+        if (invalidSkinfoldInput) {
+            _uiState.value = current.copy(errorMessage = "Skinfold values must be greater than 0")
+            return
+        }
+
+        val hasAnyValue = listOf(
+            weight,
+            neck,
+            chest,
+            waist,
+            abdomen,
+            hip,
+            chestSkinfold,
+            abdomenSkinfold,
+            thighSkinfold,
+            tricepsSkinfold,
+            suprailiacSkinfold,
+        ).any { it != null }
         if (!hasAnyValue) {
             _uiState.value = current.copy(errorMessage = "Enter at least one value")
             return
@@ -120,6 +190,11 @@ class MeasurementEditViewModel(
                         waistCircumferenceCm = waist,
                         abdomenCircumferenceCm = abdomen,
                         hipCircumferenceCm = hip,
+                        chestSkinfoldMm = chestSkinfold,
+                        abdomenSkinfoldMm = abdomenSkinfold,
+                        thighSkinfoldMm = thighSkinfold,
+                        tricepsSkinfoldMm = tricepsSkinfold,
+                        suprailiacSkinfoldMm = suprailiacSkinfold,
                     ),
                 )
             } else {
@@ -133,6 +208,11 @@ class MeasurementEditViewModel(
                         waistCircumferenceCm = waist,
                         abdomenCircumferenceCm = abdomen,
                         hipCircumferenceCm = hip,
+                        chestSkinfoldMm = chestSkinfold,
+                        abdomenSkinfoldMm = abdomenSkinfold,
+                        thighSkinfoldMm = thighSkinfold,
+                        tricepsSkinfoldMm = tricepsSkinfold,
+                        suprailiacSkinfoldMm = suprailiacSkinfold,
                     ),
                 )
             }
@@ -147,11 +227,16 @@ class MeasurementEditViewModel(
 
 class MeasurementEditViewModelFactory(
     private val repository: MeasurementRepository,
+    private val profileRepository: ProfileRepository,
     private val measurementId: Long?,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MeasurementEditViewModel(repository = repository, measurementId = measurementId) as T
+        return MeasurementEditViewModel(
+            repository = repository,
+            profileRepository = profileRepository,
+            measurementId = measurementId,
+        ) as T
     }
 }
 
