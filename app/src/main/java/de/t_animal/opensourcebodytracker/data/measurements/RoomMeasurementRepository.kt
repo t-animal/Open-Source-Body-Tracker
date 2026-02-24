@@ -20,6 +20,10 @@ class RoomMeasurementRepository(
     override suspend fun update(measurement: BodyMeasurement) {
         dao.update(measurement.toEntityForUpdate())
     }
+
+    override suspend fun replaceAll(measurements: List<BodyMeasurement>) {
+        dao.replaceAll(measurements.map { it.toEntityForInsert() })
+    }
 }
 
 private fun MeasurementEntity.toDomain(): BodyMeasurement = BodyMeasurement(

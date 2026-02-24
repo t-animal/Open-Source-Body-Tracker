@@ -11,4 +11,6 @@ interface MeasurementRepository {
     suspend fun insert(measurement: BodyMeasurement): Long
 
     suspend fun update(measurement: BodyMeasurement)
+
+    suspend fun replaceAll(measurements: List<BodyMeasurement>)
 }

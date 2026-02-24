@@ -35,6 +35,7 @@ fun MainScreenScaffold(
     onMainDestinationSelected: (MainDestination) -> Unit,
     onOpenProfile: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenFakeDataGenerator: (() -> Unit)? = null,
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
@@ -72,6 +73,15 @@ fun MainScreenScaffold(
                                 onOpenSettings()
                             },
                         )
+                        if (onOpenFakeDataGenerator != null) {
+                            DropdownMenuItem(
+                                text = { Text("Fake data generator") },
+                                onClick = {
+                                    overflowExpanded = false
+                                    onOpenFakeDataGenerator()
+                                },
+                            )
+                        }
                     }
                 },
             )
