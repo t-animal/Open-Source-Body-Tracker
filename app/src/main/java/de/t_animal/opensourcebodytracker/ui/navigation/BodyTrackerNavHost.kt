@@ -1,5 +1,6 @@
 package de.t_animal.opensourcebodytracker.ui.navigation
 
+import android.content.pm.ApplicationInfo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -26,8 +28,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisScreen
+import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListAddButton
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListFullRoute
@@ -42,7 +46,9 @@ fun BodyTrackerNavHost(
     profileRepository: ProfileRepository,
     measurementRepository: MeasurementRepository,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
+    generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
 ) {
+    val isDebuggable = (LocalContext.current.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val navController = rememberNavController()
 
     val profileOrNull by profileRepository.profileFlow.collectAsStateWithLifecycle(initialValue = null)
@@ -96,6 +102,11 @@ fun BodyTrackerNavHost(
                 },
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
+                onOpenFakeDataGenerator = if (isDebuggable) {
+                    { navController.navigate(Routes.FakeDataGenerator) }
+                } else {
+                    null
+                },
                 floatingActionButton = {
                     MeasurementListAddButton(onAdd = { navController.navigate(Routes.MeasurementAdd) })
                 },
@@ -153,6 +164,11 @@ fun BodyTrackerNavHost(
                 },
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
+                onOpenFakeDataGenerator = if (isDebuggable) {
+                    { navController.navigate(Routes.FakeDataGenerator) }
+                } else {
+                    null
+                },
             ) { contentPadding ->
                 Box(
                     modifier = Modifier
@@ -174,6 +190,11 @@ fun BodyTrackerNavHost(
                 },
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
+                onOpenFakeDataGenerator = if (isDebuggable) {
+                    { navController.navigate(Routes.FakeDataGenerator) }
+                } else {
+                    null
+                },
             ) { contentPadding ->
                 Box(
                     modifier = Modifier
@@ -181,6 +202,37 @@ fun BodyTrackerNavHost(
                         .padding(contentPadding),
                 ) {
                     PhotosScreen()
+                }
+            }
+        }
+
+        if (isDebuggable) {
+            composable(Routes.FakeDataGenerator) {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Fake data generator") },
+                            navigationIcon = {
+                                IconButton(onClick = { navController.popBackStack() }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "Back",
+                                    )
+                                }
+                            },
+                        )
+                    },
+                ) { contentPadding ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(contentPadding),
+                    ) {
+                        FakeDataGeneratorRoute(
+                            profileRepository = profileRepository,
+                            generateFakeMeasurementsUseCase = generateFakeMeasurementsUseCase,
+                        )
+                    }
                 }
             }
         }

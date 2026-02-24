@@ -7,6 +7,7 @@ import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.measurements.RoomMeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.profile.PreferencesProfileRepository
+import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsCalculator
 
@@ -31,5 +32,9 @@ class AppContainer(appContext: Context) {
 
     val calculateMeasurementDerivedMetricsUseCase: CalculateMeasurementDerivedMetricsUseCase by lazy {
         CalculateMeasurementDerivedMetricsUseCase(derivedMetricsCalculator)
+    }
+
+    val generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase by lazy {
+        GenerateFakeMeasurementsUseCase(measurementRepository)
     }
 }
