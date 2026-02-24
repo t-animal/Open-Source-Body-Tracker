@@ -31,6 +31,7 @@ import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisScreen
+import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListAddButton
@@ -170,13 +171,12 @@ fun BodyTrackerNavHost(
                     null
                 },
             ) { contentPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                ) {
-                    AnalysisScreen()
-                }
+                AnalysisRoute(
+                    measurementRepository = measurementRepository,
+                    profileRepository = profileRepository,
+                    calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
+                    contentPadding = contentPadding,
+                )
             }
         }
 

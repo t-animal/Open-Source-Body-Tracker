@@ -197,6 +197,8 @@ See [MEASUREMENT-SCREEN.md](documents/MEASUREMENT-SCREEN.md)
 
 #### Phase 4.3 Chart generation
 
+See [ANALYSIS.md](documents/ANALYSIS.md)
+
 ---
 
 ## Phase 5 – Photo Progress Tracking
