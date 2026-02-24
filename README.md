@@ -177,10 +177,11 @@ This phase introduces visual data analysis and statistical summaries.
 * Trend indicators
 * Min / Max / Mean values
 * Time range filtering (e.g., 1 month, 3 months, 1 year, all time)
+* Interactive chart exploration (tap marker, zoom, pan)
 
 ### Technical Considerations
 
-* Charting library integration
+* Vico charting integration (Compose)
 * Aggregation logic in domain layer
 * Efficient data querying
 * Smooth Compose-based chart rendering
@@ -189,7 +190,7 @@ This phase introduces visual data analysis and statistical summaries.
 
 #### Phase 4.1 Main Navigation Layout
 
-See [NAVIGATON.md](documents/NAVIGATION.md)
+See [NAVIGATION.md](documents/NAVIGATION.md)
 
 #### Phase 4.2 Measurements screen redesign
 
@@ -198,6 +199,8 @@ See [MEASUREMENT-SCREEN.md](documents/MEASUREMENT-SCREEN.md)
 #### Phase 4.3 Chart generation
 
 See [ANALYSIS.md](documents/ANALYSIS.md)
+
+Status: Implemented (duration-based filtering + interactive line charts).
 
 ---
 
@@ -258,6 +261,7 @@ like cm and kg. In the future there may be a switch for the user to display impe
 * Jetpack Compose
 * ViewModel
 * StateFlow / LiveData
+* Vico (Compose charts)
 * Room
 * Material Design 3
 

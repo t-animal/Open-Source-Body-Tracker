@@ -1,4 +1,4 @@
-# AI Development Handoff (Phase 1-4.2)
+# AI Development Handoff (Phase 1-4.3)
 
 This document describes the current implementation state and the key constraints/gotchas so another coding agent can continue work quickly.
 
@@ -9,6 +9,7 @@ Implemented:
 - Phase 3: skinfold-based derived body-fat support in add/edit and domain metrics.
 - Phase 4.1 (navigation shell): top app bar + overflow menu + bottom navigation structure with placeholder Analysis/Photos/Settings screens.
 - Phase 4.2 (measurements redesign): latest measurement card + preview table (20) + full-list "More" screen.
+- Phase 4.3 (analysis charts): fully implemented Analysis screen with duration filtering and Vico line charts for raw + derived metrics.
 
 ## Status Summary
 **Build:** `assembleDebug` succeeds.
@@ -36,7 +37,7 @@ Implemented:
 - Measurement list screen
 - Add/Edit measurement screen
 - Settings screen (placeholder)
-- Analysis screen (placeholder)
+- Analysis screen (implemented charts)
 - Photos screen (placeholder)
 
 All screens have Compose previews.
@@ -90,6 +91,22 @@ All screens have Compose previews.
   - full measurements table
   - no bottom nav and no FAB
 - Main Measurements tab still keeps the Add FAB and supports tap-to-edit from preview table rows.
+
+**Phase 4.3 analysis chart coverage (implemented):**
+- Analysis tab now renders one chart card per metric using Vico (`compose-android`, `compose-m3-android`).
+- Duration selector is available at top of content:
+  - `1M`, `3M` (default), `6M`, `1Y`, `All`.
+- Data pipeline:
+  - ViewModel combines measurement flow + profile flow + selected duration.
+  - Derived metrics are computed once per measurement in the ViewModel layer.
+  - Duration filtering is done in transform layer using `[now - duration, now]`; `All` includes data up to `now`.
+- Chart behavior:
+  - X-axis uses epoch millis and duration-dependent date labels.
+  - Y-axis range uses dynamic 5% padding (`0.5` minimum padding for flat series).
+  - Tap toggles marker visibility on data points.
+  - Zoom + pan are enabled.
+- Empty metric data in selected duration renders card message: `no data yet`.
+- Covered by unit tests in `feature/analysis/AnalysisTransformTest.kt`.
 
 ## How to Build / Lint
 This environment requires sourcing `/etc/profile` before running Gradle:
@@ -178,8 +195,17 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
     - Rendered as scaffold content (no local top app bar); `MeasurementListAddButton` hosts FAB UI.
   - `feature/measurements/MeasurementEditViewModel` + `MeasurementEditScreen`
 
-### New placeholder features
-- `feature/analysis/AnalysisScreen`
+### Analysis feature map (Phase 4.3)
+- `feature/analysis/AnalysisRoute` + `AnalysisScreen`
+  - Hosts duration selector and chart cards.
+- `feature/analysis/AnalysisViewModel`
+  - Owns selected duration state and builds `AnalysisUiState`.
+- `feature/analysis/AnalysisTransform`
+  - Duration filtering, metric chart mapping, y-range calculation.
+- `feature/analysis/AnalysisModels`
+  - Definitions for durations, metric catalog, chart point/range/state models.
+
+### Remaining placeholders
 - `feature/photos/PhotosScreen`
 - `feature/settings/SettingsScreen`
 
@@ -209,24 +235,18 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 - Packaging warning: some native libs can’t be stripped (does not fail the build).
 
 ## Recommended Next Steps
-1. Navigation polish:
-   - Move new top-bar/overflow/bottom-nav labels to string resources for EN/DE consistency.
-   - Decide final behavior for tab back stack (currently simple single-stack behavior).
-2. UX consistency:
-   - Confirm Profile/Settings app bar behavior (e.g., optional back affordance/title consistency).
-   - Verify desired system bar styling behavior across gesture and 3-button navigation modes.
+1. Analysis UX polish:
+  - Move chart/metric labels to string resources for EN/DE consistency.
+  - Add optional marker label formatting per metric type if needed.
+2. Navigation polish:
+  - Decide and document explicit tab back-stack behavior (currently single-stack + `launchSingleTop`).
 3. Testing:
-   - Add unit tests for parsing/validation logic (profile + measurement).
-   - Add basic repository tests where feasible.
-4. Phase 2 completion/polish:
-   - Optionally move new list labels (BMI/WHR/WHtR/etc.) to string resources for i18n consistency.
-5. Testing:
-   - Add targeted tests for metric formatting/presentation mapping in list UI state.
-   - Add additional edge-case tests (zero/negative values across all metrics).
-6. Phase 3 follow-up:
-   - Optionally localize new Phase 3 labels/errors to string resources for EN/DE consistency.
-   - Consider range warnings (2–50mm/site) as non-blocking UX feedback.
-   - If existing local installs must be supported, add a proper Room migration and bump DB version.
+  - Add ViewModel tests for duration switching and filtered chart content.
+  - Add UI tests for empty/non-empty chart card rendering and duration button state.
+4. Phase 3/4 metric polish:
+  - Review ratio/percent precision rules for display consistency across list and charts.
+5. Future analysis extensions:
+  - Optional trend line (WMA) and metric grouping/folding if card list grows too long.
 
 ## Quick Sanity Checklist for Future Agents
 - `source /etc/profile && ./gradlew assembleDebug --console=plain` passes.
@@ -238,3 +258,6 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 - Bottom nav switches between Measurements/Analysis/Photos and updates title.
 - Overflow on main tabs opens Profile and Settings screens.
 - Missing raw/derived values in latest card/table render as `--`.
+- Analysis tab shows duration segmented controls (`1M/3M/6M/1Y/All`).
+- Analysis cards render Vico line charts for populated metrics and `no data yet` when empty.
+- Analysis charts support tap marker toggle, pan, and pinch zoom.

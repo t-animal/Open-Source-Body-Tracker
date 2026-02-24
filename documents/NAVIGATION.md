@@ -1,3 +1,80 @@
+# Navigation Structure
+
+This document describes the currently implemented navigation behavior.
+
+---
+
+## Main Shell
+
+The app uses a shared `MainScreenScaffold` for main tabs:
+
+- top app bar with dynamic title
+- overflow menu
+- bottom navigation
+
+Main destinations:
+
+- Measurements (`measurement_list`)
+- Analysis (`analysis`)
+- Photos (`photos`)
+
+Tab navigation uses a single `NavController` stack with `launchSingleTop = true` for tab selections.
+
+---
+
+## Overflow Menu
+
+Main tabs expose overflow actions:
+
+- Profile
+- Settings
+
+In debug builds, a fake data generator action is also available.
+
+---
+
+## Onboarding Gate
+
+Start destination is onboarding.
+
+If a profile exists while the current route is onboarding, navigation automatically moves to Measurements and removes onboarding from back stack.
+
+---
+
+## Route Overview
+
+### Main-tab routes
+
+- `measurement_list`: implemented measurement overview with latest card, table preview, and FAB.
+- `analysis`: implemented chart screen with duration filtering and Vico line charts.
+- `photos`: placeholder screen.
+
+### Secondary routes
+
+- `profile`: editable profile form.
+- `settings`: placeholder screen.
+- `measurement_add`: add measurement flow.
+- `measurement_edit/{id}`: edit measurement flow.
+- `measurement_list_all`: full measurement table screen with back button.
+- `fake_data_generator` (debug only): fake data screen.
+
+---
+
+## Back Behavior
+
+- Add/edit/full-list screens are pushed onto the main stack and return with system/back icon.
+- Profile/settings are opened from overflow and return to previous screen on back.
+- Main tabs remain top-level destinations selected via bottom navigation.
+
+---
+
+## Screen Status Summary
+
+- Measurements: implemented
+- Analysis: implemented
+- Photos: placeholder
+- Profile: implemented
+- Settings: placeholder
 
 ---
 
