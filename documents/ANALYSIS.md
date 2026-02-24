@@ -1,236 +1,140 @@
-# Phase 4.3 – Analysis Screen (Charts)
+# Phase 4.3 – Analysis Screen (Implemented)
 
-This document defines the structure and behavior of the **Analysis** tab.
-The purpose of this screen is to visualize historical measurement data over a selectable time range.
-
-The screen focuses on clarity, scalability, and consistent visual representation of all tracked metrics.
-
-
-# 🧱 Screen Structure Overview
-
-```text id="6o2jrd"
-Scaffold
- ├── TopAppBar ("Analysis")
- ├── Content
- │     ├── Duration Segmented Control
- │     └── Metric Chart Cards (LazyColumn)
- └── BottomNavigationBar
-```
+This document describes the currently implemented Analysis tab behavior.
+It reflects the code in `feature/analysis/*` and navigation wiring in `BodyTrackerNavHost`.
 
 ---
 
-# 1️⃣ Duration Selector (Segmented Button)
+## Purpose
 
-At the top of the screen, a segmented button control allows the user to select the timeframe to analyze.
-
-## Available Durations
-
-* 1 Month
-* 3 Months (default)
-* 6 Months
-* 1 Year
-* All
-
-## Default Selection
-
-```text id="oh87oj"
-3 Months
-```
-
-## Behavior
-
-* Only one duration can be selected at a time.
-* Changing the selection:
-
-  * Recalculates the filtered dataset
-  * Updates all charts immediately
-* Filtering is based on measurement date:
-
-  * `now - duration` to `now`
+The Analysis tab visualizes historical values for raw measurements and derived metrics over selectable time ranges.
 
 ---
 
-## 🖥 ASCII Mockup – Duration Selector
+## Screen Composition
 
-```text id="3klemi"
-+--------------------------------------------------+
-| [ 1M ] [ 3M* ] [ 6M ] [ 1Y ] [ All ]            |
-+--------------------------------------------------+
-```
+The Analysis route is hosted inside the shared main scaffold (`MainScreenScaffold`), which already provides:
 
-(* = selected)
+- top app bar
+- overflow menu
+- bottom navigation
 
----
+`AnalysisScreen` renders only its content area:
 
-# 2️⃣ Metric Chart Cards
-
-Below the segmented control, a scrollable list (`LazyColumn`) displays one card per metric.
-
-Each card represents **one metric over time**.
+1. duration segmented control
+2. metric chart cards in a `LazyColumn`
 
 ---
 
-## 📦 Card Structure
+## Duration Selector
 
-Each metric card contains:
+Available durations:
 
-1. Title (metric name)
-2. Line chart
-3. Automatic axis scaling
+- `1M`
+- `3M` (default)
+- `6M`
+- `1Y`
+- `All`
 
----
+Behavior:
 
-## Supported Metrics (Initial Scope)
-
-* Weight
-* BMI
-* Navy Body Fat %
-* Skinfold Body Fat %
-* Waist
-* Hip
-* Waist–Hip Ratio
-* Waist–Height Ratio
-* Hip–Height Ratio
-
-The list can easily be extended in the future.
+- single selection only
+- changing duration recalculates all chart datasets
+- filtering window is `[now - duration, now]`
+- `All` includes entries up to `now`
 
 ---
 
-# 📈 Chart Specifications
+## Metrics Rendered
 
-Each chart must:
+The screen currently renders 17 metric cards, each with one line chart (or empty state):
 
-* Use a **line chart**
-* Show datapoints connected chronologically
-* Use:
+- Weight
+- Neck
+- Chest
+- Waist
+- Abdomen
+- Hip
+- Chest Skinfold
+- Abdomen Skinfold
+- Thigh Skinfold
+- Triceps Skinfold
+- Suprailiac Skinfold
+- BMI
+- Navy Body Fat %
+- Skinfold Body Fat %
+- Waist–Hip Ratio
+- Waist–Height Ratio
+- Hip–Height Ratio
 
-  * X-axis → Time (date)
-  * Y-axis → Metric value
-* Automatically scale Y-axis to fit visible data
-* Dynamically adjust to selected duration
-
----
-
-## Axis Behavior
-
-### X-Axis
-
-* Represents measurement date
-* Sorted ascending (oldest → newest)
-* Formatted depending on timeframe:
-
-  * 1M → show day labels
-  * 1Y → show month labels
-  * All → adaptive spacing
-
-### Y-Axis
-
-* Automatically calculated min/max from filtered data
-* Add small vertical padding (e.g., 5%) for visual clarity
+Metric definitions are centralized in `AnalysisModels.kt`.
 
 ---
 
-## 🖥 ASCII Mockup – Single Metric Card
+## Data Flow
 
-```text id="5060rl"
-+--------------------------------------------------+
-| Weight                                           |
-|--------------------------------------------------|
-|                                                  |
-|   85 |                         *                |
-|      |                     *                    |
-|   83 |                 *                        |
-|      |             *                            |
-|   81 |         *                                |
-|      |______________________________________    |
-|        01.01 01.02 01.03 01.04                  |
-|                                                  |
-+--------------------------------------------------+
-```
+`AnalysisViewModel` combines:
 
-Note: Data points should be visible on the chart but also
-connected with a line.
+- all measurements (`MeasurementRepository.observeAll()`)
+- current profile (`ProfileRepository.profileFlow`)
+- selected duration (`MutableStateFlow`)
+
+For each measurement, derived metrics are computed with `CalculateMeasurementDerivedMetricsUseCase`.
+Then `AnalysisTransform`:
+
+1. filters by selected duration
+2. sorts points chronologically
+3. builds one chart model per metric
+4. computes Y-axis range with padding
 
 ---
 
-# 3️⃣ Empty Data Handling
+## Charting Implementation
 
-If a metric has **no data** in the selected timeframe:
+Library: **Vico 3.0.1** (`compose-android`, `compose-m3-android`)
 
-* The card still shows the title
-* Instead of a chart, display:
+Current chart behavior:
 
-```text id="kph49n"
-no data yet
-```
+- line chart per metric
+- tap marker toggle
+- horizontal scroll/pan enabled
+- pinch zoom enabled
+- epoch millis as X values
+- duration-aware X-axis labels (`dd.MM` for short windows, `MM.yy` for `1Y`/`All`)
 
----
+Y-axis behavior:
 
-## 🖥 ASCII Mockup – Empty Metric Card
-
-```text id="44nqj7"
-+--------------------------------------------------+
-| Waist–Hip Ratio                                 |
-|--------------------------------------------------|
-|                                                  |
-|               no data yet                       |
-|                                                  |
-+--------------------------------------------------+
-```
+- auto range based on visible points
+- +5% padding above and below
+- flat series fallback padding: `max(abs(value) * 0.05, 0.5)`
 
 ---
 
-# 4️⃣ Performance Considerations
+## Empty State
 
-* Use `LazyColumn` for metric cards
-* Memoize filtered data when duration changes
-* Avoid recalculating derived metrics inside composables
-* Compute in domain layer
+If a metric has no datapoints in the selected duration, the metric card is shown with:
 
----
-
-# 5️⃣ Future Extension (Not Implemented Yet)
-
-A **Weighted Moving Average (WMA)** line will be added later:
-
-* Displayed as a secondary line
-* Slightly transparent
-* Smoothed trend representation
-
-For now:
-
-✔ Only raw datapoints
-✔ No smoothing
-✔ No average line
+`no data yet`
 
 ---
 
-# 6️⃣ UI Behavior Rules
+## Validation and Tests
 
-* Maintain consistent card spacing
-* Charts should have consistent height across metrics
+`AnalysisTransformTest` currently verifies:
 
----
-
-# 🎯 UX Goals
-
-* Quick identification of trends
-* Clear separation per metric
-* No visual overload
-* Responsive time filtering
-* Clean scaling behavior
+- duration filtering
+- chart count == metric definition count
+- y-axis padding behavior (flat + non-flat)
+- chronological point ordering
 
 ---
 
-# ✅ Summary of Requirements
+## Non-Implemented Items
 
-✔ Segmented duration selector
-✔ Default selection = 3 Months
-✔ One chart card per metric
-✔ Automatic axis scaling
-✔ X-axis = time
-✔ Y-axis = value
-✔ No data → “no data yet”
-✔ No smoothing (yet)
+Not implemented in Phase 4.3:
 
+- moving averages / trend overlays
+- metric grouping or collapsing
+- per-metric custom interaction behavior
 
+These can be added incrementally without changing the existing ViewModel/transform separation.
