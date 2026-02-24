@@ -4,6 +4,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
@@ -24,11 +25,18 @@ class GenerateFakeMeasurementsUseCaseTest {
             nowProvider = { now },
         )
 
-        val measurements = useCase.generateMeasurements(sex = Sex.Male)
+        val measurements = useCase.generateMeasurements(
+            sex = Sex.Male,
+            heightCm = 178.0,
+            dateOfBirthEpochMillis = null,
+            leanBodyWeightKg = 67.0,
+            minFatBodyWeightKg = 8.0,
+            maxFatBodyWeightKg = 20.0,
+        )
 
         assertEquals(120, measurements.size)
-        assertEquals(86.0, measurements.first().weightKg ?: 0.0, 0.0001)
-        assertEquals(75.0, measurements.last().weightKg ?: 0.0, 0.0001)
+        assertTrue((measurements.first().weightKg ?: 0.0) in 75.0..90.0)
+        assertTrue((measurements.last().weightKg ?: 0.0) in 75.0..90.0)
 
         measurements.zipWithNext().forEach { (left, right) ->
             val leftDate = Instant.ofEpochMilli(left.dateEpochMillis).atZone(zoneId).toLocalDate()
@@ -36,25 +44,37 @@ class GenerateFakeMeasurementsUseCaseTest {
             val days = ChronoUnit.DAYS.between(leftDate, rightDate)
             assertTrue(days == 6L || days == 7L)
         }
+
+        measurements.forEach { measurement ->
+            val weight = measurement.weightKg ?: 0.0
+            assertTrue(weight in 75.0..90.0)
+            assertTrue((measurement.waistCircumferenceCm ?: 0.0) > (measurement.neckCircumferenceCm ?: 0.0))
+        }
     }
 
     @Test
-    fun generateMeasurements_firstYearLosesThenRegainsPartially() {
+    fun generateMeasurements_firstCycleLosesThenRegains() {
         val useCase = GenerateFakeMeasurementsUseCase(
             measurementRepository = FakeMeasurementRepository(),
             nowProvider = { now },
         )
 
-        val measurements = useCase.generateMeasurements(sex = Sex.Male)
+        val measurements = useCase.generateMeasurements(
+            sex = Sex.Male,
+            heightCm = 178.0,
+            dateOfBirthEpochMillis = null,
+            leanBodyWeightKg = 67.0,
+            minFatBodyWeightKg = 8.0,
+            maxFatBodyWeightKg = 20.0,
+        )
         val startDate = Instant.ofEpochMilli(measurements.first().dateEpochMillis).atZone(zoneId).toLocalDate()
 
         val startWeight = measurements.first().weightKg ?: 0.0
-        val halfYearWeight = weightClosestTo(measurements, startDate.plusDays(182))
-        val oneYearWeight = weightClosestTo(measurements, startDate.plusDays(365))
+        val sixMonthWeight = weightClosestTo(measurements, startDate.plusDays(182))
+        val tenMonthWeight = weightClosestTo(measurements, startDate.plusDays(304))
 
-        assertTrue(halfYearWeight < startWeight)
-        assertTrue(oneYearWeight > halfYearWeight)
-        assertTrue(oneYearWeight < startWeight)
+        assertTrue(sixMonthWeight < startWeight)
+        assertTrue(tenMonthWeight > sixMonthWeight)
     }
 
     @Test
@@ -64,15 +84,29 @@ class GenerateFakeMeasurementsUseCaseTest {
             nowProvider = { now },
         )
 
-        val first = useCase.generateMeasurements(sex = Sex.Female)
-        val second = useCase.generateMeasurements(sex = Sex.Female)
+        val first = useCase.generateMeasurements(
+            sex = Sex.Female,
+            heightCm = 165.0,
+            dateOfBirthEpochMillis = null,
+            leanBodyWeightKg = 52.0,
+            minFatBodyWeightKg = 10.0,
+            maxFatBodyWeightKg = 24.0,
+        )
+        val second = useCase.generateMeasurements(
+            sex = Sex.Female,
+            heightCm = 165.0,
+            dateOfBirthEpochMillis = null,
+            leanBodyWeightKg = 52.0,
+            minFatBodyWeightKg = 10.0,
+            maxFatBodyWeightKg = 24.0,
+        )
 
         assertEquals(first, second)
     }
 
     private fun weightClosestTo(
         measurements: List<BodyMeasurement>,
-        targetDate: java.time.LocalDate,
+        targetDate: LocalDate,
     ): Double {
         return (measurements.minByOrNull { measurement ->
             val measurementDate = Instant.ofEpochMilli(measurement.dateEpochMillis).atZone(zoneId).toLocalDate()
