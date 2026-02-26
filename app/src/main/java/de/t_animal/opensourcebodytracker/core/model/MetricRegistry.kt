@@ -28,7 +28,7 @@ enum class BodyMetric(
         id = "weight_kg",
         metricType = BodyMetricType.Weight,
         unit = BodyMetricUnit.Kilogram,
-        isMeasured = false,
+        isMeasured = true,
         valueSelector = { measurement, _ -> measurement.weightKg },
     ),
     NeckCircumference(
