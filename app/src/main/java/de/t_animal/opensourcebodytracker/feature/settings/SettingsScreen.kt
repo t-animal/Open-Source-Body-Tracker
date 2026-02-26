@@ -45,7 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.settings.SettingsDependencyResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -59,7 +59,7 @@ fun SettingsRoute(
         factory = SettingsViewModelFactory(
             settingsRepository = settingsRepository,
             profileRepository = profileRepository,
-            dependencyResolver = SettingsDependencyResolver(),
+            dependencyResolver = DerivedMetricsDependencyResolver(),
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()

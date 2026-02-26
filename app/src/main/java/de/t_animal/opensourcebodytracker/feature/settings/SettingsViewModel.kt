@@ -9,8 +9,8 @@ import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.settings.SettingsDependencyResolver
-import de.t_animal.opensourcebodytracker.domain.settings.enabledAnalysisMethods
+import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +36,7 @@ data class SettingsUiState(
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
     profileRepository: ProfileRepository,
-    private val dependencyResolver: SettingsDependencyResolver,
+    private val dependencyResolver: DerivedMetricsDependencyResolver,
 ) : ViewModel() {
 
     private val errorMessage = MutableStateFlow<String?>(null)
@@ -143,7 +143,7 @@ class SettingsViewModel(
 class SettingsViewModelFactory(
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
-    private val dependencyResolver: SettingsDependencyResolver,
+    private val dependencyResolver: DerivedMetricsDependencyResolver,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

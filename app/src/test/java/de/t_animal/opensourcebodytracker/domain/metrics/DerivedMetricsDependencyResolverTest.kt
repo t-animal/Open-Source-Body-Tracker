@@ -1,16 +1,16 @@
-package de.t_animal.opensourcebodytracker.domain.settings
+package de.t_animal.opensourcebodytracker.domain.metrics
 
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
-import org.junit.Assert.assertEquals
+import org.junit.Assert
 import org.junit.Test
 
-class SettingsDependencyResolverTest {
+class DerivedMetricsDependencyResolverTest {
 
-    private val resolver = SettingsDependencyResolver()
+    private val resolver = DerivedMetricsDependencyResolver()
 
     @Test
     fun resolve_noAnalysisMethods_returnsNoRequiredMeasurements() {
@@ -19,7 +19,7 @@ class SettingsDependencyResolverTest {
             profile = profile(sex = Sex.Male),
         )
 
-        assertEquals(emptySet<BodyMetric>(), result.requiredMeasurements)
+        Assert.assertEquals(emptySet<BodyMetric>(), result.requiredMeasurements)
     }
 
     @Test
@@ -29,7 +29,7 @@ class SettingsDependencyResolverTest {
             profile = profile(sex = Sex.Male),
         )
 
-        assertEquals(
+        Assert.assertEquals(
             setOf(
                 BodyMetric.NeckCircumference,
                 BodyMetric.WaistCircumference,
@@ -45,7 +45,7 @@ class SettingsDependencyResolverTest {
             profile = profile(sex = Sex.Female),
         )
 
-        assertEquals(
+        Assert.assertEquals(
             setOf(
                 BodyMetric.NeckCircumference,
                 BodyMetric.WaistCircumference,
@@ -62,7 +62,7 @@ class SettingsDependencyResolverTest {
             profile = profile(sex = Sex.Male),
         )
 
-        assertEquals(
+        Assert.assertEquals(
             setOf(
                 BodyMetric.ChestSkinfold,
                 BodyMetric.AbdomenSkinfold,
@@ -79,7 +79,7 @@ class SettingsDependencyResolverTest {
             profile = profile(sex = Sex.Female),
         )
 
-        assertEquals(
+        Assert.assertEquals(
             setOf(
                 BodyMetric.TricepsSkinfold,
                 BodyMetric.SuprailiacSkinfold,
@@ -96,7 +96,7 @@ class SettingsDependencyResolverTest {
             profile = profile(sex = Sex.Male),
         )
 
-        assertEquals(setOf(BodyMetric.Weight), result.requiredMeasurements)
+        Assert.assertEquals(setOf(BodyMetric.Weight), result.requiredMeasurements)
     }
 
     @Test
@@ -109,7 +109,7 @@ class SettingsDependencyResolverTest {
             profile = profile(sex = Sex.Female),
         )
 
-        assertEquals(
+        Assert.assertEquals(
             setOf(
                 BodyMetric.NeckCircumference,
                 BodyMetric.WaistCircumference,
@@ -135,7 +135,7 @@ class SettingsDependencyResolverTest {
 
         val methods = settings.enabledAnalysisMethods()
 
-        assertEquals(
+        Assert.assertEquals(
             setOf(
                 AnalysisMethod.Bmi,
                 AnalysisMethod.NavyBodyFat,

@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.domain.settings
+package de.t_animal.opensourcebodytracker.domain.metrics
 
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
@@ -10,7 +10,7 @@ data class MeasurementDependencyState(
     val requiredMeasurements: Set<BodyMetric>,
 )
 
-class SettingsDependencyResolver {
+class DerivedMetricsDependencyResolver {
 
     fun resolve(
         enabledAnalysisMethods: Set<AnalysisMethod>,
