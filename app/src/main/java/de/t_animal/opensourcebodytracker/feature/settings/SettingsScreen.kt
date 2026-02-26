@@ -42,8 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import de.t_animal.opensourcebodytracker.core.model.DisplayMetricType
-import de.t_animal.opensourcebodytracker.core.model.MeasurementType
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.settings.SettingsDependencyResolver
@@ -83,8 +82,8 @@ fun SettingsScreen(
     contentPadding: PaddingValues,
     onNavyBodyFatEnabledChanged: (Boolean) -> Unit,
     onSkinfoldBodyFatEnabledChanged: (Boolean) -> Unit,
-    onMeasurementEnabledChanged: (MeasurementType, Boolean) -> Unit,
-    onDisplayPlacementChanged: (DisplayMetricType, DisplayPlacement) -> Unit,
+    onMeasurementEnabledChanged: (BodyMetric, Boolean) -> Unit,
+    onDisplayPlacementChanged: (BodyMetric, DisplayPlacement) -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier
@@ -176,16 +175,16 @@ private fun AnalysisMethodsSection(
 
 @Composable
 private fun MeasurementCollectionSection(
-    enabledMeasurements: Set<MeasurementType>,
-    requiredMeasurements: Set<MeasurementType>,
-    onMeasurementEnabledChanged: (MeasurementType, Boolean) -> Unit,
+    enabledMeasurements: Set<BodyMetric>,
+    requiredMeasurements: Set<BodyMetric>,
+    onMeasurementEnabledChanged: (BodyMetric, Boolean) -> Unit,
 ) {
     Card {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Measurement Collection", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
-            MeasurementType.entries.forEach { measurement ->
+            BodyMetric.entries.filter { it.isMeasured }.forEach { measurement ->
                 val required = measurement in requiredMeasurements
                 val label = if (required) {
                     "${measurement.label()} (required)"
@@ -206,12 +205,12 @@ private fun MeasurementCollectionSection(
 @Composable
 private fun DisplayConfigurationSection(
     state: SettingsUiState,
-    onDisplayPlacementChanged: (DisplayMetricType, DisplayPlacement) -> Unit,
+    onDisplayPlacementChanged: (BodyMetric, DisplayPlacement) -> Unit,
 ) {
-    val visibleMetricTypes = DisplayMetricType.entries.filter {
+    val visibleMetricTypes = BodyMetric.entries.filter {
         when (it) {
-            DisplayMetricType.NavyBodyFatPercent -> state.settings.navyBodyFatEnabled
-            DisplayMetricType.SkinfoldBodyFatPercent -> state.settings.skinfoldBodyFatEnabled
+            BodyMetric.NavyBodyFatPercent -> state.settings.navyBodyFatEnabled
+            BodyMetric.SkinfoldBodyFatPercent -> state.settings.skinfoldBodyFatEnabled
             else -> true
         }
     }
@@ -337,37 +336,24 @@ private fun DisplayPlacement.label(): String = when (this) {
     DisplayPlacement.Hidden -> "Hidden"
 }
 
-private fun MeasurementType.label(): String = when (this) {
-    MeasurementType.NeckCircumference -> "Neck"
-    MeasurementType.WaistCircumference -> "Waist"
-    MeasurementType.HipCircumference -> "Hip"
-    MeasurementType.ChestCircumference -> "Chest"
-    MeasurementType.AbdomenCircumference -> "Abdomen"
-    MeasurementType.ChestSkinfold -> "Chest Skinfold"
-    MeasurementType.AbdomenSkinfold -> "Abdomen Skinfold"
-    MeasurementType.ThighSkinfold -> "Thigh Skinfold"
-    MeasurementType.TricepsSkinfold -> "Triceps Skinfold"
-    MeasurementType.SuprailiacSkinfold -> "Suprailiac Skinfold"
-}
-
-private fun DisplayMetricType.label(): String = when (this) {
-    DisplayMetricType.Weight -> "Weight"
-    DisplayMetricType.NeckCircumference -> "Neck"
-    DisplayMetricType.WaistCircumference -> "Waist"
-    DisplayMetricType.HipCircumference -> "Hip"
-    DisplayMetricType.ChestCircumference -> "Chest"
-    DisplayMetricType.AbdomenCircumference -> "Abdomen"
-    DisplayMetricType.ChestSkinfold -> "Chest Skinfold"
-    DisplayMetricType.AbdomenSkinfold -> "Abdomen Skinfold"
-    DisplayMetricType.ThighSkinfold -> "Thigh Skinfold"
-    DisplayMetricType.TricepsSkinfold -> "Triceps Skinfold"
-    DisplayMetricType.SuprailiacSkinfold -> "Suprailiac Skinfold"
-    DisplayMetricType.Bmi -> "BMI"
-    DisplayMetricType.NavyBodyFatPercent -> "Navy Body Fat %"
-    DisplayMetricType.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
-    DisplayMetricType.WaistHipRatio -> "Waist–Hip Ratio"
-    DisplayMetricType.WaistHeightRatio -> "Waist–Height Ratio"
-    DisplayMetricType.HipHeightRatio -> "Hip–Height Ratio"
+private fun BodyMetric.label(): String = when (this) {
+    BodyMetric.Weight -> "Weight"
+    BodyMetric.NeckCircumference -> "Neck"
+    BodyMetric.WaistCircumference -> "Waist"
+    BodyMetric.HipCircumference -> "Hip"
+    BodyMetric.ChestCircumference -> "Chest"
+    BodyMetric.AbdomenCircumference -> "Abdomen"
+    BodyMetric.ChestSkinfold -> "Chest Skinfold"
+    BodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
+    BodyMetric.ThighSkinfold -> "Thigh Skinfold"
+    BodyMetric.TricepsSkinfold -> "Triceps Skinfold"
+    BodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+    BodyMetric.Bmi -> "BMI"
+    BodyMetric.NavyBodyFatPercent -> "Navy Body Fat %"
+    BodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
+    BodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
+    BodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
+    BodyMetric.HipHeightRatio -> "Hip–Height Ratio"
 }
 
 

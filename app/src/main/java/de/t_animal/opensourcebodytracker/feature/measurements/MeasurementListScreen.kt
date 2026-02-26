@@ -39,6 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
@@ -289,9 +291,16 @@ private fun MeasurementTable(
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(vertical = 8.dp),
         ) {
-            MEASUREMENT_TABLE_COLUMNS.forEach { column ->
+            Text(
+                text = "Date",
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier
+                    .width(TABLE_CELL_WIDTH)
+                    .padding(horizontal = 8.dp),
+            )
+            measurementTableMetricColumns.forEach { column ->
                 Text(
-                    text = column.header,
+                    text = column.label(),
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier
                         .width(TABLE_CELL_WIDTH)
@@ -318,9 +327,16 @@ private fun MeasurementTable(
                     .clickable { onRowClick(item.measurement.id) }
                     .padding(vertical = 8.dp),
             ) {
-                MEASUREMENT_TABLE_COLUMNS.forEach { column ->
+                Text(
+                    text = formatEpochMillisToLocalizedNumericDate(item.measurement.dateEpochMillis),
+                    modifier = Modifier
+                        .width(TABLE_CELL_WIDTH)
+                        .padding(horizontal = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                measurementTableMetricColumns.forEach { column ->
                     Text(
-                        text = column.value(item),
+                        text = column.formattedValue(item),
                         modifier = Modifier
                             .width(TABLE_CELL_WIDTH)
                             .padding(horizontal = 8.dp),
@@ -339,64 +355,49 @@ private data class MetricDisplayItem(
     val value: String,
 )
 
-private data class MeasurementTableColumn(
-    val header: String,
-    val value: (MeasurementListItemUiModel) -> String,
-)
-
 private val TABLE_CELL_WIDTH = 136.dp
 private val MEASUREMENT_LIST_FAB_CLEARANCE = 96.dp
 
-private val MEASUREMENT_TABLE_COLUMNS = listOf(
-    MeasurementTableColumn("Date") { formatEpochMillisToLocalizedNumericDate(it.measurement.dateEpochMillis) },
-    MeasurementTableColumn("Weight") { valueWithUnit(it.measurement.weightKg, "kg") },
-    MeasurementTableColumn("Neck") { valueWithUnit(it.measurement.neckCircumferenceCm, "cm") },
-    MeasurementTableColumn("Chest") { valueWithUnit(it.measurement.chestCircumferenceCm, "cm") },
-    MeasurementTableColumn("Waist") { valueWithUnit(it.measurement.waistCircumferenceCm, "cm") },
-    MeasurementTableColumn("Abdomen") { valueWithUnit(it.measurement.abdomenCircumferenceCm, "cm") },
-    MeasurementTableColumn("Hip") { valueWithUnit(it.measurement.hipCircumferenceCm, "cm") },
-    MeasurementTableColumn("Chest Skinfold") { valueWithUnit(it.measurement.chestSkinfoldMm, "mm") },
-    MeasurementTableColumn("Abdomen Skinfold") { valueWithUnit(it.measurement.abdomenSkinfoldMm, "mm") },
-    MeasurementTableColumn("Thigh Skinfold") { valueWithUnit(it.measurement.thighSkinfoldMm, "mm") },
-    MeasurementTableColumn("Triceps Skinfold") { valueWithUnit(it.measurement.tricepsSkinfoldMm, "mm") },
-    MeasurementTableColumn("Suprailiac Skinfold") { valueWithUnit(it.measurement.suprailiacSkinfoldMm, "mm") },
-    MeasurementTableColumn("BMI") { valueWithUnit(it.derivedMetrics.bmi, null) },
-    MeasurementTableColumn("Body Fat Navy") { valueWithUnit(it.derivedMetrics.navyBodyFatPercent, "%") },
-    MeasurementTableColumn("Body Fat Skinfold") { valueWithUnit(it.derivedMetrics.skinfold3SiteBodyFatPercent, "%") },
-    MeasurementTableColumn("WHR") { valueWithUnit(it.derivedMetrics.waistHipRatio, null) },
-    MeasurementTableColumn("WHtR") { valueWithUnit(it.derivedMetrics.waistHeightRatio, null) },
-    MeasurementTableColumn("HHR") { valueWithUnit(it.derivedMetrics.hipHeightRatio, null) },
-)
-
 private fun buildLatestMeasurementMetrics(item: MeasurementListItemUiModel): List<MetricDisplayItem> {
-    return listOf(
-        MetricDisplayItem("Weight", valueWithUnit(item.measurement.weightKg, "kg")),
-        MetricDisplayItem("Neck", valueWithUnit(item.measurement.neckCircumferenceCm, "cm")),
-        MetricDisplayItem("Chest", valueWithUnit(item.measurement.chestCircumferenceCm, "cm")),
-        MetricDisplayItem("Waist", valueWithUnit(item.measurement.waistCircumferenceCm, "cm")),
-        MetricDisplayItem("Abdomen", valueWithUnit(item.measurement.abdomenCircumferenceCm, "cm")),
-        MetricDisplayItem("Hip", valueWithUnit(item.measurement.hipCircumferenceCm, "cm")),
-        MetricDisplayItem("Chest Skinfold", valueWithUnit(item.measurement.chestSkinfoldMm, "mm")),
-        MetricDisplayItem("Abdomen Skinfold", valueWithUnit(item.measurement.abdomenSkinfoldMm, "mm")),
-        MetricDisplayItem("Thigh Skinfold", valueWithUnit(item.measurement.thighSkinfoldMm, "mm")),
-        MetricDisplayItem("Triceps Skinfold", valueWithUnit(item.measurement.tricepsSkinfoldMm, "mm")),
-        MetricDisplayItem("Suprailiac Skinfold", valueWithUnit(item.measurement.suprailiacSkinfoldMm, "mm")),
-        MetricDisplayItem("BMI", valueWithUnit(item.derivedMetrics.bmi, null)),
-        MetricDisplayItem("Body Fat (Navy)", valueWithUnit(item.derivedMetrics.navyBodyFatPercent, "%")),
+    return BodyMetric.entries.map { metric ->
         MetricDisplayItem(
-            "Body Fat (Skinfold)",
-            valueWithUnit(item.derivedMetrics.skinfold3SiteBodyFatPercent, "%"),
-        ),
-        MetricDisplayItem("WHR", valueWithUnit(item.derivedMetrics.waistHipRatio, null)),
-        MetricDisplayItem("WHtR", valueWithUnit(item.derivedMetrics.waistHeightRatio, null)),
-        MetricDisplayItem("HHR", valueWithUnit(item.derivedMetrics.hipHeightRatio, null)),
-    )
+            label = metric.label(),
+            value = metric.formattedValue(item),
+        )
+    }
 }
 
-private fun valueWithUnit(value: Double?, unit: String?): String {
+private val measurementTableMetricColumns: List<BodyMetric> = BodyMetric.entries
+
+private fun BodyMetric.formattedValue(item: MeasurementListItemUiModel): String {
+    val value = valueSelector(item.measurement, item.derivedMetrics)
+    return valueWithUnit(value, unit)
+}
+
+private fun BodyMetric.label(): String = when (this) {
+    BodyMetric.Weight -> "Weight"
+    BodyMetric.NeckCircumference -> "Neck"
+    BodyMetric.WaistCircumference -> "Waist"
+    BodyMetric.HipCircumference -> "Hip"
+    BodyMetric.ChestCircumference -> "Chest"
+    BodyMetric.AbdomenCircumference -> "Abdomen"
+    BodyMetric.ChestSkinfold -> "Chest Skinfold"
+    BodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
+    BodyMetric.ThighSkinfold -> "Thigh Skinfold"
+    BodyMetric.TricepsSkinfold -> "Triceps Skinfold"
+    BodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+    BodyMetric.Bmi -> "BMI"
+    BodyMetric.NavyBodyFatPercent -> "Body Fat (Navy)"
+    BodyMetric.SkinfoldBodyFatPercent -> "Body Fat (Skinfold)"
+    BodyMetric.WaistHipRatio -> "WHR"
+    BodyMetric.WaistHeightRatio -> "WHtR"
+    BodyMetric.HipHeightRatio -> "HHR"
+}
+
+private fun valueWithUnit(value: Double?, unit: BodyMetricUnit): String {
     if (value == null) return MISSING_VALUE_PLACEHOLDER
     val number = formatDecimal(value)
-    return if (unit.isNullOrBlank()) number else "$number $unit"
+    return if (unit == BodyMetricUnit.Unitless) number else "$number ${unit.symbol}"
 }
 
 private const val MISSING_VALUE_PLACEHOLDER = "--"

@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.feature.analysis
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import java.time.Instant
 import java.time.ZoneId
@@ -39,7 +40,7 @@ internal fun filterByDuration(
 
 internal fun buildMetricCharts(
     items: List<MeasurementWithDerived>,
-    definitions: List<AnalysisMetricDefinition> = analysisMetricDefinitions,
+    definitions: List<BodyMetric> = BodyMetric.entries,
 ): List<AnalysisMetricChartUiModel> {
     val sortedItems = items.sortedBy { it.measurement.dateEpochMillis }
 

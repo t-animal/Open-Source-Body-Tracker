@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.feature.analysis
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -43,10 +44,9 @@ class AnalysisTransformTest {
 
         val charts = buildMetricCharts(items)
 
-        assertEquals(17, charts.size)
-        assertEquals(analysisMetricDefinitions.size, charts.size)
+        assertEquals(BodyMetric.entries.size, charts.size)
         assertEquals(
-            analysisMetricDefinitions.map { it.id },
+            BodyMetric.entries.map { it.id },
             charts.map { it.definition.id },
         )
     }

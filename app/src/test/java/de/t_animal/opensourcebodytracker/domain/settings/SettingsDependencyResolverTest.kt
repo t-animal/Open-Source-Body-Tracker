@@ -1,8 +1,7 @@
 package de.t_animal.opensourcebodytracker.domain.settings
 
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
-import de.t_animal.opensourcebodytracker.core.model.DisplayMetricType
-import de.t_animal.opensourcebodytracker.core.model.MeasurementType
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
@@ -20,7 +19,7 @@ class SettingsDependencyResolverTest {
             profile = profile(sex = Sex.Male),
         )
 
-        assertEquals(emptySet<MeasurementType>(), result.requiredMeasurements)
+        assertEquals(emptySet<BodyMetric>(), result.requiredMeasurements)
     }
 
     @Test
@@ -32,8 +31,8 @@ class SettingsDependencyResolverTest {
 
         assertEquals(
             setOf(
-                MeasurementType.NeckCircumference,
-                MeasurementType.WaistCircumference,
+                BodyMetric.NeckCircumference,
+                BodyMetric.WaistCircumference,
             ),
             result.requiredMeasurements,
         )
@@ -48,9 +47,9 @@ class SettingsDependencyResolverTest {
 
         assertEquals(
             setOf(
-                MeasurementType.NeckCircumference,
-                MeasurementType.WaistCircumference,
-                MeasurementType.HipCircumference,
+                BodyMetric.NeckCircumference,
+                BodyMetric.WaistCircumference,
+                BodyMetric.HipCircumference,
             ),
             result.requiredMeasurements,
         )
@@ -65,9 +64,9 @@ class SettingsDependencyResolverTest {
 
         assertEquals(
             setOf(
-                MeasurementType.ChestSkinfold,
-                MeasurementType.AbdomenSkinfold,
-                MeasurementType.ThighSkinfold,
+                BodyMetric.ChestSkinfold,
+                BodyMetric.AbdomenSkinfold,
+                BodyMetric.ThighSkinfold,
             ),
             result.requiredMeasurements,
         )
@@ -82,9 +81,9 @@ class SettingsDependencyResolverTest {
 
         assertEquals(
             setOf(
-                MeasurementType.TricepsSkinfold,
-                MeasurementType.SuprailiacSkinfold,
-                MeasurementType.ThighSkinfold,
+                BodyMetric.TricepsSkinfold,
+                BodyMetric.SuprailiacSkinfold,
+                BodyMetric.ThighSkinfold,
             ),
             result.requiredMeasurements,
         )
@@ -102,12 +101,12 @@ class SettingsDependencyResolverTest {
 
         assertEquals(
             setOf(
-                MeasurementType.NeckCircumference,
-                MeasurementType.WaistCircumference,
-                MeasurementType.HipCircumference,
-                MeasurementType.TricepsSkinfold,
-                MeasurementType.SuprailiacSkinfold,
-                MeasurementType.ThighSkinfold,
+                BodyMetric.NeckCircumference,
+                BodyMetric.WaistCircumference,
+                BodyMetric.HipCircumference,
+                BodyMetric.TricepsSkinfold,
+                BodyMetric.SuprailiacSkinfold,
+                BodyMetric.ThighSkinfold,
             ),
             result.requiredMeasurements,
         )
@@ -119,8 +118,8 @@ class SettingsDependencyResolverTest {
             navyBodyFatEnabled = true,
             skinfoldBodyFatEnabled = false,
             enabledMeasurements = emptySet(),
-            visibleInAnalysis = setOf(DisplayMetricType.Weight),
-            visibleInTable = setOf(DisplayMetricType.Weight),
+            visibleInAnalysis = setOf(BodyMetric.Weight),
+            visibleInTable = setOf(BodyMetric.Weight),
         )
 
         val methods = settings.enabledAnalysisMethods()

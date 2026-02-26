@@ -7,8 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import de.t_animal.opensourcebodytracker.core.model.DisplayMetricType
-import de.t_animal.opensourcebodytracker.core.model.MeasurementType
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import kotlinx.coroutines.flow.Flow
@@ -35,17 +34,17 @@ class PreferencesSettingsRepository(
             skinfoldBodyFatEnabled = prefs[Keys.skinfoldBodyFatEnabled] ?: defaults.skinfoldBodyFatEnabled,
             enabledMeasurements = parseEnumSet(
                 raw = prefs[Keys.enabledMeasurements],
-                values = MeasurementType.entries,
+                values = BodyMetric.entries,
                 fallback = defaults.enabledMeasurements,
             ),
             visibleInAnalysis = parseEnumSet(
                 raw = prefs[Keys.visibleInAnalysis],
-                values = DisplayMetricType.entries,
+                values = BodyMetric.entries,
                 fallback = defaults.visibleInAnalysis,
             ),
             visibleInTable = parseEnumSet(
                 raw = prefs[Keys.visibleInTable],
-                values = DisplayMetricType.entries,
+                values = BodyMetric.entries,
                 fallback = defaults.visibleInTable,
             ),
         )

@@ -52,6 +52,8 @@ import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
@@ -144,7 +146,7 @@ private fun MetricChartCard(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = chart.definition.title,
+                text = chart.definition.analysisTitle(),
                 style = MaterialTheme.typography.titleMedium,
             )
 
@@ -187,7 +189,7 @@ private fun MetricLineChart(
     val yValues = remember(points) { points.map { it.value } }
 
     val unitSuffix = remember(chart.definition.unit) {
-        chart.definition.unit?.let { " $it" }.orEmpty()
+        chart.definition.unit.suffixWithLeadingSpace()
     }
     val xAxisValueFormatter = remember(duration) {
         CartesianValueFormatter { _, value, _ ->
@@ -294,6 +296,11 @@ private val CHART_POINT_SIZE = 6.dp
 private val CHART_SELECTED_POINT_SIZE = 12.dp
 private val CHART_SELECTED_POINT_BORDER_WIDTH = 2.dp
 
+private fun BodyMetricUnit.suffixWithLeadingSpace(): String = when (this) {
+    BodyMetricUnit.Unitless -> ""
+    else -> " $symbol"
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun AnalysisScreenPreview() {
@@ -303,7 +310,7 @@ private fun AnalysisScreenPreview() {
                 selectedDuration = AnalysisDuration.ThreeMonths,
                 metricCharts = listOf(
                     AnalysisMetricChartUiModel(
-                        definition = analysisMetricDefinitions.first(),
+                        definition = BodyMetric.entries.first(),
                         points = listOf(
                             AnalysisChartPoint(1_735_689_600_000, 82.1),
                             AnalysisChartPoint(1_736_467_200_000, 81.8),
@@ -313,7 +320,7 @@ private fun AnalysisScreenPreview() {
                         yAxisRange = AnalysisYAxisRange(80.7, 82.3),
                     ),
                     AnalysisMetricChartUiModel(
-                        definition = analysisMetricDefinitions[14],
+                        definition = BodyMetric.entries[14],
                         points = emptyList(),
                         yAxisRange = null,
                     ),
@@ -324,4 +331,24 @@ private fun AnalysisScreenPreview() {
             contentPadding = PaddingValues(),
         )
     }
+}
+
+private fun BodyMetric.analysisTitle(): String = when (this) {
+    BodyMetric.Weight -> "Weight"
+    BodyMetric.NeckCircumference -> "Neck"
+    BodyMetric.WaistCircumference -> "Waist"
+    BodyMetric.HipCircumference -> "Hip"
+    BodyMetric.ChestCircumference -> "Chest"
+    BodyMetric.AbdomenCircumference -> "Abdomen"
+    BodyMetric.ChestSkinfold -> "Chest Skinfold"
+    BodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
+    BodyMetric.ThighSkinfold -> "Thigh Skinfold"
+    BodyMetric.TricepsSkinfold -> "Triceps Skinfold"
+    BodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+    BodyMetric.Bmi -> "BMI"
+    BodyMetric.NavyBodyFatPercent -> "Navy Body Fat %"
+    BodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
+    BodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
+    BodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
+    BodyMetric.HipHeightRatio -> "Hip–Height Ratio"
 }
