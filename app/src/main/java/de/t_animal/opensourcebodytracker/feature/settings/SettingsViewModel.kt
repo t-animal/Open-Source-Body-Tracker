@@ -72,6 +72,10 @@ class SettingsViewModel(
         updateAndPersist { it.copy(navyBodyFatEnabled = enabled) }
     }
 
+    fun onBmiEnabledChanged(enabled: Boolean) {
+        updateAndPersist { it.copy(bmiEnabled = enabled) }
+    }
+
     fun onSkinfoldBodyFatEnabledChanged(enabled: Boolean) {
         updateAndPersist { it.copy(skinfoldBodyFatEnabled = enabled) }
     }
@@ -129,7 +133,7 @@ class SettingsViewModel(
         val effective = transformed.copy(
             enabledMeasurements = transformed.enabledMeasurements + requiredMeasurements,
         )
-        
+
         viewModelScope.launch {
             settingsRepository.saveSettings(effective)
         }

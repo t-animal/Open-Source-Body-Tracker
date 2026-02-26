@@ -18,6 +18,10 @@ class SettingsDependencyResolver {
     ): MeasurementDependencyState {
         val sex = profile.sex
         val requiredMeasurements = buildSet {
+            if (AnalysisMethod.Bmi in enabledAnalysisMethods) {
+                add(BodyMetric.Weight)
+            }
+
             if (AnalysisMethod.NavyBodyFat in enabledAnalysisMethods) {
                 add(BodyMetric.NeckCircumference)
                 add(BodyMetric.WaistCircumference)
@@ -45,6 +49,9 @@ class SettingsDependencyResolver {
 }
 
 fun SettingsState.enabledAnalysisMethods(): Set<AnalysisMethod> = buildSet {
+    if (bmiEnabled) {
+        add(AnalysisMethod.Bmi)
+    }
     if (navyBodyFatEnabled) {
         add(AnalysisMethod.NavyBodyFat)
     }

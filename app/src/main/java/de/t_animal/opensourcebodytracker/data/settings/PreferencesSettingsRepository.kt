@@ -20,6 +20,7 @@ class PreferencesSettingsRepository(
 ) : SettingsRepository {
 
     private object Keys {
+        val bmiEnabled = booleanPreferencesKey("bmiEnabled")
         val navyBodyFatEnabled = booleanPreferencesKey("navyBodyFatEnabled")
         val skinfoldBodyFatEnabled = booleanPreferencesKey("skinfoldBodyFatEnabled")
         val enabledMeasurements = stringSetPreferencesKey("enabledMeasurements")
@@ -30,6 +31,7 @@ class PreferencesSettingsRepository(
     override val settingsFlow: Flow<SettingsState> = context.settingsDataStore.data.map { prefs ->
         val defaults = defaultSettingsState()
         SettingsState(
+            bmiEnabled = prefs[Keys.bmiEnabled] ?: defaults.bmiEnabled,
             navyBodyFatEnabled = prefs[Keys.navyBodyFatEnabled] ?: defaults.navyBodyFatEnabled,
             skinfoldBodyFatEnabled = prefs[Keys.skinfoldBodyFatEnabled] ?: defaults.skinfoldBodyFatEnabled,
             enabledMeasurements = parseEnumSet(
@@ -52,6 +54,7 @@ class PreferencesSettingsRepository(
 
     override suspend fun saveSettings(settings: SettingsState) {
         context.settingsDataStore.edit { prefs ->
+            prefs[Keys.bmiEnabled] = settings.bmiEnabled
             prefs[Keys.navyBodyFatEnabled] = settings.navyBodyFatEnabled
             prefs[Keys.skinfoldBodyFatEnabled] = settings.skinfoldBodyFatEnabled
             prefs[Keys.enabledMeasurements] = settings.enabledMeasurements.mapTo(mutableSetOf()) { it.name }

@@ -1,11 +1,13 @@
 package de.t_animal.opensourcebodytracker.core.model
 
 enum class AnalysisMethod {
+    Bmi,
     NavyBodyFat,
     Skinfold3SiteBodyFat,
 }
 
 data class SettingsState(
+    val bmiEnabled: Boolean,
     val navyBodyFatEnabled: Boolean,
     val skinfoldBodyFatEnabled: Boolean,
     val enabledMeasurements: Set<BodyMetric>,
@@ -24,6 +26,7 @@ fun defaultSettingsState(): SettingsState {
     )
 
     return SettingsState(
+        bmiEnabled = true,
         navyBodyFatEnabled = true,
         skinfoldBodyFatEnabled = true,
         enabledMeasurements = BodyMetric.entries.filterTo(mutableSetOf()) { it.isMeasured },

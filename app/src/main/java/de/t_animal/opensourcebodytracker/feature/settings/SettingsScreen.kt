@@ -68,6 +68,7 @@ fun SettingsRoute(
         state = state,
         onNavigateBack = onNavigateBack,
         contentPadding = contentPadding,
+        onBmiEnabledChanged = vm::onBmiEnabledChanged,
         onNavyBodyFatEnabledChanged = vm::onNavyBodyFatEnabledChanged,
         onSkinfoldBodyFatEnabledChanged = vm::onSkinfoldBodyFatEnabledChanged,
         onMeasurementEnabledChanged = vm::onMeasurementEnabledChanged,
@@ -80,6 +81,7 @@ fun SettingsScreen(
     state: SettingsUiState,
     onNavigateBack: () -> Unit,
     contentPadding: PaddingValues,
+    onBmiEnabledChanged: (Boolean) -> Unit,
     onNavyBodyFatEnabledChanged: (Boolean) -> Unit,
     onSkinfoldBodyFatEnabledChanged: (Boolean) -> Unit,
     onMeasurementEnabledChanged: (BodyMetric, Boolean) -> Unit,
@@ -112,8 +114,10 @@ fun SettingsScreen(
 
         item {
             AnalysisMethodsSection(
+                bmiEnabled = state.settings.bmiEnabled,
                 navyBodyFatEnabled = state.settings.navyBodyFatEnabled,
                 skinfoldBodyFatEnabled = state.settings.skinfoldBodyFatEnabled,
+                onBmiEnabledChanged = onBmiEnabledChanged,
                 onNavyBodyFatEnabledChanged = onNavyBodyFatEnabledChanged,
                 onSkinfoldBodyFatEnabledChanged = onSkinfoldBodyFatEnabledChanged,
             )
@@ -147,8 +151,10 @@ fun SettingsScreen(
 
 @Composable
 private fun AnalysisMethodsSection(
+    bmiEnabled: Boolean,
     navyBodyFatEnabled: Boolean,
     skinfoldBodyFatEnabled: Boolean,
+    onBmiEnabledChanged: (Boolean) -> Unit,
     onNavyBodyFatEnabledChanged: (Boolean) -> Unit,
     onSkinfoldBodyFatEnabledChanged: (Boolean) -> Unit,
 ) {
@@ -157,6 +163,12 @@ private fun AnalysisMethodsSection(
             Text("Analysis Methods", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
+            CheckRow(
+                label = "BMI",
+                checked = bmiEnabled,
+                enabled = true,
+                onCheckedChange = onBmiEnabledChanged,
+            )
             CheckRow(
                 label = "Navy Body Fat %",
                 checked = navyBodyFatEnabled,
@@ -209,6 +221,7 @@ private fun DisplayConfigurationSection(
 ) {
     val visibleMetricTypes = BodyMetric.entries.filter {
         when (it) {
+            BodyMetric.Bmi -> state.settings.bmiEnabled
             BodyMetric.NavyBodyFatPercent -> state.settings.navyBodyFatEnabled
             BodyMetric.SkinfoldBodyFatPercent -> state.settings.skinfoldBodyFatEnabled
             else -> true
@@ -365,6 +378,7 @@ private fun SettingsScreenPreview() {
             state = SettingsUiState(),
             onNavigateBack = {},
             contentPadding = PaddingValues(0.dp),
+            onBmiEnabledChanged = {},
             onNavyBodyFatEnabledChanged = {},
             onSkinfoldBodyFatEnabledChanged = {},
             onMeasurementEnabledChanged = { _, _ -> },

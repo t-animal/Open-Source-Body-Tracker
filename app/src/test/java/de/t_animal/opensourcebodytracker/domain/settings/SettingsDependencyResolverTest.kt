@@ -90,6 +90,16 @@ class SettingsDependencyResolverTest {
     }
 
     @Test
+    fun resolve_bmi_requiresWeight() {
+        val result = resolver.resolve(
+            enabledAnalysisMethods = setOf(AnalysisMethod.Bmi),
+            profile = profile(sex = Sex.Male),
+        )
+
+        assertEquals(setOf(BodyMetric.Weight), result.requiredMeasurements)
+    }
+
+    @Test
     fun resolve_bothMethodsForFemale_returnsUnionWithoutDuplicates() {
         val result = resolver.resolve(
             enabledAnalysisMethods = setOf(
@@ -115,6 +125,7 @@ class SettingsDependencyResolverTest {
     @Test
     fun enabledAnalysisMethods_mapsFromSettingsFlags() {
         val settings = SettingsState(
+            bmiEnabled = true,
             navyBodyFatEnabled = true,
             skinfoldBodyFatEnabled = false,
             enabledMeasurements = emptySet(),
@@ -124,7 +135,13 @@ class SettingsDependencyResolverTest {
 
         val methods = settings.enabledAnalysisMethods()
 
-        assertEquals(setOf(AnalysisMethod.NavyBodyFat), methods)
+        assertEquals(
+            setOf(
+                AnalysisMethod.Bmi,
+                AnalysisMethod.NavyBodyFat,
+            ),
+            methods,
+        )
     }
 
     private fun profile(sex: Sex) = UserProfile(
