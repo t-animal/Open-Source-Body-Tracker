@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
                 Surface(modifier = Modifier) {
                     BodyTrackerApp(
                         profileRepository = container.profileRepository,
+                        settingsRepository = container.settingsRepository,
                         measurementRepository = container.measurementRepository,
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
                         generateFakeMeasurementsUseCase = container.generateFakeMeasurementsUseCase,
@@ -34,12 +35,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun BodyTrackerApp(
     profileRepository: de.t_animal.opensourcebodytracker.data.profile.ProfileRepository,
+    settingsRepository: de.t_animal.opensourcebodytracker.data.settings.SettingsRepository,
     measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
     generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
 ) {
     BodyTrackerNavHost(
         profileRepository = profileRepository,
+        settingsRepository = settingsRepository,
         measurementRepository = measurementRepository,
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         generateFakeMeasurementsUseCase = generateFakeMeasurementsUseCase,

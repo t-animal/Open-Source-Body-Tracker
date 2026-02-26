@@ -7,6 +7,8 @@ import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.measurements.RoomMeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.profile.PreferencesProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.PreferencesSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsCalculator
@@ -16,6 +18,10 @@ class AppContainer(appContext: Context) {
 
     val profileRepository: ProfileRepository by lazy {
         PreferencesProfileRepository(applicationContext)
+    }
+
+    val settingsRepository: SettingsRepository by lazy {
+        PreferencesSettingsRepository(applicationContext)
     }
 
     private val database: AppDatabase by lazy {

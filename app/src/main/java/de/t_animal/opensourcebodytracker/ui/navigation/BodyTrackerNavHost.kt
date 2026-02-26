@@ -28,6 +28,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisScreen
@@ -39,12 +40,13 @@ import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListFul
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosScreen
 import de.t_animal.opensourcebodytracker.feature.profile.ProfileRoute
-import de.t_animal.opensourcebodytracker.feature.settings.SettingsScreen
+import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BodyTrackerNavHost(
     profileRepository: ProfileRepository,
+    settingsRepository: SettingsRepository,
     measurementRepository: MeasurementRepository,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
@@ -90,7 +92,14 @@ fun BodyTrackerNavHost(
         }
 
         composable(Routes.Settings) {
-            SettingsScreen()
+            Scaffold { contentPadding ->
+                SettingsRoute(
+                    settingsRepository = settingsRepository,
+                    profileRepository = profileRepository,
+                    onNavigateBack = { navController.popBackStack() },
+                    contentPadding = contentPadding,
+                )
+            }
         }
 
         composable(Routes.MeasurementList) {
