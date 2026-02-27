@@ -74,6 +74,7 @@ fun BodyTrackerNavHost(
         composable(Routes.Onboarding) {
             ProfileRoute(
                 repository = profileRepository,
+                settingsRepository = settingsRepository,
                 mode = de.t_animal.opensourcebodytracker.feature.profile.ProfileMode.Onboarding,
                 onFinished = {
                     navController.navigate(Routes.MeasurementList) {
@@ -86,6 +87,7 @@ fun BodyTrackerNavHost(
         composable(Routes.Profile) {
             ProfileRoute(
                 repository = profileRepository,
+                settingsRepository = settingsRepository,
                 mode = de.t_animal.opensourcebodytracker.feature.profile.ProfileMode.Settings,
                 onFinished = { navController.popBackStack() },
             )

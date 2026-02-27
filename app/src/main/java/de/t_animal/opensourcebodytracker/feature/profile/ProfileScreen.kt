@@ -26,6 +26,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
 import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -36,10 +38,18 @@ import java.time.ZoneId
 @Composable
 fun ProfileRoute(
     repository: ProfileRepository,
+    settingsRepository: SettingsRepository,
     mode: ProfileMode,
     onFinished: () -> Unit,
 ) {
-    val vm: ProfileViewModel = viewModel(factory = ProfileViewModelFactory(repository, mode))
+    val vm: ProfileViewModel = viewModel(
+        factory = ProfileViewModelFactory(
+            repository = repository,
+            settingsRepository = settingsRepository,
+            dependencyResolver = DerivedMetricsDependencyResolver(),
+            mode = mode,
+        ),
+    )
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {
