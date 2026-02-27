@@ -54,6 +54,8 @@ import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
+import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
@@ -334,21 +336,28 @@ private fun AnalysisScreenPreview() {
 }
 
 private fun BodyMetric.analysisTitle(): String = when (this) {
-    BodyMetric.Weight -> "Weight"
-    BodyMetric.NeckCircumference -> "Neck"
-    BodyMetric.WaistCircumference -> "Waist"
-    BodyMetric.HipCircumference -> "Hip"
-    BodyMetric.ChestCircumference -> "Chest"
-    BodyMetric.AbdomenCircumference -> "Abdomen"
-    BodyMetric.ChestSkinfold -> "Chest Skinfold"
-    BodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
-    BodyMetric.ThighSkinfold -> "Thigh Skinfold"
-    BodyMetric.TricepsSkinfold -> "Triceps Skinfold"
-    BodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
-    BodyMetric.Bmi -> "BMI"
-    BodyMetric.NavyBodyFatPercent -> "Navy Body Fat %"
-    BodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
-    BodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
-    BodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
-    BodyMetric.HipHeightRatio -> "Hip–Height Ratio"
+    is MeasuredBodyMetric -> when (this) {
+        MeasuredBodyMetric.Weight -> "Weight"
+        MeasuredBodyMetric.NeckCircumference -> "Neck"
+        MeasuredBodyMetric.WaistCircumference -> "Waist"
+        MeasuredBodyMetric.HipCircumference -> "Hip"
+        MeasuredBodyMetric.ChestCircumference -> "Chest"
+        MeasuredBodyMetric.AbdomenCircumference -> "Abdomen"
+        MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold"
+        MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
+        MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold"
+        MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold"
+        MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+    }
+
+    is DerivedBodyMetric -> when (this) {
+        DerivedBodyMetric.Bmi -> "BMI"
+        DerivedBodyMetric.NavyBodyFatPercent -> "Navy Body Fat %"
+        DerivedBodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
+        DerivedBodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
+        DerivedBodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
+        DerivedBodyMetric.HipHeightRatio -> "Hip–Height Ratio"
+    }
+
+    else -> id
 }

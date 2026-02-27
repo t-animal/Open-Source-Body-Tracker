@@ -10,26 +10,26 @@ data class SettingsState(
     val bmiEnabled: Boolean,
     val navyBodyFatEnabled: Boolean,
     val skinfoldBodyFatEnabled: Boolean,
-    val enabledMeasurements: Set<BodyMetric>,
+    val enabledMeasurements: Set<MeasuredBodyMetric>,
     val visibleInAnalysis: Set<BodyMetric>,
     val visibleInTable: Set<BodyMetric>,
 )
 
 fun defaultSettingsState(): SettingsState {
     val visibleByDefault = BodyMetric.entries.toSet() - setOf(
-        BodyMetric.ChestSkinfold,
-        BodyMetric.AbdomenSkinfold,
-        BodyMetric.ThighSkinfold,
-        BodyMetric.TricepsSkinfold,
-        BodyMetric.SuprailiacSkinfold,
-        BodyMetric.HipHeightRatio,
+        MeasuredBodyMetric.ChestSkinfold,
+        MeasuredBodyMetric.AbdomenSkinfold,
+        MeasuredBodyMetric.ThighSkinfold,
+        MeasuredBodyMetric.TricepsSkinfold,
+        MeasuredBodyMetric.SuprailiacSkinfold,
+        DerivedBodyMetric.HipHeightRatio,
     )
 
     return SettingsState(
         bmiEnabled = true,
         navyBodyFatEnabled = true,
         skinfoldBodyFatEnabled = true,
-        enabledMeasurements = BodyMetric.entries.filterTo(mutableSetOf()) { it.isMeasured },
+        enabledMeasurements = MeasuredBodyMetric.entries.toSet(),
         visibleInAnalysis = visibleByDefault,
         visibleInTable = visibleByDefault,
     )

@@ -1,7 +1,7 @@
 package de.t_animal.opensourcebodytracker.domain.metrics
 
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
-import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
@@ -19,7 +19,7 @@ class DerivedMetricsDependencyResolverTest {
             profile = profile(sex = Sex.Male),
         )
 
-        Assert.assertEquals(emptySet<BodyMetric>(), result.requiredMeasurements)
+        Assert.assertEquals(emptySet<MeasuredBodyMetric>(), result.requiredMeasurements)
     }
 
     @Test
@@ -31,8 +31,8 @@ class DerivedMetricsDependencyResolverTest {
 
         Assert.assertEquals(
             setOf(
-                BodyMetric.NeckCircumference,
-                BodyMetric.WaistCircumference,
+                MeasuredBodyMetric.NeckCircumference,
+                MeasuredBodyMetric.WaistCircumference,
             ),
             result.requiredMeasurements,
         )
@@ -47,9 +47,9 @@ class DerivedMetricsDependencyResolverTest {
 
         Assert.assertEquals(
             setOf(
-                BodyMetric.NeckCircumference,
-                BodyMetric.WaistCircumference,
-                BodyMetric.HipCircumference,
+                MeasuredBodyMetric.NeckCircumference,
+                MeasuredBodyMetric.WaistCircumference,
+                MeasuredBodyMetric.HipCircumference,
             ),
             result.requiredMeasurements,
         )
@@ -64,9 +64,9 @@ class DerivedMetricsDependencyResolverTest {
 
         Assert.assertEquals(
             setOf(
-                BodyMetric.ChestSkinfold,
-                BodyMetric.AbdomenSkinfold,
-                BodyMetric.ThighSkinfold,
+                MeasuredBodyMetric.ChestSkinfold,
+                MeasuredBodyMetric.AbdomenSkinfold,
+                MeasuredBodyMetric.ThighSkinfold,
             ),
             result.requiredMeasurements,
         )
@@ -81,9 +81,9 @@ class DerivedMetricsDependencyResolverTest {
 
         Assert.assertEquals(
             setOf(
-                BodyMetric.TricepsSkinfold,
-                BodyMetric.SuprailiacSkinfold,
-                BodyMetric.ThighSkinfold,
+                MeasuredBodyMetric.TricepsSkinfold,
+                MeasuredBodyMetric.SuprailiacSkinfold,
+                MeasuredBodyMetric.ThighSkinfold,
             ),
             result.requiredMeasurements,
         )
@@ -96,7 +96,7 @@ class DerivedMetricsDependencyResolverTest {
             profile = profile(sex = Sex.Male),
         )
 
-        Assert.assertEquals(setOf(BodyMetric.Weight), result.requiredMeasurements)
+        Assert.assertEquals(setOf(MeasuredBodyMetric.Weight), result.requiredMeasurements)
     }
 
     @Test
@@ -111,12 +111,12 @@ class DerivedMetricsDependencyResolverTest {
 
         Assert.assertEquals(
             setOf(
-                BodyMetric.NeckCircumference,
-                BodyMetric.WaistCircumference,
-                BodyMetric.HipCircumference,
-                BodyMetric.TricepsSkinfold,
-                BodyMetric.SuprailiacSkinfold,
-                BodyMetric.ThighSkinfold,
+                MeasuredBodyMetric.NeckCircumference,
+                MeasuredBodyMetric.WaistCircumference,
+                MeasuredBodyMetric.HipCircumference,
+                MeasuredBodyMetric.TricepsSkinfold,
+                MeasuredBodyMetric.SuprailiacSkinfold,
+                MeasuredBodyMetric.ThighSkinfold,
             ),
             result.requiredMeasurements,
         )
@@ -129,8 +129,8 @@ class DerivedMetricsDependencyResolverTest {
             navyBodyFatEnabled = true,
             skinfoldBodyFatEnabled = false,
             enabledMeasurements = emptySet(),
-            visibleInAnalysis = setOf(BodyMetric.Weight),
-            visibleInTable = setOf(BodyMetric.Weight),
+            visibleInAnalysis = setOf(MeasuredBodyMetric.Weight),
+            visibleInTable = setOf(MeasuredBodyMetric.Weight),
         )
 
         val methods = settings.enabledAnalysisMethods()
