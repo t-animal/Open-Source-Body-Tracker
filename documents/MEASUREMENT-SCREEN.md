@@ -40,6 +40,12 @@ If no measurement exists:
 * Show onboarding-style empty state
 * Provide quick access to create the first entry
 
+The displayed metrics in this card are settings-driven:
+
+* Uses `SettingsState.visibleInTable`
+* Applies analysis-method gating for derived metrics
+* Preserves metric order from shared registry (`BodyMetric.entries`)
+
 ---
 
 ## 📦 Card Layout
@@ -147,7 +153,7 @@ If no measurements exist:
 
 * "Add" button opens **New Measurement Screen**
 * Floating Action Button is still visible
-* In the future, the metrics to display will be configurable. For now we display all metrics.
+* Displayed metrics are configurable in Settings.
 * In the future, some metrics will have a third line with an indicator message (e.g. "overweight"/"underweight" for bmi)
 
 ---
@@ -182,6 +188,12 @@ All Measurements
 | ... all other metrics            |
 
 In the future, the columns will be configurable. For now we display all measurements.
+
+Current behavior:
+
+* Table columns are configurable via Settings display placement
+* Date column is always shown
+* Metric columns follow `visibleInTable`
 
 ---
 
@@ -267,6 +279,13 @@ Behavior:
 * Latest measurement = most recent by date
 * Derived metrics calculated in domain layer
 * Missing values rendered as `"--"`
+* Disabled metrics in settings are excluded from card/table layouts
+
+### Add/Edit form integration
+
+* Input fields are shown only for enabled measurements
+* Required measurements from active analyses are always enabled
+* Disabled fields are saved as `null` (not persisted as active values)
 
 ### Performance
 

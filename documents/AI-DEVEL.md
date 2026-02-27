@@ -1,4 +1,4 @@
-# AI Development Handoff (Phase 1-4.3)
+# AI Development Handoff (Phase 1-4.4)
 
 This document describes the current implementation state and the key constraints/gotchas so another coding agent can continue work quickly.
 
@@ -10,11 +10,30 @@ Implemented:
 - Phase 4.1 (navigation shell): top app bar + overflow menu + bottom navigation structure with placeholder Analysis/Photos/Settings screens.
 - Phase 4.2 (measurements redesign): latest measurement card + preview table (20) + full-list "More" screen.
 - Phase 4.3 (analysis charts): fully implemented Analysis screen with duration filtering and Vico line charts for raw + derived metrics.
+- Phase 4.4 (settings integration): implemented Settings screen + persisted configuration + settings-driven visibility/input behavior across Analysis and Measurements.
 
 ## Status Summary
 **Build:** `assembleDebug` succeeds.
 **Tests:** `test` succeeds.
 **Lint:** `ktlintCheck` succeeds.
+
+**Phase 4.4 feature coverage (implemented):**
+- Settings persistence via DataStore (`SettingsRepository` / `PreferencesSettingsRepository`).
+- Settings UI sections implemented:
+  - Analysis Methods (`BMI`, `Navy Body Fat %`, `Skinfold Body Fat %`)
+  - Measurement Collection (required measurements locked)
+  - Display Configuration (placement: `Hidden`, `Only in Table`, `Only in Analysis`, `In both`)
+- Shared metric registry split into:
+  - `MeasuredBodyMetric`
+  - `DerivedBodyMetric`
+  - unified `BodyMetric.entries`
+- Settings-driven visibility is applied to:
+  - Analysis chart cards
+  - Latest measurement card
+  - Table preview and full-list table
+  - Add/Edit measurement input fields
+- Profile save interaction:
+  - when sex changes and profile is saved, newly required measurements for enabled analyses are auto-enabled additively (never auto-disabled).
 
 **Phase 1 feature coverage:**
 - Profile gate on startup (if profile missing → onboarding).
@@ -36,7 +55,7 @@ Implemented:
 - Profile screen (editable)
 - Measurement list screen
 - Add/Edit measurement screen
-- Settings screen (placeholder)
+- Settings screen (implemented)
 - Analysis screen (implemented charts)
 - Photos screen (placeholder)
 
@@ -141,6 +160,7 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 - `de.t_animal.opensourcebodytracker.AppContainer`
   - Simple manual DI:
     - `PreferencesProfileRepository` (DataStore)
+    - `PreferencesSettingsRepository` (DataStore)
     - `AppDatabase` + `RoomMeasurementRepository` (Room)
     - `DerivedMetricsCalculator`
     - `CalculateMeasurementDerivedMetricsUseCase`
@@ -170,6 +190,26 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
   - `feature/profile/ProfileMode` (Onboarding vs Settings)
   - `feature/profile/ProfileViewModel`
   - `feature/profile/ProfileScreen`
+- Interaction note:
+  - `ProfileViewModel.onSaveClicked()` now also syncs settings by enabling newly required measurements according to `DerivedMetricsDependencyResolver`.
+
+### Settings (DataStore + UI)
+- Model:
+  - `core/model/SettingsState`
+  - `core/model/AnalysisMethod`
+  - `core/model/MetricRegistry` (`BodyMetric`, `MeasuredBodyMetric`, `DerivedBodyMetric`)
+- Data:
+  - `data/settings/SettingsRepository`
+  - `data/settings/PreferencesSettingsRepository`
+- Domain:
+  - `domain/metrics/DerivedMetricsDependencyResolver`
+  - `SettingsState.enabledAnalysisMethods()`
+  - shared visibility helpers:
+    - `SettingsState.visibleInAnalysisOrdered()`
+    - `SettingsState.visibleInTableOrdered()`
+- Feature UI:
+  - `feature/settings/SettingsViewModel`
+  - `feature/settings/SettingsScreen`
 
 ### Shared UI components
 - `ui/components/InputFields.kt`
@@ -192,14 +232,18 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 - Feature UI:
   - `feature/measurements/MeasurementListViewModel` + `MeasurementListScreen`
     - List state combines profile + measurements and exposes per-row derived metrics.
+    - Also combines settings and filters visible table/latest-card metrics.
     - Rendered as scaffold content (no local top app bar); `MeasurementListAddButton` hosts FAB UI.
   - `feature/measurements/MeasurementEditViewModel` + `MeasurementEditScreen`
+    - Field visibility is settings-driven.
+    - Disabled metrics are persisted as `null` on save.
 
 ### Analysis feature map (Phase 4.3)
 - `feature/analysis/AnalysisRoute` + `AnalysisScreen`
   - Hosts duration selector and chart cards.
 - `feature/analysis/AnalysisViewModel`
   - Owns selected duration state and builds `AnalysisUiState`.
+  - Combines settings and applies `visibleInAnalysis` filtering via shared helper.
 - `feature/analysis/AnalysisTransform`
   - Duration filtering, metric chart mapping, y-range calculation.
 - `feature/analysis/AnalysisModels`
@@ -207,11 +251,12 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 
 ### Remaining placeholders
 - `feature/photos/PhotosScreen`
-- `feature/settings/SettingsScreen`
 
 ### Tests
 - `app/src/test/java/de/t_animal/opensourcebodytracker/domain/metrics/DerivedMetricsCalculatorTest.kt`
   - Covers BMI/ratio calculations, separate navy/skinfold body-fat paths, sex-specific 3-site requirements, age-at-measurement constraints, and invalid navy log-input handling.
+- `app/src/test/java/de/t_animal/opensourcebodytracker/domain/metrics/DerivedMetricsDependencyResolverTest.kt`
+  - Covers method→required-measurement mapping for BMI/Navy/Skinfold and sex-specific requirements.
 
 ### Theme
 - `ui/theme/Theme`
@@ -258,6 +303,11 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 - Bottom nav switches between Measurements/Analysis/Photos and updates title.
 - Overflow on main tabs opens Profile and Settings screens.
 - Missing raw/derived values in latest card/table render as `--`.
+- Settings changes immediately affect:
+  - Analysis chart list
+  - Latest card/table columns
+  - Add/Edit input field visibility
+- Changing sex in Profile and saving auto-enables newly required measurements for active analysis methods.
 - Analysis tab shows duration segmented controls (`1M/3M/6M/1Y/All`).
 - Analysis cards render Vico line charts for populated metrics and `no data yet` when empty.
 - Analysis charts support tap marker toggle, pan, and pinch zoom.
