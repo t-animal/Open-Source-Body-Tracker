@@ -42,6 +42,8 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
+import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
@@ -375,23 +377,30 @@ private fun BodyMetric.formattedValue(item: MeasurementListItemUiModel): String 
 }
 
 private fun BodyMetric.label(): String = when (this) {
-    BodyMetric.Weight -> "Weight"
-    BodyMetric.NeckCircumference -> "Neck"
-    BodyMetric.WaistCircumference -> "Waist"
-    BodyMetric.HipCircumference -> "Hip"
-    BodyMetric.ChestCircumference -> "Chest"
-    BodyMetric.AbdomenCircumference -> "Abdomen"
-    BodyMetric.ChestSkinfold -> "Chest Skinfold"
-    BodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
-    BodyMetric.ThighSkinfold -> "Thigh Skinfold"
-    BodyMetric.TricepsSkinfold -> "Triceps Skinfold"
-    BodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
-    BodyMetric.Bmi -> "BMI"
-    BodyMetric.NavyBodyFatPercent -> "Body Fat (Navy)"
-    BodyMetric.SkinfoldBodyFatPercent -> "Body Fat (Skinfold)"
-    BodyMetric.WaistHipRatio -> "WHR"
-    BodyMetric.WaistHeightRatio -> "WHtR"
-    BodyMetric.HipHeightRatio -> "HHR"
+    is MeasuredBodyMetric -> when (this) {
+        MeasuredBodyMetric.Weight -> "Weight"
+        MeasuredBodyMetric.NeckCircumference -> "Neck"
+        MeasuredBodyMetric.WaistCircumference -> "Waist"
+        MeasuredBodyMetric.HipCircumference -> "Hip"
+        MeasuredBodyMetric.ChestCircumference -> "Chest"
+        MeasuredBodyMetric.AbdomenCircumference -> "Abdomen"
+        MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold"
+        MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
+        MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold"
+        MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold"
+        MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+    }
+
+    is DerivedBodyMetric -> when (this) {
+        DerivedBodyMetric.Bmi -> "BMI"
+        DerivedBodyMetric.NavyBodyFatPercent -> "Body Fat (Navy)"
+        DerivedBodyMetric.SkinfoldBodyFatPercent -> "Body Fat (Skinfold)"
+        DerivedBodyMetric.WaistHipRatio -> "WHR"
+        DerivedBodyMetric.WaistHeightRatio -> "WHtR"
+        DerivedBodyMetric.HipHeightRatio -> "HHR"
+    }
+
+    else -> id
 }
 
 private fun valueWithUnit(value: Double?, unit: BodyMetricUnit): String {

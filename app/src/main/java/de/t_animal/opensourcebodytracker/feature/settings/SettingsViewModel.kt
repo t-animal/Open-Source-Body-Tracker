@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
@@ -29,7 +30,7 @@ data class SettingsUiState(
     val isLoading: Boolean = true,
     val profile: UserProfile? = null,
     val settings: SettingsState = defaultSettingsState(),
-    val requiredMeasurements: Set<BodyMetric> = emptySet(),
+    val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
     val errorMessage: String? = null,
 )
 
@@ -81,7 +82,7 @@ class SettingsViewModel(
     }
 
     fun onMeasurementEnabledChanged(
-        measurementType: BodyMetric,
+        measurementType: MeasuredBodyMetric,
         enabled: Boolean,
     ) {
         val required = uiState.value.requiredMeasurements

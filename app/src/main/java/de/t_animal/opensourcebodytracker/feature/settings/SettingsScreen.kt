@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
@@ -84,7 +86,7 @@ fun SettingsScreen(
     onBmiEnabledChanged: (Boolean) -> Unit,
     onNavyBodyFatEnabledChanged: (Boolean) -> Unit,
     onSkinfoldBodyFatEnabledChanged: (Boolean) -> Unit,
-    onMeasurementEnabledChanged: (BodyMetric, Boolean) -> Unit,
+    onMeasurementEnabledChanged: (MeasuredBodyMetric, Boolean) -> Unit,
     onDisplayPlacementChanged: (BodyMetric, DisplayPlacement) -> Unit,
 ) {
     LazyColumn(
@@ -187,16 +189,16 @@ private fun AnalysisMethodsSection(
 
 @Composable
 private fun MeasurementCollectionSection(
-    enabledMeasurements: Set<BodyMetric>,
-    requiredMeasurements: Set<BodyMetric>,
-    onMeasurementEnabledChanged: (BodyMetric, Boolean) -> Unit,
+    enabledMeasurements: Set<MeasuredBodyMetric>,
+    requiredMeasurements: Set<MeasuredBodyMetric>,
+    onMeasurementEnabledChanged: (MeasuredBodyMetric, Boolean) -> Unit,
 ) {
     Card {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Measurement Collection", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
-            BodyMetric.entries.filter { it.isMeasured }.forEach { measurement ->
+            MeasuredBodyMetric.entries.forEach { measurement ->
                 val required = measurement in requiredMeasurements
                 val label = if (required) {
                     "${measurement.label()} (required)"
@@ -221,9 +223,9 @@ private fun DisplayConfigurationSection(
 ) {
     val visibleMetricTypes = BodyMetric.entries.filter {
         when (it) {
-            BodyMetric.Bmi -> state.settings.bmiEnabled
-            BodyMetric.NavyBodyFatPercent -> state.settings.navyBodyFatEnabled
-            BodyMetric.SkinfoldBodyFatPercent -> state.settings.skinfoldBodyFatEnabled
+            DerivedBodyMetric.Bmi -> state.settings.bmiEnabled
+            DerivedBodyMetric.NavyBodyFatPercent -> state.settings.navyBodyFatEnabled
+            DerivedBodyMetric.SkinfoldBodyFatPercent -> state.settings.skinfoldBodyFatEnabled
             else -> true
         }
     }
@@ -350,23 +352,30 @@ private fun DisplayPlacement.label(): String = when (this) {
 }
 
 private fun BodyMetric.label(): String = when (this) {
-    BodyMetric.Weight -> "Weight"
-    BodyMetric.NeckCircumference -> "Neck"
-    BodyMetric.WaistCircumference -> "Waist"
-    BodyMetric.HipCircumference -> "Hip"
-    BodyMetric.ChestCircumference -> "Chest"
-    BodyMetric.AbdomenCircumference -> "Abdomen"
-    BodyMetric.ChestSkinfold -> "Chest Skinfold"
-    BodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
-    BodyMetric.ThighSkinfold -> "Thigh Skinfold"
-    BodyMetric.TricepsSkinfold -> "Triceps Skinfold"
-    BodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
-    BodyMetric.Bmi -> "BMI"
-    BodyMetric.NavyBodyFatPercent -> "Navy Body Fat %"
-    BodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
-    BodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
-    BodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
-    BodyMetric.HipHeightRatio -> "Hip–Height Ratio"
+    is MeasuredBodyMetric -> when (this) {
+        MeasuredBodyMetric.Weight -> "Weight"
+        MeasuredBodyMetric.NeckCircumference -> "Neck"
+        MeasuredBodyMetric.WaistCircumference -> "Waist"
+        MeasuredBodyMetric.HipCircumference -> "Hip"
+        MeasuredBodyMetric.ChestCircumference -> "Chest"
+        MeasuredBodyMetric.AbdomenCircumference -> "Abdomen"
+        MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold"
+        MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
+        MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold"
+        MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold"
+        MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+    }
+
+    is DerivedBodyMetric -> when (this) {
+        DerivedBodyMetric.Bmi -> "BMI"
+        DerivedBodyMetric.NavyBodyFatPercent -> "Navy Body Fat %"
+        DerivedBodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
+        DerivedBodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
+        DerivedBodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
+        DerivedBodyMetric.HipHeightRatio -> "Hip–Height Ratio"
+    }
+
+    else -> id
 }
 
 

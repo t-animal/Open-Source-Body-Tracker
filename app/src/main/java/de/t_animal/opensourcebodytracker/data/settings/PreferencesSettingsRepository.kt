@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import kotlinx.coroutines.flow.Flow
@@ -36,17 +38,15 @@ class PreferencesSettingsRepository(
             skinfoldBodyFatEnabled = prefs[Keys.skinfoldBodyFatEnabled] ?: defaults.skinfoldBodyFatEnabled,
             enabledMeasurements = parseEnumSet(
                 raw = prefs[Keys.enabledMeasurements],
-                values = BodyMetric.entries,
+                values = MeasuredBodyMetric.entries,
                 fallback = defaults.enabledMeasurements,
             ),
-            visibleInAnalysis = parseEnumSet(
+            visibleInAnalysis = parseBodyMetricSet(
                 raw = prefs[Keys.visibleInAnalysis],
-                values = BodyMetric.entries,
                 fallback = defaults.visibleInAnalysis,
             ),
-            visibleInTable = parseEnumSet(
+            visibleInTable = parseBodyMetricSet(
                 raw = prefs[Keys.visibleInTable],
-                values = BodyMetric.entries,
                 fallback = defaults.visibleInTable,
             ),
         )
@@ -58,11 +58,31 @@ class PreferencesSettingsRepository(
             prefs[Keys.navyBodyFatEnabled] = settings.navyBodyFatEnabled
             prefs[Keys.skinfoldBodyFatEnabled] = settings.skinfoldBodyFatEnabled
             prefs[Keys.enabledMeasurements] = settings.enabledMeasurements.mapTo(mutableSetOf()) { it.name }
-            prefs[Keys.visibleInAnalysis] = settings.visibleInAnalysis.mapTo(mutableSetOf()) { it.name }
-            prefs[Keys.visibleInTable] = settings.visibleInTable.mapTo(mutableSetOf()) { it.name }
+            prefs[Keys.visibleInAnalysis] = settings.visibleInAnalysis.mapTo(mutableSetOf()) { it.storageName() }
+            prefs[Keys.visibleInTable] = settings.visibleInTable.mapTo(mutableSetOf()) { it.storageName() }
         }
     }
 }
+
+private fun parseBodyMetricSet(
+    raw: Set<String>?,
+    fallback: Set<BodyMetric>,
+): Set<BodyMetric> {
+    if (raw == null) {
+        return fallback
+    }
+
+    val measuredByStorageName = MeasuredBodyMetric.entries.associateBy { it.storageName() }
+    val derivedByStorageName = DerivedBodyMetric.entries.associateBy { it.storageName() }
+    val parsed = raw.mapNotNull { token ->
+        measuredByStorageName[token]
+            ?: derivedByStorageName[token]
+    }.toSet()
+
+    return if (parsed.isEmpty()) fallback else parsed
+}
+
+private fun BodyMetric.storageName(): String = this.javaClass.simpleName + ":$name"
 
 private fun <E : Enum<E>> parseEnumSet(
     raw: Set<String>?,

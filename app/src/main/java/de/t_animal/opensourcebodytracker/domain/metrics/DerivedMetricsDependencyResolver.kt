@@ -1,13 +1,13 @@
 package de.t_animal.opensourcebodytracker.domain.metrics
 
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
-import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 
 data class MeasurementDependencyState(
-    val requiredMeasurements: Set<BodyMetric>,
+    val requiredMeasurements: Set<MeasuredBodyMetric>,
 )
 
 class DerivedMetricsDependencyResolver {
@@ -19,25 +19,25 @@ class DerivedMetricsDependencyResolver {
         val sex = profile.sex
         val requiredMeasurements = buildSet {
             if (AnalysisMethod.Bmi in enabledAnalysisMethods) {
-                add(BodyMetric.Weight)
+                add(MeasuredBodyMetric.Weight)
             }
 
             if (AnalysisMethod.NavyBodyFat in enabledAnalysisMethods) {
-                add(BodyMetric.NeckCircumference)
-                add(BodyMetric.WaistCircumference)
+                add(MeasuredBodyMetric.NeckCircumference)
+                add(MeasuredBodyMetric.WaistCircumference)
                 if (sex == Sex.Female) {
-                    add(BodyMetric.HipCircumference)
+                    add(MeasuredBodyMetric.HipCircumference)
                 }
             }
 
             if (AnalysisMethod.Skinfold3SiteBodyFat in enabledAnalysisMethods) {
-                add(BodyMetric.ThighSkinfold)
+                add(MeasuredBodyMetric.ThighSkinfold)
                 if (sex == Sex.Male) {
-                    add(BodyMetric.ChestSkinfold)
-                    add(BodyMetric.AbdomenSkinfold)
+                    add(MeasuredBodyMetric.ChestSkinfold)
+                    add(MeasuredBodyMetric.AbdomenSkinfold)
                 } else {
-                    add(BodyMetric.TricepsSkinfold)
-                    add(BodyMetric.SuprailiacSkinfold)
+                    add(MeasuredBodyMetric.TricepsSkinfold)
+                    add(MeasuredBodyMetric.SuprailiacSkinfold)
                 }
             }
         }
