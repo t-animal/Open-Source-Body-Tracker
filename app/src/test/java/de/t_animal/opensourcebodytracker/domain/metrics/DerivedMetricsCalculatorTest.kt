@@ -35,11 +35,9 @@ class DerivedMetricsCalculatorTest {
         assertNotNull(result.bmi)
         assertNotNull(result.waistHipRatio)
         assertNotNull(result.waistHeightRatio)
-        assertNotNull(result.hipHeightRatio)
         assertEquals(24.69, result.bmi ?: 0.0, 0.01)
         assertEquals(0.90, result.waistHipRatio ?: 0.0, 0.0001)
         assertEquals(0.50, result.waistHeightRatio ?: 0.0, 0.0001)
-        assertEquals(0.5556, result.hipHeightRatio ?: 0.0, 0.0001)
     }
 
     @Test

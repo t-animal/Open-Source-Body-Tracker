@@ -359,7 +359,6 @@ private fun BodyMetric.analysisTitle(): String = when (this) {
         DerivedBodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
         DerivedBodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
         DerivedBodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
-        DerivedBodyMetric.HipHeightRatio -> "Hip–Height Ratio"
     }
 
     else -> id

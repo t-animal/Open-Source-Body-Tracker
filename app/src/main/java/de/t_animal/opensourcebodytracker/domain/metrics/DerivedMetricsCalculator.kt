@@ -43,7 +43,6 @@ class DerivedMetricsCalculator {
         )
         val waistHipRatio = calculateWaistHipRatio(waistCm = waistCm, hipCm = hipCm)
         val waistHeightRatio = calculateWaistHeightRatio(waistCm = waistCm, heightCm = heightCm)
-        val hipHeightRatio = calculateHipHeightRatio(hipCm = hipCm, heightCm = heightCm)
 
         return DerivedMetrics(
             bmi = bmi,
@@ -51,7 +50,6 @@ class DerivedMetricsCalculator {
             skinfold3SiteBodyFatPercent = skinfold3SiteBodyFatPercent,
             waistHipRatio = waistHipRatio,
             waistHeightRatio = waistHeightRatio,
-            hipHeightRatio = hipHeightRatio,
         )
     }
 
@@ -212,16 +210,5 @@ class DerivedMetricsCalculator {
         }
 
         return waistCm / heightCm
-    }
-
-    private fun calculateHipHeightRatio(
-        hipCm: Double?,
-        heightCm: Double,
-    ): Double? {
-        if (hipCm == null || hipCm <= 0 || heightCm <= 0) {
-            return null
-        }
-
-        return hipCm / heightCm
     }
 }

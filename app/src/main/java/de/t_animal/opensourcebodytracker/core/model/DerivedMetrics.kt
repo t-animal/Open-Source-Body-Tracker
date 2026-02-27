@@ -6,5 +6,4 @@ data class DerivedMetrics(
     val skinfold3SiteBodyFatPercent: Double? = null,
     val waistHipRatio: Double? = null,
     val waistHeightRatio: Double? = null,
-    val hipHeightRatio: Double? = null,
 )

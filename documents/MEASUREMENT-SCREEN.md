@@ -33,7 +33,7 @@ Scaffold
 Displays:
 
 * All measurement values from the most recent entry
-* All derived metrics (BMI, Navy Body Fat, WHR, WHtR, HHR)
+* All derived metrics (BMI, Navy Body Fat, WHR, WHtR)
 
 If no measurement exists:
 
@@ -123,9 +123,6 @@ BMI
 |                                                  |
 |   89 cm                1.02                     |
 |   Waist                WHtR                     |
-|                                                  |
-|   95 cm                --                       |
-|   Hip                  HHR                      |
 |                                                  |
 +--------------------------------------------------+
 ```

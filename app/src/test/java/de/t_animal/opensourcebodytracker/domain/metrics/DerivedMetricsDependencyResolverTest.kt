@@ -100,6 +100,35 @@ class DerivedMetricsDependencyResolverTest {
     }
 
     @Test
+    fun resolve_waistHipRatio_requiresWaistAndHip() {
+        val result = resolver.resolve(
+            enabledAnalysisMethods = setOf(AnalysisMethod.WaistHipRatio),
+            profile = profile(sex = Sex.Male),
+        )
+
+        Assert.assertEquals(
+            setOf(
+                MeasuredBodyMetric.WaistCircumference,
+                MeasuredBodyMetric.HipCircumference,
+            ),
+            result.requiredMeasurements,
+        )
+    }
+
+    @Test
+    fun resolve_waistHeightRatio_requiresWaistOnly() {
+        val result = resolver.resolve(
+            enabledAnalysisMethods = setOf(AnalysisMethod.WaistHeightRatio),
+            profile = profile(sex = Sex.Female),
+        )
+
+        Assert.assertEquals(
+            setOf(MeasuredBodyMetric.WaistCircumference),
+            result.requiredMeasurements,
+        )
+    }
+
+    @Test
     fun resolve_bothMethodsForFemale_returnsUnionWithoutDuplicates() {
         val result = resolver.resolve(
             enabledAnalysisMethods = setOf(
@@ -128,6 +157,8 @@ class DerivedMetricsDependencyResolverTest {
             bmiEnabled = true,
             navyBodyFatEnabled = true,
             skinfoldBodyFatEnabled = false,
+            waistHipRatioEnabled = true,
+            waistHeightRatioEnabled = false,
             enabledMeasurements = emptySet(),
             visibleInAnalysis = setOf(MeasuredBodyMetric.Weight),
             visibleInTable = setOf(MeasuredBodyMetric.Weight),
@@ -139,6 +170,7 @@ class DerivedMetricsDependencyResolverTest {
             setOf(
                 AnalysisMethod.Bmi,
                 AnalysisMethod.NavyBodyFat,
+                AnalysisMethod.WaistHipRatio,
             ),
             methods,
         )

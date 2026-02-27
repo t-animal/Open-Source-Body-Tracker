@@ -81,6 +81,14 @@ class SettingsViewModel(
         updateAndPersist { it.copy(skinfoldBodyFatEnabled = enabled) }
     }
 
+    fun onWaistHipRatioEnabledChanged(enabled: Boolean) {
+        updateAndPersist { it.copy(waistHipRatioEnabled = enabled) }
+    }
+
+    fun onWaistHeightRatioEnabledChanged(enabled: Boolean) {
+        updateAndPersist { it.copy(waistHeightRatioEnabled = enabled) }
+    }
+
     fun onMeasurementEnabledChanged(
         measurementType: MeasuredBodyMetric,
         enabled: Boolean,
