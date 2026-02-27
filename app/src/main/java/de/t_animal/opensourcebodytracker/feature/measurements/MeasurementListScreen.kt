@@ -46,6 +46,7 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.ui.components.formatEpochMillisToLocalizedNumericDate
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -55,6 +56,7 @@ import java.text.NumberFormat
 fun MeasurementListRoute(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
+    settingsRepository: SettingsRepository,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     onEdit: (Long) -> Unit,
     onAdd: () -> Unit,
@@ -65,6 +67,7 @@ fun MeasurementListRoute(
         factory = MeasurementListViewModelFactory(
             measurementRepository = measurementRepository,
             profileRepository = profileRepository,
+            settingsRepository = settingsRepository,
             calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         ),
     )
@@ -83,6 +86,7 @@ fun MeasurementListRoute(
 fun MeasurementListFullRoute(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
+    settingsRepository: SettingsRepository,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     onEdit: (Long) -> Unit,
 ) {
@@ -90,6 +94,7 @@ fun MeasurementListFullRoute(
         factory = MeasurementListViewModelFactory(
             measurementRepository = measurementRepository,
             profileRepository = profileRepository,
+            settingsRepository = settingsRepository,
             calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         ),
     )
@@ -134,6 +139,7 @@ fun MeasurementListScreen(
         item {
             MeasurementTable(
                 items = state.previewMeasurements,
+                visibleMetrics = state.visibleInTableMetrics,
                 onRowClick = { onEdit(it) },
             )
         }
@@ -177,6 +183,7 @@ fun MeasurementFullListScreen(
 
         MeasurementTable(
             items = state.allMeasurements,
+            visibleMetrics = state.visibleInTableMetrics,
             onRowClick = onEdit,
         )
     }
@@ -229,7 +236,10 @@ private fun LatestMeasurementCard(
                 else -> {
                     val latest = state.latestMeasurement
                     if (latest != null) {
-                        LatestMeasurementGrid(item = latest)
+                        LatestMeasurementGrid(
+                            item = latest,
+                            visibleMetrics = state.visibleInTableMetrics,
+                        )
                     }
                 }
             }
@@ -239,9 +249,12 @@ private fun LatestMeasurementCard(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LatestMeasurementGrid(item: MeasurementListItemUiModel) {
-    val metrics = remember(item) {
-        buildLatestMeasurementMetrics(item)
+private fun LatestMeasurementGrid(
+    item: MeasurementListItemUiModel,
+    visibleMetrics: List<BodyMetric>,
+) {
+    val metrics = remember(item, visibleMetrics) {
+        buildLatestMeasurementMetrics(item, visibleMetrics)
     }
 
     FlowRow(
@@ -273,6 +286,7 @@ private fun LatestMeasurementGrid(item: MeasurementListItemUiModel) {
 @Composable
 private fun MeasurementTable(
     items: List<MeasurementListItemUiModel>,
+    visibleMetrics: List<BodyMetric>,
     onRowClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -300,7 +314,7 @@ private fun MeasurementTable(
                     .width(TABLE_CELL_WIDTH)
                     .padding(horizontal = 8.dp),
             )
-            measurementTableMetricColumns.forEach { column ->
+            visibleMetrics.forEach { column ->
                 Text(
                     text = column.label(),
                     style = MaterialTheme.typography.labelMedium,
@@ -336,7 +350,7 @@ private fun MeasurementTable(
                         .padding(horizontal = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                measurementTableMetricColumns.forEach { column ->
+                visibleMetrics.forEach { column ->
                     Text(
                         text = column.formattedValue(item),
                         modifier = Modifier
@@ -360,16 +374,17 @@ private data class MetricDisplayItem(
 private val TABLE_CELL_WIDTH = 136.dp
 private val MEASUREMENT_LIST_FAB_CLEARANCE = 96.dp
 
-private fun buildLatestMeasurementMetrics(item: MeasurementListItemUiModel): List<MetricDisplayItem> {
-    return BodyMetric.entries.map { metric ->
+private fun buildLatestMeasurementMetrics(
+    item: MeasurementListItemUiModel,
+    visibleMetrics: List<BodyMetric>,
+): List<MetricDisplayItem> {
+    return visibleMetrics.map { metric ->
         MetricDisplayItem(
             label = metric.label(),
             value = metric.formattedValue(item),
         )
     }
 }
-
-private val measurementTableMetricColumns: List<BodyMetric> = BodyMetric.entries
 
 private fun BodyMetric.formattedValue(item: MeasurementListItemUiModel): String {
     val value = valueSelector(item.measurement, item.derivedMetrics)

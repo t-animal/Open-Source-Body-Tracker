@@ -34,3 +34,30 @@ fun defaultSettingsState(): SettingsState {
         visibleInTable = visibleByDefault,
     )
 }
+
+fun SettingsState.visibleInAnalysisOrdered(
+    allMetrics: List<BodyMetric> = BodyMetric.entries,
+): List<BodyMetric> = visibleMetricSetOrdered(visibleInAnalysis, allMetrics)
+
+fun SettingsState.visibleInTableOrdered(
+    allMetrics: List<BodyMetric> = BodyMetric.entries,
+): List<BodyMetric> = visibleMetricSetOrdered(visibleInTable, allMetrics)
+
+private fun SettingsState.visibleMetricSetOrdered(
+    configuredVisibleMetrics: Set<BodyMetric>,
+    allMetrics: List<BodyMetric>,
+): List<BodyMetric> {
+    val activeVisibleMetrics = configuredVisibleMetrics
+        .asSequence()
+        .filter(::isActiveMetric)
+        .toSet()
+
+    return allMetrics.filter { it in activeVisibleMetrics }
+}
+
+private fun SettingsState.isActiveMetric(metric: BodyMetric): Boolean = when (metric) {
+    DerivedBodyMetric.Bmi -> bmiEnabled
+    DerivedBodyMetric.NavyBodyFatPercent -> navyBodyFatEnabled
+    DerivedBodyMetric.SkinfoldBodyFatPercent -> skinfoldBodyFatEnabled
+    else -> true
+}

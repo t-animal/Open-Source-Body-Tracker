@@ -124,6 +124,7 @@ fun BodyTrackerNavHost(
                 MeasurementListRoute(
                     measurementRepository = measurementRepository,
                     profileRepository = profileRepository,
+                    settingsRepository = settingsRepository,
                     calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
                     onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
                     onAdd = { navController.navigate(Routes.MeasurementAdd) },
@@ -157,6 +158,7 @@ fun BodyTrackerNavHost(
                     MeasurementListFullRoute(
                         measurementRepository = measurementRepository,
                         profileRepository = profileRepository,
+                        settingsRepository = settingsRepository,
                         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
                         onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
                     )
@@ -183,6 +185,7 @@ fun BodyTrackerNavHost(
                 AnalysisRoute(
                     measurementRepository = measurementRepository,
                     profileRepository = profileRepository,
+                    settingsRepository = settingsRepository,
                     calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
                     contentPadding = contentPadding,
                 )
@@ -250,6 +253,7 @@ fun BodyTrackerNavHost(
             MeasurementEditRoute(
                 repository = measurementRepository,
                 profileRepository = profileRepository,
+                settingsRepository = settingsRepository,
                 measurementId = null,
                 onFinished = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() },
@@ -273,6 +277,7 @@ fun BodyTrackerNavHost(
             MeasurementEditRoute(
                 repository = measurementRepository,
                 profileRepository = profileRepository,
+                settingsRepository = settingsRepository,
                 measurementId = id,
                 onFinished = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() },

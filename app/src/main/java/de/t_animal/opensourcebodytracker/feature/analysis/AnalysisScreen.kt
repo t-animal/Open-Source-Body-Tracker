@@ -58,6 +58,7 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.Instant
@@ -69,6 +70,7 @@ import java.util.Locale
 fun AnalysisRoute(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
+    settingsRepository: SettingsRepository,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     contentPadding: PaddingValues,
 ) {
@@ -76,6 +78,7 @@ fun AnalysisRoute(
         factory = AnalysisViewModelFactory(
             measurementRepository = measurementRepository,
             profileRepository = profileRepository,
+            settingsRepository = settingsRepository,
             calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         ),
     )

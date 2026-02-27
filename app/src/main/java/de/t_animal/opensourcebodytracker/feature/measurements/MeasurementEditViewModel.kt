@@ -4,23 +4,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
 import java.text.DecimalFormatSymbols
 import java.time.Instant
 import java.time.ZoneId
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class MeasurementEditUiState(
     val measurementId: Long? = null,
     val sex: Sex? = null,
+    val enabledMeasurements: Set<MeasuredBodyMetric> = MeasuredBodyMetric.entries.toSet(),
     val dateEpochMillis: Long? = null,
     val dateText: String = "",
     val weightKgText: String = "",
@@ -44,6 +49,8 @@ sealed interface MeasurementEditEvent {
 class MeasurementEditViewModel(
     private val repository: MeasurementRepository,
     private val profileRepository: ProfileRepository,
+    private val settingsRepository: SettingsRepository,
+    private val dependencyResolver: DerivedMetricsDependencyResolver,
     private val measurementId: Long?,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MeasurementEditUiState(measurementId = measurementId))
@@ -54,8 +61,21 @@ class MeasurementEditViewModel(
 
     init {
         viewModelScope.launch {
-            val profile = profileRepository.profileFlow.first()
-            update { it.copy(sex = profile?.sex) }
+            combine(profileRepository.profileFlow, settingsRepository.settingsFlow) { profile, settings ->
+                val requiredMeasurements = profile
+                    ?.let { dependencyResolver.resolve(settings.enabledAnalysisMethods(), it).requiredMeasurements }
+                    .orEmpty()
+                val effectiveEnabledMeasurements = settings.enabledMeasurements + requiredMeasurements
+
+                profile?.sex to effectiveEnabledMeasurements
+            }.collect { (sex, enabledMeasurements) ->
+                update {
+                    it.copy(
+                        sex = sex,
+                        enabledMeasurements = enabledMeasurements,
+                    )
+                }
+            }
         }
 
         if (measurementId != null) {
@@ -134,6 +154,7 @@ class MeasurementEditViewModel(
 
     fun onSaveClicked() {
         val current = _uiState.value
+        val enabledMeasurements = current.enabledMeasurements
         val date = current.dateEpochMillis ?: System.currentTimeMillis()
 
         val weight = parseDoubleOrNull(current.weightKgText)
@@ -179,22 +200,26 @@ class MeasurementEditViewModel(
         }
 
         viewModelScope.launch {
+            fun ifEnabled(metric: MeasuredBodyMetric, value: Double?): Double? {
+                return if (metric in enabledMeasurements) value else null
+            }
+
             if (measurementId == null) {
                 repository.insert(
                     BodyMeasurement(
                         id = 0,
                         dateEpochMillis = date,
-                        weightKg = weight,
-                        neckCircumferenceCm = neck,
-                        chestCircumferenceCm = chest,
-                        waistCircumferenceCm = waist,
-                        abdomenCircumferenceCm = abdomen,
-                        hipCircumferenceCm = hip,
-                        chestSkinfoldMm = chestSkinfold,
-                        abdomenSkinfoldMm = abdomenSkinfold,
-                        thighSkinfoldMm = thighSkinfold,
-                        tricepsSkinfoldMm = tricepsSkinfold,
-                        suprailiacSkinfoldMm = suprailiacSkinfold,
+                        weightKg = ifEnabled(MeasuredBodyMetric.Weight, weight),
+                        neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference, neck),
+                        chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference, chest),
+                        waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference, waist),
+                        abdomenCircumferenceCm = ifEnabled(MeasuredBodyMetric.AbdomenCircumference, abdomen),
+                        hipCircumferenceCm = ifEnabled(MeasuredBodyMetric.HipCircumference, hip),
+                        chestSkinfoldMm = ifEnabled(MeasuredBodyMetric.ChestSkinfold, chestSkinfold),
+                        abdomenSkinfoldMm = ifEnabled(MeasuredBodyMetric.AbdomenSkinfold, abdomenSkinfold),
+                        thighSkinfoldMm = ifEnabled(MeasuredBodyMetric.ThighSkinfold, thighSkinfold),
+                        tricepsSkinfoldMm = ifEnabled(MeasuredBodyMetric.TricepsSkinfold, tricepsSkinfold),
+                        suprailiacSkinfoldMm = ifEnabled(MeasuredBodyMetric.SuprailiacSkinfold, suprailiacSkinfold),
                     ),
                 )
             } else {
@@ -202,17 +227,17 @@ class MeasurementEditViewModel(
                     BodyMeasurement(
                         id = measurementId,
                         dateEpochMillis = date,
-                        weightKg = weight,
-                        neckCircumferenceCm = neck,
-                        chestCircumferenceCm = chest,
-                        waistCircumferenceCm = waist,
-                        abdomenCircumferenceCm = abdomen,
-                        hipCircumferenceCm = hip,
-                        chestSkinfoldMm = chestSkinfold,
-                        abdomenSkinfoldMm = abdomenSkinfold,
-                        thighSkinfoldMm = thighSkinfold,
-                        tricepsSkinfoldMm = tricepsSkinfold,
-                        suprailiacSkinfoldMm = suprailiacSkinfold,
+                        weightKg = ifEnabled(MeasuredBodyMetric.Weight, weight),
+                        neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference, neck),
+                        chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference, chest),
+                        waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference, waist),
+                        abdomenCircumferenceCm = ifEnabled(MeasuredBodyMetric.AbdomenCircumference, abdomen),
+                        hipCircumferenceCm = ifEnabled(MeasuredBodyMetric.HipCircumference, hip),
+                        chestSkinfoldMm = ifEnabled(MeasuredBodyMetric.ChestSkinfold, chestSkinfold),
+                        abdomenSkinfoldMm = ifEnabled(MeasuredBodyMetric.AbdomenSkinfold, abdomenSkinfold),
+                        thighSkinfoldMm = ifEnabled(MeasuredBodyMetric.ThighSkinfold, thighSkinfold),
+                        tricepsSkinfoldMm = ifEnabled(MeasuredBodyMetric.TricepsSkinfold, tricepsSkinfold),
+                        suprailiacSkinfoldMm = ifEnabled(MeasuredBodyMetric.SuprailiacSkinfold, suprailiacSkinfold),
                     ),
                 )
             }
@@ -228,6 +253,8 @@ class MeasurementEditViewModel(
 class MeasurementEditViewModelFactory(
     private val repository: MeasurementRepository,
     private val profileRepository: ProfileRepository,
+    private val settingsRepository: SettingsRepository,
+    private val dependencyResolver: DerivedMetricsDependencyResolver,
     private val measurementId: Long?,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
@@ -235,6 +262,8 @@ class MeasurementEditViewModelFactory(
         return MeasurementEditViewModel(
             repository = repository,
             profileRepository = profileRepository,
+            settingsRepository = settingsRepository,
+            dependencyResolver = dependencyResolver,
             measurementId = measurementId,
         ) as T
     }

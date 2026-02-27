@@ -33,9 +33,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
 import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -44,6 +47,7 @@ import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 fun MeasurementEditRoute(
     repository: MeasurementRepository,
     profileRepository: ProfileRepository,
+    settingsRepository: SettingsRepository,
     measurementId: Long?,
     onFinished: () -> Unit,
     onCancel: () -> Unit,
@@ -52,6 +56,8 @@ fun MeasurementEditRoute(
         factory = MeasurementEditViewModelFactory(
             repository = repository,
             profileRepository = profileRepository,
+            settingsRepository = settingsRepository,
+            dependencyResolver = DerivedMetricsDependencyResolver(),
             measurementId = measurementId,
         ),
     )
@@ -103,6 +109,7 @@ fun MeasurementEditScreen(
     onSaveClicked: () -> Unit,
     onBackClicked: () -> Unit,
 ) {
+    val enabledMeasurements = state.enabledMeasurements
     val title = if (state.measurementId == null) "Add Measurement" else "Edit Measurement"
     var showDiscardDialog by remember { mutableStateOf(false) }
 
@@ -171,117 +178,121 @@ fun MeasurementEditScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            DecimalNumberInputField(
+            MetricInputField(
+                isVisible = MeasuredBodyMetric.Weight in enabledMeasurements,
                 label = "Weight (kg)",
                 value = state.weightKgText,
                 onValueChange = onWeightChanged,
-                modifier = Modifier.fillMaxWidth(),
                 imeAction = ImeAction.Next,
             )
-            Spacer(modifier = Modifier.height(8.dp))
 
-            DecimalNumberInputField(
+            MetricInputField(
+                isVisible = MeasuredBodyMetric.NeckCircumference in enabledMeasurements,
                 label = "Neck (cm)",
                 value = state.neckCmText,
                 onValueChange = onNeckChanged,
-                modifier = Modifier.fillMaxWidth(),
                 imeAction = ImeAction.Next,
             )
-            Spacer(modifier = Modifier.height(8.dp))
 
-            DecimalNumberInputField(
+            MetricInputField(
+                isVisible = MeasuredBodyMetric.ChestCircumference in enabledMeasurements,
                 label = "Chest (cm)",
                 value = state.chestCmText,
                 onValueChange = onChestChanged,
-                modifier = Modifier.fillMaxWidth(),
                 imeAction = ImeAction.Next,
             )
-            Spacer(modifier = Modifier.height(8.dp))
 
-            DecimalNumberInputField(
+            MetricInputField(
+                isVisible = MeasuredBodyMetric.WaistCircumference in enabledMeasurements,
                 label = "Waist (cm)",
                 value = state.waistCmText,
                 onValueChange = onWaistChanged,
-                modifier = Modifier.fillMaxWidth(),
                 imeAction = ImeAction.Next,
             )
-            Spacer(modifier = Modifier.height(8.dp))
 
-            DecimalNumberInputField(
+            MetricInputField(
+                isVisible = MeasuredBodyMetric.AbdomenCircumference in enabledMeasurements,
                 label = "Abdomen (cm)",
                 value = state.abdomenCmText,
                 onValueChange = onAbdomenChanged,
-                modifier = Modifier.fillMaxWidth(),
                 imeAction = ImeAction.Next,
             )
-            Spacer(modifier = Modifier.height(8.dp))
 
-            DecimalNumberInputField(
+            MetricInputField(
+                isVisible = MeasuredBodyMetric.HipCircumference in enabledMeasurements,
                 label = "Hip (cm)",
                 value = state.hipCmText,
                 onValueChange = onHipChanged,
-                modifier = Modifier.fillMaxWidth(),
                 imeAction = ImeAction.Next,
+                addBottomSpacing = false,
             )
 
             when (state.sex) {
                 Sex.Male -> {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    val maleSkinfoldsVisible = MeasuredBodyMetric.ChestSkinfold in enabledMeasurements ||
+                        MeasuredBodyMetric.AbdomenSkinfold in enabledMeasurements ||
+                        MeasuredBodyMetric.ThighSkinfold in enabledMeasurements
+                    if (maleSkinfoldsVisible) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
 
-                    DecimalNumberInputField(
+                    MetricInputField(
+                        isVisible = MeasuredBodyMetric.ChestSkinfold in enabledMeasurements,
                         label = "Chest Skinfold (mm)",
                         value = state.chestSkinfoldMmText,
                         onValueChange = onChestSkinfoldChanged,
-                        modifier = Modifier.fillMaxWidth(),
                         imeAction = ImeAction.Next,
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
 
-                    DecimalNumberInputField(
+                    MetricInputField(
+                        isVisible = MeasuredBodyMetric.AbdomenSkinfold in enabledMeasurements,
                         label = "Abdomen Skinfold (mm)",
                         value = state.abdomenSkinfoldMmText,
                         onValueChange = onAbdomenSkinfoldChanged,
-                        modifier = Modifier.fillMaxWidth(),
                         imeAction = ImeAction.Next,
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
 
-                    DecimalNumberInputField(
+                    MetricInputField(
+                        isVisible = MeasuredBodyMetric.ThighSkinfold in enabledMeasurements,
                         label = "Thigh Skinfold (mm)",
                         value = state.thighSkinfoldMmText,
                         onValueChange = onThighSkinfoldChanged,
-                        modifier = Modifier.fillMaxWidth(),
                         imeAction = ImeAction.Done,
+                        addBottomSpacing = false,
                     )
                 }
 
                 Sex.Female -> {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    val femaleSkinfoldsVisible = MeasuredBodyMetric.TricepsSkinfold in enabledMeasurements ||
+                        MeasuredBodyMetric.SuprailiacSkinfold in enabledMeasurements ||
+                        MeasuredBodyMetric.ThighSkinfold in enabledMeasurements
+                    if (femaleSkinfoldsVisible) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
 
-                    DecimalNumberInputField(
+                    MetricInputField(
+                        isVisible = MeasuredBodyMetric.TricepsSkinfold in enabledMeasurements,
                         label = "Triceps Skinfold (mm)",
                         value = state.tricepsSkinfoldMmText,
                         onValueChange = onTricepsSkinfoldChanged,
-                        modifier = Modifier.fillMaxWidth(),
                         imeAction = ImeAction.Next,
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
 
-                    DecimalNumberInputField(
+                    MetricInputField(
+                        isVisible = MeasuredBodyMetric.SuprailiacSkinfold in enabledMeasurements,
                         label = "Suprailiac Skinfold (mm)",
                         value = state.suprailiacSkinfoldMmText,
                         onValueChange = onSuprailiacSkinfoldChanged,
-                        modifier = Modifier.fillMaxWidth(),
                         imeAction = ImeAction.Next,
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
 
-                    DecimalNumberInputField(
+                    MetricInputField(
+                        isVisible = MeasuredBodyMetric.ThighSkinfold in enabledMeasurements,
                         label = "Thigh Skinfold (mm)",
                         value = state.thighSkinfoldMmText,
                         onValueChange = onThighSkinfoldChanged,
-                        modifier = Modifier.fillMaxWidth(),
                         imeAction = ImeAction.Done,
+                        addBottomSpacing = false,
                     )
                 }
 
@@ -321,6 +332,32 @@ fun MeasurementEditScreen(
                 }
             },
         )
+    }
+}
+
+@Composable
+private fun MetricInputField(
+    isVisible: Boolean,
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    imeAction: ImeAction,
+    addBottomSpacing: Boolean = true,
+) {
+    if (!isVisible) {
+        return
+    }
+
+    DecimalNumberInputField(
+        label = label,
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier.fillMaxWidth(),
+        imeAction = imeAction,
+    )
+
+    if (addBottomSpacing) {
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 

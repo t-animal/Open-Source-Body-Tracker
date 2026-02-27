@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.core.model.visibleInAnalysisOrdered
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,6 +19,7 @@ import java.time.ZoneId
 class AnalysisViewModel(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
+    settingsRepository: SettingsRepository,
     private val calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     private val nowProvider: () -> Instant = { Instant.now() },
     private val zoneIdProvider: () -> ZoneId = { ZoneId.systemDefault() },
@@ -26,14 +29,17 @@ class AnalysisViewModel(
     val uiState: StateFlow<AnalysisUiState> = combine(
         measurementRepository.observeAll(),
         profileRepository.profileFlow,
+        settingsRepository.settingsFlow,
         selectedDuration,
-    ) { measurements, profile, duration ->
+    ) { measurements, profile, settings, duration ->
         val withDerived = measurements.map { measurement ->
             MeasurementWithDerived(
                 measurement = measurement,
                 derivedMetrics = calculateMeasurementDerivedMetrics(profile, measurement),
             )
         }
+
+        val orderedVisibleInAnalysisMetrics = settings.visibleInAnalysisOrdered()
 
         val filteredItems = filterByDuration(
             items = withDerived,
@@ -44,7 +50,7 @@ class AnalysisViewModel(
 
         AnalysisUiState(
             selectedDuration = duration,
-            metricCharts = buildMetricCharts(filteredItems),
+            metricCharts = buildMetricCharts(filteredItems, orderedVisibleInAnalysisMetrics),
             isLoading = false,
         )
     }.stateIn(
@@ -61,6 +67,7 @@ class AnalysisViewModel(
 class AnalysisViewModelFactory(
     private val measurementRepository: MeasurementRepository,
     private val profileRepository: ProfileRepository,
+    private val settingsRepository: SettingsRepository,
     private val calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
@@ -68,6 +75,7 @@ class AnalysisViewModelFactory(
         return AnalysisViewModel(
             measurementRepository = measurementRepository,
             profileRepository = profileRepository,
+            settingsRepository = settingsRepository,
             calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         ) as T
     }
