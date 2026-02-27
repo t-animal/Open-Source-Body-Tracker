@@ -4,8 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.Sex
+import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -15,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class ProfileUiState(
@@ -31,6 +36,8 @@ sealed interface ProfileEvent {
 
 class ProfileViewModel(
     private val repository: ProfileRepository,
+    private val settingsRepository: SettingsRepository,
+    private val dependencyResolver: DerivedMetricsDependencyResolver,
     private val mode: ProfileMode,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileUiState(mode = mode))
@@ -91,25 +98,59 @@ class ProfileViewModel(
         }
 
         viewModelScope.launch {
-            repository.saveProfile(
-                UserProfile(
-                    sex = sex,
-                    dateOfBirthEpochMillis = localDateToEpochMillis(date),
-                    heightCm = height,
-                ),
+            val profile = UserProfile(
+                sex = sex,
+                dateOfBirthEpochMillis = localDateToEpochMillis(date),
+                heightCm = height,
             )
+
+            repository.saveProfile(
+                profile,
+            )
+
+            val currentSettings = settingsRepository.settingsFlow.first()
+            val effectiveSettings = ensureRequiredMeasurementsEnabled(currentSettings, profile)
+            if (effectiveSettings != currentSettings) {
+                settingsRepository.saveSettings(effectiveSettings)
+            }
+
             _events.emit(ProfileEvent.Saved)
         }
+    }
+
+    private fun ensureRequiredMeasurementsEnabled(
+        settings: SettingsState,
+        profile: UserProfile,
+    ): SettingsState {
+        val requiredMeasurements = dependencyResolver
+            .resolve(settings.enabledAnalysisMethods(), profile)
+            .requiredMeasurements
+
+        val missingRequiredMeasurements = requiredMeasurements - settings.enabledMeasurements
+        if (missingRequiredMeasurements.isEmpty()) {
+            return settings
+        }
+
+        return settings.copy(
+            enabledMeasurements = settings.enabledMeasurements + missingRequiredMeasurements,
+        )
     }
 }
 
 class ProfileViewModelFactory(
     private val repository: ProfileRepository,
+    private val settingsRepository: SettingsRepository,
+    private val dependencyResolver: DerivedMetricsDependencyResolver,
     private val mode: ProfileMode,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ProfileViewModel(repository = repository, mode = mode) as T
+        return ProfileViewModel(
+            repository = repository,
+            settingsRepository = settingsRepository,
+            dependencyResolver = dependencyResolver,
+            mode = mode,
+        ) as T
     }
 }
 
