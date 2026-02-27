@@ -4,7 +4,8 @@ An Android application for tracking personal body measurements over time.
 The app enables users to record key anthropometric data, monitor changes, and calculate derived health indicators such as BMI and body composition ratios.
 It is translated into English and German.
 
-The project is built using **MVVM architecture**, **Jetpack Compose** for the UI layer and **Room** for storage.
+The project is built using **MVVM architecture**, **Jetpack Compose** for the UI layer,
+**Room** for measurement storage and **DataStore** for profile/settings persistence.
 
 This is also a test for AI-driven development, so don't expect much. It might kill your cat or whatever.
 
@@ -19,6 +20,7 @@ This is also a test for AI-driven development, so don't expect much. It might ki
 * Calculate derived health metrics
 * Visualize historical trends
 * Compare progress visually with photos
+* Configure enabled analyses, collected measurements, and display visibility
 * Extend functionality incrementally through clearly defined development phases
 
 ## Implementation hints
@@ -186,6 +188,20 @@ This phase introduces visual data analysis and statistical summaries.
 * Efficient data querying
 * Smooth Compose-based chart rendering
 
+#### Phase 4.4 Settings-driven metric configuration
+
+Implemented:
+
+* Analysis method switches (BMI, Navy body fat, Skinfold body fat)
+* Measurement-collection switches with required-measurement locking
+* Display placement per metric (`Hidden`, `Only in Table`, `Only in Analysis`, `In both`)
+* Visibility applied to:
+  * Analysis charts
+  * Latest measurement card
+  * Table preview + full measurement list
+  * Add/Edit measurement form fields
+* Profile-save interaction: when sex changes, newly required measurements are auto-enabled additively (never auto-disabled)
+
 ### Subphases
 
 #### Phase 4.1 Main Navigation Layout
@@ -201,6 +217,8 @@ See [MEASUREMENT-SCREEN.md](documents/MEASUREMENT-SCREEN.md)
 See [ANALYSIS.md](documents/ANALYSIS.md)
 
 Status: Implemented (duration-based filtering + interactive line charts).
+
+Caveat: The ratios (e.g. waist to hip) are also analyses and need to be added
 
 ---
 
@@ -286,5 +304,11 @@ License to be defined.
 
 # 📌 Status
 
-🚧 In Active Development – Phase 1, 2 and 3 (JP 3-site skinfold) implemented
+🚧 In Active Development – Phase 1, 2, 3 and 4 implemented
 If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
+
+
+# Ideas for the future
+
+* Allow reordering of measurements for table and analysis
+* Add config button right next to analysis and table to show/hide measurements

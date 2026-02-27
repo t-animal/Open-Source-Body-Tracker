@@ -47,7 +47,15 @@ Behavior:
 
 ## Metrics Rendered
 
-The screen currently renders 17 metric cards, each with one line chart (or empty state):
+The screen renders metric cards from the shared metric registry
+(`BodyMetric.entries`) filtered by settings visibility.
+
+Cards are shown for metrics that are:
+
+- enabled in `SettingsState.visibleInAnalysis`
+- active for current analysis-method switches (e.g. body-fat derived metrics are hidden when their method is disabled)
+
+Possible metric catalog entries:
 
 - Weight
 - Neck
@@ -67,7 +75,7 @@ The screen currently renders 17 metric cards, each with one line chart (or empty
 - Waist–Height Ratio
 - Hip–Height Ratio
 
-Metric definitions are centralized in `AnalysisModels.kt`.
+Metric definitions are centralized in `core/model/MetricRegistry.kt`.
 
 ---
 
@@ -77,6 +85,7 @@ Metric definitions are centralized in `AnalysisModels.kt`.
 
 - all measurements (`MeasurementRepository.observeAll()`)
 - current profile (`ProfileRepository.profileFlow`)
+- settings (`SettingsRepository.settingsFlow`)
 - selected duration (`MutableStateFlow`)
 
 For each measurement, derived metrics are computed with `CalculateMeasurementDerivedMetricsUseCase`.
@@ -84,7 +93,7 @@ Then `AnalysisTransform`:
 
 1. filters by selected duration
 2. sorts points chronologically
-3. builds one chart model per metric
+3. builds one chart model per visible metric
 4. computes Y-axis range with padding
 
 ---
@@ -126,6 +135,9 @@ If a metric has no datapoints in the selected duration, the metric card is shown
 - chart count == metric definition count
 - y-axis padding behavior (flat + non-flat)
 - chronological point ordering
+
+`BodyMetric.entries` ordering is used by tests and UI mapping to keep
+chart order stable across Analysis and measurement tables.
 
 ---
 

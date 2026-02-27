@@ -52,11 +52,19 @@ If a profile exists while the current route is onboarding, navigation automatica
 ### Secondary routes
 
 - `profile`: editable profile form.
-- `settings`: placeholder screen.
+- `settings`: implemented settings configuration screen.
 - `measurement_add`: add measurement flow.
 - `measurement_edit/{id}`: edit measurement flow.
 - `measurement_list_all`: full measurement table screen with back button.
 - `fake_data_generator` (debug only): fake data screen.
+
+`BodyTrackerNavHost` now passes `SettingsRepository` into:
+
+- `ProfileRoute`
+- `SettingsRoute`
+- `MeasurementListRoute` / `MeasurementListFullRoute`
+- `MeasurementEditRoute`
+- `AnalysisRoute`
 
 ---
 
@@ -74,7 +82,7 @@ If a profile exists while the current route is onboarding, navigation automatica
 - Analysis: implemented
 - Photos: placeholder
 - Profile: implemented
-- Settings: placeholder
+- Settings: implemented
 
 ---
 
@@ -111,7 +119,7 @@ Each main screen contains a top navigation bar with:
 | Menu Item | Destination                                   |
 | --------- | --------------------------------------------- |
 | Profile   | Profile screen                                |
-| Settings  | Settings screen (currently empty placeholder) |
+| Settings  | Settings configuration screen                 |
 
 ---
 
@@ -122,14 +130,14 @@ The bottom navigation contains three entries:
 | Label | Meaning      | Destination                         |
 | ----- | ------------ | ----------------------------------- |
 | M     | Measurements | Measurement list screen             |
-| A     | Analysis     | Analysis screen (empty placeholder) |
+| A     | Analysis     | Analysis screen                     |
 | P     | Photos       | Photos screen (empty placeholder)   |
 
 Icons will later replace the letters.
 
 ---
 
-# 📱 Screens (Phase 3.1 Scope)
+# 📱 Screens (Current Scope)
 
 ## 1️⃣ Measurements Screen (Default Start Destination)
 
@@ -140,12 +148,12 @@ Icons will later replace the letters.
 
 ---
 
-## 2️⃣ Analysis Screen (Placeholder)
+## 2️⃣ Analysis Screen
 
 * Top bar: Title = "Analysis"
 * Overflow menu available
 * Bottom navigation visible
-* Content: Empty placeholder layout
+* Content: duration selector + chart cards based on settings visibility
 
 ---
 
@@ -174,12 +182,16 @@ Editable form layout.
 
 ---
 
-## 5️⃣ Settings Screen (Placeholder)
+## 5️⃣ Settings Screen
 
 * Accessible via overflow menu. 
 * Same top bar layout
 * No bottom navigation (optional design decision — recommended: no bottom nav)
-* Empty screen (placeholder)
+* Configurable sections:
+
+   * Analysis Methods
+   * Measurement Collection
+   * Display Configuration
 
 ---
 
