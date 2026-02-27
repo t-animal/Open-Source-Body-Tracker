@@ -44,6 +44,8 @@ This section controls which body fat estimation methods are active.
 * ☐ BMI
 * ☐ Navy Body Fat %
 * ☐ Skinfold Body Fat %
+* ☐ Waist–Hip Ratio
+* ☐ Waist–Height Ratio
 
 Each method can be enabled or disabled independently.
 
@@ -87,6 +89,29 @@ These measurements:
 
 * Must be collected
 * Cannot be disabled while Skinfold is active
+
+### If Waist–Hip Ratio is ENABLED:
+
+Required measurements:
+
+* Waist circumference
+* Hip circumference
+
+These measurements:
+
+* Must be collected
+* Cannot be disabled while Waist–Hip Ratio is active
+
+### If Waist–Height Ratio is ENABLED:
+
+Required measurements:
+
+* Waist circumference
+
+These measurements:
+
+* Must be collected
+* Cannot be disabled while Waist–Height Ratio is active
 
 ---
 
@@ -306,6 +331,8 @@ data class SettingsState(
       val bmiEnabled: Boolean,
     val navyBodyFatEnabled: Boolean,
     val skinfoldBodyFatEnabled: Boolean,
+      val waistHipRatioEnabled: Boolean,
+      val waistHeightRatioEnabled: Boolean,
 
       val enabledMeasurements: Set<MeasuredBodyMetric>,
 
@@ -349,6 +376,8 @@ visible metrics in Analysis/Table.
 
 ✔ Enable/Disable Navy Body Fat
 ✔ Enable/Disable Skinfold Body Fat
+✔ Enable/Disable Waist–Hip Ratio
+✔ Enable/Disable Waist–Height Ratio
 ✔ Automatically lock required measurements
 ✔ Allow optional measurements to be toggled freely
 ✔ Separate display visibility controls

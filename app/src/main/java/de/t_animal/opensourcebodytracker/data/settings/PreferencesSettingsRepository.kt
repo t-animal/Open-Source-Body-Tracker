@@ -25,6 +25,8 @@ class PreferencesSettingsRepository(
         val bmiEnabled = booleanPreferencesKey("bmiEnabled")
         val navyBodyFatEnabled = booleanPreferencesKey("navyBodyFatEnabled")
         val skinfoldBodyFatEnabled = booleanPreferencesKey("skinfoldBodyFatEnabled")
+        val waistHipRatioEnabled = booleanPreferencesKey("waistHipRatioEnabled")
+        val waistHeightRatioEnabled = booleanPreferencesKey("waistHeightRatioEnabled")
         val enabledMeasurements = stringSetPreferencesKey("enabledMeasurements")
         val visibleInAnalysis = stringSetPreferencesKey("visibleInAnalysis")
         val visibleInTable = stringSetPreferencesKey("visibleInTable")
@@ -36,6 +38,8 @@ class PreferencesSettingsRepository(
             bmiEnabled = prefs[Keys.bmiEnabled] ?: defaults.bmiEnabled,
             navyBodyFatEnabled = prefs[Keys.navyBodyFatEnabled] ?: defaults.navyBodyFatEnabled,
             skinfoldBodyFatEnabled = prefs[Keys.skinfoldBodyFatEnabled] ?: defaults.skinfoldBodyFatEnabled,
+            waistHipRatioEnabled = prefs[Keys.waistHipRatioEnabled] ?: defaults.waistHipRatioEnabled,
+            waistHeightRatioEnabled = prefs[Keys.waistHeightRatioEnabled] ?: defaults.waistHeightRatioEnabled,
             enabledMeasurements = parseEnumSet(
                 raw = prefs[Keys.enabledMeasurements],
                 values = MeasuredBodyMetric.entries,
@@ -57,6 +61,8 @@ class PreferencesSettingsRepository(
             prefs[Keys.bmiEnabled] = settings.bmiEnabled
             prefs[Keys.navyBodyFatEnabled] = settings.navyBodyFatEnabled
             prefs[Keys.skinfoldBodyFatEnabled] = settings.skinfoldBodyFatEnabled
+            prefs[Keys.waistHipRatioEnabled] = settings.waistHipRatioEnabled
+            prefs[Keys.waistHeightRatioEnabled] = settings.waistHeightRatioEnabled
             prefs[Keys.enabledMeasurements] = settings.enabledMeasurements.mapTo(mutableSetOf()) { it.name }
             prefs[Keys.visibleInAnalysis] = settings.visibleInAnalysis.mapTo(mutableSetOf()) { it.storageName() }
             prefs[Keys.visibleInTable] = settings.visibleInTable.mapTo(mutableSetOf()) { it.storageName() }
@@ -74,12 +80,9 @@ private fun parseBodyMetricSet(
 
     val measuredByStorageName = MeasuredBodyMetric.entries.associateBy { it.storageName() }
     val derivedByStorageName = DerivedBodyMetric.entries.associateBy { it.storageName() }
-    val parsed = raw.mapNotNull { token ->
-        measuredByStorageName[token]
-            ?: derivedByStorageName[token]
+    return raw.mapNotNull { token ->
+        measuredByStorageName[token] ?: derivedByStorageName[token]
     }.toSet()
-
-    return if (parsed.isEmpty()) fallback else parsed
 }
 
 private fun BodyMetric.storageName(): String = this.javaClass.simpleName + ":$name"

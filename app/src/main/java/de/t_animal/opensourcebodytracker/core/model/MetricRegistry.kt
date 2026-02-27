@@ -140,10 +140,4 @@ enum class DerivedBodyMetric(
         unit = BodyMetricUnit.Unitless,
         valueSelector = { _, derived -> derived.waistHeightRatio },
     ),
-    HipHeightRatio(
-        id = "hip_height_ratio",
-        metricType = BodyMetricType.AnalysisResult,
-        unit = BodyMetricUnit.Unitless,
-        valueSelector = { _, derived -> derived.hipHeightRatio },
-    ),
 }

@@ -116,23 +116,7 @@ val whtr = waistCm / heightCm
 
 ---
 
-# 5️⃣ Hip–Height Ratio (HHR)
-
-### Formula
-
-```
-HHR = hipCm / heightCm
-```
-
-### Kotlin
-
-```kotlin
-val hhr = hipCm / heightCm
-```
-
----
-
-## 6️⃣ Jackson & Pollock 3-Site Skinfold Method
+## 5️⃣ Jackson & Pollock 3-Site Skinfold Method
 
 This section defines the formulas required to implement the **3-site skinfold body fat estimation** based on the equations developed by Jackson & Pollock.
 

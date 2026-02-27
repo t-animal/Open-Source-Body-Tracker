@@ -134,7 +134,6 @@ In this phase, calculated metrics are introduced.
 * Estimated Body-Fat using Navy Method
 * Waist–Hip Ratio (WHR)
 * Waist–Height Ratio (WHtR)
-* Hip–Height Ratio
 
 These values are calculated dynamically based on:
 
@@ -218,7 +217,7 @@ See [ANALYSIS.md](documents/ANALYSIS.md)
 
 Status: Implemented (duration-based filtering + interactive line charts).
 
-Caveat: The ratios (e.g. waist to hip) are also analyses and need to be added
+Note: Waist–Hip Ratio and Waist–Height Ratio are analysis-method controlled in Settings.
 
 ---
 

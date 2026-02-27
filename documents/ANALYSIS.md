@@ -73,7 +73,6 @@ Possible metric catalog entries:
 - Skinfold Body Fat %
 - Waist–Hip Ratio
 - Waist–Height Ratio
-- Hip–Height Ratio
 
 Metric definitions are centralized in `core/model/MetricRegistry.kt`.
 

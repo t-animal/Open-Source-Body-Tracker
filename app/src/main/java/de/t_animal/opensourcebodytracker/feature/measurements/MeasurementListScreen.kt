@@ -412,7 +412,6 @@ private fun BodyMetric.label(): String = when (this) {
         DerivedBodyMetric.SkinfoldBodyFatPercent -> "Body Fat (Skinfold)"
         DerivedBodyMetric.WaistHipRatio -> "WHR"
         DerivedBodyMetric.WaistHeightRatio -> "WHtR"
-        DerivedBodyMetric.HipHeightRatio -> "HHR"
     }
 
     else -> id
@@ -452,7 +451,6 @@ private fun MeasurementListScreenPreview() {
                         navyBodyFatPercent = 18.3,
                         waistHipRatio = 0.91,
                         waistHeightRatio = 0.5,
-                        hipHeightRatio = 0.55,
                     ),
                 ),
                 previewMeasurements = listOf(

@@ -4,12 +4,16 @@ enum class AnalysisMethod {
     Bmi,
     NavyBodyFat,
     Skinfold3SiteBodyFat,
+    WaistHipRatio,
+    WaistHeightRatio,
 }
 
 data class SettingsState(
     val bmiEnabled: Boolean,
     val navyBodyFatEnabled: Boolean,
     val skinfoldBodyFatEnabled: Boolean,
+    val waistHipRatioEnabled: Boolean,
+    val waistHeightRatioEnabled: Boolean,
     val enabledMeasurements: Set<MeasuredBodyMetric>,
     val visibleInAnalysis: Set<BodyMetric>,
     val visibleInTable: Set<BodyMetric>,
@@ -22,13 +26,14 @@ fun defaultSettingsState(): SettingsState {
         MeasuredBodyMetric.ThighSkinfold,
         MeasuredBodyMetric.TricepsSkinfold,
         MeasuredBodyMetric.SuprailiacSkinfold,
-        DerivedBodyMetric.HipHeightRatio,
     )
 
     return SettingsState(
         bmiEnabled = true,
         navyBodyFatEnabled = true,
         skinfoldBodyFatEnabled = true,
+        waistHipRatioEnabled = true,
+        waistHeightRatioEnabled = true,
         enabledMeasurements = MeasuredBodyMetric.entries.toSet(),
         visibleInAnalysis = visibleByDefault,
         visibleInTable = visibleByDefault,
@@ -59,5 +64,7 @@ private fun SettingsState.isActiveMetric(metric: BodyMetric): Boolean = when (me
     DerivedBodyMetric.Bmi -> bmiEnabled
     DerivedBodyMetric.NavyBodyFatPercent -> navyBodyFatEnabled
     DerivedBodyMetric.SkinfoldBodyFatPercent -> skinfoldBodyFatEnabled
+    DerivedBodyMetric.WaistHipRatio -> waistHipRatioEnabled
+    DerivedBodyMetric.WaistHeightRatio -> waistHeightRatioEnabled
     else -> true
 }

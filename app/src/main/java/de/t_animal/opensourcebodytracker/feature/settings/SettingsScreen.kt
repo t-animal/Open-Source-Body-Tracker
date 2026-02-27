@@ -73,6 +73,8 @@ fun SettingsRoute(
         onBmiEnabledChanged = vm::onBmiEnabledChanged,
         onNavyBodyFatEnabledChanged = vm::onNavyBodyFatEnabledChanged,
         onSkinfoldBodyFatEnabledChanged = vm::onSkinfoldBodyFatEnabledChanged,
+        onWaistHipRatioEnabledChanged = vm::onWaistHipRatioEnabledChanged,
+        onWaistHeightRatioEnabledChanged = vm::onWaistHeightRatioEnabledChanged,
         onMeasurementEnabledChanged = vm::onMeasurementEnabledChanged,
         onDisplayPlacementChanged = vm::onDisplayPlacementChanged,
     )
@@ -86,6 +88,8 @@ fun SettingsScreen(
     onBmiEnabledChanged: (Boolean) -> Unit,
     onNavyBodyFatEnabledChanged: (Boolean) -> Unit,
     onSkinfoldBodyFatEnabledChanged: (Boolean) -> Unit,
+    onWaistHipRatioEnabledChanged: (Boolean) -> Unit,
+    onWaistHeightRatioEnabledChanged: (Boolean) -> Unit,
     onMeasurementEnabledChanged: (MeasuredBodyMetric, Boolean) -> Unit,
     onDisplayPlacementChanged: (BodyMetric, DisplayPlacement) -> Unit,
 ) {
@@ -119,9 +123,13 @@ fun SettingsScreen(
                 bmiEnabled = state.settings.bmiEnabled,
                 navyBodyFatEnabled = state.settings.navyBodyFatEnabled,
                 skinfoldBodyFatEnabled = state.settings.skinfoldBodyFatEnabled,
+                waistHipRatioEnabled = state.settings.waistHipRatioEnabled,
+                waistHeightRatioEnabled = state.settings.waistHeightRatioEnabled,
                 onBmiEnabledChanged = onBmiEnabledChanged,
                 onNavyBodyFatEnabledChanged = onNavyBodyFatEnabledChanged,
                 onSkinfoldBodyFatEnabledChanged = onSkinfoldBodyFatEnabledChanged,
+                onWaistHipRatioEnabledChanged = onWaistHipRatioEnabledChanged,
+                onWaistHeightRatioEnabledChanged = onWaistHeightRatioEnabledChanged,
             )
         }
 
@@ -156,9 +164,13 @@ private fun AnalysisMethodsSection(
     bmiEnabled: Boolean,
     navyBodyFatEnabled: Boolean,
     skinfoldBodyFatEnabled: Boolean,
+    waistHipRatioEnabled: Boolean,
+    waistHeightRatioEnabled: Boolean,
     onBmiEnabledChanged: (Boolean) -> Unit,
     onNavyBodyFatEnabledChanged: (Boolean) -> Unit,
     onSkinfoldBodyFatEnabledChanged: (Boolean) -> Unit,
+    onWaistHipRatioEnabledChanged: (Boolean) -> Unit,
+    onWaistHeightRatioEnabledChanged: (Boolean) -> Unit,
 ) {
     Card {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -182,6 +194,18 @@ private fun AnalysisMethodsSection(
                 checked = skinfoldBodyFatEnabled,
                 enabled = true,
                 onCheckedChange = onSkinfoldBodyFatEnabledChanged,
+            )
+            CheckRow(
+                label = "Waist–Hip Ratio",
+                checked = waistHipRatioEnabled,
+                enabled = true,
+                onCheckedChange = onWaistHipRatioEnabledChanged,
+            )
+            CheckRow(
+                label = "Waist–Height Ratio",
+                checked = waistHeightRatioEnabled,
+                enabled = true,
+                onCheckedChange = onWaistHeightRatioEnabledChanged,
             )
         }
     }
@@ -226,6 +250,8 @@ private fun DisplayConfigurationSection(
             DerivedBodyMetric.Bmi -> state.settings.bmiEnabled
             DerivedBodyMetric.NavyBodyFatPercent -> state.settings.navyBodyFatEnabled
             DerivedBodyMetric.SkinfoldBodyFatPercent -> state.settings.skinfoldBodyFatEnabled
+            DerivedBodyMetric.WaistHipRatio -> state.settings.waistHipRatioEnabled
+            DerivedBodyMetric.WaistHeightRatio -> state.settings.waistHeightRatioEnabled
             else -> true
         }
     }
@@ -372,7 +398,6 @@ private fun BodyMetric.label(): String = when (this) {
         DerivedBodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
         DerivedBodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
         DerivedBodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
-        DerivedBodyMetric.HipHeightRatio -> "Hip–Height Ratio"
     }
 
     else -> id
@@ -390,6 +415,8 @@ private fun SettingsScreenPreview() {
             onBmiEnabledChanged = {},
             onNavyBodyFatEnabledChanged = {},
             onSkinfoldBodyFatEnabledChanged = {},
+            onWaistHipRatioEnabledChanged = {},
+            onWaistHeightRatioEnabledChanged = {},
             onMeasurementEnabledChanged = { _, _ -> },
             onDisplayPlacementChanged = { _, _ -> },
         )

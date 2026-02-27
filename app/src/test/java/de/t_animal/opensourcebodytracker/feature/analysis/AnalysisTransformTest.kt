@@ -120,7 +120,6 @@ class AnalysisTransformTest {
             skinfold3SiteBodyFatPercent = 18.0,
             waistHipRatio = 0.9,
             waistHeightRatio = 0.5,
-            hipHeightRatio = 0.55,
         )
         return MeasurementWithDerived(measurement = measurement, derivedMetrics = derived)
     }

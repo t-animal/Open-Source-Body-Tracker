@@ -40,6 +40,15 @@ class DerivedMetricsDependencyResolver {
                     add(MeasuredBodyMetric.SuprailiacSkinfold)
                 }
             }
+
+            if (AnalysisMethod.WaistHipRatio in enabledAnalysisMethods) {
+                add(MeasuredBodyMetric.WaistCircumference)
+                add(MeasuredBodyMetric.HipCircumference)
+            }
+
+            if (AnalysisMethod.WaistHeightRatio in enabledAnalysisMethods) {
+                add(MeasuredBodyMetric.WaistCircumference)
+            }
         }
 
         return MeasurementDependencyState(
@@ -57,5 +66,11 @@ fun SettingsState.enabledAnalysisMethods(): Set<AnalysisMethod> = buildSet {
     }
     if (skinfoldBodyFatEnabled) {
         add(AnalysisMethod.Skinfold3SiteBodyFat)
+    }
+    if (waistHipRatioEnabled) {
+        add(AnalysisMethod.WaistHipRatio)
+    }
+    if (waistHeightRatioEnabled) {
+        add(AnalysisMethod.WaistHeightRatio)
     }
 }
