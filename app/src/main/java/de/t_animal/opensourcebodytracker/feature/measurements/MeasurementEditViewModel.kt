@@ -1,5 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -39,6 +40,8 @@ data class MeasurementEditUiState(
     val thighSkinfoldMmText: String = "",
     val tricepsSkinfoldMmText: String = "",
     val suprailiacSkinfoldMmText: String = "",
+    val capturedPhoto: Bitmap? = null,
+    val isPhotoPreviewDialogVisible: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -149,6 +152,30 @@ class MeasurementEditViewModel(
                 dateText = formatDate(epochMillis),
                 errorMessage = null,
             )
+        }
+    }
+
+    fun onPhotoCaptured(photo: Bitmap?) {
+        update {
+            it.copy(
+                capturedPhoto = photo,
+                isPhotoPreviewDialogVisible = false,
+            )
+        }
+    }
+
+    fun onDeletePhotoClicked() {
+        update {
+            it.copy(
+                capturedPhoto = null,
+                isPhotoPreviewDialogVisible = false,
+            )
+        }
+    }
+
+    fun onPhotoPreviewDialogVisibilityChanged(isVisible: Boolean) {
+        update {
+            it.copy(isPhotoPreviewDialogVisible = isVisible)
         }
     }
 

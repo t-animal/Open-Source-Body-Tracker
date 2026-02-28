@@ -1,19 +1,31 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,10 +39,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
@@ -62,6 +80,11 @@ fun MeasurementEditRoute(
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
+    val takePicturePreviewLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview(),
+    ) { photo ->
+        vm.onPhotoCaptured(photo)
+    }
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
@@ -85,6 +108,9 @@ fun MeasurementEditRoute(
         onThighSkinfoldChanged = vm::onThighSkinfoldChanged,
         onTricepsSkinfoldChanged = vm::onTricepsSkinfoldChanged,
         onSuprailiacSkinfoldChanged = vm::onSuprailiacSkinfoldChanged,
+        onTakePhotoClicked = { takePicturePreviewLauncher.launch(null) },
+        onDeletePhotoClicked = vm::onDeletePhotoClicked,
+        onPhotoPreviewDialogVisibilityChanged = vm::onPhotoPreviewDialogVisibilityChanged,
         onSaveClicked = vm::onSaveClicked,
         onBackClicked = onCancel,
     )
@@ -106,6 +132,9 @@ fun MeasurementEditScreen(
     onThighSkinfoldChanged: (String) -> Unit,
     onTricepsSkinfoldChanged: (String) -> Unit,
     onSuprailiacSkinfoldChanged: (String) -> Unit,
+    onTakePhotoClicked: () -> Unit,
+    onDeletePhotoClicked: () -> Unit,
+    onPhotoPreviewDialogVisibilityChanged: (Boolean) -> Unit,
     onSaveClicked: () -> Unit,
     onBackClicked: () -> Unit,
 ) {
@@ -125,7 +154,7 @@ fun MeasurementEditScreen(
         state.thighSkinfoldMmText,
         state.tricepsSkinfoldMmText,
         state.suprailiacSkinfoldMmText,
-    ).any { it.isNotBlank() }
+    ).any { it.isNotBlank() } || state.capturedPhoto != null
 
     val handleBackClick = {
         if (hasEnteredAnyInput) {
@@ -150,11 +179,22 @@ fun MeasurementEditScreen(
             )
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = onSaveClicked,
-                modifier = Modifier.imePadding(),
-            ) {
-                Text("Save")
+            Column(modifier = Modifier.imePadding()) {
+                val hasPhoto = state.capturedPhoto != null
+                FloatingActionButton(
+                    onClick = if (hasPhoto) onDeletePhotoClicked else onTakePhotoClicked,
+                ) {
+                    Icon(
+                        imageVector = if (hasPhoto) Icons.Filled.Delete else Icons.Filled.CameraAlt,
+                        contentDescription = if (hasPhoto) "Delete photo" else "Take photo",
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ExtendedFloatingActionButton(onClick = onSaveClicked) {
+                    Text("Save")
+                }
             }
         },
     ) { padding ->
@@ -299,6 +339,28 @@ fun MeasurementEditScreen(
                 null -> Unit
             }
 
+            state.capturedPhoto?.let { capturedPhoto ->
+                Spacer(modifier = Modifier.height(16.dp))
+                val previewShape = MaterialTheme.shapes.medium
+
+                Image(
+                    bitmap = capturedPhoto.asImageBitmap(),
+                    contentDescription = "Captured photo preview",
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .heightIn(max = 500.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .clip(previewShape)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline,
+                            shape = previewShape,
+                        )
+                        .clickable { onPhotoPreviewDialogVisibilityChanged(true) },
+                    contentScale = ContentScale.Crop,
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             val error = state.errorMessage
@@ -307,7 +369,44 @@ fun MeasurementEditScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            Spacer(modifier = Modifier.height(96.dp))
+            if (state.capturedPhoto == null) {
+                Spacer(modifier = Modifier.height(150.dp))
+            }
+        }
+    }
+
+    if (state.isPhotoPreviewDialogVisible) {
+        val previewPhoto = state.capturedPhoto
+        if (previewPhoto != null) {
+            Dialog(
+                onDismissRequest = { onPhotoPreviewDialogVisibilityChanged(false) },
+                properties = DialogProperties(usePlatformDefaultWidth = false),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                ) {
+                    Image(
+                        bitmap = previewPhoto.asImageBitmap(),
+                        contentDescription = "Captured photo",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        contentScale = ContentScale.Fit,
+                    )
+
+                    IconButton(
+                        onClick = { onPhotoPreviewDialogVisibilityChanged(false) },
+                        modifier = Modifier.align(Alignment.TopEnd),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Close",
+                        )
+                    }
+                }
+            }
         }
     }
 
@@ -383,6 +482,9 @@ private fun MeasurementEditScreenPreview_Add() {
             onThighSkinfoldChanged = {},
             onTricepsSkinfoldChanged = {},
             onSuprailiacSkinfoldChanged = {},
+            onTakePhotoClicked = {},
+            onDeletePhotoClicked = {},
+            onPhotoPreviewDialogVisibilityChanged = {},
             onSaveClicked = {},
             onBackClicked = {},
         )
@@ -412,6 +514,9 @@ private fun MeasurementEditScreenPreview_Error() {
             onThighSkinfoldChanged = {},
             onTricepsSkinfoldChanged = {},
             onSuprailiacSkinfoldChanged = {},
+            onTakePhotoClicked = {},
+            onDeletePhotoClicked = {},
+            onPhotoPreviewDialogVisibilityChanged = {},
             onSaveClicked = {},
             onBackClicked = {},
         )
