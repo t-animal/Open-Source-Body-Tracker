@@ -215,9 +215,9 @@ See [MEASUREMENT-SCREEN.md](documents/MEASUREMENT-SCREEN.md)
 
 See [ANALYSIS.md](documents/ANALYSIS.md)
 
-Status: Implemented (duration-based filtering + interactive line charts).
-
-Note: Waist–Hip Ratio and Waist–Height Ratio are analysis-method controlled in Settings.
+Status: Implemented (duration-based filtering + interactive line chart
+s).
+Caveat: The ratios (e.g. waist to hip) are also analyses and need to be added - but which of those are actually practically useful?
 
 ---
 
@@ -241,6 +241,12 @@ This phase enables visual comparison of physical progress.
 * File management and caching
 * Permission handling
 * Performance optimization for image loading
+
+Due to its size and complexity, this phase is divided into multiple subphases:
+    - Phase 6.1 – Photo Capture & Secure Storage
+    - Phase 6.2 – Optimized Photo Gallery
+    - Phase 6.3 – Photo Comparison Mode (2-Image Slider)
+    - Phase 6.4 – Compare Mode & Animation Mode (Advanced Interaction)
 
 ---
 
