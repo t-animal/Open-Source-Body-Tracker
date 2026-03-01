@@ -7,7 +7,7 @@ import de.t_animal.opensourcebodytracker.core.model.Sex
 
 fun resolveVisibleMeasuredMetrics(
     enabledMeasurements: Set<MeasuredBodyMetric>,
-    sex: Sex?,
+    sex: Sex,
 ): List<MeasuredBodyMetric> {
     return MeasuredBodyMetric.entries.filter { metric ->
         metric in enabledMeasurements && isMetricVisible(metric = metric, sex = sex)
@@ -16,7 +16,7 @@ fun resolveVisibleMeasuredMetrics(
 
 private fun isMetricVisible(
     metric: MeasuredBodyMetric,
-    sex: Sex?,
+    sex: Sex,
 ): Boolean {
     if (metric.metricType != BodyMetricType.SkinfoldThickness) {
         return true
@@ -31,7 +31,7 @@ private fun isMetricVisible(
         MeasuredBodyMetric.SuprailiacSkinfold,
         -> sex == Sex.Female
 
-        MeasuredBodyMetric.ThighSkinfold -> sex != null
+        MeasuredBodyMetric.ThighSkinfold -> true
 
         else -> false
     }

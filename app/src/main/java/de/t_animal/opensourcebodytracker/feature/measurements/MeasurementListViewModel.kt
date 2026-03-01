@@ -40,7 +40,7 @@ class MeasurementListViewModel(
 ) : ViewModel() {
     val uiState: StateFlow<MeasurementListUiState> = combine(
         measurementRepository.observeAll(),
-        profileRepository.profileFlow,
+        profileRepository.requiredProfileFlow,
         settingsRepository.settingsFlow,
     ) { measurements, profile, settings ->
         val items = measurements.map { measurement ->

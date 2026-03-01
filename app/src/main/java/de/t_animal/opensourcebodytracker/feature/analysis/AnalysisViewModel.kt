@@ -28,7 +28,7 @@ class AnalysisViewModel(
 
     val uiState: StateFlow<AnalysisUiState> = combine(
         measurementRepository.observeAll(),
-        profileRepository.profileFlow,
+        profileRepository.requiredProfileFlow,
         settingsRepository.settingsFlow,
         selectedDuration,
     ) { measurements, profile, settings, duration ->

@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.feature.measurements
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Alignment
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
@@ -89,14 +92,16 @@ fun MeasurementEditRoute(
         pendingCaptureTarget = null
     }
 
-    val newPhotoTaken =!state.pendingPhotoAbsolutePath.isNullOrBlank()
-    val oldPhotoExistsAndNotDeleted = !state.persistedPhotoFilePath.isNullOrBlank() && !state.isPhotoMarkedForDeletion
+    val loadedState = state as? MeasurementEditUiState.Loaded
+    val newPhotoTaken = !loadedState?.pendingPhotoAbsolutePath.isNullOrBlank()
+    val oldPhotoExistsAndNotDeleted =
+        !loadedState?.persistedPhotoFilePath.isNullOrBlank() && loadedState?.isPhotoMarkedForDeletion == false
     val photoPreviewModel: File? = when {
-         newPhotoTaken-> {
-            state.pendingPhotoAbsolutePath?.let(::File)
+        newPhotoTaken -> {
+            loadedState?.pendingPhotoAbsolutePath?.let(::File)
         }
-         oldPhotoExistsAndNotDeleted -> {
-            state.persistedPhotoFilePath?.let(photoStorage::resolvePhotoFile)
+        oldPhotoExistsAndNotDeleted -> {
+            loadedState?.persistedPhotoFilePath?.let(photoStorage::resolvePhotoFile)
         }
 
         else -> null
@@ -141,6 +146,54 @@ fun MeasurementEditRoute(
 @Composable
 fun MeasurementEditScreen(
     state: MeasurementEditUiState,
+    onDateChanged: (Long) -> Unit,
+    onMetricChanged: (MeasuredBodyMetric, String) -> Unit,
+    photoPreviewModel: File?,
+    onTakePhotoClicked: () -> Unit,
+    onDeletePhotoClicked: () -> Unit,
+    onPhotoPreviewDialogVisibilityChanged: (Boolean) -> Unit,
+    onSaveClicked: () -> Unit,
+    onBackClicked: () -> Unit,
+) {
+    if (state is MeasurementEditUiState.Loading) {
+        Scaffold(
+            topBar = {
+                MeasurementEditTopBar(
+                    title = "Loading",
+                    onBackClicked = onBackClicked,
+                )
+            },
+        ) { padding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+        return
+    }
+
+    val loadedState = state as MeasurementEditUiState.Loaded
+    MeasurementEditLoadedScreen(
+        state = loadedState,
+        onDateChanged = onDateChanged,
+        onMetricChanged = onMetricChanged,
+        photoPreviewModel = photoPreviewModel,
+        onTakePhotoClicked = onTakePhotoClicked,
+        onDeletePhotoClicked = onDeletePhotoClicked,
+        onPhotoPreviewDialogVisibilityChanged = onPhotoPreviewDialogVisibilityChanged,
+        onSaveClicked = onSaveClicked,
+        onBackClicked = onBackClicked,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MeasurementEditLoadedScreen(
+    state: MeasurementEditUiState.Loaded,
     onDateChanged: (Long) -> Unit,
     onMetricChanged: (MeasuredBodyMetric, String) -> Unit,
     photoPreviewModel: File?,
@@ -257,8 +310,10 @@ fun MeasurementEditScreen(
 private fun MeasurementEditScreenPreview_Add() {
     BodyTrackerTheme {
         MeasurementEditScreen(
-            state = MeasurementEditUiState(
+            state = MeasurementEditUiState.Loaded(
                 measurementId = null,
+                sex = Sex.Male,
+                enabledMeasurements = MeasuredBodyMetric.entries.toSet(),
                 dateEpochMillis = 1_700_000_000_000,
                 dateText = "2024-01-01",
             ),
@@ -279,8 +334,10 @@ private fun MeasurementEditScreenPreview_Add() {
 private fun MeasurementEditScreenPreview_Error() {
     BodyTrackerTheme {
         MeasurementEditScreen(
-            state = MeasurementEditUiState(
+            state = MeasurementEditUiState.Loaded(
                 measurementId = null,
+                sex = Sex.Male,
+                enabledMeasurements = MeasuredBodyMetric.entries.toSet(),
                 dateEpochMillis = 1_700_000_000_000,
                 dateText = "2024-01-01",
                 errorMessage = "Enter at least one value",

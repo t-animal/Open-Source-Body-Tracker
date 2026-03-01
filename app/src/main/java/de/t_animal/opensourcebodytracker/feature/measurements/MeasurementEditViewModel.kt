@@ -22,21 +22,26 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
-data class MeasurementEditUiState(
-    val measurementId: Long? = null,
-    val sex: Sex? = null,
-    val enabledMeasurements: Set<MeasuredBodyMetric> = MeasuredBodyMetric.entries.toSet(),
-    val dateEpochMillis: Long? = null,
-    val dateText: String = "",
-    val metricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
-    val persistedPhotoFilePath: String? = null,
-    val pendingPhotoAbsolutePath: String? = null,
-    val isPhotoMarkedForDeletion: Boolean = false,
-    val isPhotoPreviewDialogVisible: Boolean = false,
-    val errorMessage: String? = null,
-)
+sealed interface MeasurementEditUiState {
+    data object Loading : MeasurementEditUiState
+
+    data class Loaded(
+        val measurementId: Long? = null,
+        val sex: Sex,
+        val enabledMeasurements: Set<MeasuredBodyMetric>,
+        val dateEpochMillis: Long? = null,
+        val dateText: String = "",
+        val metricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
+        val persistedPhotoFilePath: String? = null,
+        val pendingPhotoAbsolutePath: String? = null,
+        val isPhotoMarkedForDeletion: Boolean = false,
+        val isPhotoPreviewDialogVisible: Boolean = false,
+        val errorMessage: String? = null,
+    ) : MeasurementEditUiState
+}
 
 sealed interface MeasurementEditEvent {
     data object Saved : MeasurementEditEvent
@@ -50,7 +55,7 @@ class MeasurementEditViewModel(
     private val dependencyResolver: DerivedMetricsDependencyResolver,
     private val measurementId: Long?,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(MeasurementEditUiState(measurementId = measurementId))
+    private val _uiState = MutableStateFlow<MeasurementEditUiState>(MeasurementEditUiState.Loading)
     val uiState: StateFlow<MeasurementEditUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<MeasurementEditEvent>()
@@ -58,45 +63,48 @@ class MeasurementEditViewModel(
 
     init {
         viewModelScope.launch {
-            combine(profileRepository.profileFlow, settingsRepository.settingsFlow) { profile, settings ->
-                val requiredMeasurements = profile
-                    ?.let { dependencyResolver.resolve(settings.enabledAnalysisMethods(), it).requiredMeasurements }
-                    .orEmpty()
+            combine(
+                profileRepository.requiredProfileFlow,
+                settingsRepository.settingsFlow,
+                observeExistingMeasurement(),
+            ) { profile, settings, measurement ->
+                val requiredMeasurements = dependencyResolver
+                    .resolve(settings.enabledAnalysisMethods(), profile)
+                    .requiredMeasurements
                 val effectiveEnabledMeasurements = settings.enabledMeasurements + requiredMeasurements
 
-                profile?.sex to effectiveEnabledMeasurements
-            }.collect { (sex, enabledMeasurements) ->
-                update {
-                    it.copy(
+                Triple(profile.sex, effectiveEnabledMeasurements, measurement)
+            }.collect { (sex, enabledMeasurements, measurement) ->
+
+                val baseMeasurementId = measurementId
+                if (baseMeasurementId == null && measurement != null) return@collect
+
+                val currentLoaded = _uiState.value as? MeasurementEditUiState.Loaded
+                _uiState.value = if (currentLoaded == null) {
+                    buildInitialLoadedState(
+                        sex = sex,
+                        enabledMeasurements = enabledMeasurements,
+                        measurementId = baseMeasurementId,
+                        measurement = measurement,
+                    )
+                } else {
+                    currentLoaded.copy(
                         sex = sex,
                         enabledMeasurements = enabledMeasurements,
                     )
                 }
             }
         }
+    }
 
-        if (measurementId != null) {
-            viewModelScope.launch {
-                val measurement = repository.getById(measurementId)
-                if (measurement != null) {
-                    _uiState.value = MeasurementEditUiState(
-                        measurementId = measurement.id,
-                        sex = _uiState.value.sex,
-                        enabledMeasurements = _uiState.value.enabledMeasurements,
-                        dateEpochMillis = measurement.dateEpochMillis,
-                        dateText = formatDate(measurement.dateEpochMillis),
-                        metricInputs = toMetricInputMap(measurement),
-                        persistedPhotoFilePath = measurement.photoFilePath,
-                    )
-                }
-            }
-        } else {
-            val now = System.currentTimeMillis()
-            _uiState.value = _uiState.value.copy(
-                dateEpochMillis = now,
-                dateText = formatDate(now),
-            )
-        }
+    private fun observeExistingMeasurement() = flow {
+        emit(
+            if (measurementId == null) {
+                null
+            } else {
+                repository.getById(measurementId)
+            },
+        )
     }
 
     fun onMetricChanged(metric: MeasuredBodyMetric, text: String) {
@@ -119,7 +127,8 @@ class MeasurementEditViewModel(
     }
 
     fun onPhotoCaptured(pendingPhotoAbsolutePath: String?) {
-        val previousPhotoPath = _uiState.value.pendingPhotoAbsolutePath
+        val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
+        val previousPhotoPath = current.pendingPhotoAbsolutePath
         if (!previousPhotoPath.isNullOrBlank() && previousPhotoPath != pendingPhotoAbsolutePath) {
             viewModelScope.launch {
                 photoStorage.deletePhotoAtAbsolutePath(previousPhotoPath)
@@ -152,9 +161,10 @@ class MeasurementEditViewModel(
     }
 
     fun onSaveClicked() {
-        val current = _uiState.value
+        val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
         val enabledMeasurements = current.enabledMeasurements
         val date = current.dateEpochMillis ?: System.currentTimeMillis()
+        val currentMeasurementId = current.measurementId
 
         val metricValues = current.metricInputs
             .mapValues { (_, valueText) -> parseDoubleOrNull(valueText) }
@@ -184,7 +194,7 @@ class MeasurementEditViewModel(
             val pendingPhotoAbsolutePath = current.pendingPhotoAbsolutePath
 
             try {
-                if (measurementId == null) {
+                if (currentMeasurementId == null) {
                     val insertedId = repository.insert(
                         buildBodyMeasurement(
                             id = 0,
@@ -217,7 +227,7 @@ class MeasurementEditViewModel(
 
                     val updatedPhotoPath = when {
                         pendingPhotoAbsolutePath != null -> photoStorage.movePhotoForMeasurement(
-                            measurementId = measurementId,
+                            measurementId = currentMeasurementId,
                             measurementDateEpochMillis = date,
                             sourceAbsolutePath = pendingPhotoAbsolutePath,
                         )
@@ -227,7 +237,7 @@ class MeasurementEditViewModel(
 
                     repository.update(
                         buildBodyMeasurement(
-                            id = measurementId,
+                            id = currentMeasurementId,
                             dateEpochMillis = date,
                             photoFilePath = updatedPhotoPath,
                             values = metricValues,
@@ -247,13 +257,44 @@ class MeasurementEditViewModel(
 
                 _events.emit(MeasurementEditEvent.Saved)
             } catch (_: Throwable) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Unable to save measurement photo")
+                update {
+                    it.copy(errorMessage = "Unable to save measurement photo")
+                }
             }
         }
     }
 
-    private fun update(transform: (MeasurementEditUiState) -> MeasurementEditUiState) {
-        _uiState.value = transform(_uiState.value)
+    private fun update(transform: (MeasurementEditUiState.Loaded) -> MeasurementEditUiState.Loaded) {
+        val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
+        _uiState.value = transform(current)
+    }
+
+    private fun buildInitialLoadedState(
+        sex: Sex,
+        enabledMeasurements: Set<MeasuredBodyMetric>,
+        measurementId: Long?,
+        measurement: BodyMeasurement?,
+    ): MeasurementEditUiState.Loaded {
+        val now = System.currentTimeMillis()
+        return if (measurement == null) {
+            MeasurementEditUiState.Loaded(
+                measurementId = measurementId,
+                sex = sex,
+                enabledMeasurements = enabledMeasurements,
+                dateEpochMillis = now,
+                dateText = formatDate(now),
+            )
+        } else {
+            MeasurementEditUiState.Loaded(
+                measurementId = measurement.id,
+                sex = sex,
+                enabledMeasurements = enabledMeasurements,
+                dateEpochMillis = measurement.dateEpochMillis,
+                dateText = formatDate(measurement.dateEpochMillis),
+                metricInputs = toMetricInputMap(measurement),
+                persistedPhotoFilePath = measurement.photoFilePath,
+            )
+        }
     }
 
     private fun buildBodyMeasurement(
