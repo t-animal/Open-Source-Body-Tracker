@@ -323,3 +323,4 @@ If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
 * add a hint that not every fields needs to be input
 * dedicated photo remove icon 
 * add measurement deletion
+* paths (e.g. in internalphotostorage) should be provided by a central instance, not hardcoded
