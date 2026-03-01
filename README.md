@@ -321,3 +321,5 @@ If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
 * Tapping photo preview closes it
 * Segment input fields by grouping them by type (also possibly cleans up codebase)
 * add a hint that not every fields needs to be input
+* dedicated photo remove icon 
+* add measurement deletion
