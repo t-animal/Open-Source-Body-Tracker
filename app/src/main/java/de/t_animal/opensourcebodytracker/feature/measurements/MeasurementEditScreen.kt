@@ -1,39 +1,20 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
-import android.content.Context
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,20 +22,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
+import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
@@ -62,8 +36,16 @@ import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.feature.measurements.components.DiscardChangesDialog
+import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditFabColumn
+import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditTopBar
+import de.t_animal.opensourcebodytracker.feature.measurements.components.MetricSections
+import de.t_animal.opensourcebodytracker.feature.measurements.components.PhotoPreviewCard
+import de.t_animal.opensourcebodytracker.feature.measurements.components.PhotoPreviewDialog
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.PendingCaptureTarget
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.createTemporaryImageUri
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.resolveVisibleMeasuredMetrics
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
-import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.io.File
 import kotlinx.coroutines.launch
@@ -95,8 +77,7 @@ fun MeasurementEditRoute(
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
     ) { didCapture ->
-
-        val capturedPhotoPath = pendingCaptureTarget?.let { 
+        val capturedPhotoPath = pendingCaptureTarget?.let {
             if (didCapture) {
                 it.file.absolutePath
             } else {
@@ -108,11 +89,13 @@ fun MeasurementEditRoute(
         pendingCaptureTarget = null
     }
 
+    val newPhotoTaken =!state.pendingPhotoAbsolutePath.isNullOrBlank()
+    val oldPhotoExistsAndNotDeleted = !state.persistedPhotoFilePath.isNullOrBlank() && !state.isPhotoMarkedForDeletion
     val photoPreviewModel: File? = when {
-        !state.pendingPhotoAbsolutePath.isNullOrBlank() -> {
+         newPhotoTaken-> {
             state.pendingPhotoAbsolutePath?.let(::File)
         }
-        !state.persistedPhotoFilePath.isNullOrBlank() && !state.isPhotoMarkedForDeletion -> {
+         oldPhotoExistsAndNotDeleted -> {
             state.persistedPhotoFilePath?.let(photoStorage::resolvePhotoFile)
         }
 
@@ -133,17 +116,7 @@ fun MeasurementEditRoute(
     MeasurementEditScreen(
         state = state,
         onDateChanged = vm::onDateChanged,
-        onWeightChanged = vm::onWeightChanged,
-        onNeckChanged = vm::onNeckChanged,
-        onChestChanged = vm::onChestChanged,
-        onWaistChanged = vm::onWaistChanged,
-        onAbdomenChanged = vm::onAbdomenChanged,
-        onHipChanged = vm::onHipChanged,
-        onChestSkinfoldChanged = vm::onChestSkinfoldChanged,
-        onAbdomenSkinfoldChanged = vm::onAbdomenSkinfoldChanged,
-        onThighSkinfoldChanged = vm::onThighSkinfoldChanged,
-        onTricepsSkinfoldChanged = vm::onTricepsSkinfoldChanged,
-        onSuprailiacSkinfoldChanged = vm::onSuprailiacSkinfoldChanged,
+        onMetricChanged = vm::onMetricChanged,
         photoPreviewModel = photoPreviewModel,
         onTakePhotoClicked = {
             val captureTarget = createTemporaryImageUri(context)
@@ -164,47 +137,12 @@ fun MeasurementEditRoute(
     )
 }
 
-private data class PendingCaptureTarget(
-    val uri: Uri,
-    val file: File,
-)
-
-private fun createTemporaryImageUri(context: Context): PendingCaptureTarget? {
-    val cameraDir = File(context.cacheDir, "images").apply { mkdirs() }
-    val imageFile = runCatching {
-        File.createTempFile("capture_", ".jpg", cameraDir)
-    }.getOrNull() ?: return null
-
-    val imageUri = runCatching {
-        FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            imageFile,
-        )
-    }.getOrNull() ?: return null
-
-    return PendingCaptureTarget(
-        uri = imageUri,
-        file = imageFile,
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeasurementEditScreen(
     state: MeasurementEditUiState,
     onDateChanged: (Long) -> Unit,
-    onWeightChanged: (String) -> Unit,
-    onNeckChanged: (String) -> Unit,
-    onChestChanged: (String) -> Unit,
-    onWaistChanged: (String) -> Unit,
-    onAbdomenChanged: (String) -> Unit,
-    onHipChanged: (String) -> Unit,
-    onChestSkinfoldChanged: (String) -> Unit,
-    onAbdomenSkinfoldChanged: (String) -> Unit,
-    onThighSkinfoldChanged: (String) -> Unit,
-    onTricepsSkinfoldChanged: (String) -> Unit,
-    onSuprailiacSkinfoldChanged: (String) -> Unit,
+    onMetricChanged: (MeasuredBodyMetric, String) -> Unit,
     photoPreviewModel: File?,
     onTakePhotoClicked: () -> Unit,
     onDeletePhotoClicked: () -> Unit,
@@ -215,20 +153,14 @@ fun MeasurementEditScreen(
     val enabledMeasurements = state.enabledMeasurements
     val title = if (state.measurementId == null) "Add Measurement" else "Edit Measurement"
     var showDiscardDialog by remember { mutableStateOf(false) }
+    val visibleMetrics = remember(enabledMeasurements, state.sex) {
+        resolveVisibleMeasuredMetrics(
+            enabledMeasurements = enabledMeasurements,
+            sex = state.sex,
+        )
+    }
 
-    val hasEnteredAnyInput = listOf(
-        state.weightKgText,
-        state.neckCmText,
-        state.chestCmText,
-        state.waistCmText,
-        state.abdomenCmText,
-        state.hipCmText,
-        state.chestSkinfoldMmText,
-        state.abdomenSkinfoldMmText,
-        state.thighSkinfoldMmText,
-        state.tricepsSkinfoldMmText,
-        state.suprailiacSkinfoldMmText,
-    ).any { it.isNotBlank() } || photoPreviewModel != null
+    val hasEnteredAnyInput = state.metricInputs.values.any { it.isNotBlank() } || photoPreviewModel != null
 
     val handleBackClick = {
         if (hasEnteredAnyInput) {
@@ -240,36 +172,18 @@ fun MeasurementEditScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                navigationIcon = {
-                    IconButton(onClick = handleBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                },
+            MeasurementEditTopBar(
+                title = title,
+                onBackClicked = handleBackClick,
             )
         },
         floatingActionButton = {
-            Column(modifier = Modifier.imePadding()) {
-                val hasPhoto = photoPreviewModel != null
-                FloatingActionButton(
-                    onClick = if (hasPhoto) onDeletePhotoClicked else onTakePhotoClicked,
-                ) {
-                    Icon(
-                        imageVector = if (hasPhoto) Icons.Filled.Delete else Icons.Filled.CameraAlt,
-                        contentDescription = if (hasPhoto) "Delete photo" else "Take photo",
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                ExtendedFloatingActionButton(onClick = onSaveClicked) {
-                    Text("Save")
-                }
-            }
+            MeasurementEditFabColumn(
+                hasPhoto = photoPreviewModel != null,
+                onTakePhotoClicked = onTakePhotoClicked,
+                onDeletePhotoClicked = onDeletePhotoClicked,
+                onSaveClicked = onSaveClicked,
+            )
         },
     ) { padding ->
         val scrollState = rememberScrollState()
@@ -292,146 +206,17 @@ fun MeasurementEditScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            MetricInputField(
-                isVisible = MeasuredBodyMetric.Weight in enabledMeasurements,
-                label = "Weight (kg)",
-                value = state.weightKgText,
-                onValueChange = onWeightChanged,
-                imeAction = ImeAction.Next,
+            MetricSections(
+                metrics = visibleMetrics,
+                metricInputs = state.metricInputs,
+                onMetricChanged = onMetricChanged,
             )
-
-            MetricInputField(
-                isVisible = MeasuredBodyMetric.NeckCircumference in enabledMeasurements,
-                label = "Neck (cm)",
-                value = state.neckCmText,
-                onValueChange = onNeckChanged,
-                imeAction = ImeAction.Next,
-            )
-
-            MetricInputField(
-                isVisible = MeasuredBodyMetric.ChestCircumference in enabledMeasurements,
-                label = "Chest (cm)",
-                value = state.chestCmText,
-                onValueChange = onChestChanged,
-                imeAction = ImeAction.Next,
-            )
-
-            MetricInputField(
-                isVisible = MeasuredBodyMetric.WaistCircumference in enabledMeasurements,
-                label = "Waist (cm)",
-                value = state.waistCmText,
-                onValueChange = onWaistChanged,
-                imeAction = ImeAction.Next,
-            )
-
-            MetricInputField(
-                isVisible = MeasuredBodyMetric.AbdomenCircumference in enabledMeasurements,
-                label = "Abdomen (cm)",
-                value = state.abdomenCmText,
-                onValueChange = onAbdomenChanged,
-                imeAction = ImeAction.Next,
-            )
-
-            MetricInputField(
-                isVisible = MeasuredBodyMetric.HipCircumference in enabledMeasurements,
-                label = "Hip (cm)",
-                value = state.hipCmText,
-                onValueChange = onHipChanged,
-                imeAction = ImeAction.Next,
-                addBottomSpacing = false,
-            )
-
-            when (state.sex) {
-                Sex.Male -> {
-                    val maleSkinfoldsVisible = MeasuredBodyMetric.ChestSkinfold in enabledMeasurements ||
-                        MeasuredBodyMetric.AbdomenSkinfold in enabledMeasurements ||
-                        MeasuredBodyMetric.ThighSkinfold in enabledMeasurements
-                    if (maleSkinfoldsVisible) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    MetricInputField(
-                        isVisible = MeasuredBodyMetric.ChestSkinfold in enabledMeasurements,
-                        label = "Chest Skinfold (mm)",
-                        value = state.chestSkinfoldMmText,
-                        onValueChange = onChestSkinfoldChanged,
-                        imeAction = ImeAction.Next,
-                    )
-
-                    MetricInputField(
-                        isVisible = MeasuredBodyMetric.AbdomenSkinfold in enabledMeasurements,
-                        label = "Abdomen Skinfold (mm)",
-                        value = state.abdomenSkinfoldMmText,
-                        onValueChange = onAbdomenSkinfoldChanged,
-                        imeAction = ImeAction.Next,
-                    )
-
-                    MetricInputField(
-                        isVisible = MeasuredBodyMetric.ThighSkinfold in enabledMeasurements,
-                        label = "Thigh Skinfold (mm)",
-                        value = state.thighSkinfoldMmText,
-                        onValueChange = onThighSkinfoldChanged,
-                        imeAction = ImeAction.Done,
-                        addBottomSpacing = false,
-                    )
-                }
-
-                Sex.Female -> {
-                    val femaleSkinfoldsVisible = MeasuredBodyMetric.TricepsSkinfold in enabledMeasurements ||
-                        MeasuredBodyMetric.SuprailiacSkinfold in enabledMeasurements ||
-                        MeasuredBodyMetric.ThighSkinfold in enabledMeasurements
-                    if (femaleSkinfoldsVisible) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-
-                    MetricInputField(
-                        isVisible = MeasuredBodyMetric.TricepsSkinfold in enabledMeasurements,
-                        label = "Triceps Skinfold (mm)",
-                        value = state.tricepsSkinfoldMmText,
-                        onValueChange = onTricepsSkinfoldChanged,
-                        imeAction = ImeAction.Next,
-                    )
-
-                    MetricInputField(
-                        isVisible = MeasuredBodyMetric.SuprailiacSkinfold in enabledMeasurements,
-                        label = "Suprailiac Skinfold (mm)",
-                        value = state.suprailiacSkinfoldMmText,
-                        onValueChange = onSuprailiacSkinfoldChanged,
-                        imeAction = ImeAction.Next,
-                    )
-
-                    MetricInputField(
-                        isVisible = MeasuredBodyMetric.ThighSkinfold in enabledMeasurements,
-                        label = "Thigh Skinfold (mm)",
-                        value = state.thighSkinfoldMmText,
-                        onValueChange = onThighSkinfoldChanged,
-                        imeAction = ImeAction.Done,
-                        addBottomSpacing = false,
-                    )
-                }
-
-                null -> Unit
-            }
 
             if (photoPreviewModel != null) {
                 Spacer(modifier = Modifier.height(16.dp))
-                val previewShape = MaterialTheme.shapes.medium
-
-                AsyncImage(
-                    model = photoPreviewModel,
-                    contentDescription = "Captured photo preview",
-                    modifier = Modifier
-                        .fillMaxWidth(0.6f)
-                        .heightIn(max = 500.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .clip(previewShape)
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = previewShape,
-                        )
-                        .clickable { onPhotoPreviewDialogVisibilityChanged(true) },
-                    contentScale = ContentScale.Fit,
+                PhotoPreviewCard(
+                    photoPreviewModel = photoPreviewModel,
+                    onClick = { onPhotoPreviewDialogVisibilityChanged(true) },
                 )
             }
 
@@ -449,90 +234,23 @@ fun MeasurementEditScreen(
         }
     }
 
-    if (state.isPhotoPreviewDialogVisible) {
-        val previewPhoto = photoPreviewModel
-        if (previewPhoto != null) {
-            Dialog(
-                onDismissRequest = { onPhotoPreviewDialogVisibilityChanged(false) },
-                properties = DialogProperties(usePlatformDefaultWidth = false),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp),
-                ) {
-                    AsyncImage(
-                        model = previewPhoto,
-                        contentDescription = "Captured photo",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(),
-                        contentScale = ContentScale.Fit,
-                    )
-
-                    IconButton(
-                        onClick = { onPhotoPreviewDialogVisibilityChanged(false) },
-                        modifier = Modifier.align(Alignment.TopEnd),
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = "Close",
-                        )
-                    }
-                }
-            }
-        }
-    }
+    PhotoPreviewDialog(
+        isVisible = state.isPhotoPreviewDialogVisible,
+        photoPreviewModel = photoPreviewModel,
+        onDismiss = { onPhotoPreviewDialogVisibilityChanged(false) },
+    )
 
     if (showDiscardDialog) {
-        AlertDialog(
-            onDismissRequest = { showDiscardDialog = false },
-            title = { Text("Discard input?") },
-            text = { Text("You have entered values. Discard them and go back?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDiscardDialog = false
-                        onBackClicked()
-                    },
-                ) {
-                    Text("Discard")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDiscardDialog = false }) {
-                    Text("Keep editing")
-                }
+        DiscardChangesDialog(
+            onDismiss = { showDiscardDialog = false },
+            onDiscard = {
+                showDiscardDialog = false
+                onBackClicked()
             },
         )
     }
 }
 
-@Composable
-private fun MetricInputField(
-    isVisible: Boolean,
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    imeAction: ImeAction,
-    addBottomSpacing: Boolean = true,
-) {
-    if (!isVisible) {
-        return
-    }
-
-    DecimalNumberInputField(
-        label = label,
-        value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth(),
-        imeAction = imeAction,
-    )
-
-    if (addBottomSpacing) {
-        Spacer(modifier = Modifier.height(8.dp))
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
@@ -545,17 +263,7 @@ private fun MeasurementEditScreenPreview_Add() {
                 dateText = "2024-01-01",
             ),
             onDateChanged = {},
-            onWeightChanged = {},
-            onNeckChanged = {},
-            onChestChanged = {},
-            onWaistChanged = {},
-            onAbdomenChanged = {},
-            onHipChanged = {},
-            onChestSkinfoldChanged = {},
-            onAbdomenSkinfoldChanged = {},
-            onThighSkinfoldChanged = {},
-            onTricepsSkinfoldChanged = {},
-            onSuprailiacSkinfoldChanged = {},
+            onMetricChanged = { _, _ -> },
             photoPreviewModel = null,
             onTakePhotoClicked = {},
             onDeletePhotoClicked = {},
@@ -578,17 +286,7 @@ private fun MeasurementEditScreenPreview_Error() {
                 errorMessage = "Enter at least one value",
             ),
             onDateChanged = {},
-            onWeightChanged = {},
-            onNeckChanged = {},
-            onChestChanged = {},
-            onWaistChanged = {},
-            onAbdomenChanged = {},
-            onHipChanged = {},
-            onChestSkinfoldChanged = {},
-            onAbdomenSkinfoldChanged = {},
-            onThighSkinfoldChanged = {},
-            onTricepsSkinfoldChanged = {},
-            onSuprailiacSkinfoldChanged = {},
+            onMetricChanged = { _, _ -> },
             photoPreviewModel = null,
             onTakePhotoClicked = {},
             onDeletePhotoClicked = {},
