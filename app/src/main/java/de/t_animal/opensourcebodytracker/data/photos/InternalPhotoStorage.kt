@@ -48,6 +48,10 @@ class InternalPhotoStorage(
         file.delete()
     }
 
+    fun resolvePhotoFile(path: String): File {
+        return resolveFile(path)
+    }
+
     fun pathForMeasurement(measurementId: Long, measurementDateEpochMillis: Long): String {
         val date = Instant.ofEpochMilli(measurementDateEpochMillis)
             .atZone(ZoneId.systemDefault())

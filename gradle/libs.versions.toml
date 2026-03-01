@@ -17,6 +17,7 @@ room = "2.8.4"
 datastore = "1.1.1"
 ksp = "2.2.10-2.0.2"
 vico = "3.0.1"
+coil = "2.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +47,7 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose-android", version.ref = "vico" }
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3-android", version.ref = "vico" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

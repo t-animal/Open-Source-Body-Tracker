@@ -219,7 +219,7 @@ fun BodyTrackerNavHost(
                 ) {
                     PhotosRoute(
                         measurementRepository = measurementRepository,
-                        onOpenMeasurement = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
+                        photoStorage = internalPhotoStorage,
                     )
                 }
             }
