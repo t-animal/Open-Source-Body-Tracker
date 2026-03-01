@@ -1,5 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -49,6 +53,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
@@ -61,6 +67,7 @@ import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependency
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
 import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
+import java.io.File
 
 @Composable
 fun MeasurementEditRoute(
@@ -72,6 +79,7 @@ fun MeasurementEditRoute(
     onFinished: () -> Unit,
     onCancel: () -> Unit,
 ) {
+    val context = LocalContext.current
     val vm: MeasurementEditViewModel = viewModel(
         factory = MeasurementEditViewModelFactory(
             repository = repository,
@@ -83,10 +91,18 @@ fun MeasurementEditRoute(
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
-    val takePicturePreviewLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.TakePicturePreview(),
-    ) { photo ->
-        vm.onPhotoCaptured(photo)
+    var pendingCaptureUri by remember { mutableStateOf<Uri?>(null) }
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { didCapture ->
+        val captureUri = pendingCaptureUri
+        val capturedPhoto = if (didCapture && captureUri != null) {
+            decodeBitmapFromUri(context, captureUri)
+        } else {
+            null
+        }
+        vm.onPhotoCaptured(capturedPhoto)
+        pendingCaptureUri = null
     }
 
     LaunchedEffect(vm) {
@@ -111,12 +127,41 @@ fun MeasurementEditRoute(
         onThighSkinfoldChanged = vm::onThighSkinfoldChanged,
         onTricepsSkinfoldChanged = vm::onTricepsSkinfoldChanged,
         onSuprailiacSkinfoldChanged = vm::onSuprailiacSkinfoldChanged,
-        onTakePhotoClicked = { takePicturePreviewLauncher.launch(null) },
+        onTakePhotoClicked = {
+            val imageUri = createTemporaryImageUri(context)
+            if (imageUri != null) {
+                pendingCaptureUri = imageUri
+                takePictureLauncher.launch(imageUri)
+            }
+        },
         onDeletePhotoClicked = vm::onDeletePhotoClicked,
         onPhotoPreviewDialogVisibilityChanged = vm::onPhotoPreviewDialogVisibilityChanged,
         onSaveClicked = vm::onSaveClicked,
         onBackClicked = onCancel,
     )
+}
+
+private fun createTemporaryImageUri(context: Context): Uri? {
+    val cameraDir = File(context.cacheDir, "images").apply { mkdirs() }
+    val imageFile = runCatching {
+        File.createTempFile("capture_", ".jpg", cameraDir)
+    }.getOrNull() ?: return null
+
+    return runCatching {
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            imageFile,
+        )
+    }.getOrNull()
+}
+
+private fun decodeBitmapFromUri(context: Context, uri: Uri): Bitmap? {
+    return runCatching {
+        context.contentResolver.openInputStream(uri)?.use { inputStream ->
+            BitmapFactory.decodeStream(inputStream)
+        }
+    }.getOrNull()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

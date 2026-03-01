@@ -319,3 +319,5 @@ If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
 * Add config button right next to analysis and table to show/hide measurements
 * Editing warning dialog only when actually changed something
 * Tapping photo preview closes it
+* Segment input fields by grouping them by type (also possibly cleans up codebase)
+* add a hint that not every fields needs to be input
