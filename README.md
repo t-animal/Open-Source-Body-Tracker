@@ -324,3 +324,4 @@ If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
 * dedicated photo remove icon 
 * add measurement deletion
 * paths (e.g. in internalphotostorage) should be provided by a central instance, not hardcoded
+* highlighting an analysis entry highlights all of the same date

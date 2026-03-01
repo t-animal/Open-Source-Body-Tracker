@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
-import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
@@ -16,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -28,7 +28,6 @@ enum class DisplayPlacement {
 
 data class SettingsUiState(
     val isLoading: Boolean = true,
-    val profile: UserProfile? = null,
     val settings: SettingsState = defaultSettingsState(),
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
     val errorMessage: String? = null,
@@ -36,7 +35,7 @@ data class SettingsUiState(
 
 class SettingsViewModel(
     private val settingsRepository: SettingsRepository,
-    profileRepository: ProfileRepository,
+    private val profileRepository: ProfileRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
 ) : ViewModel() {
 
@@ -44,13 +43,13 @@ class SettingsViewModel(
 
     val uiState: StateFlow<SettingsUiState> = combine(
         settingsRepository.settingsFlow,
-        profileRepository.profileFlow,
+        profileRepository.requiredProfileFlow,
         errorMessage,
     ) { persistedSettings, profile, error ->
         val editableSettings = persistedSettings
-        val requiredMeasurements = profile
-            ?.let { dependencyResolver.resolve(editableSettings.enabledAnalysisMethods(), it).requiredMeasurements }
-            .orEmpty()
+        val requiredMeasurements = dependencyResolver
+            .resolve(editableSettings.enabledAnalysisMethods(), profile)
+            .requiredMeasurements
 
         val effectiveSettings = editableSettings.copy(
             enabledMeasurements = editableSettings.enabledMeasurements + requiredMeasurements,
@@ -58,7 +57,6 @@ class SettingsViewModel(
 
         SettingsUiState(
             isLoading = false,
-            profile = profile,
             settings = effectiveSettings,
             requiredMeasurements = requiredMeasurements,
             errorMessage = error,
@@ -136,14 +134,15 @@ class SettingsViewModel(
     private fun updateAndPersist(transform: (SettingsState) -> SettingsState) {
         val base = uiState.value.settings
         val transformed = transform(base)
-        val requiredMeasurements = uiState.value.profile
-            ?.let { dependencyResolver.resolve(transformed.enabledAnalysisMethods(), it).requiredMeasurements }
-            .orEmpty()
-        val effective = transformed.copy(
-            enabledMeasurements = transformed.enabledMeasurements + requiredMeasurements,
-        )
 
         viewModelScope.launch {
+            val profile = profileRepository.requiredProfileFlow.first()
+            val requiredMeasurements = dependencyResolver
+                .resolve(transformed.enabledAnalysisMethods(), profile)
+                .requiredMeasurements
+            val effective = transformed.copy(
+                enabledMeasurements = transformed.enabledMeasurements + requiredMeasurements,
+            )
             settingsRepository.saveSettings(effective)
         }
     }

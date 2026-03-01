@@ -55,14 +55,20 @@ fun BodyTrackerNavHost(
     val isDebuggable = (LocalContext.current.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val navController = rememberNavController()
 
-    val profileOrNull by profileRepository.profileFlow.collectAsStateWithLifecycle(initialValue = null)
+    val hasProfile by profileRepository.hasProfileFlow.collectAsStateWithLifecycle(initialValue = false)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    LaunchedEffect(profileOrNull, currentRoute) {
-        if (profileOrNull != null && currentRoute == Routes.Onboarding) {
+    LaunchedEffect(hasProfile, currentRoute) {
+        if (hasProfile && currentRoute == Routes.Onboarding) {
             navController.navigate(Routes.MeasurementList) {
                 popUpTo(Routes.Onboarding) { inclusive = true }
+                launchSingleTop = true
+            }
+        } else if (!hasProfile && currentRoute != null && currentRoute != Routes.Onboarding) {
+            while (navController.popBackStack()) {
+            }
+            navController.navigate(Routes.Onboarding) {
                 launchSingleTop = true
             }
         }

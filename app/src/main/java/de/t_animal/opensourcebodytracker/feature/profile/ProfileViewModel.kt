@@ -51,8 +51,8 @@ class ProfileViewModel(
     init {
         if (mode == ProfileMode.Settings) {
             viewModelScope.launch {
-                repository.profileFlow.collect { profile ->
-                    if (profile != null && !didInitializeFromRepo) {
+                repository.requiredProfileFlow.collect { profile ->
+                    if (!didInitializeFromRepo) {
                         didInitializeFromRepo = true
                         _uiState.value = _uiState.value.copy(
                             sex = profile.sex,
