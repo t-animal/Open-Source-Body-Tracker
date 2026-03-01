@@ -54,6 +54,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
@@ -64,6 +65,7 @@ import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 @Composable
 fun MeasurementEditRoute(
     repository: MeasurementRepository,
+    photoStorage: InternalPhotoStorage,
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
     measurementId: Long?,
@@ -73,6 +75,7 @@ fun MeasurementEditRoute(
     val vm: MeasurementEditViewModel = viewModel(
         factory = MeasurementEditViewModelFactory(
             repository = repository,
+            photoStorage = photoStorage,
             profileRepository = profileRepository,
             settingsRepository = settingsRepository,
             dependencyResolver = DerivedMetricsDependencyResolver(),
@@ -154,7 +157,7 @@ fun MeasurementEditScreen(
         state.thighSkinfoldMmText,
         state.tricepsSkinfoldMmText,
         state.suprailiacSkinfoldMmText,
-    ).any { it.isNotBlank() } || state.capturedPhoto != null
+    ).any { it.isNotBlank() } || state.photoBinaryContent != null
 
     val handleBackClick = {
         if (hasEnteredAnyInput) {
@@ -180,7 +183,7 @@ fun MeasurementEditScreen(
         },
         floatingActionButton = {
             Column(modifier = Modifier.imePadding()) {
-                val hasPhoto = state.capturedPhoto != null
+                val hasPhoto = state.photoBinaryContent != null
                 FloatingActionButton(
                     onClick = if (hasPhoto) onDeletePhotoClicked else onTakePhotoClicked,
                 ) {
@@ -339,7 +342,7 @@ fun MeasurementEditScreen(
                 null -> Unit
             }
 
-            state.capturedPhoto?.let { capturedPhoto ->
+            state.photoBinaryContent?.let { capturedPhoto ->
                 Spacer(modifier = Modifier.height(16.dp))
                 val previewShape = MaterialTheme.shapes.medium
 
@@ -369,14 +372,14 @@ fun MeasurementEditScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            if (state.capturedPhoto == null) {
+            if (state.photoBinaryContent == null) {
                 Spacer(modifier = Modifier.height(150.dp))
             }
         }
     }
 
     if (state.isPhotoPreviewDialogVisible) {
-        val previewPhoto = state.capturedPhoto
+        val previewPhoto = state.photoBinaryContent
         if (previewPhoto != null) {
             Dialog(
                 onDismissRequest = { onPhotoPreviewDialogVisibilityChanged(false) },

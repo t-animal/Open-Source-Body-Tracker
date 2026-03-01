@@ -29,6 +29,7 @@ class RoomMeasurementRepository(
 private fun MeasurementEntity.toDomain(): BodyMeasurement = BodyMeasurement(
     id = id,
     dateEpochMillis = dateEpochMillis,
+    photoFilePath = photoFilePath,
     weightKg = weightKg,
     neckCircumferenceCm = neckCircumferenceCm,
     chestCircumferenceCm = chestCircumferenceCm,
@@ -45,6 +46,7 @@ private fun MeasurementEntity.toDomain(): BodyMeasurement = BodyMeasurement(
 private fun BodyMeasurement.toEntityForInsert(): MeasurementEntity = MeasurementEntity(
     id = 0,
     dateEpochMillis = dateEpochMillis,
+    photoFilePath = photoFilePath,
     weightKg = weightKg,
     neckCircumferenceCm = neckCircumferenceCm,
     chestCircumferenceCm = chestCircumferenceCm,
