@@ -1,12 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -42,12 +39,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
@@ -68,6 +66,7 @@ import de.t_animal.opensourcebodytracker.ui.components.DateInputField
 import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.io.File
+import kotlinx.coroutines.launch
 
 @Composable
 fun MeasurementEditRoute(
@@ -80,6 +79,7 @@ fun MeasurementEditRoute(
     onCancel: () -> Unit,
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val vm: MeasurementEditViewModel = viewModel(
         factory = MeasurementEditViewModelFactory(
             repository = repository,
@@ -91,24 +91,41 @@ fun MeasurementEditRoute(
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
-    var pendingCaptureUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingCaptureTarget by remember { mutableStateOf<PendingCaptureTarget?>(null) }
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
     ) { didCapture ->
-        val captureUri = pendingCaptureUri
-        val capturedPhoto = if (didCapture && captureUri != null) {
-            decodeBitmapFromUri(context, captureUri)
-        } else {
-            null
+
+        val capturedPhotoPath = pendingCaptureTarget?.let { 
+            if (didCapture) {
+                it.file.absolutePath
+            } else {
+                it.file.delete()
+                null
+            }
         }
-        vm.onPhotoCaptured(capturedPhoto)
-        pendingCaptureUri = null
+        vm.onPhotoCaptured(capturedPhotoPath)
+        pendingCaptureTarget = null
+    }
+
+    val photoPreviewModel: File? = when {
+        !state.pendingPhotoAbsolutePath.isNullOrBlank() -> {
+            state.pendingPhotoAbsolutePath?.let(::File)
+        }
+        !state.persistedPhotoFilePath.isNullOrBlank() && !state.isPhotoMarkedForDeletion -> {
+            state.persistedPhotoFilePath?.let(photoStorage::resolvePhotoFile)
+        }
+
+        else -> null
     }
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
-                MeasurementEditEvent.Saved -> onFinished()
+                MeasurementEditEvent.Saved -> {
+                    photoStorage.clearTemporaryCapturePhotos()
+                    onFinished()
+                }
             }
         }
     }
@@ -127,41 +144,49 @@ fun MeasurementEditRoute(
         onThighSkinfoldChanged = vm::onThighSkinfoldChanged,
         onTricepsSkinfoldChanged = vm::onTricepsSkinfoldChanged,
         onSuprailiacSkinfoldChanged = vm::onSuprailiacSkinfoldChanged,
+        photoPreviewModel = photoPreviewModel,
         onTakePhotoClicked = {
-            val imageUri = createTemporaryImageUri(context)
-            if (imageUri != null) {
-                pendingCaptureUri = imageUri
-                takePictureLauncher.launch(imageUri)
+            val captureTarget = createTemporaryImageUri(context)
+            if (captureTarget != null) {
+                pendingCaptureTarget = captureTarget
+                takePictureLauncher.launch(captureTarget.uri)
             }
         },
         onDeletePhotoClicked = vm::onDeletePhotoClicked,
         onPhotoPreviewDialogVisibilityChanged = vm::onPhotoPreviewDialogVisibilityChanged,
         onSaveClicked = vm::onSaveClicked,
-        onBackClicked = onCancel,
+        onBackClicked = {
+            coroutineScope.launch {
+                photoStorage.clearTemporaryCapturePhotos()
+                onCancel()
+            }
+        },
     )
 }
 
-private fun createTemporaryImageUri(context: Context): Uri? {
+private data class PendingCaptureTarget(
+    val uri: Uri,
+    val file: File,
+)
+
+private fun createTemporaryImageUri(context: Context): PendingCaptureTarget? {
     val cameraDir = File(context.cacheDir, "images").apply { mkdirs() }
     val imageFile = runCatching {
         File.createTempFile("capture_", ".jpg", cameraDir)
     }.getOrNull() ?: return null
 
-    return runCatching {
+    val imageUri = runCatching {
         FileProvider.getUriForFile(
             context,
             "${context.packageName}.fileprovider",
             imageFile,
         )
-    }.getOrNull()
-}
+    }.getOrNull() ?: return null
 
-private fun decodeBitmapFromUri(context: Context, uri: Uri): Bitmap? {
-    return runCatching {
-        context.contentResolver.openInputStream(uri)?.use { inputStream ->
-            BitmapFactory.decodeStream(inputStream)
-        }
-    }.getOrNull()
+    return PendingCaptureTarget(
+        uri = imageUri,
+        file = imageFile,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -180,6 +205,7 @@ fun MeasurementEditScreen(
     onThighSkinfoldChanged: (String) -> Unit,
     onTricepsSkinfoldChanged: (String) -> Unit,
     onSuprailiacSkinfoldChanged: (String) -> Unit,
+    photoPreviewModel: File?,
     onTakePhotoClicked: () -> Unit,
     onDeletePhotoClicked: () -> Unit,
     onPhotoPreviewDialogVisibilityChanged: (Boolean) -> Unit,
@@ -202,7 +228,7 @@ fun MeasurementEditScreen(
         state.thighSkinfoldMmText,
         state.tricepsSkinfoldMmText,
         state.suprailiacSkinfoldMmText,
-    ).any { it.isNotBlank() } || state.photoBinaryContent != null
+    ).any { it.isNotBlank() } || photoPreviewModel != null
 
     val handleBackClick = {
         if (hasEnteredAnyInput) {
@@ -228,7 +254,7 @@ fun MeasurementEditScreen(
         },
         floatingActionButton = {
             Column(modifier = Modifier.imePadding()) {
-                val hasPhoto = state.photoBinaryContent != null
+                val hasPhoto = photoPreviewModel != null
                 FloatingActionButton(
                     onClick = if (hasPhoto) onDeletePhotoClicked else onTakePhotoClicked,
                 ) {
@@ -387,12 +413,12 @@ fun MeasurementEditScreen(
                 null -> Unit
             }
 
-            state.photoBinaryContent?.let { capturedPhoto ->
+            if (photoPreviewModel != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 val previewShape = MaterialTheme.shapes.medium
 
-                Image(
-                    bitmap = capturedPhoto.asImageBitmap(),
+                AsyncImage(
+                    model = photoPreviewModel,
                     contentDescription = "Captured photo preview",
                     modifier = Modifier
                         .fillMaxWidth(0.6f)
@@ -405,7 +431,7 @@ fun MeasurementEditScreen(
                             shape = previewShape,
                         )
                         .clickable { onPhotoPreviewDialogVisibilityChanged(true) },
-                    contentScale = ContentScale.Crop,
+                    contentScale = ContentScale.Fit,
                 )
             }
 
@@ -417,14 +443,14 @@ fun MeasurementEditScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            if (state.photoBinaryContent == null) {
+            if (photoPreviewModel == null) {
                 Spacer(modifier = Modifier.height(150.dp))
             }
         }
     }
 
     if (state.isPhotoPreviewDialogVisible) {
-        val previewPhoto = state.photoBinaryContent
+        val previewPhoto = photoPreviewModel
         if (previewPhoto != null) {
             Dialog(
                 onDismissRequest = { onPhotoPreviewDialogVisibilityChanged(false) },
@@ -435,8 +461,8 @@ fun MeasurementEditScreen(
                         .fillMaxSize()
                         .padding(8.dp),
                 ) {
-                    Image(
-                        bitmap = previewPhoto.asImageBitmap(),
+                    AsyncImage(
+                        model = previewPhoto,
                         contentDescription = "Captured photo",
                         modifier = Modifier
                             .fillMaxWidth()
@@ -530,6 +556,7 @@ private fun MeasurementEditScreenPreview_Add() {
             onThighSkinfoldChanged = {},
             onTricepsSkinfoldChanged = {},
             onSuprailiacSkinfoldChanged = {},
+            photoPreviewModel = null,
             onTakePhotoClicked = {},
             onDeletePhotoClicked = {},
             onPhotoPreviewDialogVisibilityChanged = {},
@@ -562,6 +589,7 @@ private fun MeasurementEditScreenPreview_Error() {
             onThighSkinfoldChanged = {},
             onTricepsSkinfoldChanged = {},
             onSuprailiacSkinfoldChanged = {},
+            photoPreviewModel = null,
             onTakePhotoClicked = {},
             onDeletePhotoClicked = {},
             onPhotoPreviewDialogVisibilityChanged = {},

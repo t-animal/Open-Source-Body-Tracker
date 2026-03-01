@@ -1,6 +1,5 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
-import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -43,7 +42,7 @@ data class MeasurementEditUiState(
     val suprailiacSkinfoldMmText: String = "",
     val persistedPhotoFilePath: String? = null,
     val isPhotoMarkedForDeletion: Boolean = false,
-    val photoBinaryContent: Bitmap? = null,
+    val pendingPhotoAbsolutePath: String? = null,
     val isPhotoPreviewDialogVisible: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -89,7 +88,6 @@ class MeasurementEditViewModel(
             viewModelScope.launch {
                 val measurement = repository.getById(measurementId)
                 if (measurement != null) {
-                    val persistedPhoto = measurement.photoFilePath?.let { photoStorage.loadPhoto(it) }
                     _uiState.value = MeasurementEditUiState(
                         measurementId = measurement.id,
                         sex = _uiState.value.sex,
@@ -108,7 +106,6 @@ class MeasurementEditViewModel(
                         tricepsSkinfoldMmText = measurement.tricepsSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
                         suprailiacSkinfoldMmText = measurement.suprailiacSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
                         persistedPhotoFilePath = measurement.photoFilePath,
-                        photoBinaryContent = persistedPhoto,
                     )
                 }
             }
@@ -163,10 +160,17 @@ class MeasurementEditViewModel(
         }
     }
 
-    fun onPhotoCaptured(photo: Bitmap?) {
+    fun onPhotoCaptured(photoAbsolutePath: String?) {
+        val previousPendingPhotoPath = _uiState.value.pendingPhotoAbsolutePath
+        if (!previousPendingPhotoPath.isNullOrBlank() && previousPendingPhotoPath != photoAbsolutePath) {
+            viewModelScope.launch {
+                photoStorage.deletePhotoAtAbsolutePath(previousPendingPhotoPath)
+            }
+        }
+
         update {
             it.copy(
-                photoBinaryContent = photo,
+                pendingPhotoAbsolutePath = photoAbsolutePath,
                 isPhotoMarkedForDeletion = false,
                 isPhotoPreviewDialogVisible = false,
             )
@@ -176,8 +180,8 @@ class MeasurementEditViewModel(
     fun onDeletePhotoClicked() {
         update {
             it.copy(
-                photoBinaryContent = null,
-                isPhotoMarkedForDeletion = it.persistedPhotoFilePath != null,
+                pendingPhotoAbsolutePath = null,
+                isPhotoMarkedForDeletion = true,
                 isPhotoPreviewDialogVisible = false,
             )
         }
@@ -232,7 +236,7 @@ class MeasurementEditViewModel(
             suprailiacSkinfold,
         ).any { it != null }
 
-        val hasPhoto = current.photoBinaryContent != null ||
+        val hasPhoto = current.pendingPhotoAbsolutePath != null ||
             (current.persistedPhotoFilePath != null && !current.isPhotoMarkedForDeletion)
 
         if (!hasAnyValue && !hasPhoto) {
@@ -245,7 +249,7 @@ class MeasurementEditViewModel(
                 return if (metric in enabledMeasurements) value else null
             }
 
-            val draftPhoto = current.photoBinaryContent
+            val pendingPhotoAbsolutePath = current.pendingPhotoAbsolutePath
 
             try {
                 if (measurementId == null) {
@@ -268,8 +272,12 @@ class MeasurementEditViewModel(
                         ),
                     )
 
-                    if (draftPhoto != null) {
-                        val savedPhotoPath = photoStorage.savePhotoForMeasurement(insertedId, date, draftPhoto)
+                    if (pendingPhotoAbsolutePath != null) {
+                        val savedPhotoPath = photoStorage.movePhotoForMeasurement(
+                            measurementId = insertedId,
+                            measurementDateEpochMillis = date,
+                            sourceAbsolutePath = pendingPhotoAbsolutePath,
+                        )
                         repository.update(
                             BodyMeasurement(
                                 id = insertedId,
@@ -290,10 +298,15 @@ class MeasurementEditViewModel(
                         )
                     }
                 } else {
-                    val shouldRemovePersistedPhoto = current.isPhotoMarkedForDeletion && draftPhoto == null
+                    val shouldRemovePersistedPhoto =
+                        current.isPhotoMarkedForDeletion && pendingPhotoAbsolutePath == null
 
                     val updatedPhotoPath = when {
-                        draftPhoto != null -> photoStorage.savePhotoForMeasurement(measurementId, date, draftPhoto)
+                        pendingPhotoAbsolutePath != null -> photoStorage.movePhotoForMeasurement(
+                            measurementId = measurementId,
+                            measurementDateEpochMillis = date,
+                            sourceAbsolutePath = pendingPhotoAbsolutePath,
+                        )
                         shouldRemovePersistedPhoto -> null
                         else -> current.persistedPhotoFilePath
                     }
@@ -319,6 +332,11 @@ class MeasurementEditViewModel(
 
                     if (shouldRemovePersistedPhoto) {
                         current.persistedPhotoFilePath?.let { photoStorage.deletePhoto(it) }
+                    } else if (pendingPhotoAbsolutePath != null) {
+                        val previousPhotoPath = current.persistedPhotoFilePath
+                        if (!previousPhotoPath.isNullOrBlank() && previousPhotoPath != updatedPhotoPath) {
+                            photoStorage.deletePhoto(previousPhotoPath)
+                        }
                     }
                 }
 
