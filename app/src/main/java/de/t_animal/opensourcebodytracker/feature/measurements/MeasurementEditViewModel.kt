@@ -8,6 +8,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
@@ -40,7 +41,9 @@ data class MeasurementEditUiState(
     val thighSkinfoldMmText: String = "",
     val tricepsSkinfoldMmText: String = "",
     val suprailiacSkinfoldMmText: String = "",
-    val capturedPhoto: Bitmap? = null,
+    val persistedPhotoFilePath: String? = null,
+    val isPhotoMarkedForDeletion: Boolean = false,
+    val photoBinaryContent: Bitmap? = null,
     val isPhotoPreviewDialogVisible: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -51,6 +54,7 @@ sealed interface MeasurementEditEvent {
 
 class MeasurementEditViewModel(
     private val repository: MeasurementRepository,
+    private val photoStorage: InternalPhotoStorage,
     private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
@@ -85,9 +89,11 @@ class MeasurementEditViewModel(
             viewModelScope.launch {
                 val measurement = repository.getById(measurementId)
                 if (measurement != null) {
+                    val persistedPhoto = measurement.photoFilePath?.let { photoStorage.loadPhoto(it) }
                     _uiState.value = MeasurementEditUiState(
                         measurementId = measurement.id,
                         sex = _uiState.value.sex,
+                        enabledMeasurements = _uiState.value.enabledMeasurements,
                         dateEpochMillis = measurement.dateEpochMillis,
                         dateText = formatDate(measurement.dateEpochMillis),
                         weightKgText = measurement.weightKg?.let(::formatDecimalForInput).orEmpty(),
@@ -101,6 +107,8 @@ class MeasurementEditViewModel(
                         thighSkinfoldMmText = measurement.thighSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
                         tricepsSkinfoldMmText = measurement.tricepsSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
                         suprailiacSkinfoldMmText = measurement.suprailiacSkinfoldMm?.let(::formatDecimalForInput).orEmpty(),
+                        persistedPhotoFilePath = measurement.photoFilePath,
+                        photoBinaryContent = persistedPhoto,
                     )
                 }
             }
@@ -158,7 +166,8 @@ class MeasurementEditViewModel(
     fun onPhotoCaptured(photo: Bitmap?) {
         update {
             it.copy(
-                capturedPhoto = photo,
+                photoBinaryContent = photo,
+                isPhotoMarkedForDeletion = false,
                 isPhotoPreviewDialogVisible = false,
             )
         }
@@ -167,7 +176,8 @@ class MeasurementEditViewModel(
     fun onDeletePhotoClicked() {
         update {
             it.copy(
-                capturedPhoto = null,
+                photoBinaryContent = null,
+                isPhotoMarkedForDeletion = it.persistedPhotoFilePath != null,
                 isPhotoPreviewDialogVisible = false,
             )
         }
@@ -221,8 +231,12 @@ class MeasurementEditViewModel(
             tricepsSkinfold,
             suprailiacSkinfold,
         ).any { it != null }
-        if (!hasAnyValue) {
-            _uiState.value = current.copy(errorMessage = "Enter at least one value")
+
+        val hasPhoto = current.photoBinaryContent != null ||
+            (current.persistedPhotoFilePath != null && !current.isPhotoMarkedForDeletion)
+
+        if (!hasAnyValue && !hasPhoto) {
+            _uiState.value = current.copy(errorMessage = "Enter at least one value or add a photo")
             return
         }
 
@@ -231,44 +245,87 @@ class MeasurementEditViewModel(
                 return if (metric in enabledMeasurements) value else null
             }
 
-            if (measurementId == null) {
-                repository.insert(
-                    BodyMeasurement(
-                        id = 0,
-                        dateEpochMillis = date,
-                        weightKg = ifEnabled(MeasuredBodyMetric.Weight, weight),
-                        neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference, neck),
-                        chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference, chest),
-                        waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference, waist),
-                        abdomenCircumferenceCm = ifEnabled(MeasuredBodyMetric.AbdomenCircumference, abdomen),
-                        hipCircumferenceCm = ifEnabled(MeasuredBodyMetric.HipCircumference, hip),
-                        chestSkinfoldMm = ifEnabled(MeasuredBodyMetric.ChestSkinfold, chestSkinfold),
-                        abdomenSkinfoldMm = ifEnabled(MeasuredBodyMetric.AbdomenSkinfold, abdomenSkinfold),
-                        thighSkinfoldMm = ifEnabled(MeasuredBodyMetric.ThighSkinfold, thighSkinfold),
-                        tricepsSkinfoldMm = ifEnabled(MeasuredBodyMetric.TricepsSkinfold, tricepsSkinfold),
-                        suprailiacSkinfoldMm = ifEnabled(MeasuredBodyMetric.SuprailiacSkinfold, suprailiacSkinfold),
-                    ),
-                )
-            } else {
-                repository.update(
-                    BodyMeasurement(
-                        id = measurementId,
-                        dateEpochMillis = date,
-                        weightKg = ifEnabled(MeasuredBodyMetric.Weight, weight),
-                        neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference, neck),
-                        chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference, chest),
-                        waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference, waist),
-                        abdomenCircumferenceCm = ifEnabled(MeasuredBodyMetric.AbdomenCircumference, abdomen),
-                        hipCircumferenceCm = ifEnabled(MeasuredBodyMetric.HipCircumference, hip),
-                        chestSkinfoldMm = ifEnabled(MeasuredBodyMetric.ChestSkinfold, chestSkinfold),
-                        abdomenSkinfoldMm = ifEnabled(MeasuredBodyMetric.AbdomenSkinfold, abdomenSkinfold),
-                        thighSkinfoldMm = ifEnabled(MeasuredBodyMetric.ThighSkinfold, thighSkinfold),
-                        tricepsSkinfoldMm = ifEnabled(MeasuredBodyMetric.TricepsSkinfold, tricepsSkinfold),
-                        suprailiacSkinfoldMm = ifEnabled(MeasuredBodyMetric.SuprailiacSkinfold, suprailiacSkinfold),
-                    ),
-                )
+            val draftPhoto = current.photoBinaryContent
+
+            try {
+                if (measurementId == null) {
+                    val insertedId = repository.insert(
+                        BodyMeasurement(
+                            id = 0,
+                            dateEpochMillis = date,
+                            photoFilePath = null,
+                            weightKg = ifEnabled(MeasuredBodyMetric.Weight, weight),
+                            neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference, neck),
+                            chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference, chest),
+                            waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference, waist),
+                            abdomenCircumferenceCm = ifEnabled(MeasuredBodyMetric.AbdomenCircumference, abdomen),
+                            hipCircumferenceCm = ifEnabled(MeasuredBodyMetric.HipCircumference, hip),
+                            chestSkinfoldMm = ifEnabled(MeasuredBodyMetric.ChestSkinfold, chestSkinfold),
+                            abdomenSkinfoldMm = ifEnabled(MeasuredBodyMetric.AbdomenSkinfold, abdomenSkinfold),
+                            thighSkinfoldMm = ifEnabled(MeasuredBodyMetric.ThighSkinfold, thighSkinfold),
+                            tricepsSkinfoldMm = ifEnabled(MeasuredBodyMetric.TricepsSkinfold, tricepsSkinfold),
+                            suprailiacSkinfoldMm = ifEnabled(MeasuredBodyMetric.SuprailiacSkinfold, suprailiacSkinfold),
+                        ),
+                    )
+
+                    if (draftPhoto != null) {
+                        val savedPhotoPath = photoStorage.savePhotoForMeasurement(insertedId, date, draftPhoto)
+                        repository.update(
+                            BodyMeasurement(
+                                id = insertedId,
+                                dateEpochMillis = date,
+                                photoFilePath = savedPhotoPath,
+                                weightKg = ifEnabled(MeasuredBodyMetric.Weight, weight),
+                                neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference, neck),
+                                chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference, chest),
+                                waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference, waist),
+                                abdomenCircumferenceCm = ifEnabled(MeasuredBodyMetric.AbdomenCircumference, abdomen),
+                                hipCircumferenceCm = ifEnabled(MeasuredBodyMetric.HipCircumference, hip),
+                                chestSkinfoldMm = ifEnabled(MeasuredBodyMetric.ChestSkinfold, chestSkinfold),
+                                abdomenSkinfoldMm = ifEnabled(MeasuredBodyMetric.AbdomenSkinfold, abdomenSkinfold),
+                                thighSkinfoldMm = ifEnabled(MeasuredBodyMetric.ThighSkinfold, thighSkinfold),
+                                tricepsSkinfoldMm = ifEnabled(MeasuredBodyMetric.TricepsSkinfold, tricepsSkinfold),
+                                suprailiacSkinfoldMm = ifEnabled(MeasuredBodyMetric.SuprailiacSkinfold, suprailiacSkinfold),
+                            ),
+                        )
+                    }
+                } else {
+                    val shouldRemovePersistedPhoto = current.isPhotoMarkedForDeletion && draftPhoto == null
+
+                    val updatedPhotoPath = when {
+                        draftPhoto != null -> photoStorage.savePhotoForMeasurement(measurementId, date, draftPhoto)
+                        shouldRemovePersistedPhoto -> null
+                        else -> current.persistedPhotoFilePath
+                    }
+
+                    repository.update(
+                        BodyMeasurement(
+                            id = measurementId,
+                            dateEpochMillis = date,
+                            photoFilePath = updatedPhotoPath,
+                            weightKg = ifEnabled(MeasuredBodyMetric.Weight, weight),
+                            neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference, neck),
+                            chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference, chest),
+                            waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference, waist),
+                            abdomenCircumferenceCm = ifEnabled(MeasuredBodyMetric.AbdomenCircumference, abdomen),
+                            hipCircumferenceCm = ifEnabled(MeasuredBodyMetric.HipCircumference, hip),
+                            chestSkinfoldMm = ifEnabled(MeasuredBodyMetric.ChestSkinfold, chestSkinfold),
+                            abdomenSkinfoldMm = ifEnabled(MeasuredBodyMetric.AbdomenSkinfold, abdomenSkinfold),
+                            thighSkinfoldMm = ifEnabled(MeasuredBodyMetric.ThighSkinfold, thighSkinfold),
+                            tricepsSkinfoldMm = ifEnabled(MeasuredBodyMetric.TricepsSkinfold, tricepsSkinfold),
+                            suprailiacSkinfoldMm = ifEnabled(MeasuredBodyMetric.SuprailiacSkinfold, suprailiacSkinfold),
+                        ),
+                    )
+
+                    if (shouldRemovePersistedPhoto) {
+                        current.persistedPhotoFilePath?.let { photoStorage.deletePhoto(it) }
+                    }
+                }
+
+                _events.emit(MeasurementEditEvent.Saved)
+            } catch (_: Throwable) {
+                _uiState.value = _uiState.value.copy(errorMessage = "Unable to save measurement photo")
             }
-            _events.emit(MeasurementEditEvent.Saved)
         }
     }
 
@@ -279,6 +336,7 @@ class MeasurementEditViewModel(
 
 class MeasurementEditViewModelFactory(
     private val repository: MeasurementRepository,
+    private val photoStorage: InternalPhotoStorage,
     private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
@@ -288,6 +346,7 @@ class MeasurementEditViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return MeasurementEditViewModel(
             repository = repository,
+            photoStorage = photoStorage,
             profileRepository = profileRepository,
             settingsRepository = settingsRepository,
             dependencyResolver = dependencyResolver,

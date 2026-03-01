@@ -27,6 +27,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
@@ -38,7 +39,7 @@ import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRou
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListAddButton
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListFullRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRoute
-import de.t_animal.opensourcebodytracker.feature.photos.PhotosScreen
+import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.profile.ProfileRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
 
@@ -48,6 +49,7 @@ fun BodyTrackerNavHost(
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
     measurementRepository: MeasurementRepository,
+    internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
 ) {
@@ -215,7 +217,10 @@ fun BodyTrackerNavHost(
                         .fillMaxSize()
                         .padding(contentPadding),
                 ) {
-                    PhotosScreen()
+                    PhotosRoute(
+                        measurementRepository = measurementRepository,
+                        onOpenMeasurement = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
+                    )
                 }
             }
         }
@@ -254,6 +259,7 @@ fun BodyTrackerNavHost(
         composable(Routes.MeasurementAdd) {
             MeasurementEditRoute(
                 repository = measurementRepository,
+                photoStorage = internalPhotoStorage,
                 profileRepository = profileRepository,
                 settingsRepository = settingsRepository,
                 measurementId = null,
@@ -278,6 +284,7 @@ fun BodyTrackerNavHost(
 
             MeasurementEditRoute(
                 repository = measurementRepository,
+                photoStorage = internalPhotoStorage,
                 profileRepository = profileRepository,
                 settingsRepository = settingsRepository,
                 measurementId = id,

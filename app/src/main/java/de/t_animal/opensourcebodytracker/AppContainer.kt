@@ -5,6 +5,7 @@ import androidx.room.Room
 import de.t_animal.opensourcebodytracker.data.measurements.AppDatabase
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.measurements.RoomMeasurementRepository
+import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.profile.PreferencesProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.PreferencesSettingsRepository
@@ -25,11 +26,16 @@ class AppContainer(appContext: Context) {
     }
 
     private val database: AppDatabase by lazy {
-        Room.databaseBuilder(applicationContext, AppDatabase::class.java, "body_tracker.db").build()
+        Room.databaseBuilder(applicationContext, AppDatabase::class.java, "body_tracker.db")
+            .build()
     }
 
     val measurementRepository: MeasurementRepository by lazy {
         RoomMeasurementRepository(database.measurementDao())
+    }
+
+    val internalPhotoStorage: InternalPhotoStorage by lazy {
+        InternalPhotoStorage(applicationContext)
     }
 
     private val derivedMetricsCalculator: DerivedMetricsCalculator by lazy {

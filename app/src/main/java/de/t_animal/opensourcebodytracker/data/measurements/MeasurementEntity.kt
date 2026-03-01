@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 data class MeasurementEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val dateEpochMillis: Long,
+    val photoFilePath: String? = null,
     val weightKg: Double? = null,
     val neckCircumferenceCm: Double? = null,
     val chestCircumferenceCm: Double? = null,

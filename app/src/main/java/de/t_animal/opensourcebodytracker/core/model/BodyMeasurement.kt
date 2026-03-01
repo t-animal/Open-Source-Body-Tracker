@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.core.model
 data class BodyMeasurement(
     val id: Long,
     val dateEpochMillis: Long,
+    val photoFilePath: String? = null,
     val weightKg: Double? = null,
     val neckCircumferenceCm: Double? = null,
     val chestCircumferenceCm: Double? = null,
