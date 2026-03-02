@@ -12,6 +12,9 @@ interface MeasurementDao {
     @Query("SELECT * FROM measurements ORDER BY dateEpochMillis DESC")
     fun observeAll(): Flow<List<MeasurementEntity>>
 
+    @Query("SELECT * FROM measurements ORDER BY dateEpochMillis ASC")
+    suspend fun getAll(): List<MeasurementEntity>
+
     @Query("SELECT * FROM measurements WHERE id = :id")
     suspend fun getById(id: Long): MeasurementEntity?
 

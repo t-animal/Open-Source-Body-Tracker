@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 interface MeasurementRepository {
     fun observeAll(): Flow<List<BodyMeasurement>>
 
+    suspend fun getAll(): List<BodyMeasurement>
+
     suspend fun getById(id: Long): BodyMeasurement?
 
     suspend fun insert(measurement: BodyMeasurement): Long
