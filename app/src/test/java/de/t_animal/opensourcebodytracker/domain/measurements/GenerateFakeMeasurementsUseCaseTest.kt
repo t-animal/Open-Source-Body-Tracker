@@ -118,6 +118,8 @@ class GenerateFakeMeasurementsUseCaseTest {
 private class FakeMeasurementRepository : MeasurementRepository {
     override fun observeAll(): Flow<List<BodyMeasurement>> = flowOf(emptyList())
 
+    override suspend fun getAll(): List<BodyMeasurement> = emptyList()
+
     override suspend fun getById(id: Long): BodyMeasurement? = null
 
     override suspend fun insert(measurement: BodyMeasurement): Long = 0

@@ -30,7 +30,7 @@ import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
@@ -51,7 +51,7 @@ fun BodyTrackerNavHost(
     measurementRepository: MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
-    generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
+    generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
 ) {
     val isDebuggable = (LocalContext.current.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val navController = rememberNavController()
@@ -310,7 +310,7 @@ fun BodyTrackerNavHost(
                     ) {
                         FakeDataGeneratorRoute(
                             profileRepository = profileRepository,
-                            generateFakeMeasurementsUseCase = generateFakeMeasurementsUseCase,
+                            generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
                         )
                     }
                 }

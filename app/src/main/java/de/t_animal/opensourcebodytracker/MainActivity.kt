@@ -7,7 +7,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                         measurementRepository = container.measurementRepository,
                         internalPhotoStorage = container.internalPhotoStorage,
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
-                        generateFakeMeasurementsUseCase = container.generateFakeMeasurementsUseCase,
+                        generateFakeMeasurementsWithPhotosUseCase = container.generateFakeMeasurementsWithPhotosUseCase,
                     )
                 }
             }
@@ -41,7 +41,7 @@ private fun BodyTrackerApp(
     measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
-    generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
+    generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
 ) {
     BodyTrackerNavHost(
         profileRepository = profileRepository,
@@ -49,6 +49,6 @@ private fun BodyTrackerApp(
         measurementRepository = measurementRepository,
         internalPhotoStorage = internalPhotoStorage,
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-        generateFakeMeasurementsUseCase = generateFakeMeasurementsUseCase,
+        generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
     )
 }
