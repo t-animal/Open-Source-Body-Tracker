@@ -14,6 +14,14 @@ object Routes {
 
     const val Analysis = "analysis"
     const val Photos = "photos"
+    const val PhotoCompareLeftIdArg = "leftMeasurementId"
+    const val PhotoCompareRightIdArg = "rightMeasurementId"
+    const val PhotoCompare =
+        "photo_compare/{$PhotoCompareLeftIdArg}/{$PhotoCompareRightIdArg}"
 
     fun measurementEditRoute(id: Long): String = "measurement_edit/$id"
+
+    fun photoCompareRoute(leftMeasurementId: Long, rightMeasurementId: Long): String {
+        return "photo_compare/$leftMeasurementId/$rightMeasurementId"
+    }
 }

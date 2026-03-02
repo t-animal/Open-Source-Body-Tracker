@@ -38,6 +38,7 @@ import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRou
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListAddButton
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListFullRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRoute
+import de.t_animal.opensourcebodytracker.feature.photos.PhotoCompareRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.profile.ProfileRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
@@ -225,6 +226,61 @@ fun BodyTrackerNavHost(
                     PhotosRoute(
                         measurementRepository = measurementRepository,
                         photoStorage = internalPhotoStorage,
+                        onOpenCompare = { leftMeasurementId, rightMeasurementId ->
+                            navController.navigate(
+                                Routes.photoCompareRoute(
+                                    leftMeasurementId = leftMeasurementId,
+                                    rightMeasurementId = rightMeasurementId,
+                                ),
+                            )
+                        },
+                    )
+                }
+            }
+        }
+
+        composable(
+            route = Routes.PhotoCompare,
+            arguments = listOf(
+                navArgument(Routes.PhotoCompareLeftIdArg) { type = NavType.LongType },
+                navArgument(Routes.PhotoCompareRightIdArg) { type = NavType.LongType },
+            ),
+        ) { backStackEntry ->
+            val leftMeasurementId = backStackEntry.arguments?.getLong(Routes.PhotoCompareLeftIdArg)
+            val rightMeasurementId = backStackEntry.arguments?.getLong(Routes.PhotoCompareRightIdArg)
+
+            if (leftMeasurementId == null || rightMeasurementId == null) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+                return@composable
+            }
+
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Compare") },
+                        navigationIcon = {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back",
+                                )
+                            }
+                        },
+                    )
+                },
+            ) { contentPadding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                ) {
+                    PhotoCompareRoute(
+                        measurementRepository = measurementRepository,
+                        photoStorage = internalPhotoStorage,
+                        leftMeasurementId = leftMeasurementId,
+                        rightMeasurementId = rightMeasurementId,
                     )
                 }
             }
