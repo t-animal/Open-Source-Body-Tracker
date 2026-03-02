@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
 import java.text.DecimalFormatSymbols
 import java.time.LocalDate
 import java.time.ZoneId
@@ -25,7 +25,7 @@ data class FakeDataGeneratorUiState(
 
 class FakeDataGeneratorViewModel(
     private val profileRepository: ProfileRepository,
-    private val generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
+    private val generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FakeDataGeneratorUiState())
     val uiState: StateFlow<FakeDataGeneratorUiState> = _uiState.asStateFlow()
@@ -63,7 +63,7 @@ class FakeDataGeneratorViewModel(
             try {
                 val profile = defaultFakeProfile()
                 profileRepository.saveProfile(profile)
-                generateFakeMeasurementsUseCase(
+                generateFakeMeasurementsWithPhotosUseCase(
                     profile = profile,
                     leanBodyWeightKg = leanBodyWeightKg,
                     minFatBodyWeightKg = minFatBodyWeightKg,
@@ -101,13 +101,13 @@ private fun defaultFakeProfile(): UserProfile {
 
 class FakeDataGeneratorViewModelFactory(
     private val profileRepository: ProfileRepository,
-    private val generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
+    private val generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return FakeDataGeneratorViewModel(
             profileRepository = profileRepository,
-            generateFakeMeasurementsUseCase = generateFakeMeasurementsUseCase,
+            generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
         ) as T
     }
 }

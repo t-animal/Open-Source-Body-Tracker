@@ -18,18 +18,18 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
 import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 
 @Composable
 fun FakeDataGeneratorRoute(
     profileRepository: ProfileRepository,
-    generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
+    generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
 ) {
     val vm: FakeDataGeneratorViewModel = viewModel(
         factory = FakeDataGeneratorViewModelFactory(
             profileRepository = profileRepository,
-            generateFakeMeasurementsUseCase = generateFakeMeasurementsUseCase,
+            generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()

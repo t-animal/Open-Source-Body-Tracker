@@ -40,6 +40,17 @@ class InternalPhotoStorage(
         path
     }
 
+    suspend fun writePhotoForMeasurement(
+        measurementId: Long,
+        measurementDateEpochMillis: Long,
+        photoBinaryContent: ByteArray,
+    ): String = withContext(Dispatchers.IO) {
+        val path = pathForMeasurement(measurementId, measurementDateEpochMillis)
+        val targetFile = resolveFile(path)
+        targetFile.writeBytes(photoBinaryContent)
+        path
+    }
+
     suspend fun deletePhoto(path: String): Boolean = withContext(Dispatchers.IO) {
         val file = resolveFile(path)
         if (!file.exists()) {

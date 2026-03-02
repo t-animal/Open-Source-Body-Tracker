@@ -11,6 +11,8 @@ class RoomMeasurementRepository(
         entities.map { it.toDomain() }
     }
 
+    override suspend fun getAll(): List<BodyMeasurement> = dao.getAll().map { it.toDomain() }
+
     override suspend fun getById(id: Long): BodyMeasurement? = dao.getById(id)?.toDomain()
 
     override suspend fun insert(measurement: BodyMeasurement): Long {
