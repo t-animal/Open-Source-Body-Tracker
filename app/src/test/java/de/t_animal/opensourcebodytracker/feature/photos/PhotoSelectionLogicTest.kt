@@ -1,5 +1,8 @@
 package de.t_animal.opensourcebodytracker.feature.photos
 
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedCompareSelection
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.togglePhotoSelection
 import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
