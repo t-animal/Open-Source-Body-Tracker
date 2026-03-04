@@ -10,13 +10,13 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun PhotosScreenSnackbarHost(
     snackbarHostState: SnackbarHostState,
-    isCompareBottomBarVisible: Boolean,
+    isSelectionBottomBarVisible: Boolean,
     modifier: Modifier = Modifier,
 ) {
     SnackbarHost(
         hostState = snackbarHostState,
         modifier = modifier.padding(
-            bottom = if (isCompareBottomBarVisible) {
+            bottom = if (isSelectionBottomBarVisible) {
                 96.dp
             } else {
                 24.dp

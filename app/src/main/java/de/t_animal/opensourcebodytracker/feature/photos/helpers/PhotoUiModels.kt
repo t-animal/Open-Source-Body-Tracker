@@ -18,6 +18,7 @@ data class PhotosUiState(
 enum class PhotoMode {
     NORMAL,
     COMPARE,
+    ANIMATE,
 }
 
 data class PhotoSelectionResult(

@@ -38,6 +38,7 @@ import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRou
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListAddButton
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListFullRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRoute
+import de.t_animal.opensourcebodytracker.feature.photos.PhotoAnimationRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoCompareRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.profile.ProfileRoute
@@ -234,6 +235,15 @@ fun BodyTrackerNavHost(
                                 ),
                             )
                         },
+                        onOpenAnimate = { selectedMeasurementIds ->
+                            navController.currentBackStackEntry
+                                ?.savedStateHandle
+                                ?.set(
+                                    Routes.PhotoAnimateSelectionIdsKey,
+                                    selectedMeasurementIds.toLongArray(),
+                                )
+                            navController.navigate(Routes.PhotoAnimate)
+                        },
                     )
                 }
             }
@@ -281,6 +291,40 @@ fun BodyTrackerNavHost(
                         photoStorage = internalPhotoStorage,
                         leftMeasurementId = leftMeasurementId,
                         rightMeasurementId = rightMeasurementId,
+                    )
+                }
+            }
+        }
+
+        composable(Routes.PhotoAnimate) {
+            val selectedMeasurementIds = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<LongArray>(Routes.PhotoAnimateSelectionIdsKey)
+                ?.toList()
+                .orEmpty()
+
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Animation") },
+                        navigationIcon = {
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back",
+                                )
+                            }
+                        },
+                    )
+                },
+            ) { contentPadding ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                ) {
+                    PhotoAnimationRoute(
+                        selectedMeasurementIds = selectedMeasurementIds,
                     )
                 }
             }

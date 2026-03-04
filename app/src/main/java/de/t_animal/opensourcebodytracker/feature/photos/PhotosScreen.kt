@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import de.t_animal.opensourcebodytracker.feature.photos.components.AnimateSelectionBottomBar
 import de.t_animal.opensourcebodytracker.feature.photos.components.CompareSelectionBottomBar
 import de.t_animal.opensourcebodytracker.feature.photos.components.PhotosFeed
 import de.t_animal.opensourcebodytracker.feature.photos.components.PhotosModeFab
@@ -30,6 +31,7 @@ fun PhotosRoute(
     measurementRepository: MeasurementRepository,
     photoStorage: InternalPhotoStorage,
     onOpenCompare: (leftMeasurementId: Long, rightMeasurementId: Long) -> Unit,
+    onOpenAnimate: (selectedMeasurementIds: List<Long>) -> Unit,
 ) {
     val vm: PhotosViewModel = viewModel(
         factory = PhotosViewModelFactory(
@@ -50,12 +52,16 @@ fun PhotosRoute(
         state = state,
         snackbarHostState = snackbarHostState,
         onEnterCompareModeClicked = vm::onEnterCompareModeClicked,
+        onEnterAnimateModeClicked = vm::onEnterAnimateModeClicked,
         onExitModeClicked = vm::onExitModeClicked,
         onPhotoClicked = vm::onPhotoClicked,
         onCompareClicked = {
             vm.consumeCompareSelection()?.let { (leftMeasurementId, rightMeasurementId) ->
                 onOpenCompare(leftMeasurementId, rightMeasurementId)
             }
+        },
+        onAnimateClicked = {
+            vm.consumeAnimateSelectionOrShowError()?.let(onOpenAnimate)
         },
     )
 }
@@ -65,26 +71,41 @@ fun PhotosScreen(
     state: PhotosUiState,
     snackbarHostState: SnackbarHostState,
     onEnterCompareModeClicked: () -> Unit,
+    onEnterAnimateModeClicked: () -> Unit,
     onExitModeClicked: () -> Unit,
     onPhotoClicked: (Long) -> Unit,
     onCompareClicked: () -> Unit,
+    onAnimateClicked: () -> Unit,
 ) {
     val selectedIds = state.selectedMeasurementIds.toSet()
     val selectedItems = state.selectedMeasurementIds.mapNotNull { selectedId ->
         state.items.firstOrNull { item -> item.measurementId == selectedId }
     }
-    val isCompareBottomBarVisible = state.mode == PhotoMode.COMPARE && selectedItems.isNotEmpty()
+    val isCompareMode = state.mode == PhotoMode.COMPARE
+    val isAnimateMode = state.mode == PhotoMode.ANIMATE
+    val isCompareBottomBarVisible = isCompareMode && selectedItems.isNotEmpty()
+    val isAnimateBottomBarVisible = isAnimateMode && selectedItems.isNotEmpty()
+    val isSelectionBottomBarVisible = isCompareBottomBarVisible || isAnimateBottomBarVisible
 
-    val compareEnabled = state.mode == PhotoMode.COMPARE && selectedItems.size == 2
+    val compareEnabled = isCompareMode && selectedItems.size == 2
+    val animateEnabled = isAnimateMode && selectedItems.size >= 2
 
-    val listBottomPadding = if (state.mode == PhotoMode.COMPARE) {
-        if (selectedItems.isNotEmpty()) {
-            170.dp
-        } else {
-            96.dp
+    val listBottomPadding = when (state.mode) {
+        PhotoMode.NORMAL -> 136.dp
+        PhotoMode.COMPARE -> {
+            if (selectedItems.isNotEmpty()) {
+                170.dp
+            } else {
+                96.dp
+            }
         }
-    } else {
-        96.dp
+        PhotoMode.ANIMATE -> {
+            if (selectedItems.isNotEmpty()) {
+                130.dp
+            } else {
+                96.dp
+            }
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -109,18 +130,39 @@ fun PhotosScreen(
             }
         }
 
+        if (isAnimateBottomBarVisible) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter),
+            ) {
+                AnimateSelectionBottomBar(
+                    selectedCount = selectedItems.size,
+                    playEnabled = animateEnabled,
+                    onPlayClicked = onAnimateClicked,
+                )
+            }
+        }
+
         PhotosModeFab(
             mode = state.mode,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = 16.dp, bottom = if (state.mode == PhotoMode.COMPARE) 100.dp else 24.dp),
+                .padding(
+                    end = 16.dp,
+                    bottom = if (state.mode == PhotoMode.NORMAL) {
+                        24.dp
+                    } else {
+                        100.dp
+                    },
+                ),
             onEnterCompareModeClicked = onEnterCompareModeClicked,
+            onEnterAnimateModeClicked = onEnterAnimateModeClicked,
             onExitModeClicked = onExitModeClicked,
         )
 
         PhotosScreenSnackbarHost(
             snackbarHostState = snackbarHostState,
-            isCompareBottomBarVisible = isCompareBottomBarVisible,
+            isSelectionBottomBarVisible = isSelectionBottomBarVisible,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
         )
@@ -153,9 +195,11 @@ fun PhotosScreenPreview() {
             ),
             snackbarHostState = remember { SnackbarHostState() },
             onEnterCompareModeClicked = {},
+            onEnterAnimateModeClicked = {},
             onExitModeClicked = {},
             onPhotoClicked = {},
             onCompareClicked = {},
+            onAnimateClicked = {},
         )
     }
 }
@@ -168,9 +212,11 @@ fun PhotosScreenEmptyPreview() {
             state = PhotosUiState(),
             snackbarHostState = remember { SnackbarHostState() },
             onEnterCompareModeClicked = {},
+            onEnterAnimateModeClicked = {},
             onExitModeClicked = {},
             onPhotoClicked = {},
             onCompareClicked = {},
+            onAnimateClicked = {},
         )
     }
 }

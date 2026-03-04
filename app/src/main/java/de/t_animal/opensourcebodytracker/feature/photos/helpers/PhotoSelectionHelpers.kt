@@ -3,13 +3,16 @@ package de.t_animal.opensourcebodytracker.feature.photos.helpers
 fun togglePhotoSelection(
     selectedMeasurementIds: List<Long>,
     clickedMeasurementId: Long,
+    maxSelection: Int? = 2,
 ): PhotoSelectionResult {
+    val selectionLimit = maxSelection?.coerceAtLeast(1)
+
     return if (selectedMeasurementIds.contains(clickedMeasurementId)) {
         PhotoSelectionResult(
             selectedMeasurementIds = selectedMeasurementIds - clickedMeasurementId,
             selectionLimitReached = false,
         )
-    } else if (selectedMeasurementIds.size >= 2) {
+    } else if (selectionLimit != null && selectedMeasurementIds.size >= selectionLimit) {
         PhotoSelectionResult(
             selectedMeasurementIds = selectedMeasurementIds,
             selectionLimitReached = true,
@@ -26,17 +29,28 @@ fun orderedCompareSelection(
     selectedMeasurementIds: List<Long>,
     items: List<PhotosItemUiModel>,
 ): Pair<Long, Long>? {
-    if (selectedMeasurementIds.size != 2) {
-        return null
-    }
-    val itemById = items.associateBy { it.measurementId }
-    val selectedItems = selectedMeasurementIds.mapNotNull { itemById[it] }
-    if (selectedItems.size != 2) {
-        return null
-    }
-    val ordered = selectedItems.sortedWith(
-        compareBy<PhotosItemUiModel> { it.dateEpochMillis }
-            .thenBy { it.measurementId },
+    val orderedIds = orderedAnimationSelection(
+        selectedMeasurementIds = selectedMeasurementIds,
+        items = items,
     )
-    return ordered[0].measurementId to ordered[1].measurementId
+
+    if (orderedIds.size != 2) {
+        return null
+    }
+
+    return orderedIds[0] to orderedIds[1]
+}
+
+fun orderedAnimationSelection(
+    selectedMeasurementIds: List<Long>,
+    items: List<PhotosItemUiModel>,
+): List<Long> {
+    val itemById = items.associateBy { it.measurementId }
+    return selectedMeasurementIds
+        .mapNotNull { itemById[it] }
+        .sortedWith(
+            compareBy<PhotosItemUiModel> { it.dateEpochMillis }
+                .thenBy { it.measurementId },
+        )
+        .map { it.measurementId }
 }

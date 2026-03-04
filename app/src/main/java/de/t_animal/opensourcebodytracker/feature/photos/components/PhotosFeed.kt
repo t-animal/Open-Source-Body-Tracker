@@ -86,7 +86,7 @@ private fun PhotoListItem(
                 .fillMaxWidth(0.8f)
                 .align(Alignment.CenterHorizontally)
                 .clip(RoundedCornerShape(12.dp))
-                .clickable(enabled = mode == PhotoMode.COMPARE) {
+                .clickable(enabled = mode != PhotoMode.NORMAL) {
                     onPhotoClicked(item.measurementId)
                 },
         ) {
@@ -110,7 +110,7 @@ private fun PhotoListItem(
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
             )
-            if (mode == PhotoMode.COMPARE && isSelected) {
+            if (mode != PhotoMode.NORMAL && isSelected) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
