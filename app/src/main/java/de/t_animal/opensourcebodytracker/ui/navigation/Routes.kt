@@ -18,6 +18,8 @@ object Routes {
     const val PhotoCompareRightIdArg = "rightMeasurementId"
     const val PhotoCompare =
         "photo_compare/{$PhotoCompareLeftIdArg}/{$PhotoCompareRightIdArg}"
+    const val PhotoAnimate = "photo_animate"
+    const val PhotoAnimateSelectionIdsKey = "photoAnimateSelectionIds"
 
     fun measurementEditRoute(id: Long): String = "measurement_edit/$id"
 

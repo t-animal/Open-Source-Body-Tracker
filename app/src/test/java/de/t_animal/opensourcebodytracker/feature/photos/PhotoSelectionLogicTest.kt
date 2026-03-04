@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.feature.photos
 
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedAnimationSelection
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedCompareSelection
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.togglePhotoSelection
 import java.io.File
@@ -46,6 +47,18 @@ class PhotoSelectionLogicTest {
     }
 
     @Test
+    fun togglePhotoSelection_addsThirdMeasurement_whenSelectionIsUnlimited() {
+        val result = togglePhotoSelection(
+            selectedMeasurementIds = listOf(11L, 22L),
+            clickedMeasurementId = 33L,
+            maxSelection = null,
+        )
+
+        assertEquals(listOf(11L, 22L, 33L), result.selectedMeasurementIds)
+        assertFalse(result.selectionLimitReached)
+    }
+
+    @Test
     fun orderedCompareSelection_sortsByDateAscending() {
         val items = listOf(
             photoItem(measurementId = 11L, dateEpochMillis = 1_770_000_000_000),
@@ -68,6 +81,22 @@ class PhotoSelectionLogicTest {
         )
 
         assertNull(selection)
+    }
+
+    @Test
+    fun orderedAnimationSelection_sortsByDateAscending() {
+        val items = listOf(
+            photoItem(measurementId = 11L, dateEpochMillis = 1_770_000_000_000),
+            photoItem(measurementId = 33L, dateEpochMillis = 1_775_000_000_000),
+            photoItem(measurementId = 22L, dateEpochMillis = 1_760_000_000_000),
+        )
+
+        val selection = orderedAnimationSelection(
+            selectedMeasurementIds = listOf(11L, 22L, 33L),
+            items = items,
+        )
+
+        assertEquals(listOf(22L, 11L, 33L), selection)
     }
 
     private fun photoItem(measurementId: Long, dateEpochMillis: Long): PhotosItemUiModel {

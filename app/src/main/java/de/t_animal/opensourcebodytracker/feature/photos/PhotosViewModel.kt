@@ -8,6 +8,7 @@ import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotoMode
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosUiState
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedAnimationSelection
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedCompareSelection
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.togglePhotoSelection
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,9 +74,17 @@ class PhotosViewModel(
     )
 
     fun onEnterCompareModeClicked() {
+        setMode(mode = PhotoMode.COMPARE)
+    }
+
+    fun onEnterAnimateModeClicked() {
+        setMode(mode = PhotoMode.ANIMATE)
+    }
+
+    private fun setMode(mode: PhotoMode) {
         selectionState.update {
             it.copy(
-                mode = PhotoMode.COMPARE,
+                mode = mode,
                 selectedMeasurementIds = emptyList(),
                 snackbarMessage = null,
             )
@@ -94,13 +103,19 @@ class PhotosViewModel(
 
     fun onPhotoClicked(measurementId: Long) {
         selectionState.update { currentState ->
-            if (currentState.mode != PhotoMode.COMPARE) {
+            if (currentState.mode == PhotoMode.NORMAL) {
                 return@update currentState
             }
 
+            val maxSelection = if (currentState.mode == PhotoMode.COMPARE) {
+                2
+            } else {
+                null
+            }
             val selectionResult = togglePhotoSelection(
                 selectedMeasurementIds = currentState.selectedMeasurementIds,
                 clickedMeasurementId = measurementId,
+                maxSelection = maxSelection,
             )
 
             if (selectionResult.selectionLimitReached) {
@@ -125,6 +140,29 @@ class PhotosViewModel(
             selectedMeasurementIds = uiState.value.selectedMeasurementIds,
             items = uiState.value.items,
         )
+    }
+
+    fun consumeAnimateSelectionOrShowError(): List<Long>? {
+        val orderedIds = orderedAnimationSelection(
+            selectedMeasurementIds = uiState.value.selectedMeasurementIds,
+            items = uiState.value.items,
+        )
+
+        if (orderedIds.size >= 2) {
+            return orderedIds
+        }
+
+        selectionState.update { currentState ->
+            if (currentState.mode != PhotoMode.ANIMATE) {
+                return@update currentState
+            }
+
+            currentState.copy(
+                snackbarMessage = "Select at least 2 photos to animate",
+            )
+        }
+
+        return null
     }
 }
 
