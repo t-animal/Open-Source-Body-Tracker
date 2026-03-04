@@ -163,7 +163,7 @@ private fun interpolateFatKg(
         lerp(start = minFatKg, end = maxFatKg, progress = (phaseDay - lossDays) / gainDays)
     }
 
-    val noiseKg = random.nextDouble(-1.0, 1.0)
+    val noiseKg = (random.nextDouble() * 2.0) - 1.0
     return (interpolatedFatKg + noiseKg).coerceIn(minFatKg, maxFatKg)
 }
 
