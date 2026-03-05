@@ -45,6 +45,7 @@ sealed interface MeasurementEditUiState {
 
 sealed interface MeasurementEditEvent {
     data object Saved : MeasurementEditEvent
+    data object Deleted : MeasurementEditEvent
 }
 
 class MeasurementEditViewModel(
@@ -157,6 +158,24 @@ class MeasurementEditViewModel(
     fun onPhotoPreviewDialogVisibilityChanged(isVisible: Boolean) {
         update {
             it.copy(isPhotoPreviewDialogVisible = isVisible)
+        }
+    }
+
+    fun onDeleteMeasurementClicked() {
+        val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
+        val currentMeasurementId = current.measurementId ?: return
+
+        viewModelScope.launch {
+            try {
+                repository.deleteById(currentMeasurementId)
+                current.pendingPhotoAbsolutePath?.let { photoStorage.deletePhotoAtAbsolutePath(it) }
+                current.persistedPhotoFilePath?.let { photoStorage.deletePhoto(it) }
+                _events.emit(MeasurementEditEvent.Deleted)
+            } catch (_: Throwable) {
+                update {
+                    it.copy(errorMessage = "Unable to delete measurement")
+                }
+            }
         }
     }
 

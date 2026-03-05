@@ -27,6 +27,9 @@ interface MeasurementDao {
     @Update
     suspend fun update(entity: MeasurementEntity): Int
 
+    @Query("DELETE FROM measurements WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query("DELETE FROM measurements")
     suspend fun deleteAll()
 
