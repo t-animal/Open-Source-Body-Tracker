@@ -88,6 +88,7 @@ This phase enables visual comparison of physical progress.
 * Secure local storage of images
 * Thumbnail preview in list view
 * Side-by-side comparison mode
+* Multi-photo animation playback mode
 * Timeline-based photo gallery
 * Before/After comparison view
 
@@ -168,7 +169,7 @@ License to be defined.
 
 # 📌 Status
 
-🚧 In Active Development – Phase 1, 2, 3 and 4 implemented
+🚧 In Active Development – Phase 1-4 implemented, Phase 5 in progress
 If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
 
 
