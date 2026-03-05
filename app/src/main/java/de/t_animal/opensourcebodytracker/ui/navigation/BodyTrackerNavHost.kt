@@ -324,6 +324,8 @@ fun BodyTrackerNavHost(
                         .padding(contentPadding),
                 ) {
                     PhotoAnimationRoute(
+                        measurementRepository = measurementRepository,
+                        photoStorage = internalPhotoStorage,
                         selectedMeasurementIds = selectedMeasurementIds,
                     )
                 }

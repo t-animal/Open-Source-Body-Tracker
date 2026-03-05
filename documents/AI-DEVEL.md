@@ -1,8 +1,8 @@
-# AI Development Handoff (Phase 1-4.4)
+# AI Development Handoff (Phase 1-5.4)
 
 This document describes the current implementation state and the key constraints/gotchas so another coding agent can continue work quickly.
 
-## Project Goal (README phases through 4.2)
+## Project Goal (README phases through 5.4)
 Implemented:
 - Phase 1: profile onboarding (DataStore) + measurement CRUD (Room) with Compose UI + MVVM.
 - Phase 2: derived metrics in the measurement list via a domain calculation layer.
@@ -11,6 +11,10 @@ Implemented:
 - Phase 4.2 (measurements redesign): latest measurement card + preview table (20) + full-list "More" screen.
 - Phase 4.3 (analysis charts): fully implemented Analysis screen with duration filtering and Vico line charts for raw + derived metrics.
 - Phase 4.4 (settings integration): implemented Settings screen + persisted configuration + settings-driven visibility/input behavior across Analysis and Measurements.
+- Phase 5.1 (photo capture + storage): camera capture in add/edit with deferred persistence on Save and private internal app storage.
+- Phase 5.2 (photo gallery): photos tab shows newest→oldest thumbnail feed for measurements with photos.
+- Phase 5.3 (compare mode): 2-photo selection mode and compare slider screen.
+- Phase 5.4 (animate mode): multi-select animation mode with looping playback screen.
 
 ## Status Summary
 **Build:** `assembleDebug` succeeds.
@@ -57,7 +61,7 @@ Implemented:
 - Add/Edit measurement screen
 - Settings screen (implemented)
 - Analysis screen (implemented charts)
-- Photos screen (placeholder)
+- Photos screen (gallery + compare + animate mode)
 
 All screens have Compose previews.
 
@@ -127,6 +131,13 @@ All screens have Compose previews.
 - Empty metric data in selected duration renders card message: `no data yet`.
 - Covered by unit tests in `feature/analysis/AnalysisTransformTest.kt`.
 
+**Phase 5 photo feature coverage (implemented):**
+- Add/Edit measurement includes camera capture, preview, delete-before-save behavior, and save-time persistence only.
+- Photos tab supports compare mode and animate mode with explicit mode entry/exit behavior.
+- Compare mode enforces a max selection of 2 and opens the compare slider route.
+- Animate mode supports multi-select, requires at least 2 photos to play, and opens a dedicated animation route.
+- Animation playback loops at fixed `ANIMATION_FRAME_RATE = 5` and preserves image aspect ratio.
+
 ## How to Build / Lint
 This environment requires sourcing `/etc/profile` before running Gradle:
 
@@ -170,13 +181,13 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 ### Navigation
 - `de.t_animal.opensourcebodytracker.ui.navigation.Routes`
   - Route constants and helper for edit route.
-  - Includes onboarding, measurement list/add/edit/full-list, profile, settings, analysis, photos.
+  - Includes onboarding, measurement list/add/edit/full-list, profile, settings, analysis, photos, compare, and animation routes.
 - `de.t_animal.opensourcebodytracker.ui.navigation.MainDestination`
   - Main-tab model for Measurements/Analysis/Photos.
 - `de.t_animal.opensourcebodytracker.ui.navigation.MainScreenScaffold`
   - Shared main-screen scaffold (top bar, overflow menu, bottom nav, optional FAB slot).
 - `de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost`
-  - NavHost for onboarding/profile/settings/measurements/analysis/photos/add/edit/full-list.
+  - NavHost for onboarding/profile/settings/measurements/analysis/photos/add/edit/full-list/compare/animation.
   - Gating logic: starts on onboarding; when profile becomes non-null **and current route is onboarding**, navigates to measurement list and pops onboarding.
   - Wires shared scaffold to main tabs and keeps add/edit flows separate.
 
@@ -250,7 +261,7 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
   - Definitions for durations, metric catalog, chart point/range/state models.
 
 ### Remaining placeholders
-- `feature/photos/PhotosScreen`
+- No major placeholder screen remains in the primary product flow.
 
 ### Tests
 - `app/src/test/java/de/t_animal/opensourcebodytracker/domain/metrics/DerivedMetricsCalculatorTest.kt`
@@ -302,6 +313,9 @@ source /etc/profile && ./gradlew :app:ktlintCheck --console=plain
 - Measurements tab shows Latest card + preview table; More opens full-list screen with back button only.
 - Bottom nav switches between Measurements/Analysis/Photos and updates title.
 - Overflow on main tabs opens Profile and Settings screens.
+- Photos tab renders captured photos in newest→oldest order.
+- Compare mode allows max 2 selections and opens compare slider screen.
+- Animate mode requires at least 2 selections and opens looping playback screen.
 - Missing raw/derived values in latest card/table render as `--`.
 - Settings changes immediately affect:
   - Analysis chart list

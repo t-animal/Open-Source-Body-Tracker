@@ -47,7 +47,7 @@ If a profile exists while the current route is onboarding, navigation automatica
 
 - `measurement_list`: implemented measurement overview with latest card, table preview, and FAB.
 - `analysis`: implemented chart screen with duration filtering and Vico line charts.
-- `photos`: placeholder screen.
+- `photos`: implemented photo gallery with compare/animate mode entry.
 
 ### Secondary routes
 
@@ -56,6 +56,8 @@ If a profile exists while the current route is onboarding, navigation automatica
 - `measurement_add`: add measurement flow.
 - `measurement_edit/{id}`: edit measurement flow.
 - `measurement_list_all`: full measurement table screen with back button.
+- `photo_compare/{leftMeasurementId}/{rightMeasurementId}`: compare screen with draggable before/after slider.
+- `photo_animate`: animation playback screen for selected photos.
 - `fake_data_generator` (debug only): fake data screen.
 
 `BodyTrackerNavHost` now passes `SettingsRepository` into:
@@ -80,7 +82,7 @@ If a profile exists while the current route is onboarding, navigation automatica
 
 - Measurements: implemented
 - Analysis: implemented
-- Photos: placeholder
+- Photos: implemented
 - Profile: implemented
 - Settings: implemented
 
@@ -131,7 +133,7 @@ The bottom navigation contains three entries:
 | ----- | ------------ | ----------------------------------- |
 | M     | Measurements | Measurement list screen             |
 | A     | Analysis     | Analysis screen                     |
-| P     | Photos       | Photos screen (empty placeholder)   |
+| P     | Photos       | Photos gallery + compare/animate modes |
 
 Icons will later replace the letters.
 
@@ -157,12 +159,15 @@ Icons will later replace the letters.
 
 ---
 
-## 3️⃣ Photos Screen (Placeholder)
+## 3️⃣ Photos Screen (Implemented)
 
 * Top bar: Title = "Photos"
 * Overflow menu available
 * Bottom navigation visible
-* Content: Empty placeholder layout
+* Content:
+   - scrollable photo gallery
+   - compare mode selection + compare route
+   - animate mode selection + animation route
 
 ---
 
@@ -245,7 +250,7 @@ Editable form layout.
 
 ---
 
-# 🖥 ASCII Mockup – Photos Screen (Empty Placeholder)
+# 🖥 ASCII Mockup – Photos Screen (Gallery)
 
 ```
 +--------------------------------------------------+
@@ -254,7 +259,7 @@ Editable form layout.
 
 |                                                  |
 |                                                  |
-|              Photos Coming Soon                  |
+|              [Photo feed content]               |
 |                                                  |
 |                                                  |
 |                                                  |
@@ -315,4 +320,4 @@ Editable form layout.
 
 ---
 
-This completes the structural navigation design required before expanding Analysis and Photos functionality in later phases.
+This reflects the current navigation structure, including the implemented Photos compare and animation routes.
