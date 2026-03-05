@@ -1,7 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.photos.components
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,6 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -49,21 +54,54 @@ fun PhotosFeed(
             style = MaterialTheme.typography.bodyLarge,
         )
     } else {
-        LazyColumn(
+        Crossfade(
+            targetState = mode,
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(bottom = listBottomPadding),
-        ) {
-            items(
-                items = items,
-                key = { it.measurementId },
-            ) { item ->
-                PhotoListItem(
-                    item = item,
-                    isSelected = selectedIds.contains(item.measurementId),
-                    mode = mode,
-                    onPhotoClicked = onPhotoClicked,
-                )
-                HorizontalDivider()
+            label = "PhotosFeedModeTransition",
+        ) { targetMode ->
+            if (targetMode == PhotoMode.ANIMATE) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 8.dp,
+                        top = 8.dp,
+                        end = 8.dp,
+                        bottom = listBottomPadding,
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(
+                        items = items,
+                        key = { it.measurementId },
+                    ) { item ->
+                        PhotoGridItem(
+                            item = item,
+                            isSelected = selectedIds.contains(item.measurementId),
+                            mode = targetMode,
+                            onPhotoClicked = onPhotoClicked,
+                        )
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = listBottomPadding),
+                ) {
+                    items(
+                        items = items,
+                        key = { it.measurementId },
+                    ) { item ->
+                        PhotoListItem(
+                            item = item,
+                            isSelected = selectedIds.contains(item.measurementId),
+                            mode = targetMode,
+                            onPhotoClicked = onPhotoClicked,
+                        )
+                        HorizontalDivider()
+                    }
+                }
             }
         }
     }
@@ -81,53 +119,95 @@ private fun PhotoListItem(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        Box(
+        PhotoTile(
+            item = item,
+            isSelected = isSelected,
+            mode = mode,
+            onPhotoClicked = onPhotoClicked,
             modifier = Modifier
                 .fillMaxWidth(0.8f)
-                .align(Alignment.CenterHorizontally)
-                .clip(RoundedCornerShape(12.dp))
-                .clickable(enabled = mode != PhotoMode.NORMAL) {
-                    onPhotoClicked(item.measurementId)
-                },
-        ) {
-            AsyncImage(
-                model = item.photoFile,
-                contentDescription = "Progress photo",
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Text(
-                text = formatEpochMillisToLocalizedNumericDate(item.dateEpochMillis),
+                .align(Alignment.CenterHorizontally),
+            dateFontSize = 14.sp,
+            selectedIndicatorSize = 28.dp,
+            selectionPadding = 8.dp,
+        )
+    }
+}
+
+@Composable
+private fun PhotoGridItem(
+    item: PhotosItemUiModel,
+    isSelected: Boolean,
+    mode: PhotoMode,
+    onPhotoClicked: (Long) -> Unit,
+) {
+    PhotoTile(
+        item = item,
+        isSelected = isSelected,
+        mode = mode,
+        onPhotoClicked = onPhotoClicked,
+        modifier = Modifier.fillMaxWidth(),
+        dateFontSize = 10.sp,
+        selectedIndicatorSize = 22.dp,
+        selectionPadding = 6.dp,
+    )
+}
+
+@Composable
+private fun PhotoTile(
+    item: PhotosItemUiModel,
+    isSelected: Boolean,
+    mode: PhotoMode,
+    onPhotoClicked: (Long) -> Unit,
+    modifier: Modifier,
+    dateFontSize: androidx.compose.ui.unit.TextUnit,
+    selectedIndicatorSize: Dp,
+    selectionPadding: Dp,
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(enabled = mode != PhotoMode.NORMAL) {
+                onPhotoClicked(item.measurementId)
+            },
+    ) {
+        AsyncImage(
+            model = item.photoFile,
+            contentDescription = "Progress photo",
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Text(
+            text = formatEpochMillisToLocalizedNumericDate(item.dateEpochMillis),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(6.dp)
+                .background(
+                    color = Color.Black.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(6.dp),
+                )
+                .padding(horizontal = 8.dp, vertical = 2.dp),
+            fontSize = dateFontSize,
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+        )
+        if (mode != PhotoMode.NORMAL && isSelected) {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(6.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(selectionPadding)
+                    .size(selectedIndicatorSize)
                     .background(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(6.dp),
-                    )
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                fontSize = 14.sp,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-            )
-            if (mode != PhotoMode.NORMAL && isSelected) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(28.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = CircleShape,
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Check,
-                        contentDescription = "Selected",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                    )
-                }
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = CircleShape,
+                    ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = "Selected",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                )
             }
         }
     }
