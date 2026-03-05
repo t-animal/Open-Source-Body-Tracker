@@ -23,6 +23,10 @@ class RoomMeasurementRepository(
         dao.update(measurement.toEntityForUpdate())
     }
 
+    override suspend fun deleteById(id: Long) {
+        dao.deleteById(id)
+    }
+
     override suspend fun replaceAll(measurements: List<BodyMeasurement>) {
         dao.replaceAll(measurements.map { it.toEntityForInsert() })
     }

@@ -39,6 +39,7 @@ import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.feature.measurements.components.DeleteMeasurementDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DiscardChangesDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditFabColumn
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditTopBar
@@ -110,7 +111,8 @@ fun MeasurementEditRoute(
     LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
-                MeasurementEditEvent.Saved -> {
+                MeasurementEditEvent.Saved,
+                MeasurementEditEvent.Deleted -> {
                     photoStorage.clearTemporaryCapturePhotos()
                     onFinished()
                 }
@@ -132,6 +134,7 @@ fun MeasurementEditRoute(
         },
         onDeletePhotoClicked = vm::onDeletePhotoClicked,
         onPhotoPreviewDialogVisibilityChanged = vm::onPhotoPreviewDialogVisibilityChanged,
+        onDeleteMeasurementClicked = vm::onDeleteMeasurementClicked,
         onSaveClicked = vm::onSaveClicked,
         onBackClicked = {
             coroutineScope.launch {
@@ -152,6 +155,7 @@ fun MeasurementEditScreen(
     onTakePhotoClicked: () -> Unit,
     onDeletePhotoClicked: () -> Unit,
     onPhotoPreviewDialogVisibilityChanged: (Boolean) -> Unit,
+    onDeleteMeasurementClicked: () -> Unit,
     onSaveClicked: () -> Unit,
     onBackClicked: () -> Unit,
 ) {
@@ -185,6 +189,7 @@ fun MeasurementEditScreen(
         onTakePhotoClicked = onTakePhotoClicked,
         onDeletePhotoClicked = onDeletePhotoClicked,
         onPhotoPreviewDialogVisibilityChanged = onPhotoPreviewDialogVisibilityChanged,
+        onDeleteMeasurementClicked = onDeleteMeasurementClicked,
         onSaveClicked = onSaveClicked,
         onBackClicked = onBackClicked,
     )
@@ -200,12 +205,14 @@ private fun MeasurementEditLoadedScreen(
     onTakePhotoClicked: () -> Unit,
     onDeletePhotoClicked: () -> Unit,
     onPhotoPreviewDialogVisibilityChanged: (Boolean) -> Unit,
+    onDeleteMeasurementClicked: () -> Unit,
     onSaveClicked: () -> Unit,
     onBackClicked: () -> Unit,
 ) {
     val enabledMeasurements = state.enabledMeasurements
     val title = if (state.measurementId == null) "Add Measurement" else "Edit Measurement"
     var showDiscardDialog by remember { mutableStateOf(false) }
+    var showDeleteMeasurementDialog by remember { mutableStateOf(false) }
     val visibleMetrics = remember(enabledMeasurements, state.sex) {
         resolveVisibleMeasuredMetrics(
             enabledMeasurements = enabledMeasurements,
@@ -232,9 +239,11 @@ private fun MeasurementEditLoadedScreen(
         },
         floatingActionButton = {
             MeasurementEditFabColumn(
+                isCreatingNew = state.measurementId == null,
                 hasPhoto = photoPreviewModel != null,
                 onTakePhotoClicked = onTakePhotoClicked,
                 onDeletePhotoClicked = onDeletePhotoClicked,
+                onDeleteMeasurementClicked = { showDeleteMeasurementDialog = true },
                 onSaveClicked = onSaveClicked,
             )
         },
@@ -302,6 +311,16 @@ private fun MeasurementEditLoadedScreen(
             },
         )
     }
+
+    if (showDeleteMeasurementDialog) {
+        DeleteMeasurementDialog(
+            onDismiss = { showDeleteMeasurementDialog = false },
+            onDelete = {
+                showDeleteMeasurementDialog = false
+                onDeleteMeasurementClicked()
+            },
+        )
+    }
 }
 
 
@@ -323,6 +342,7 @@ private fun MeasurementEditScreenPreview_Add() {
             onTakePhotoClicked = {},
             onDeletePhotoClicked = {},
             onPhotoPreviewDialogVisibilityChanged = {},
+            onDeleteMeasurementClicked = {},
             onSaveClicked = {},
             onBackClicked = {},
         )
@@ -348,6 +368,7 @@ private fun MeasurementEditScreenPreview_Error() {
             onTakePhotoClicked = {},
             onDeletePhotoClicked = {},
             onPhotoPreviewDialogVisibilityChanged = {},
+            onDeleteMeasurementClicked = {},
             onSaveClicked = {},
             onBackClicked = {},
         )

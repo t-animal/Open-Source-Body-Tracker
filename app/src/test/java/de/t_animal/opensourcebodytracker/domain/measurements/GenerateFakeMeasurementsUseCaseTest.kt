@@ -126,5 +126,7 @@ private class FakeMeasurementRepository : MeasurementRepository {
 
     override suspend fun update(measurement: BodyMeasurement) = Unit
 
+    override suspend fun deleteById(id: Long) = Unit
+
     override suspend fun replaceAll(measurements: List<BodyMeasurement>) = Unit
 }

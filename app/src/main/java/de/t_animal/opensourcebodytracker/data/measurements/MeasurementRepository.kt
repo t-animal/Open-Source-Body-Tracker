@@ -14,5 +14,7 @@ interface MeasurementRepository {
 
     suspend fun update(measurement: BodyMeasurement)
 
+    suspend fun deleteById(id: Long)
+
     suspend fun replaceAll(measurements: List<BodyMeasurement>)
 }
