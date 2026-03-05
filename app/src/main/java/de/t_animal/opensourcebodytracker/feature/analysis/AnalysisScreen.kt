@@ -21,7 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,7 +45,9 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerController
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
@@ -65,6 +70,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.roundToLong
 
 @Composable
 fun AnalysisRoute(
@@ -98,6 +104,8 @@ fun AnalysisScreen(
     onDurationSelected: (AnalysisDuration) -> Unit,
     contentPadding: PaddingValues,
 ) {
+    var selectedEpochMillis by remember { mutableStateOf<Long?>(null) }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -132,6 +140,8 @@ fun AnalysisScreen(
             MetricChartCard(
                 chart = chart,
                 duration = state.selectedDuration,
+                selectedEpochMillis = selectedEpochMillis,
+                onSelectedEpochMillisChange = { selectedEpochMillis = it },
             )
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
         }
@@ -142,6 +152,8 @@ fun AnalysisScreen(
 private fun MetricChartCard(
     chart: AnalysisMetricChartUiModel,
     duration: AnalysisDuration,
+    selectedEpochMillis: Long?,
+    onSelectedEpochMillisChange: (Long?) -> Unit,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -172,6 +184,8 @@ private fun MetricChartCard(
                 MetricLineChart(
                     chart = chart,
                     duration = duration,
+                    selectedEpochMillis = selectedEpochMillis,
+                    onSelectedEpochMillisChange = onSelectedEpochMillisChange,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(CHART_HEIGHT),
@@ -185,6 +199,8 @@ private fun MetricChartCard(
 private fun MetricLineChart(
     chart: AnalysisMetricChartUiModel,
     duration: AnalysisDuration,
+    selectedEpochMillis: Long?,
+    onSelectedEpochMillisChange: (Long?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val points = chart.points
@@ -223,6 +239,31 @@ private fun MetricLineChart(
         indicator = { selectedPointIndicator },
         indicatorSize = CHART_SELECTED_POINT_SIZE,
     )
+    val latestOnSelectedEpochMillisChange = rememberUpdatedState(onSelectedEpochMillisChange)
+    val markerVisibilityListener = remember {
+        object : CartesianMarkerVisibilityListener {
+            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                latestOnSelectedEpochMillisChange.value(targets.firstOrNull()?.x?.roundToLong())
+            }
+
+            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                latestOnSelectedEpochMillisChange.value(targets.firstOrNull()?.x?.roundToLong())
+            }
+
+            override fun onHidden(marker: CartesianMarker) {
+                latestOnSelectedEpochMillisChange.value(null)
+            }
+        }
+    }
+    val selectedPersistentMarkerX = remember(selectedEpochMillis, xValues) {
+        selectedEpochMillis
+            ?.let { selected ->
+                xValues.firstOrNull { it == selected }
+                    ?: xValues.firstOrNull { candidate ->
+                        candidate.toLocalDateInSystemZone() == selected.toLocalDateInSystemZone()
+                    }
+            }
+    }
     val rangeProvider = remember(yAxisRange) {
         fixedYRangeProvider(yAxisRange)
     }
@@ -251,6 +292,10 @@ private fun MetricLineChart(
         startAxis = VerticalAxis.rememberStart(valueFormatter = yAxisValueFormatter),
         bottomAxis = HorizontalAxis.rememberBottom(valueFormatter = xAxisValueFormatter),
         marker = marker,
+        markerVisibilityListener = markerVisibilityListener,
+        persistentMarkers = { _ ->
+            selectedPersistentMarkerX?.let { marker at it }
+        },
         markerController = CartesianMarkerController.rememberToggleOnTap(),
     )
 
@@ -268,6 +313,7 @@ private fun MetricLineChart(
         modifier = modifier,
         scrollState = scrollState,
         zoomState = zoomState,
+        animateIn = false
     )
 }
 
@@ -282,8 +328,7 @@ private fun formatXAxisLabel(
     epochMillis: Long,
     duration: AnalysisDuration,
 ): String {
-    val instant = Instant.ofEpochMilli(epochMillis)
-    val date = instant.atZone(ZoneId.systemDefault()).toLocalDate()
+    val date = epochMillis.toLocalDateInSystemZone()
     val pattern = when (duration) {
         AnalysisDuration.OneMonth -> "dd.MM"
         AnalysisDuration.OneYear -> "MM.yy"
@@ -300,6 +345,9 @@ private val CHART_HEIGHT = 220.dp
 private val CHART_POINT_SIZE = 6.dp
 private val CHART_SELECTED_POINT_SIZE = 12.dp
 private val CHART_SELECTED_POINT_BORDER_WIDTH = 2.dp
+
+private fun Long.toLocalDateInSystemZone() =
+    Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
 
 private fun BodyMetricUnit.suffixWithLeadingSpace(): String = when (this) {
     BodyMetricUnit.Unitless -> ""

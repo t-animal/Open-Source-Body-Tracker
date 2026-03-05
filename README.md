@@ -177,9 +177,7 @@ If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
 
 * Allow reordering of measurements for table and analysis
 * Tapping photo preview closes it
-* add a hint that not every fields needs to be input
 * paths (e.g. in internalphotostorage) should be provided by a central instance, not hardcoded
-* highlighting an analysis entry highlights all of the same date
 * add body fat as direct measurement 
 * reminders to enter measurement
 * translation
