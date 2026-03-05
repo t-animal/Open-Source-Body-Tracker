@@ -1,11 +1,55 @@
 package de.t_animal.opensourcebodytracker.feature.photos
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.DEFAULT_ANIMATION_SPEED_FPS
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.MAX_ANIMATION_SPEED_FPS
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.MIN_ANIMATION_SPEED_FPS
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.canDecreaseSpeed
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.canIncreaseSpeed
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.nextFasterSpeedFps
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.nextFrameIndex
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.nextSlowerSpeedFps
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.previousFrameIndex
 import java.io.File
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PhotoAnimationLogicTest {
+
+    @Test
+    fun nextSlowerSpeedFps_usesSmallerStepsAtLowerSpeeds() {
+        assertEquals(4f, nextSlowerSpeedFps(5f), 0f)
+        assertEquals(2f, nextSlowerSpeedFps(4f), 0f)
+        assertEquals(0.25f, nextSlowerSpeedFps(0.5f), 0f)
+    }
+
+    @Test
+    fun nextFasterSpeedFps_usesLargerStepsAtHigherSpeeds() {
+        assertEquals(6f, nextFasterSpeedFps(5f), 0f)
+        assertEquals(12f, nextFasterSpeedFps(10f), 0f)
+        assertEquals(15f, nextFasterSpeedFps(12f), 0f)
+    }
+
+    @Test
+    fun speedBounds_areClampedAtMinAndMax() {
+        assertEquals(MIN_ANIMATION_SPEED_FPS, nextSlowerSpeedFps(MIN_ANIMATION_SPEED_FPS), 0f)
+        assertEquals(MAX_ANIMATION_SPEED_FPS, nextFasterSpeedFps(MAX_ANIMATION_SPEED_FPS), 0f)
+
+        assertFalse(canDecreaseSpeed(MIN_ANIMATION_SPEED_FPS))
+        assertFalse(canIncreaseSpeed(MAX_ANIMATION_SPEED_FPS))
+        assertTrue(canDecreaseSpeed(DEFAULT_ANIMATION_SPEED_FPS))
+        assertTrue(canIncreaseSpeed(DEFAULT_ANIMATION_SPEED_FPS))
+    }
+
+    @Test
+    fun frameNavigation_wrapsInBothDirections() {
+        assertEquals(4, previousFrameIndex(currentIndex = 0, frameCount = 5))
+        assertEquals(0, nextFrameIndex(currentIndex = 4, frameCount = 5))
+        assertEquals(0, previousFrameIndex(currentIndex = 0, frameCount = 0))
+        assertEquals(0, nextFrameIndex(currentIndex = 0, frameCount = 0))
+    }
 
     @Test
     fun buildAnimationFrameItems_keepsSelectedOrder_andFiltersInvalidEntries() {
