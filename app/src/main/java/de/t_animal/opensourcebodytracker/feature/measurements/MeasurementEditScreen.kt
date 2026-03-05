@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -30,6 +31,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
@@ -102,6 +107,7 @@ fun MeasurementEditRoute(
         newPhotoTaken -> {
             loadedState?.pendingPhotoAbsolutePath?.let(::File)
         }
+
         oldPhotoExistsAndNotDeleted -> {
             loadedState?.persistedPhotoFilePath?.let(photoStorage::resolvePhotoFile)
         }
@@ -299,9 +305,23 @@ private fun MeasurementEditLoadedScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
-            if (photoPreviewModel == null) {
-                Spacer(modifier = Modifier.height(150.dp))
-            }
+            Text(
+                text = buildAnnotatedString {
+                    append("At least one measurement is required. However ")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("you don't have to enter all measurements")
+                    }
+                    append(
+                        ". In this case though, the analysis that require missing " +
+                            "measurements will not be performed.",
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 88.dp)
+                    .heightIn(min = if (photoPreviewModel == null) 100.dp else 0.dp),
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Light),
+            )
         }
     }
 
