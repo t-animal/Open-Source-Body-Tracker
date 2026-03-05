@@ -1,5 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -210,7 +211,8 @@ private fun MeasurementEditLoadedScreen(
     onBackClicked: () -> Unit,
 ) {
     val enabledMeasurements = state.enabledMeasurements
-    val title = if (state.measurementId == null) "Add Measurement" else "Edit Measurement"
+    val isCreatingNew = state.measurementId == null
+    val title = if (isCreatingNew) "Add Measurement" else "Edit Measurement"
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showDeleteMeasurementDialog by remember { mutableStateOf(false) }
     val visibleMetrics = remember(enabledMeasurements, state.sex) {
@@ -221,13 +223,20 @@ private fun MeasurementEditLoadedScreen(
     }
 
     val hasEnteredAnyInput = state.metricInputs.values.any { it.isNotBlank() } || photoPreviewModel != null
+    val hasUnsavedInput = if (isCreatingNew) hasEnteredAnyInput else state.hasUnsavedChanges
 
     val handleBackClick = {
-        if (hasEnteredAnyInput) {
+        if (hasUnsavedInput) {
             showDiscardDialog = true
         } else {
             onBackClicked()
         }
+    }
+
+    val isOverlayVisible =
+        state.isPhotoPreviewDialogVisible || showDiscardDialog || showDeleteMeasurementDialog
+    BackHandler(enabled = !isOverlayVisible) {
+        handleBackClick()
     }
 
     Scaffold(
@@ -239,7 +248,7 @@ private fun MeasurementEditLoadedScreen(
         },
         floatingActionButton = {
             MeasurementEditFabColumn(
-                isCreatingNew = state.measurementId == null,
+                isCreatingNew = isCreatingNew,
                 hasPhoto = photoPreviewModel != null,
                 onTakePhotoClicked = onTakePhotoClicked,
                 onDeletePhotoClicked = onDeletePhotoClicked,

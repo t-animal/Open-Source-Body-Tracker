@@ -34,10 +34,14 @@ sealed interface MeasurementEditUiState {
         val enabledMeasurements: Set<MeasuredBodyMetric>,
         val dateEpochMillis: Long? = null,
         val dateText: String = "",
+        val initialDateEpochMillis: Long? = null,
         val metricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
+        val initialMetricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
         val persistedPhotoFilePath: String? = null,
+        val initialPersistedPhotoFilePath: String? = null,
         val pendingPhotoAbsolutePath: String? = null,
         val isPhotoMarkedForDeletion: Boolean = false,
+        val hasUnsavedChanges: Boolean = false,
         val isPhotoPreviewDialogVisible: Boolean = false,
         val errorMessage: String? = null,
     ) : MeasurementEditUiState
@@ -285,7 +289,10 @@ class MeasurementEditViewModel(
 
     private fun update(transform: (MeasurementEditUiState.Loaded) -> MeasurementEditUiState.Loaded) {
         val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
-        _uiState.value = transform(current)
+        val updated = transform(current)
+        _uiState.value = updated.copy(
+            hasUnsavedChanges = calculateHasUnsavedChanges(updated),
+        )
     }
 
     private fun buildInitialLoadedState(
@@ -302,16 +309,21 @@ class MeasurementEditViewModel(
                 enabledMeasurements = enabledMeasurements,
                 dateEpochMillis = now,
                 dateText = formatDate(now),
+                initialDateEpochMillis = now,
             )
         } else {
+            val metricInputs = toMetricInputMap(measurement)
             MeasurementEditUiState.Loaded(
                 measurementId = measurement.id,
                 sex = sex,
                 enabledMeasurements = enabledMeasurements,
                 dateEpochMillis = measurement.dateEpochMillis,
                 dateText = formatDate(measurement.dateEpochMillis),
-                metricInputs = toMetricInputMap(measurement),
+                initialDateEpochMillis = measurement.dateEpochMillis,
+                metricInputs = metricInputs,
+                initialMetricInputs = metricInputs,
                 persistedPhotoFilePath = measurement.photoFilePath,
+                initialPersistedPhotoFilePath = measurement.photoFilePath,
             )
         }
     }
@@ -410,4 +422,23 @@ private fun toMetricInputMap(measurement: BodyMeasurement): Map<MeasuredBodyMetr
     ).mapValues { (_, value) ->
         value?.let(::formatDecimalForInput).orEmpty()
     }
+}
+
+private fun calculateHasUnsavedChanges(state: MeasurementEditUiState.Loaded): Boolean {
+    if (state.measurementId == null) {
+        return false
+    }
+
+    val hasDateChange = state.dateEpochMillis != state.initialDateEpochMillis
+    val hasMetricInputChange = MeasuredBodyMetric.entries.any { metric ->
+        val currentValue = parseDoubleOrNull(state.metricInputs[metric].orEmpty())
+        val initialValue = parseDoubleOrNull(state.initialMetricInputs[metric].orEmpty())
+        currentValue != initialValue
+    }
+    val hasPhotoChange =
+        state.isPhotoMarkedForDeletion ||
+            !state.pendingPhotoAbsolutePath.isNullOrBlank() ||
+            state.persistedPhotoFilePath != state.initialPersistedPhotoFilePath
+
+    return hasDateChange || hasMetricInputChange || hasPhotoChange
 }

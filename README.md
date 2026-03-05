@@ -176,13 +176,10 @@ If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
 # Ideas for the future and tech debt
 
 * Allow reordering of measurements for table and analysis
-* Add config button right next to analysis and table to show/hide measurements
-* Editing warning dialog only when actually changed something
 * Tapping photo preview closes it
 * add a hint that not every fields needs to be input
-* dedicated photo remove icon 
-* add measurement deletion
 * paths (e.g. in internalphotostorage) should be provided by a central instance, not hardcoded
 * highlighting an analysis entry highlights all of the same date
 * add body fat as direct measurement 
 * reminders to enter measurement
+* translation
