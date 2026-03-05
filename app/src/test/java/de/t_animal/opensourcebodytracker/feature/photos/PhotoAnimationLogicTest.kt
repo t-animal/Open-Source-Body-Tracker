@@ -6,6 +6,9 @@ import de.t_animal.opensourcebodytracker.feature.photos.helpers.MAX_ANIMATION_SP
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.MIN_ANIMATION_SPEED_FPS
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.canDecreaseSpeed
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.canIncreaseSpeed
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.estimateDecodedMemoryBytes
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.isWithinPreloadMemoryBudget
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.maxPreloadBudgetBytes
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.nextFasterSpeedFps
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.nextFrameIndex
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.nextSlowerSpeedFps
@@ -17,6 +20,26 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class PhotoAnimationLogicTest {
+
+    @Test
+    fun estimateDecodedMemoryBytes_usesArgb8888Footprint() {
+        val estimated = estimateDecodedMemoryBytes(
+            widthPx = 1080,
+            heightPx = 2400,
+            frameCount = 10,
+        )
+
+        assertEquals(103_680_000L, estimated)
+    }
+
+    @Test
+    fun isWithinPreloadMemoryBudget_enforcesThirtyPercentHeapLimit() {
+        val maxHeapBytes = 256L * 1024L * 1024L
+        val budgetBytes = maxPreloadBudgetBytes(maxHeapBytes)
+
+        assertTrue(isWithinPreloadMemoryBudget(budgetBytes, maxHeapBytes))
+        assertFalse(isWithinPreloadMemoryBudget(budgetBytes + 1L, maxHeapBytes))
+    }
 
     @Test
     fun nextSlowerSpeedFps_usesSmallerStepsAtLowerSpeeds() {
