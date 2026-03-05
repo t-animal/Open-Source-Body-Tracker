@@ -93,7 +93,7 @@ fun MainScreenScaffold(
                         selected = selectedDestination == destination,
                         onClick = { onMainDestinationSelected(destination) },
                         icon = {},
-                        label = { Text(destination.label) },
+                        label = { Icon(imageVector = destination.icon, contentDescription = destination.title) },
                     )
                 }
             }

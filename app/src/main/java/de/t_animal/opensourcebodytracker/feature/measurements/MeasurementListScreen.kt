@@ -22,10 +22,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
@@ -193,8 +197,11 @@ fun MeasurementFullListScreen(
 fun MeasurementListAddButton(
     onAdd: () -> Unit,
 ) {
-    ExtendedFloatingActionButton(onClick = onAdd) {
-        Text("Add")
+    FloatingActionButton(onClick = onAdd) {
+        Icon(
+            imageVector = Icons.Filled.MonitorWeight,
+            contentDescription = "Add measurement"
+        )
     }
 }
 
