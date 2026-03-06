@@ -47,8 +47,8 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerController
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.Interaction
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
@@ -70,6 +70,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import kotlin.math.absoluteValue
 import kotlin.math.roundToLong
 
 @Composable
@@ -239,22 +240,9 @@ private fun MetricLineChart(
         indicator = { selectedPointIndicator },
         indicatorSize = CHART_SELECTED_POINT_SIZE,
     )
-    val latestOnSelectedEpochMillisChange = rememberUpdatedState(onSelectedEpochMillisChange)
-    val markerVisibilityListener = remember {
-        object : CartesianMarkerVisibilityListener {
-            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                latestOnSelectedEpochMillisChange.value(targets.firstOrNull()?.x?.roundToLong())
-            }
-
-            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                latestOnSelectedEpochMillisChange.value(targets.firstOrNull()?.x?.roundToLong())
-            }
-
-            override fun onHidden(marker: CartesianMarker) {
-                latestOnSelectedEpochMillisChange.value(null)
-            }
-        }
-    }
+    val markerController = rememberTapSelectionMarkerController(
+        onSelectedEpochMillisChange = onSelectedEpochMillisChange,
+    )
     val selectedPersistentMarkerX = remember(selectedEpochMillis, xValues) {
         selectedEpochMillis
             ?.let { selected ->
@@ -292,11 +280,10 @@ private fun MetricLineChart(
         startAxis = VerticalAxis.rememberStart(valueFormatter = yAxisValueFormatter),
         bottomAxis = HorizontalAxis.rememberBottom(valueFormatter = xAxisValueFormatter),
         marker = marker,
-        markerVisibilityListener = markerVisibilityListener,
         persistentMarkers = { _ ->
             selectedPersistentMarkerX?.let { marker at it }
         },
-        markerController = CartesianMarkerController.rememberToggleOnTap(),
+        markerController = markerController,
     )
 
     LaunchedEffect(xValues, yValues) {
@@ -323,6 +310,29 @@ private fun fixedYRangeProvider(yAxisRange: AnalysisYAxisRange): CartesianLayerR
 
         override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double = yAxisRange.max
     }
+
+@Composable
+private fun rememberTapSelectionMarkerController(
+    onSelectedEpochMillisChange: (Long?) -> Unit,
+): CartesianMarkerController {
+    val latestOnSelectedEpochMillisChange = rememberUpdatedState(onSelectedEpochMillisChange)
+    return remember {
+        object : CartesianMarkerController {
+            override fun shouldAcceptInteraction(
+                interaction: Interaction,
+                targets: List<CartesianMarker.Target>,
+            ): Boolean = interaction is Interaction.Tap
+
+            override fun shouldShowMarker(
+                interaction: Interaction,
+                targets: List<CartesianMarker.Target>,
+            ): Boolean {
+                latestOnSelectedEpochMillisChange.value(targets.firstOrNull()?.x?.roundToLong())
+                return false
+            }
+        }
+    }
+}
 
 private fun formatXAxisLabel(
     epochMillis: Long,
