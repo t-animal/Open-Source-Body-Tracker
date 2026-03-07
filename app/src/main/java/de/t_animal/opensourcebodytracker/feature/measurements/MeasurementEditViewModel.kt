@@ -203,6 +203,13 @@ class MeasurementEditViewModel(
             return
         }
 
+        val bodyFat = metricValues[MeasuredBodyMetric.BodyFat]
+        val invalidBodyFatInput = bodyFat != null && (bodyFat < 0.0 || bodyFat > 100.0)
+        if (invalidBodyFatInput) {
+            _uiState.value = current.copy(errorMessage = "Body fat must be between 0 and 100")
+            return
+        }
+
         val hasAnyValue = metricValues.values.any { it != null }
 
         val hasPhoto = current.pendingPhotoAbsolutePath != null ||
@@ -344,6 +351,7 @@ class MeasurementEditViewModel(
             dateEpochMillis = dateEpochMillis,
             photoFilePath = photoFilePath,
             weightKg = ifEnabled(MeasuredBodyMetric.Weight),
+            bodyFatPercent = ifEnabled(MeasuredBodyMetric.BodyFat),
             neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference),
             chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference),
             waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference),
@@ -409,6 +417,7 @@ private fun defaultMetricInputs(): Map<MeasuredBodyMetric, String> {
 private fun toMetricInputMap(measurement: BodyMeasurement): Map<MeasuredBodyMetric, String> {
     return mapOf(
         MeasuredBodyMetric.Weight to measurement.weightKg,
+        MeasuredBodyMetric.BodyFat to measurement.bodyFatPercent,
         MeasuredBodyMetric.NeckCircumference to measurement.neckCircumferenceCm,
         MeasuredBodyMetric.ChestCircumference to measurement.chestCircumferenceCm,
         MeasuredBodyMetric.WaistCircumference to measurement.waistCircumferenceCm,
