@@ -109,9 +109,18 @@ class ProfileViewModel(
             )
 
             val currentSettings = settingsRepository.settingsFlow.first()
-            val effectiveSettings = ensureRequiredMeasurementsEnabled(currentSettings, profile)
-            if (effectiveSettings != currentSettings) {
-                settingsRepository.saveSettings(effectiveSettings)
+            val requiredAwareSettings = ensureRequiredMeasurementsEnabled(currentSettings, profile)
+            val settingsToSave = if (mode == ProfileMode.Onboarding) {
+                requiredAwareSettings.copy(
+                    onboardingCompleted = false,
+                    isDemoMode = false,
+                )
+            } else {
+                requiredAwareSettings
+            }
+
+            if (settingsToSave != currentSettings) {
+                settingsRepository.saveSettings(settingsToSave)
             }
 
             _events.emit(ProfileEvent.Saved)

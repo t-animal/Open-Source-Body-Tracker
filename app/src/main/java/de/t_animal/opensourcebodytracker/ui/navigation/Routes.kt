@@ -1,7 +1,10 @@
 package de.t_animal.opensourcebodytracker.ui.navigation
 
 object Routes {
-    const val Onboarding = "onboarding"
+    const val OnboardingStart = "onboarding/start"
+    const val OnboardingProfile = "onboarding/profile"
+    const val OnboardingAnalysis = "onboarding/analysis"
+
     const val Profile = "profile"
     const val Settings = "settings"
     const val FakeDataGenerator = "fake_data_generator"

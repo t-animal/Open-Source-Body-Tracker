@@ -27,6 +27,8 @@ class PreferencesSettingsRepository(
         val skinfoldBodyFatEnabled = booleanPreferencesKey("skinfoldBodyFatEnabled")
         val waistHipRatioEnabled = booleanPreferencesKey("waistHipRatioEnabled")
         val waistHeightRatioEnabled = booleanPreferencesKey("waistHeightRatioEnabled")
+        val onboardingCompleted = booleanPreferencesKey("onboardingCompleted")
+        val isDemoMode = booleanPreferencesKey("isDemoMode")
         val enabledMeasurements = stringSetPreferencesKey("enabledMeasurements")
         val visibleInAnalysis = stringSetPreferencesKey("visibleInAnalysis")
         val visibleInTable = stringSetPreferencesKey("visibleInTable")
@@ -40,6 +42,8 @@ class PreferencesSettingsRepository(
             skinfoldBodyFatEnabled = prefs[Keys.skinfoldBodyFatEnabled] ?: defaults.skinfoldBodyFatEnabled,
             waistHipRatioEnabled = prefs[Keys.waistHipRatioEnabled] ?: defaults.waistHipRatioEnabled,
             waistHeightRatioEnabled = prefs[Keys.waistHeightRatioEnabled] ?: defaults.waistHeightRatioEnabled,
+            onboardingCompleted = prefs[Keys.onboardingCompleted] ?: defaults.onboardingCompleted,
+            isDemoMode = prefs[Keys.isDemoMode] ?: defaults.isDemoMode,
             enabledMeasurements = parseEnumSet(
                 raw = prefs[Keys.enabledMeasurements],
                 values = MeasuredBodyMetric.entries,
@@ -63,6 +67,8 @@ class PreferencesSettingsRepository(
             prefs[Keys.skinfoldBodyFatEnabled] = settings.skinfoldBodyFatEnabled
             prefs[Keys.waistHipRatioEnabled] = settings.waistHipRatioEnabled
             prefs[Keys.waistHeightRatioEnabled] = settings.waistHeightRatioEnabled
+            prefs[Keys.onboardingCompleted] = settings.onboardingCompleted
+            prefs[Keys.isDemoMode] = settings.isDemoMode
             prefs[Keys.enabledMeasurements] = settings.enabledMeasurements.mapTo(mutableSetOf()) { it.name }
             prefs[Keys.visibleInAnalysis] = settings.visibleInAnalysis.mapTo(mutableSetOf()) { it.storageName() }
             prefs[Keys.visibleInTable] = settings.visibleInTable.mapTo(mutableSetOf()) { it.storageName() }

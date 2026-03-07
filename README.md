@@ -181,3 +181,4 @@ If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
 * add body fat as direct measurement 
 * reminders to enter measurement
 * translation
+* geburtstag als datum speichern, nicht als timestamp
