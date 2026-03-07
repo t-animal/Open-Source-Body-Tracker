@@ -93,6 +93,7 @@ class DemoDataMeasurementSeriesGenerator(
                 id = 0,
                 dateEpochMillis = currentDate.atStartOfDay(zoneId).toInstant().toEpochMilli(),
                 weightKg = weightKg,
+                bodyFatPercent = roundToOneDecimal(targetBodyFatPercent),
                 neckCircumferenceCm = roundToOneDecimal(circumferences.neckCm),
                 chestCircumferenceCm = roundToOneDecimal(circumferences.chestCm),
                 waistCircumferenceCm = roundToOneDecimal(circumferences.waistCm),

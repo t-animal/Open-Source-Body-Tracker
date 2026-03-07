@@ -131,6 +131,7 @@ private fun SettingsCheckRow(
 
 private fun MeasuredBodyMetric.label(): String = when (this) {
     MeasuredBodyMetric.Weight -> "Weight"
+    MeasuredBodyMetric.BodyFat -> "Body Fat"
     MeasuredBodyMetric.NeckCircumference -> "Neck"
     MeasuredBodyMetric.WaistCircumference -> "Waist"
     MeasuredBodyMetric.HipCircumference -> "Hip"

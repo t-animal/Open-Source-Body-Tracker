@@ -42,6 +42,12 @@ enum class MeasuredBodyMetric(
         unit = BodyMetricUnit.Kilogram,
         valueSelector = { measurement, _ -> measurement.weightKg },
     ),
+    BodyFat(
+        id = "body_fat_percent",
+        metricType = BodyMetricType.Weight,
+        unit = BodyMetricUnit.Percent,
+        valueSelector = { measurement, _ -> measurement.bodyFatPercent },
+    ),
     NeckCircumference(
         id = "neck_cm",
         metricType = BodyMetricType.Circumference,

@@ -9,6 +9,7 @@ data class MeasurementEntity(
     val dateEpochMillis: Long,
     val photoFilePath: String? = null,
     val weightKg: Double? = null,
+    val bodyFatPercent: Double? = null,
     val neckCircumferenceCm: Double? = null,
     val chestCircumferenceCm: Double? = null,
     val waistCircumferenceCm: Double? = null,

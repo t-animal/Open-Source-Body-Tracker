@@ -70,6 +70,7 @@ private fun metricSectionTitle(metricType: BodyMetricType): String {
 private fun metricInputLabel(metric: MeasuredBodyMetric): String {
     return when (metric) {
         MeasuredBodyMetric.Weight -> "Weight (kg)"
+        MeasuredBodyMetric.BodyFat -> "Body Fat (%)"
         MeasuredBodyMetric.NeckCircumference -> "Neck (cm)"
         MeasuredBodyMetric.ChestCircumference -> "Chest (cm)"
         MeasuredBodyMetric.WaistCircumference -> "Waist (cm)"

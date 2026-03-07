@@ -399,6 +399,7 @@ private fun AnalysisScreenPreview() {
 private fun BodyMetric.analysisTitle(): String = when (this) {
     is MeasuredBodyMetric -> when (this) {
         MeasuredBodyMetric.Weight -> "Weight"
+        MeasuredBodyMetric.BodyFat -> "Body Fat"
         MeasuredBodyMetric.NeckCircumference -> "Neck"
         MeasuredBodyMetric.WaistCircumference -> "Waist"
         MeasuredBodyMetric.HipCircumference -> "Hip"
