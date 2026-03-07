@@ -57,6 +57,7 @@ fun BodyTrackerNavHost(
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    onResetApp: () -> Unit,
 ) {
     val isDebuggable = (LocalContext.current.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val navController = rememberNavController()
@@ -186,7 +187,7 @@ fun BodyTrackerNavHost(
                     onAdd = { navController.navigate(Routes.MeasurementAdd) },
                     onOpenMore = { navController.navigate(Routes.MeasurementListAll) },
                     showDemoBanner = settings.isDemoMode,
-                    onResetApp = {},
+                    onResetApp = onResetApp,
                     contentPadding = contentPadding,
                 )
             }
