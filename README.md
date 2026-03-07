@@ -1,4 +1,104 @@
-# Body Metrics Tracker (Android)
+# App Overview
+
+This app is a **body measurement and body composition tracking tool** designed to help users monitor physical progress over time. It allows users to record anthropometric measurements and apply established analysis methods to estimate body composition and related metrics.
+
+## Purpose
+
+The primary purpose of the app is to provide a **simple, structured, and privacy-focused way** to track body measurements and analyze body composition using scientifically recognized formulas.
+
+It is intended for:
+
+* Fitness tracking
+* Body recomposition monitoring
+* Research or self-quantification
+* Long-term physical progress tracking
+
+## Core Functionalities
+
+**1. Measurement Tracking**
+
+Users can record a wide range of body measurements, such as:
+
+* Body weight
+* Circumference measurements (e.g., waist, hips, chest, arms)
+* Skinfold measurements for body fat estimation
+
+Measurements are stored chronologically to allow **progress tracking over time**.
+
+---
+
+**2. Body Composition Analysis**
+
+The app supports multiple **analysis methods** that use recorded measurements to estimate body composition.
+
+Examples include:
+
+* Skinfold-based body fat estimation methods (e.g., Jackson & Pollock formulas)
+* Other measurement-based body composition calculations
+
+Users can choose **which analysis methods they want to use**, and the app automatically activates the required measurements.
+
+---
+
+**3. Configurable Measurement System**
+
+When enabling analysis methods, the app automatically:
+
+* Activates all measurements required for those methods
+* Allows users to enable **additional optional measurements** in the settings
+
+This ensures that the measurement workflow remains **minimal but flexible**.
+
+---
+
+**4. Progress Monitoring**
+
+By storing measurements over time, the app enables users to:
+
+* Track physical changes
+* Monitor body composition estimates
+* Maintain a historical log of their measurements
+
+---
+
+**5. Measurement Reminders**
+
+Optional reminders can be configured to help users maintain **consistent measurement routines**.
+Users can select specific weekdays and times for reminders.
+
+---
+
+## Privacy and Data Security
+
+**Data confidentiality is a core design principle of the app.**
+
+* **All data is stored locally on the device.**
+* **No measurement data is transmitted to external servers.**
+* **No cloud synchronization is required.**
+* **No user accounts are needed.**
+
+This ensures that **sensitive personal health and body data remains fully private and under the user’s control**.
+
+---
+
+## Key Design Principles
+
+The app is built around the following principles:
+
+* **Privacy-first architecture**
+* **Local data storage**
+* **Transparency of calculations**
+* **Scientific measurement methods**
+* **Minimal and focused user interface**
+
+---
+
+## Summary
+
+The app provides a **private, reliable, and scientifically grounded tool for body measurement tracking and body composition analysis**, while ensuring that **all sensitive user data remains securely stored on the device itself**.
+
+
+# Development
 
 An Android application for tracking personal body measurements over time.
 The app enables users to record key anthropometric data, monitor changes, and calculate derived health indicators such as BMI and body composition ratios.
@@ -9,19 +109,6 @@ The project is built using **MVVM architecture**, **Jetpack Compose** for the UI
 
 This is also a test for AI-driven development, so don't expect much. It might kill your cat or whatever.
 
----
-
-## 📱 Project Overview
-
-**Body Metrics Tracker** helps users:
-
-* Track core body measurements
-* Monitor physical progress over time
-* Calculate derived health metrics
-* Visualize historical trends
-* Compare progress visually with photos
-* Configure enabled analyses, collected measurements, and display visibility
-* Extend functionality incrementally through clearly defined development phases
 
 ## Implementation hints
 
@@ -65,75 +152,10 @@ The application is implemented using:
 
 ---
 
-# 🚀 Development Roadmap
-
----
-
-The following phases have already [been completed](documents/COMPLETED.md):
-
-- Phase 1 – Core Tracking & User Profile 
-- Phase 2 – Derived Metrics
-- Phase 3 – Advanced Body Fat Estimation
-- Phase 4 – Historical Trends & Analytics
-
----
-
-## Phase 5 – Photo Progress Tracking
-
-This phase enables visual comparison of physical progress.
-
-### Features
-
-* Attach a photo to each measurement entry
-* Secure local storage of images
-* Thumbnail preview in list view
-* Side-by-side comparison mode
-* Multi-photo animation playback mode
-* Timeline-based photo gallery
-* Before/After comparison view
-
-### Technical Considerations
-
-* Camera integration
-* Image storage handling
-* File management and caching
-* Permission handling
-* Performance optimization for image loading
-
-Due to its size and complexity, this phase is divided into multiple subphases:
-    - Phase 5.1 – Photo Capture & Secure Storage
-    - Phase 5.2 – Optimized Photo Gallery
-    - Phase 5.3 – Photo Comparison Mode (2-Image Slider)
-    - Phase 5.4 – Compare Mode & Animation Mode (Advanced Interaction)
-
-For details see [documents/PHOTOS.md](documents/PHOTOS.md)
-
----
-
-# 📊 Data Model (Simplified Draft)
-
-```kotlin
-data class UserProfile(
-    val sex: Sex,
-    val dateOfBirth: LocalDate,
-    val heightCm: Double
-)
-
-data class BodyMeasurement(
-    val id: Long,
-    val date: Instant,
-    val weightKg: Double? = null,
-    val neckCircumferenceCm: Double? = null,
-    val chestCircumferenceCm: Double? = null,
-    val waistCircumferenceCm: Double? = null,
-    val abdomenCircumferenceCm: Double? = null,
-    val hipCircumferenceCm: Double? = null,
-    val photoUri: String? = null
-)
-```
+# 📊 Data Model
 
 Derived metrics are computed in the domain layer and not redundantly stored. Internally, all values are stored using SI unit (or derived values)
-like cm and kg. In the future there may be a switch for the user to display imperial units, but that is not planned right now.z
+like cm and kg. In the future there may be a switch for the user to display imperial units, but that is not planned right now.
 
 ---
 
@@ -167,10 +189,7 @@ License to be defined.
 
 ---
 
-# 📌 Status
-
-🚧 In Active Development – Phase 1-4 implemented, Phase 5 in progress
-If you're an AI Agent, check [AI-DEVEL.md](documents/AI-DEVEL.md) for details.
+If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
 
 
 # Ideas for the future and tech debt

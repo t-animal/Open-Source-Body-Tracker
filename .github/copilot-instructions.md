@@ -1,5 +1,9 @@
 # Agent Instructions
 
+## Planning
+
+When planning take the [AGENTS.md](../documents/AGENTS.md) file into account
+
 ## Build Command Waiting Policy
 
 When running any build command (for example `assembleDebug`, `build`, or `:app:compileDebugKotlin`), follow this waiting policy:
