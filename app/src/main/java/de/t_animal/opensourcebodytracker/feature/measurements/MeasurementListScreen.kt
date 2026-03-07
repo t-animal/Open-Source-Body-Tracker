@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -35,9 +36,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -124,6 +131,18 @@ fun MeasurementListScreen(
     onResetApp: () -> Unit,
     contentPadding: PaddingValues,
 ) {
+    var showResetConfirmationDialog by remember { mutableStateOf(false) }
+
+    if (showResetConfirmationDialog) {
+        ResetAppConfirmationDialog(
+            onDismiss = { showResetConfirmationDialog = false },
+            onConfirm = {
+                showResetConfirmationDialog = false
+                onResetApp()
+            },
+        )
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -133,7 +152,7 @@ fun MeasurementListScreen(
         if (showDemoBanner) {
             item {
                 DemoModeBanner(
-                    onResetApp = onResetApp,
+                    onResetApp = { showResetConfirmationDialog = true },
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -210,6 +229,37 @@ private fun DemoModeBanner(
             }
         }
     }
+}
+
+@Composable
+private fun ResetAppConfirmationDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Reset App?") },
+        text = {
+            Text(
+                text = buildAnnotatedString {
+                    append("This will delete all app data and close the app.")
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("You will have to restart it manually.")
+                    }
+                },
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Reset App")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+    )
 }
 
 @Composable

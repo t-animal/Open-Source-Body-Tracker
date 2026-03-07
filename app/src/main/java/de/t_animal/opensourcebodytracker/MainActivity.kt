@@ -1,6 +1,11 @@
 package de.t_animal.opensourcebodytracker
 
+import android.app.ActivityManager
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
@@ -27,9 +32,31 @@ class MainActivity : ComponentActivity() {
                         internalPhotoStorage = container.internalPhotoStorage,
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
                         generateFakeMeasurementsWithPhotosUseCase = container.generateFakeMeasurementsWithPhotosUseCase,
+                        onResetApp = ::resetApp,
                     )
                 }
             }
+        }
+    }
+
+    private fun resetApp() {
+        Toast.makeText(
+            this,
+            "Cleaning all app data. Please restart app manually.",
+            Toast.LENGTH_LONG,
+        ).show()
+
+        val clearAccepted = runCatching {
+            val activityManager = getSystemService(ActivityManager::class.java)
+            activityManager?.clearApplicationUserData() ?: false
+        }.getOrDefault(false)
+
+        if (!clearAccepted) {
+            Toast.makeText(
+                this,
+                "Could not reset app automatically. Please clear app storage in system settings.",
+                Toast.LENGTH_LONG,
+            ).show()
         }
     }
 }
@@ -42,6 +69,7 @@ private fun BodyTrackerApp(
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
     generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    onResetApp: () -> Unit,
 ) {
     BodyTrackerNavHost(
         profileRepository = profileRepository,
@@ -50,5 +78,6 @@ private fun BodyTrackerApp(
         internalPhotoStorage = internalPhotoStorage,
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
+        onResetApp = onResetApp,
     )
 }
