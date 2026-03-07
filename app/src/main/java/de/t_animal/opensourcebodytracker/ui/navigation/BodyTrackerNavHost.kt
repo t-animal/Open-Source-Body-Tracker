@@ -41,8 +41,9 @@ import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRou
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoAnimationRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoCompareRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
-import de.t_animal.opensourcebodytracker.feature.profile.ProfileRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
+import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
+import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,7 +85,7 @@ fun BodyTrackerNavHost(
             ProfileRoute(
                 repository = profileRepository,
                 settingsRepository = settingsRepository,
-                mode = de.t_animal.opensourcebodytracker.feature.profile.ProfileMode.Onboarding,
+                mode = ProfileMode.Onboarding,
                 onFinished = {
                     navController.navigate(Routes.MeasurementList) {
                         popUpTo(Routes.Onboarding) { inclusive = true }
@@ -97,7 +98,7 @@ fun BodyTrackerNavHost(
             ProfileRoute(
                 repository = profileRepository,
                 settingsRepository = settingsRepository,
-                mode = de.t_animal.opensourcebodytracker.feature.profile.ProfileMode.Settings,
+                mode = ProfileMode.Settings,
                 onFinished = { navController.popBackStack() },
             )
         }

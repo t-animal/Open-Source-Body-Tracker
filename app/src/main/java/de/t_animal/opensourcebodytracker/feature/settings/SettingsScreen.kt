@@ -1,6 +1,5 @@
 package de.t_animal.opensourcebodytracker.feature.settings
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -27,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -48,6 +45,8 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.feature.settings.components.AnalysisMethodsSection
+import de.t_animal.opensourcebodytracker.feature.settings.components.MeasurementCollectionSection
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -160,87 +159,6 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun AnalysisMethodsSection(
-    bmiEnabled: Boolean,
-    navyBodyFatEnabled: Boolean,
-    skinfoldBodyFatEnabled: Boolean,
-    waistHipRatioEnabled: Boolean,
-    waistHeightRatioEnabled: Boolean,
-    onBmiEnabledChanged: (Boolean) -> Unit,
-    onNavyBodyFatEnabledChanged: (Boolean) -> Unit,
-    onSkinfoldBodyFatEnabledChanged: (Boolean) -> Unit,
-    onWaistHipRatioEnabledChanged: (Boolean) -> Unit,
-    onWaistHeightRatioEnabledChanged: (Boolean) -> Unit,
-) {
-    Card {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Analysis Methods", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            CheckRow(
-                label = "BMI",
-                checked = bmiEnabled,
-                enabled = true,
-                onCheckedChange = onBmiEnabledChanged,
-            )
-            CheckRow(
-                label = "Navy Body Fat %",
-                checked = navyBodyFatEnabled,
-                enabled = true,
-                onCheckedChange = onNavyBodyFatEnabledChanged,
-            )
-            CheckRow(
-                label = "Skinfold Body Fat %",
-                checked = skinfoldBodyFatEnabled,
-                enabled = true,
-                onCheckedChange = onSkinfoldBodyFatEnabledChanged,
-            )
-            CheckRow(
-                label = "Waist–Hip Ratio",
-                checked = waistHipRatioEnabled,
-                enabled = true,
-                onCheckedChange = onWaistHipRatioEnabledChanged,
-            )
-            CheckRow(
-                label = "Waist–Height Ratio",
-                checked = waistHeightRatioEnabled,
-                enabled = true,
-                onCheckedChange = onWaistHeightRatioEnabledChanged,
-            )
-        }
-    }
-}
-
-@Composable
-private fun MeasurementCollectionSection(
-    enabledMeasurements: Set<MeasuredBodyMetric>,
-    requiredMeasurements: Set<MeasuredBodyMetric>,
-    onMeasurementEnabledChanged: (MeasuredBodyMetric, Boolean) -> Unit,
-) {
-    Card {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Measurement Collection", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(8.dp))
-
-            MeasuredBodyMetric.entries.forEach { measurement ->
-                val required = measurement in requiredMeasurements
-                val label = if (required) {
-                    "${measurement.label()} (required)"
-                } else {
-                    measurement.label()
-                }
-                CheckRow(
-                    label = label,
-                    checked = measurement in enabledMeasurements,
-                    enabled = !required,
-                    onCheckedChange = { onMeasurementEnabledChanged(measurement, it) },
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun DisplayConfigurationSection(
     state: SettingsUiState,
     onDisplayPlacementChanged: (BodyMetric, DisplayPlacement) -> Unit,
@@ -276,36 +194,6 @@ private fun DisplayConfigurationSection(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun CheckRow(
-    label: String,
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled) { onCheckedChange(!checked) }
-            .padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(
-            text = label,
-            modifier = Modifier
-                .weight(1f)
-                .padding(end = 8.dp),
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        Switch(
-            checked = checked,
-            onCheckedChange = if (enabled) onCheckedChange else null,
-            enabled = enabled,
-            modifier = Modifier.size(30.dp),
-        )
     }
 }
 
