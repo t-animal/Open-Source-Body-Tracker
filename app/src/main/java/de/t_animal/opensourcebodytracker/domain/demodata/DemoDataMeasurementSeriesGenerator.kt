@@ -1,9 +1,7 @@
-package de.t_animal.opensourcebodytracker.domain.measurements
+package de.t_animal.opensourcebodytracker.domain.demodata
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.Sex
-import de.t_animal.opensourcebodytracker.core.model.UserProfile
-import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
@@ -17,29 +15,10 @@ import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sqrt
 
-class GenerateFakeMeasurementsUseCase(
-    private val measurementRepository: MeasurementRepository,
+class DemoDataMeasurementSeriesGenerator(
     private val nowProvider: () -> Instant = { Instant.now() },
 ) {
-    suspend operator fun invoke(
-        profile: UserProfile?,
-        leanBodyWeightKg: Double,
-        minFatBodyWeightKg: Double,
-        maxFatBodyWeightKg: Double,
-    ) {
-        measurementRepository.replaceAll(
-            generateMeasurements(
-                sex = profile?.sex,
-                heightCm = profile?.heightCm?.toDouble(),
-                dateOfBirthEpochMillis = profile?.dateOfBirthEpochMillis,
-                leanBodyWeightKg = leanBodyWeightKg,
-                minFatBodyWeightKg = minFatBodyWeightKg,
-                maxFatBodyWeightKg = maxFatBodyWeightKg,
-            ),
-        )
-    }
-
-    internal fun generateMeasurements(
+    fun generateMeasurements(
         sex: Sex?,
         heightCm: Double?,
         dateOfBirthEpochMillis: Long?,
@@ -75,7 +54,7 @@ class GenerateFakeMeasurementsUseCase(
         val startDate = dates.first()
         var previousNeckCm: Double? = null
 
-        return dates.mapIndexed { index, currentDate ->
+        return dates.map { currentDate ->
             val daysFromStart = ChronoUnit.DAYS.between(startDate, currentDate)
             val fatKg = interpolateFatKg(
                 daysFromStart = daysFromStart,
@@ -274,8 +253,8 @@ private fun computeSkinfolds(
         when (sex) {
             Sex.Male -> {
                 val chest = (sum3 * 0.24 + jitter).coerceIn(2.0, 70.0)
-                val abdomen = (sum3 * 0.46 - jitter*1/3).coerceIn(2.0, 70.0)
-                val thigh = (sum3 * 0.30 - jitter*2/3).coerceIn(2.0, 70.0)
+                val abdomen = (sum3 * 0.46 - jitter * 1 / 3).coerceIn(2.0, 70.0)
+                val thigh = (sum3 * 0.30 - jitter * 2 / 3).coerceIn(2.0, 70.0)
                 GeneratedSkinfolds(
                     chestMm = chest,
                     abdomenMm = abdomen,
@@ -287,8 +266,8 @@ private fun computeSkinfolds(
 
             Sex.Female -> {
                 val triceps = (sum3 * 0.30 + jitter).coerceIn(2.0, 70.0)
-                val suprailiac = (sum3 * 0.32 - jitter*1/3).coerceIn(2.0, 70.0)
-                val thigh = (sum3 * 0.8 - jitter*2/3).coerceIn(2.0, 70.0)
+                val suprailiac = (sum3 * 0.32 - jitter * 1 / 3).coerceIn(2.0, 70.0)
+                val thigh = (sum3 * 0.8 - jitter * 2 / 3).coerceIn(2.0, 70.0)
                 GeneratedSkinfolds(
                     chestMm = (triceps - 4.0).coerceIn(2.0, 70.0),
                     abdomenMm = (suprailiac + 2.0).coerceIn(2.0, 70.0),

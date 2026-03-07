@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.domain.measurements
+package de.t_animal.opensourcebodytracker.domain.demodata
 
 import android.content.res.AssetManager
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
@@ -11,31 +11,12 @@ import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
 
-class GenerateFakeMeasurementsWithPhotosUseCase(
+class DemoDataPhotoSeeder(
     private val measurementRepository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
-    private val generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase,
     private val assetManager: AssetManager,
 ) {
-    suspend operator fun invoke(
-        profile: UserProfile?,
-        leanBodyWeightKg: Double,
-        minFatBodyWeightKg: Double,
-        maxFatBodyWeightKg: Double,
-    ) {
-        cleanupExistingMeasurementPhotos()
-
-        generateFakeMeasurementsUseCase(
-            profile = profile,
-            leanBodyWeightKg = leanBodyWeightKg,
-            minFatBodyWeightKg = minFatBodyWeightKg,
-            maxFatBodyWeightKg = maxFatBodyWeightKg,
-        )
-
-        seedPhotosForGeneratedMeasurements(profile = profile)
-    }
-
-    private suspend fun cleanupExistingMeasurementPhotos() {
+    suspend fun cleanupExistingMeasurementPhotos() {
         val existingPhotoPaths = measurementRepository.getAll()
             .mapNotNull { it.photoFilePath }
             .distinct()
@@ -45,7 +26,7 @@ class GenerateFakeMeasurementsWithPhotosUseCase(
         }
     }
 
-    private suspend fun seedPhotosForGeneratedMeasurements(profile: UserProfile?) {
+    suspend fun seedPhotosForGeneratedMeasurements(profile: UserProfile?) {
         val effectiveSex = profile?.sex ?: Sex.Male
         val effectiveHeightCm = (profile?.heightCm?.toDouble() ?: 175.0).coerceAtLeast(120.0)
 
@@ -64,16 +45,16 @@ class GenerateFakeMeasurementsWithPhotosUseCase(
 
         val minNavyBodyFatPercent = navyMeasurements.minOf { it.navyBodyFatPercent }
         val maxNavyBodyFatPercent = navyMeasurements.maxOf { it.navyBodyFatPercent }
-        val photoTargets = buildPhotoTargetBodyFatPercents(
+        val photoTargets = buildDemoDataPhotoTargetBodyFatPercents(
             minBodyFatPercent = minNavyBodyFatPercent,
             maxBodyFatPercent = maxNavyBodyFatPercent,
-            photoCount = DEFAULT_FAKE_PHOTO_COUNT,
+            photoCount = DEFAULT_DEMO_DATA_PHOTO_COUNT,
         )
         val photoBinaryCache = mutableMapOf<Int, ByteArray?>()
         val everySecondMeasurement = navyMeasurements.filterIndexed { index, _ -> index % 2 == 0 }
 
         everySecondMeasurement.forEach { navyMeasurement ->
-            val photoLabel = closestPhotoLabel(
+            val photoLabel = closestDemoDataPhotoLabel(
                 bodyFatPercent = navyMeasurement.navyBodyFatPercent,
                 targetBodyFatPercents = photoTargets,
             )
@@ -100,7 +81,7 @@ class GenerateFakeMeasurementsWithPhotosUseCase(
 
     private companion object {
         const val ASSET_DIRECTORY = "ordered"
-        const val DEFAULT_FAKE_PHOTO_COUNT = 10
+        const val DEFAULT_DEMO_DATA_PHOTO_COUNT = 10
     }
 }
 
@@ -109,7 +90,7 @@ private data class NavyMeasurement(
     val navyBodyFatPercent: Double,
 )
 
-internal fun buildPhotoTargetBodyFatPercents(
+internal fun buildDemoDataPhotoTargetBodyFatPercents(
     minBodyFatPercent: Double,
     maxBodyFatPercent: Double,
     photoCount: Int,
@@ -132,7 +113,7 @@ internal fun buildPhotoTargetBodyFatPercents(
         }
 }
 
-internal fun closestPhotoLabel(
+internal fun closestDemoDataPhotoLabel(
     bodyFatPercent: Double,
     targetBodyFatPercents: List<Double>,
 ): Int {

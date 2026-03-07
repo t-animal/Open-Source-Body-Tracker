@@ -31,7 +31,7 @@ import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
+import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
@@ -56,7 +56,7 @@ fun BodyTrackerNavHost(
     measurementRepository: MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
-    generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    generateDemoDataUseCase: GenerateDemoDataUseCase,
     onResetApp: () -> Unit,
 ) {
     val isDebuggable = (LocalContext.current.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -100,7 +100,7 @@ fun BodyTrackerNavHost(
             OnboardingStartRoute(
                 profileRepository = profileRepository,
                 settingsRepository = settingsRepository,
-                generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
+                generateDemoDataUseCase = generateDemoDataUseCase,
                 onCreateProfileSelected = {
                     navController.navigate(Routes.OnboardingProfile) {
                         launchSingleTop = true
@@ -404,7 +404,7 @@ fun BodyTrackerNavHost(
                     ) {
                         FakeDataGeneratorRoute(
                             profileRepository = profileRepository,
-                            generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
+                            generateDemoDataUseCase = generateDemoDataUseCase,
                         )
                     }
                 }

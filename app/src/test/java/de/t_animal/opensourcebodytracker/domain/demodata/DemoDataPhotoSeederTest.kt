@@ -1,12 +1,12 @@
-package de.t_animal.opensourcebodytracker.domain.measurements
+package de.t_animal.opensourcebodytracker.domain.demodata
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class GenerateFakeMeasurementsWithPhotosUseCaseTest {
+class DemoDataPhotoSeederTest {
     @Test
-    fun buildPhotoTargetBodyFatPercents_distributesEvenlyFromMaxToMin() {
-        val targets = buildPhotoTargetBodyFatPercents(
+    fun buildDemoDataPhotoTargetBodyFatPercents_distributesEvenlyFromMaxToMin() {
+        val targets = buildDemoDataPhotoTargetBodyFatPercents(
             minBodyFatPercent = 10.0,
             maxBodyFatPercent = 28.0,
             photoCount = 10,
@@ -20,21 +20,21 @@ class GenerateFakeMeasurementsWithPhotosUseCaseTest {
     }
 
     @Test
-    fun closestPhotoLabel_returnsNearestTargetIndexPlusOne() {
-        val targets = buildPhotoTargetBodyFatPercents(
+    fun closestDemoDataPhotoLabel_returnsNearestTargetIndexPlusOne() {
+        val targets = buildDemoDataPhotoTargetBodyFatPercents(
             minBodyFatPercent = 10.0,
             maxBodyFatPercent = 28.0,
             photoCount = 10,
         )
 
-        assertEquals(1, closestPhotoLabel(27.1, targets))
-        assertEquals(5, closestPhotoLabel(20.1, targets))
-        assertEquals(10, closestPhotoLabel(9.7, targets))
+        assertEquals(1, closestDemoDataPhotoLabel(27.1, targets))
+        assertEquals(5, closestDemoDataPhotoLabel(20.1, targets))
+        assertEquals(10, closestDemoDataPhotoLabel(9.7, targets))
     }
 
     @Test
-    fun buildPhotoTargetBodyFatPercents_returnsEmptyForInvalidCount() {
-        val targets = buildPhotoTargetBodyFatPercents(
+    fun buildDemoDataPhotoTargetBodyFatPercents_returnsEmptyForInvalidCount() {
+        val targets = buildDemoDataPhotoTargetBodyFatPercents(
             minBodyFatPercent = 10.0,
             maxBodyFatPercent = 28.0,
             photoCount = 0,

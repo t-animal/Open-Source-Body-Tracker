@@ -4,11 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeLeanBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeMaxFatBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeMinFatBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
-import de.t_animal.opensourcebodytracker.domain.measurements.defaultFakeProfile
+import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataLeanBodyWeightKg
+import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMaxFatBodyWeightKg
+import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMinFatBodyWeightKg
+import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.domain.demodata.defaultDemoDataProfile
 import java.text.DecimalFormatSymbols
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,15 +17,15 @@ import kotlinx.coroutines.launch
 
 data class FakeDataGeneratorUiState(
     val isGenerating: Boolean = false,
-    val leanBodyWeightKgText: String = DefaultFakeLeanBodyWeightKg.toString(),
-    val minFatBodyWeightKgText: String = DefaultFakeMinFatBodyWeightKg.toString(),
-    val maxFatBodyWeightKgText: String = DefaultFakeMaxFatBodyWeightKg.toString(),
+    val leanBodyWeightKgText: String = DefaultDemoDataLeanBodyWeightKg.toString(),
+    val minFatBodyWeightKgText: String = DefaultDemoDataMinFatBodyWeightKg.toString(),
+    val maxFatBodyWeightKgText: String = DefaultDemoDataMaxFatBodyWeightKg.toString(),
     val inputError: String? = null,
 )
 
 class FakeDataGeneratorViewModel(
     private val profileRepository: ProfileRepository,
-    private val generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    private val generateDemoDataUseCase: GenerateDemoDataUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FakeDataGeneratorUiState())
     val uiState: StateFlow<FakeDataGeneratorUiState> = _uiState.asStateFlow()
@@ -61,9 +61,9 @@ class FakeDataGeneratorViewModel(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isGenerating = true, inputError = null)
             try {
-                val profile = defaultFakeProfile()
+                val profile = defaultDemoDataProfile()
                 profileRepository.saveProfile(profile)
-                generateFakeMeasurementsWithPhotosUseCase(
+                generateDemoDataUseCase(
                     profile = profile,
                     leanBodyWeightKg = leanBodyWeightKg,
                     minFatBodyWeightKg = minFatBodyWeightKg,
@@ -88,13 +88,13 @@ private fun parseDoubleOrNull(text: String): Double? {
 
 class FakeDataGeneratorViewModelFactory(
     private val profileRepository: ProfileRepository,
-    private val generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    private val generateDemoDataUseCase: GenerateDemoDataUseCase,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return FakeDataGeneratorViewModel(
             profileRepository = profileRepository,
-            generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
+            generateDemoDataUseCase = generateDemoDataUseCase,
         ) as T
     }
 }

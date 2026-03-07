@@ -1,31 +1,25 @@
-package de.t_animal.opensourcebodytracker.domain.measurements
+package de.t_animal.opensourcebodytracker.domain.demodata
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.Sex
-import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import kotlin.math.abs
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class GenerateFakeMeasurementsUseCaseTest {
+class DemoDataMeasurementSeriesGeneratorTest {
     private val now = Instant.parse("2026-02-24T12:00:00Z")
     private val zoneId = ZoneId.systemDefault()
 
     @Test
     fun generateMeasurements_hasExpectedCountSpacingAndAnchors() {
-        val useCase = GenerateFakeMeasurementsUseCase(
-            measurementRepository = FakeMeasurementRepository(),
-            nowProvider = { now },
-        )
+        val generator = DemoDataMeasurementSeriesGenerator(nowProvider = { now })
 
-        val measurements = useCase.generateMeasurements(
+        val measurements = generator.generateMeasurements(
             sex = Sex.Male,
             heightCm = 178.0,
             dateOfBirthEpochMillis = null,
@@ -54,12 +48,9 @@ class GenerateFakeMeasurementsUseCaseTest {
 
     @Test
     fun generateMeasurements_firstCycleLosesThenRegains() {
-        val useCase = GenerateFakeMeasurementsUseCase(
-            measurementRepository = FakeMeasurementRepository(),
-            nowProvider = { now },
-        )
+        val generator = DemoDataMeasurementSeriesGenerator(nowProvider = { now })
 
-        val measurements = useCase.generateMeasurements(
+        val measurements = generator.generateMeasurements(
             sex = Sex.Male,
             heightCm = 178.0,
             dateOfBirthEpochMillis = null,
@@ -79,12 +70,9 @@ class GenerateFakeMeasurementsUseCaseTest {
 
     @Test
     fun generateMeasurements_isDeterministicForSameSeedAndNow() {
-        val useCase = GenerateFakeMeasurementsUseCase(
-            measurementRepository = FakeMeasurementRepository(),
-            nowProvider = { now },
-        )
+        val generator = DemoDataMeasurementSeriesGenerator(nowProvider = { now })
 
-        val first = useCase.generateMeasurements(
+        val first = generator.generateMeasurements(
             sex = Sex.Female,
             heightCm = 165.0,
             dateOfBirthEpochMillis = null,
@@ -92,7 +80,7 @@ class GenerateFakeMeasurementsUseCaseTest {
             minFatBodyWeightKg = 10.0,
             maxFatBodyWeightKg = 24.0,
         )
-        val second = useCase.generateMeasurements(
+        val second = generator.generateMeasurements(
             sex = Sex.Female,
             heightCm = 165.0,
             dateOfBirthEpochMillis = null,
@@ -113,20 +101,4 @@ class GenerateFakeMeasurementsUseCaseTest {
             abs(ChronoUnit.DAYS.between(measurementDate, targetDate))
         }?.weightKg) ?: error("Expected at least one measurement")
     }
-}
-
-private class FakeMeasurementRepository : MeasurementRepository {
-    override fun observeAll(): Flow<List<BodyMeasurement>> = flowOf(emptyList())
-
-    override suspend fun getAll(): List<BodyMeasurement> = emptyList()
-
-    override suspend fun getById(id: Long): BodyMeasurement? = null
-
-    override suspend fun insert(measurement: BodyMeasurement): Long = 0
-
-    override suspend fun update(measurement: BodyMeasurement) = Unit
-
-    override suspend fun deleteById(id: Long) = Unit
-
-    override suspend fun replaceAll(measurements: List<BodyMeasurement>) = Unit
 }
