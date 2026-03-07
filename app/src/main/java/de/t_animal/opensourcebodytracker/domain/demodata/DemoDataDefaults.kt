@@ -1,15 +1,15 @@
-package de.t_animal.opensourcebodytracker.domain.measurements
+package de.t_animal.opensourcebodytracker.domain.demodata
 
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import java.time.LocalDate
 import java.time.ZoneId
 
-const val DefaultFakeLeanBodyWeightKg = 67.0
-const val DefaultFakeMinFatBodyWeightKg = 8.0
-const val DefaultFakeMaxFatBodyWeightKg = 20.0
+const val DefaultDemoDataLeanBodyWeightKg = 67.0
+const val DefaultDemoDataMinFatBodyWeightKg = 8.0
+const val DefaultDemoDataMaxFatBodyWeightKg = 20.0
 
-fun defaultFakeProfile(): UserProfile {
+fun defaultDemoDataProfile(): UserProfile {
     val dateOfBirthMillis = LocalDate.of(1990, 2, 14)
         .atStartOfDay(ZoneId.systemDefault())
         .toInstant()

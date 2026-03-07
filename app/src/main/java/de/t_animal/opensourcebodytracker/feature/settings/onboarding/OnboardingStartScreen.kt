@@ -24,14 +24,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
+import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun OnboardingStartRoute(
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
-    generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    generateDemoDataUseCase: GenerateDemoDataUseCase,
     onCreateProfileSelected: () -> Unit,
     onDemoModeCompleted: () -> Unit,
 ) {
@@ -39,7 +39,7 @@ fun OnboardingStartRoute(
         factory = OnboardingStartViewModelFactory(
             profileRepository = profileRepository,
             settingsRepository = settingsRepository,
-            generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
+            generateDemoDataUseCase = generateDemoDataUseCase,
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()

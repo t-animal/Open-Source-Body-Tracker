@@ -10,8 +10,9 @@ import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.profile.PreferencesProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.PreferencesSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsUseCase
+import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataMeasurementSeriesGenerator
+import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
+import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsCalculator
 
@@ -47,16 +48,23 @@ class AppContainer(appContext: Context) {
         CalculateMeasurementDerivedMetricsUseCase(derivedMetricsCalculator)
     }
 
-    val generateFakeMeasurementsUseCase: GenerateFakeMeasurementsUseCase by lazy {
-        GenerateFakeMeasurementsUseCase(measurementRepository)
+    private val demoDataMeasurementSeriesGenerator: DemoDataMeasurementSeriesGenerator by lazy {
+        DemoDataMeasurementSeriesGenerator()
     }
 
-    val generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase by lazy {
-        GenerateFakeMeasurementsWithPhotosUseCase(
+    private val demoDataPhotoSeeder: DemoDataPhotoSeeder by lazy {
+        DemoDataPhotoSeeder(
             measurementRepository = measurementRepository,
             photoStorage = internalPhotoStorage,
-            generateFakeMeasurementsUseCase = generateFakeMeasurementsUseCase,
             assetManager = applicationContext.assets,
+        )
+    }
+
+    val generateDemoDataUseCase: GenerateDemoDataUseCase by lazy {
+        GenerateDemoDataUseCase(
+            measurementRepository = measurementRepository,
+            demoDataMeasurementSeriesGenerator = demoDataMeasurementSeriesGenerator,
+            demoDataPhotoSeeder = demoDataPhotoSeeder,
         )
     }
 }

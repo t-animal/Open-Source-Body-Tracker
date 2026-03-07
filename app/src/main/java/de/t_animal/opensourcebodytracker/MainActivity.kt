@@ -1,9 +1,6 @@
 package de.t_animal.opensourcebodytracker
 
 import android.app.ActivityManager
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -12,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
+import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
@@ -31,7 +28,7 @@ class MainActivity : ComponentActivity() {
                         measurementRepository = container.measurementRepository,
                         internalPhotoStorage = container.internalPhotoStorage,
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
-                        generateFakeMeasurementsWithPhotosUseCase = container.generateFakeMeasurementsWithPhotosUseCase,
+                        generateDemoDataUseCase = container.generateDemoDataUseCase,
                         onResetApp = ::resetApp,
                     )
                 }
@@ -68,7 +65,7 @@ private fun BodyTrackerApp(
     measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
-    generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    generateDemoDataUseCase: GenerateDemoDataUseCase,
     onResetApp: () -> Unit,
 ) {
     BodyTrackerNavHost(
@@ -77,7 +74,7 @@ private fun BodyTrackerApp(
         measurementRepository = measurementRepository,
         internalPhotoStorage = internalPhotoStorage,
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-        generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
+        generateDemoDataUseCase = generateDemoDataUseCase,
         onResetApp = onResetApp,
     )
 }

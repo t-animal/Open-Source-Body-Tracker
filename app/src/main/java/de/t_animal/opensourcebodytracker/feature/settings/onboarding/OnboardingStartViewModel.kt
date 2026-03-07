@@ -6,11 +6,11 @@ import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeLeanBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeMaxFatBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeMinFatBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
-import de.t_animal.opensourcebodytracker.domain.measurements.defaultFakeProfile
+import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataLeanBodyWeightKg
+import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMaxFatBodyWeightKg
+import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMinFatBodyWeightKg
+import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.domain.demodata.defaultDemoDataProfile
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 class OnboardingStartViewModel(
     private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
-    private val generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    private val generateDemoDataUseCase: GenerateDemoDataUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(OnboardingStartUiState())
     val uiState = _uiState.asStateFlow()
@@ -36,7 +36,7 @@ class OnboardingStartViewModel(
             _uiState.value = _uiState.value.copy(isBusy = true, errorMessage = null)
             runCatching {
                 seedDemoData(
-                    profile = defaultFakeProfile(),
+                    profile = defaultDemoDataProfile(),
                 )
                 _events.emit(OnboardingStartEvent.DemoModeInitializationCompleted)
             }.onFailure { throwable ->
@@ -50,11 +50,11 @@ class OnboardingStartViewModel(
 
     private suspend fun seedDemoData(profile: UserProfile) {
         profileRepository.saveProfile(profile)
-        generateFakeMeasurementsWithPhotosUseCase(
+        generateDemoDataUseCase(
             profile = profile,
-            leanBodyWeightKg = DefaultFakeLeanBodyWeightKg,
-            minFatBodyWeightKg = DefaultFakeMinFatBodyWeightKg,
-            maxFatBodyWeightKg = DefaultFakeMaxFatBodyWeightKg,
+            leanBodyWeightKg = DefaultDemoDataLeanBodyWeightKg,
+            minFatBodyWeightKg = DefaultDemoDataMinFatBodyWeightKg,
+            maxFatBodyWeightKg = DefaultDemoDataMaxFatBodyWeightKg,
         )
 
         val refreshedSettings = settingsRepository.settingsFlow.first()
@@ -79,14 +79,14 @@ sealed interface OnboardingStartEvent {
 class OnboardingStartViewModelFactory(
     private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
-    private val generateFakeMeasurementsWithPhotosUseCase: GenerateFakeMeasurementsWithPhotosUseCase,
+    private val generateDemoDataUseCase: GenerateDemoDataUseCase,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return OnboardingStartViewModel(
             profileRepository = profileRepository,
             settingsRepository = settingsRepository,
-            generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
+            generateDemoDataUseCase = generateDemoDataUseCase,
         ) as T
     }
 }
