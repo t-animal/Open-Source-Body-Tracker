@@ -107,7 +107,12 @@ fun ProfileScreen(
             }
 
             Button(onClick = onSaveClicked) {
-                Text(text = "Save")
+                Text(
+                    text = when (state.mode) {
+                        ProfileMode.Onboarding -> "Continue"
+                        ProfileMode.Settings -> "Save"
+                    },
+                )
             }
         }
     }

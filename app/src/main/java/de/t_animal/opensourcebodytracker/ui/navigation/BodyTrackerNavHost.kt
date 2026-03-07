@@ -26,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
@@ -42,6 +43,8 @@ import de.t_animal.opensourcebodytracker.feature.photos.PhotoAnimationRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoCompareRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
+import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingAnalysisRoute
+import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingStartRoute
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileRoute
 
@@ -58,20 +61,31 @@ fun BodyTrackerNavHost(
     val isDebuggable = (LocalContext.current.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val navController = rememberNavController()
 
-    val hasProfile by profileRepository.hasProfileFlow.collectAsStateWithLifecycle(initialValue = false)
+    val settings by settingsRepository.settingsFlow.collectAsStateWithLifecycle(
+        initialValue = defaultSettingsState(),
+    )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val onboardingRoutes = setOf(
+        Routes.OnboardingStart,
+        Routes.OnboardingProfile,
+        Routes.OnboardingAnalysis,
+    )
 
-    LaunchedEffect(hasProfile, currentRoute) {
-        if (hasProfile && currentRoute == Routes.Onboarding) {
-            navController.navigate(Routes.MeasurementList) {
-                popUpTo(Routes.Onboarding) { inclusive = true }
-                launchSingleTop = true
-            }
-        } else if (!hasProfile && currentRoute != null && currentRoute != Routes.Onboarding) {
+    LaunchedEffect(settings, currentRoute) {
+        val route = currentRoute ?: return@LaunchedEffect
+
+        val shouldShowOnboarding = !settings.onboardingCompleted
+
+        if (shouldShowOnboarding && route !in onboardingRoutes) {
             while (navController.popBackStack()) {
             }
-            navController.navigate(Routes.Onboarding) {
+            navController.navigate(Routes.OnboardingStart) {
+                launchSingleTop = true
+            }
+        } else if (!shouldShowOnboarding && route in onboardingRoutes) {
+            navController.navigate(Routes.MeasurementList) {
+                popUpTo(Routes.OnboardingStart) { inclusive = true }
                 launchSingleTop = true
             }
         }
@@ -79,16 +93,46 @@ fun BodyTrackerNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Routes.Onboarding,
+        startDestination = Routes.OnboardingStart,
     ) {
-        composable(Routes.Onboarding) {
+        composable(Routes.OnboardingStart) {
+            OnboardingStartRoute(
+                profileRepository = profileRepository,
+                settingsRepository = settingsRepository,
+                generateFakeMeasurementsWithPhotosUseCase = generateFakeMeasurementsWithPhotosUseCase,
+                onCreateProfileSelected = {
+                    navController.navigate(Routes.OnboardingProfile) {
+                        launchSingleTop = true
+                    }
+                },
+                onDemoModeCompleted = {
+                    navController.navigate(Routes.MeasurementList) {
+                        popUpTo(Routes.OnboardingStart) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(Routes.OnboardingProfile) {
             ProfileRoute(
                 repository = profileRepository,
                 settingsRepository = settingsRepository,
                 mode = ProfileMode.Onboarding,
                 onFinished = {
+                    navController.navigate(Routes.OnboardingAnalysis) {
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        composable(Routes.OnboardingAnalysis) {
+            OnboardingAnalysisRoute(
+                settingsRepository = settingsRepository,
+                profileRepository = profileRepository,
+                onFinished = {
                     navController.navigate(Routes.MeasurementList) {
-                        popUpTo(Routes.Onboarding) { inclusive = true }
+                        popUpTo(Routes.OnboardingStart) { inclusive = true }
                     }
                 },
             )
@@ -141,6 +185,8 @@ fun BodyTrackerNavHost(
                     onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
                     onAdd = { navController.navigate(Routes.MeasurementAdd) },
                     onOpenMore = { navController.navigate(Routes.MeasurementListAll) },
+                    showDemoBanner = settings.isDemoMode,
+                    onResetApp = {},
                     contentPadding = contentPadding,
                 )
             }

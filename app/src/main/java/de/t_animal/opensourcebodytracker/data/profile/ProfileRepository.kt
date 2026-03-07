@@ -8,9 +8,6 @@ import kotlinx.coroutines.flow.map
 interface ProfileRepository {
     val profileFlow: Flow<UserProfile?>
 
-    val hasProfileFlow: Flow<Boolean>
-        get() = profileFlow.map { it != null }
-
     val requiredProfileFlow: Flow<UserProfile>
         get() = profileFlow.filterNotNull()
 

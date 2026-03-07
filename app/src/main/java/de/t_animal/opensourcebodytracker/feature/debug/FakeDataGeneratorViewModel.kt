@@ -3,13 +3,13 @@ package de.t_animal.opensourcebodytracker.feature.debug
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import de.t_animal.opensourcebodytracker.core.model.Sex
-import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeLeanBodyWeightKg
+import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeMaxFatBodyWeightKg
+import de.t_animal.opensourcebodytracker.domain.measurements.DefaultFakeMinFatBodyWeightKg
 import de.t_animal.opensourcebodytracker.domain.measurements.GenerateFakeMeasurementsWithPhotosUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.defaultFakeProfile
 import java.text.DecimalFormatSymbols
-import java.time.LocalDate
-import java.time.ZoneId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,9 +17,9 @@ import kotlinx.coroutines.launch
 
 data class FakeDataGeneratorUiState(
     val isGenerating: Boolean = false,
-    val leanBodyWeightKgText: String = "67.0",
-    val minFatBodyWeightKgText: String = "8.0",
-    val maxFatBodyWeightKgText: String = "20.0",
+    val leanBodyWeightKgText: String = DefaultFakeLeanBodyWeightKg.toString(),
+    val minFatBodyWeightKgText: String = DefaultFakeMinFatBodyWeightKg.toString(),
+    val maxFatBodyWeightKgText: String = DefaultFakeMaxFatBodyWeightKg.toString(),
     val inputError: String? = null,
 )
 
@@ -84,19 +84,6 @@ private fun parseDoubleOrNull(text: String): Double? {
         .replace(decimalSeparator, '.')
         .replace(',', '.')
         .toDoubleOrNull()
-}
-
-private fun defaultFakeProfile(): UserProfile {
-    val dateOfBirthMillis = LocalDate.of(1990, 2, 14)
-        .atStartOfDay(ZoneId.systemDefault())
-        .toInstant()
-        .toEpochMilli()
-
-    return UserProfile(
-        sex = Sex.Male,
-        dateOfBirthEpochMillis = dateOfBirthMillis,
-        heightCm = 180f,
-    )
 }
 
 class FakeDataGeneratorViewModelFactory(

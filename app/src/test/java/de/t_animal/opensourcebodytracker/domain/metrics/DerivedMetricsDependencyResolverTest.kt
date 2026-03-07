@@ -159,6 +159,8 @@ class DerivedMetricsDependencyResolverTest {
             skinfoldBodyFatEnabled = false,
             waistHipRatioEnabled = true,
             waistHeightRatioEnabled = false,
+            onboardingCompleted = false,
+            isDemoMode = false,
             enabledMeasurements = emptySet(),
             visibleInAnalysis = setOf(MeasuredBodyMetric.Weight),
             visibleInTable = setOf(MeasuredBodyMetric.Weight),

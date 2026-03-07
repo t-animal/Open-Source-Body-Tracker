@@ -65,6 +65,8 @@ fun MeasurementListRoute(
     onEdit: (Long) -> Unit,
     onAdd: () -> Unit,
     onOpenMore: () -> Unit,
+    showDemoBanner: Boolean = false,
+    onResetApp: () -> Unit,
     contentPadding: PaddingValues,
 ) {
     val vm: MeasurementListViewModel = viewModel(
@@ -82,6 +84,8 @@ fun MeasurementListRoute(
         onEdit = onEdit,
         onAdd = onAdd,
         onOpenMore = onOpenMore,
+        showDemoBanner = showDemoBanner,
+        onResetApp = onResetApp,
         contentPadding = contentPadding,
     )
 }
@@ -116,6 +120,8 @@ fun MeasurementListScreen(
     onEdit: (Long) -> Unit,
     onAdd: () -> Unit,
     onOpenMore: () -> Unit,
+    showDemoBanner: Boolean = false,
+    onResetApp: () -> Unit,
     contentPadding: PaddingValues,
 ) {
     LazyColumn(
@@ -124,6 +130,15 @@ fun MeasurementListScreen(
             .padding(contentPadding),
         contentPadding = PaddingValues(16.dp),
     ) {
+        if (showDemoBanner) {
+            item {
+                DemoModeBanner(
+                    onResetApp = onResetApp,
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+
         item {
             LatestMeasurementCard(
                 state = state,
@@ -164,6 +179,35 @@ fun MeasurementListScreen(
 
         item {
             Spacer(modifier = Modifier.height(MEASUREMENT_LIST_FAB_CLEARANCE))
+        }
+    }
+}
+
+@Composable
+private fun DemoModeBanner(
+    onResetApp: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+        ) {
+            Text(
+                text = "You are currently using demo data.",
+                style = MaterialTheme.typography.titleSmall,
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Reset the app to create your own profile.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(onClick = onResetApp) {
+                Text("Reset App")
+            }
         }
     }
 }
@@ -495,6 +539,7 @@ private fun MeasurementListScreenPreview() {
             onEdit = {},
             onAdd = {},
             onOpenMore = {},
+            onResetApp = {},
             contentPadding = PaddingValues(0.dp),
         )
     }
@@ -512,6 +557,7 @@ private fun MeasurementListScreenEmptyPreview() {
             onEdit = {},
             onAdd = {},
             onOpenMore = {},
+            onResetApp = {},
             contentPadding = PaddingValues(0.dp),
         )
     }
