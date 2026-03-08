@@ -29,6 +29,7 @@ Main tabs expose overflow actions:
 - Profile
 - Settings
 - Reminders
+- Trigger Reminder
 
 In debug builds, a fake data generator action is also available.
 
@@ -119,14 +120,16 @@ Each main screen contains a top navigation bar with:
 * **Profile**
 * **Settings**
 * **Reminders**
+* **Trigger Reminder**
 
 ### Navigation Behavior
 
-| Menu Item | Destination                                   |
+| Menu Item | Destination / Behavior                        |
 | --------- | --------------------------------------------- |
 | Profile   | Profile screen                                |
 | Settings  | Settings configuration screen                 |
 | Reminders | Reminder settings screen                      |
+| Trigger Reminder | Shows a notification that opens Add Measurement on tap |
 
 ---
 
