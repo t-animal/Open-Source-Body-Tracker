@@ -215,6 +215,17 @@ The OS should schedule notifications for:
 * Wednesday 20:00
 * Friday 20:00
 
+### Implementation Notes
+
+Phase 7.3 is implemented with **inexact one-shot alarms**:
+
+* Only the next reminder is scheduled at a time.
+* After a reminder fires, the app computes and schedules the next matching weekday/time.
+* Scheduling is re-synced when reminder settings are saved.
+* Scheduling is also re-synced after reboot and after system time/timezone changes.
+
+On Android 13+, notification permission is requested when the user saves enabled reminders.
+
 ## Notification Behavior
 
 When triggered:

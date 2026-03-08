@@ -1,0 +1,67 @@
+package de.t_animal.opensourcebodytracker.core.notifications
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import de.t_animal.opensourcebodytracker.core.model.SettingsState
+import de.t_animal.opensourcebodytracker.domain.reminders.ReminderScheduleCalculator
+import java.time.ZonedDateTime
+
+class ReminderAlarmScheduler(
+    private val context: Context,
+) {
+    fun syncWithSettings(
+        settings: SettingsState,
+        now: ZonedDateTime = ZonedDateTime.now(),
+    ) {
+        if (!settings.reminderEnabled || settings.reminderWeekdays.isEmpty()) {
+            cancelScheduledReminder()
+            return
+        }
+
+        val nextReminderAt = ReminderScheduleCalculator.nextReminderAt(
+            now = now,
+            weekdays = settings.reminderWeekdays,
+            reminderTime = settings.reminderTime,
+        )
+
+        if (nextReminderAt == null) {
+            cancelScheduledReminder()
+            return
+        }
+
+        scheduleReminderAt(nextReminderAt.toInstant().toEpochMilli())
+    }
+
+    fun cancelScheduledReminder() {
+        val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
+        alarmManager.cancel(createReminderAlarmPendingIntent())
+    }
+
+    private fun scheduleReminderAt(triggerAtMillis: Long) {
+        val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
+        val pendingIntent = createReminderAlarmPendingIntent()
+        alarmManager.cancel(pendingIntent)
+
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerAtMillis,
+            pendingIntent,
+        )
+    }
+
+    private fun createReminderAlarmPendingIntent(): PendingIntent {
+        val alarmIntent = Intent(context, ReminderAlarmReceiver::class.java).apply {
+            action = ReminderNotificationContract.ReminderAlarmAction
+        }
+
+        return PendingIntent.getBroadcast(
+            context,
+            ReminderNotificationContract.ReminderAlarmRequestCode,
+            alarmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+}

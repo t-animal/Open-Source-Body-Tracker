@@ -34,6 +34,9 @@ import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationResult
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
@@ -51,8 +54,6 @@ import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingA
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingStartRoute
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileRoute
-import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderNotificationPoster
-import de.t_animal.opensourcebodytracker.feature.settings.reminders.ManualReminderResult
 import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderSettingsRoute
 import kotlinx.coroutines.flow.StateFlow
 
@@ -66,6 +67,7 @@ fun BodyTrackerNavHost(
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     generateDemoDataUseCase: GenerateDemoDataUseCase,
     reminderNotificationPoster: ReminderNotificationPoster,
+    reminderAlarmScheduler: ReminderAlarmScheduler,
     openMeasurementAddSignal: StateFlow<Long>,
     onResetApp: () -> Unit,
 ) {
@@ -137,9 +139,9 @@ fun BodyTrackerNavHost(
     }
 
     val onTriggerReminder = {
-        when (reminderNotificationPoster.postReminderNotification()) {
-            ManualReminderResult.Shown -> Unit
-            ManualReminderResult.NotificationsDisabled -> {
+        when (reminderNotificationPoster.showReminderNotification()) {
+            ReminderNotificationResult.Shown -> Unit
+            ReminderNotificationResult.NotificationsDisabled -> {
                 Toast.makeText(
                     context,
                     "Notifications are disabled for this app.",
@@ -147,7 +149,7 @@ fun BodyTrackerNavHost(
                 ).show()
             }
 
-            ManualReminderResult.Failed -> {
+            ReminderNotificationResult.Failed -> {
                 Toast.makeText(
                     context,
                     "Could not show reminder notification.",
@@ -227,6 +229,7 @@ fun BodyTrackerNavHost(
         composable(Routes.Reminders) {
             ReminderSettingsRoute(
                 settingsRepository = settingsRepository,
+                reminderAlarmScheduler = reminderAlarmScheduler,
                 onNavigateBack = { navController.popBackStack() },
             )
         }

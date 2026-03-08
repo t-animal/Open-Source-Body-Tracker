@@ -1,6 +1,12 @@
 package de.t_animal.opensourcebodytracker.feature.settings.reminders
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.app.TimePickerDialog
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,12 +15,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -39,8 +42,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.DayOfWeek
@@ -60,14 +65,35 @@ private val weekdayDisplayOrder = listOf(
 @Composable
 fun ReminderSettingsRoute(
     settingsRepository: SettingsRepository,
+    reminderAlarmScheduler: ReminderAlarmScheduler,
     onNavigateBack: () -> Unit,
 ) {
     val vm: ReminderSettingsViewModel = viewModel(
         factory = ReminderSettingsViewModelFactory(
             settingsRepository = settingsRepository,
+            reminderAlarmScheduler = reminderAlarmScheduler,
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val latestOnSaveClicked by rememberUpdatedState(vm::onSaveClicked)
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) {
+        latestOnSaveClicked()
+    }
+
+    val onSaveRequested = onSaveRequested@{
+        if (!state.enabled) {
+            return@onSaveRequested
+        }
+
+        if (shouldRequestNotificationPermission(context)) {
+            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        vm.onSaveClicked()
+    }
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
@@ -82,9 +108,22 @@ fun ReminderSettingsRoute(
         onEnabledChanged = vm::onEnabledChanged,
         onWeekdayToggled = vm::onWeekdayToggled,
         onTimeChanged = vm::onTimeChanged,
-        onSaveClicked = vm::onSaveClicked,
+        onSaveClicked = onSaveRequested,
         onBackClicked = onNavigateBack,
     )
+}
+
+private fun shouldRequestNotificationPermission(
+    context: Context,
+): Boolean {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+        return false
+    }
+
+    return ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.POST_NOTIFICATIONS,
+    ) != PackageManager.PERMISSION_GRANTED
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -134,9 +173,11 @@ fun ReminderSettingsScreen(
                 .padding(contentPadding)
                 .padding(16.dp),
         ) {
-            Text("Set up reminders to log your measurements regularly " + 
-            "and stay on track with your goals. You will receive a notification " + 
-            "at the selected time on the chosen weekdays.", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                "Set up reminders to log your measurements regularly " +
+                    "and stay on track with your goals. You will receive a notification " +
+                    "at the selected time on the chosen weekdays.", style = MaterialTheme.typography.bodyMedium
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 

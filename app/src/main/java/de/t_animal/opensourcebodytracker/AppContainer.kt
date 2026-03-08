@@ -8,6 +8,8 @@ import de.t_animal.opensourcebodytracker.data.measurements.RoomMeasurementReposi
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.profile.PreferencesProfileRepository
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.data.settings.PreferencesSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataMeasurementSeriesGenerator
@@ -15,7 +17,6 @@ import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsCalculator
-import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderNotificationPoster
 
 class AppContainer(appContext: Context) {
     private val applicationContext = appContext.applicationContext
@@ -43,6 +44,10 @@ class AppContainer(appContext: Context) {
 
     val reminderNotificationPoster: ReminderNotificationPoster by lazy {
         ReminderNotificationPoster(applicationContext)
+    }
+
+    val reminderAlarmScheduler: ReminderAlarmScheduler by lazy {
+        ReminderAlarmScheduler(applicationContext)
     }
 
     private val derivedMetricsCalculator: DerivedMetricsCalculator by lazy {
