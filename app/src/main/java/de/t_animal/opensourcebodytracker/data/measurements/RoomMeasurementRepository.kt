@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.data.measurements
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.photos.toPersistedPhotoPathOrNull
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -35,7 +36,7 @@ class RoomMeasurementRepository(
 private fun MeasurementEntity.toDomain(): BodyMeasurement = BodyMeasurement(
     id = id,
     dateEpochMillis = dateEpochMillis,
-    photoFilePath = photoFilePath,
+    photoFilePath = photoFilePath.toPersistedPhotoPathOrNull(),
     weightKg = weightKg,
     bodyFatPercent = bodyFatPercent,
     neckCircumferenceCm = neckCircumferenceCm,
@@ -53,7 +54,7 @@ private fun MeasurementEntity.toDomain(): BodyMeasurement = BodyMeasurement(
 private fun BodyMeasurement.toEntityForInsert(): MeasurementEntity = MeasurementEntity(
     id = 0,
     dateEpochMillis = dateEpochMillis,
-    photoFilePath = photoFilePath,
+    photoFilePath = photoFilePath?.value,
     weightKg = weightKg,
     bodyFatPercent = bodyFatPercent,
     neckCircumferenceCm = neckCircumferenceCm,

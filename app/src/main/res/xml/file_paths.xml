@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Keep this path aligned with PhotoStorageContract.TEMP_CAPTURE_FILE_PROVIDER_PATH. -->
     <cache-path
         name="camera_images"
         path="images/" />
