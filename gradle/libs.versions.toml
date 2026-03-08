@@ -1,5 +1,5 @@
 [versions]
-agp = "9.0.1"
+agp = "9.1.0"
 kotlin = "2.2.10"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -15,7 +15,7 @@ lifecycle = "2.8.7"
 navigationCompose = "2.8.5"
 room = "2.8.4"
 datastore = "1.1.1"
-ksp = "2.2.10-2.0.2"
+ksp = "2.3.2"
 vico = "3.0.1"
 coil = "2.7.0"
 
