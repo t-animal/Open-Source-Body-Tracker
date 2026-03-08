@@ -11,9 +11,7 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
 import java.text.DecimalFormatSymbols
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,7 +54,7 @@ class ProfileViewModel(
                         didInitializeFromRepo = true
                         _uiState.value = _uiState.value.copy(
                             sex = profile.sex,
-                            dateOfBirthText = epochMillisToLocalDate(profile.dateOfBirthEpochMillis).toString(),
+                            dateOfBirthText = profile.dateOfBirth.toString(),
                             heightCmText = formatDecimalForInput(profile.heightCm.toDouble()),
                             errorMessage = null,
                         )
@@ -100,7 +98,7 @@ class ProfileViewModel(
         viewModelScope.launch {
             val profile = UserProfile(
                 sex = sex,
-                dateOfBirthEpochMillis = localDateToEpochMillis(date),
+                dateOfBirth = date,
                 heightCm = height,
             )
 
@@ -161,14 +159,6 @@ class ProfileViewModelFactory(
             mode = mode,
         ) as T
     }
-}
-
-private fun localDateToEpochMillis(localDate: LocalDate): Long {
-    return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-}
-
-private fun epochMillisToLocalDate(epochMillis: Long): LocalDate {
-    return Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate()
 }
 
 private fun parseFloatOrNull(text: String): Float? {

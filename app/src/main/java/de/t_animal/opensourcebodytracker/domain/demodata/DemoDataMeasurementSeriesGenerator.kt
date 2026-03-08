@@ -21,7 +21,7 @@ class DemoDataMeasurementSeriesGenerator(
     fun generateMeasurements(
         sex: Sex?,
         heightCm: Double?,
-        dateOfBirthEpochMillis: Long?,
+        dateOfBirth: LocalDate?,
         leanBodyWeightKg: Double,
         minFatBodyWeightKg: Double,
         maxFatBodyWeightKg: Double,
@@ -64,11 +64,10 @@ class DemoDataMeasurementSeriesGenerator(
             )
             val weightKg = roundToOneDecimal(leanBodyWeightKg + fatKg)
             val targetBodyFatPercent = (fatKg / (leanBodyWeightKg + fatKg)) * 100.0
-            val ageYears = dateOfBirthEpochMillis?.let {
+            val ageYears = dateOfBirth?.let {
                 calculateAgeYearsAtDate(
-                    dateOfBirthEpochMillis = it,
+                    dateOfBirth = it,
                     atDate = currentDate,
-                    zoneId = zoneId,
                 )
             } ?: 30
 
@@ -346,14 +345,9 @@ private data class QuadCoefficients(
 )
 
 private fun calculateAgeYearsAtDate(
-    dateOfBirthEpochMillis: Long,
+    dateOfBirth: LocalDate,
     atDate: LocalDate,
-    zoneId: ZoneId,
 ): Int {
-    val dateOfBirth = Instant.ofEpochMilli(dateOfBirthEpochMillis)
-        .atZone(zoneId)
-        .toLocalDate()
-
     if (atDate.isBefore(dateOfBirth)) {
         return 18
     }

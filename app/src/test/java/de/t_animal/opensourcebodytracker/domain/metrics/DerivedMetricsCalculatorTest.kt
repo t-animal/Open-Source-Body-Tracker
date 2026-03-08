@@ -3,6 +3,9 @@ package de.t_animal.opensourcebodytracker.domain.metrics
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -12,13 +15,16 @@ import org.junit.Test
 class DerivedMetricsCalculatorTest {
     private val calculator = DerivedMetricsCalculator()
     private val measurementDateEpochMillis = 1_704_067_200_000L
-    private val adultDateOfBirthEpochMillis = 883_612_800_000L
+    private val adultDateOfBirth = LocalDate.of(1998, 1, 1)
+    private val measurementDate = Instant.ofEpochMilli(measurementDateEpochMillis)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
 
     @Test
     fun calculate_returnsBmiAndRatios_whenInputsAreValid() {
         val profile = UserProfile(
             sex = Sex.Male,
-            dateOfBirthEpochMillis = adultDateOfBirthEpochMillis,
+            dateOfBirth = adultDateOfBirth,
             heightCm = 180f,
         )
         val measurement = BodyMeasurement(
@@ -44,7 +50,7 @@ class DerivedMetricsCalculatorTest {
     fun calculate_returnsMaleNavyBodyFat_whenMaleInputsAreValid() {
         val profile = UserProfile(
             sex = Sex.Male,
-            dateOfBirthEpochMillis = adultDateOfBirthEpochMillis,
+            dateOfBirth = adultDateOfBirth,
             heightCm = 180f,
         )
         val measurement = BodyMeasurement(
@@ -65,7 +71,7 @@ class DerivedMetricsCalculatorTest {
     fun calculate_returnsFemaleNavyBodyFat_whenFemaleInputsAreValid() {
         val profile = UserProfile(
             sex = Sex.Female,
-            dateOfBirthEpochMillis = adultDateOfBirthEpochMillis,
+            dateOfBirth = adultDateOfBirth,
             heightCm = 165f,
         )
         val measurement = BodyMeasurement(
@@ -87,7 +93,7 @@ class DerivedMetricsCalculatorTest {
     fun calculate_returnsNullBodyFat_whenNavyLogInputIsInvalid() {
         val profile = UserProfile(
             sex = Sex.Male,
-            dateOfBirthEpochMillis = adultDateOfBirthEpochMillis,
+            dateOfBirth = adultDateOfBirth,
             heightCm = 180f,
         )
         val measurement = BodyMeasurement(
@@ -106,7 +112,7 @@ class DerivedMetricsCalculatorTest {
     fun calculate_returnsMaleSkinfoldBodyFat_whenMaleInputsAreValid() {
         val profile = UserProfile(
             sex = Sex.Male,
-            dateOfBirthEpochMillis = adultDateOfBirthEpochMillis,
+            dateOfBirth = adultDateOfBirth,
             heightCm = 180f,
         )
         val measurement = BodyMeasurement(
@@ -128,7 +134,7 @@ class DerivedMetricsCalculatorTest {
     fun calculate_returnsFemaleSkinfoldBodyFat_whenFemaleInputsAreValid() {
         val profile = UserProfile(
             sex = Sex.Female,
-            dateOfBirthEpochMillis = adultDateOfBirthEpochMillis,
+            dateOfBirth = adultDateOfBirth,
             heightCm = 165f,
         )
         val measurement = BodyMeasurement(
@@ -150,7 +156,7 @@ class DerivedMetricsCalculatorTest {
     fun calculate_returnsNullSkinfoldBodyFat_whenAnyRequiredSiteMissing() {
         val profile = UserProfile(
             sex = Sex.Male,
-            dateOfBirthEpochMillis = adultDateOfBirthEpochMillis,
+            dateOfBirth = adultDateOfBirth,
             heightCm = 180f,
         )
         val measurement = BodyMeasurement(
@@ -170,7 +176,7 @@ class DerivedMetricsCalculatorTest {
     fun calculate_returnsNullSkinfoldBodyFat_whenAgeAtMeasurementIsNotPositive() {
         val profile = UserProfile(
             sex = Sex.Male,
-            dateOfBirthEpochMillis = measurementDateEpochMillis,
+            dateOfBirth = measurementDate,
             heightCm = 180f,
         )
         val measurement = BodyMeasurement(

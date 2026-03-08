@@ -22,7 +22,7 @@ class DemoDataMeasurementSeriesGeneratorTest {
         val measurements = generator.generateMeasurements(
             sex = Sex.Male,
             heightCm = 178.0,
-            dateOfBirthEpochMillis = null,
+            dateOfBirth = null,
             leanBodyWeightKg = 67.0,
             minFatBodyWeightKg = 8.0,
             maxFatBodyWeightKg = 20.0,
@@ -53,7 +53,7 @@ class DemoDataMeasurementSeriesGeneratorTest {
         val measurements = generator.generateMeasurements(
             sex = Sex.Male,
             heightCm = 178.0,
-            dateOfBirthEpochMillis = null,
+            dateOfBirth = null,
             leanBodyWeightKg = 67.0,
             minFatBodyWeightKg = 8.0,
             maxFatBodyWeightKg = 20.0,
@@ -75,7 +75,7 @@ class DemoDataMeasurementSeriesGeneratorTest {
         val first = generator.generateMeasurements(
             sex = Sex.Female,
             heightCm = 165.0,
-            dateOfBirthEpochMillis = null,
+            dateOfBirth = null,
             leanBodyWeightKg = 52.0,
             minFatBodyWeightKg = 10.0,
             maxFatBodyWeightKg = 24.0,
@@ -83,7 +83,7 @@ class DemoDataMeasurementSeriesGeneratorTest {
         val second = generator.generateMeasurements(
             sex = Sex.Female,
             heightCm = 165.0,
-            dateOfBirthEpochMillis = null,
+            dateOfBirth = null,
             leanBodyWeightKg = 52.0,
             minFatBodyWeightKg = 10.0,
             maxFatBodyWeightKg = 24.0,

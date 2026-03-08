@@ -5,6 +5,7 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import java.time.Instant
+import java.time.LocalDate
 import java.time.Period
 import java.time.ZoneId
 import kotlin.math.log10
@@ -20,7 +21,7 @@ class DerivedMetricsCalculator {
         val hipCm = measurement.hipCircumferenceCm
         val neckCm = measurement.neckCircumferenceCm
         val ageYears = calculateAgeYearsAtMeasurement(
-            dateOfBirthEpochMillis = profile.dateOfBirthEpochMillis,
+            dateOfBirth = profile.dateOfBirth,
             measurementEpochMillis = measurement.dateEpochMillis,
         )
 
@@ -172,13 +173,10 @@ class DerivedMetricsCalculator {
     }
 
     private fun calculateAgeYearsAtMeasurement(
-        dateOfBirthEpochMillis: Long,
+        dateOfBirth: LocalDate,
         measurementEpochMillis: Long,
     ): Int? {
         val zoneId = ZoneId.systemDefault()
-        val dateOfBirth = Instant.ofEpochMilli(dateOfBirthEpochMillis)
-            .atZone(zoneId)
-            .toLocalDate()
         val measurementDate = Instant.ofEpochMilli(measurementEpochMillis)
             .atZone(zoneId)
             .toLocalDate()
