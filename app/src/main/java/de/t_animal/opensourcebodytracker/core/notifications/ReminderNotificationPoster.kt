@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.feature.settings.reminders
+package de.t_animal.opensourcebodytracker.core.notifications
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -13,15 +13,14 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import de.t_animal.opensourcebodytracker.MainActivity
 import de.t_animal.opensourcebodytracker.R
-import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationContract
 
 class ReminderNotificationPoster(
     private val context: Context,
 ) {
     @androidx.annotation.RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
-    fun postReminderNotification(): ManualReminderResult {
+    fun showReminderNotification(): ReminderNotificationResult {
         if (!areNotificationsEnabled()) {
-            return ManualReminderResult.NotificationsDisabled
+            return ReminderNotificationResult.NotificationsDisabled
         }
 
         createChannelIfNeeded()
@@ -33,12 +32,12 @@ class ReminderNotificationPoster(
         }
         val contentIntent = PendingIntent.getActivity(
             context,
-            REQUEST_CODE,
+            ReminderNotificationContract.OpenAddMeasurementRequestCode,
             openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(context, ReminderNotificationContract.ReminderChannelId)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle("Measurement Reminder")
             .setContentText("Don't forget to record your measurements.")
@@ -47,11 +46,14 @@ class ReminderNotificationPoster(
             .setContentIntent(contentIntent)
             .build()
 
-        return runCatching{
-            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, notification)
+        return runCatching {
+            NotificationManagerCompat.from(context).notify(
+                ReminderNotificationContract.ReminderNotificationId,
+                notification,
+            )
         }.fold(
-            onSuccess = { ManualReminderResult.Shown },
-            onFailure = { ManualReminderResult.Failed },
+            onSuccess = { ReminderNotificationResult.Shown },
+            onFailure = { ReminderNotificationResult.Failed },
         )
     }
 
@@ -72,27 +74,21 @@ class ReminderNotificationPoster(
 
     private fun createChannelIfNeeded() {
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
-        val existingChannel = manager.getNotificationChannel(CHANNEL_ID)
+        val existingChannel = manager.getNotificationChannel(ReminderNotificationContract.ReminderChannelId)
         if (existingChannel != null) {
             return
         }
 
         val channel = NotificationChannel(
-            CHANNEL_ID,
+            ReminderNotificationContract.ReminderChannelId,
             "Measurement Reminders",
             NotificationManager.IMPORTANCE_DEFAULT,
         )
         manager.createNotificationChannel(channel)
     }
-
-    private companion object {
-        const val CHANNEL_ID = "measurement_reminders"
-        const val NOTIFICATION_ID = 4223
-        const val REQUEST_CODE = 4223
-    }
 }
 
-enum class ManualReminderResult {
+enum class ReminderNotificationResult {
     Shown,
     NotificationsDisabled,
     Failed,

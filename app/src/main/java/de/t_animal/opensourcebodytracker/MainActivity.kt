@@ -11,8 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationContract
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
-import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +39,7 @@ class MainActivity : ComponentActivity() {
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
                         generateDemoDataUseCase = container.generateDemoDataUseCase,
                         reminderNotificationPoster = container.reminderNotificationPoster,
+                        reminderAlarmScheduler = container.reminderAlarmScheduler,
                         openMeasurementAddSignal = openMeasurementAddSignal,
                         onResetApp = ::resetApp,
                     )
@@ -99,6 +101,7 @@ private fun BodyTrackerApp(
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
     generateDemoDataUseCase: GenerateDemoDataUseCase,
     reminderNotificationPoster: ReminderNotificationPoster,
+    reminderAlarmScheduler: ReminderAlarmScheduler,
     openMeasurementAddSignal: StateFlow<Long>,
     onResetApp: () -> Unit,
 ) {
@@ -110,6 +113,7 @@ private fun BodyTrackerApp(
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         generateDemoDataUseCase = generateDemoDataUseCase,
         reminderNotificationPoster = reminderNotificationPoster,
+        reminderAlarmScheduler = reminderAlarmScheduler,
         openMeasurementAddSignal = openMeasurementAddSignal,
         onResetApp = onResetApp,
     )

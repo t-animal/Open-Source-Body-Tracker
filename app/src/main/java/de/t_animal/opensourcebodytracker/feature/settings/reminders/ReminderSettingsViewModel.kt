@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.feature.settings.reminders
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -28,6 +29,7 @@ sealed interface ReminderSettingsEvent {
 
 class ReminderSettingsViewModel(
     private val settingsRepository: SettingsRepository,
+    private val reminderAlarmScheduler: ReminderAlarmScheduler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ReminderSettingsUiState())
     val uiState: StateFlow<ReminderSettingsUiState> = _uiState.asStateFlow()
@@ -99,6 +101,8 @@ class ReminderSettingsViewModel(
                 settingsRepository.saveSettings(updatedSettings)
             }
 
+            reminderAlarmScheduler.syncWithSettings(updatedSettings)
+
             _events.emit(ReminderSettingsEvent.Saved)
         }
     }
@@ -106,11 +110,13 @@ class ReminderSettingsViewModel(
 
 class ReminderSettingsViewModelFactory(
     private val settingsRepository: SettingsRepository,
+    private val reminderAlarmScheduler: ReminderAlarmScheduler,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return ReminderSettingsViewModel(
             settingsRepository = settingsRepository,
+            reminderAlarmScheduler = reminderAlarmScheduler,
         ) as T
     }
 }
