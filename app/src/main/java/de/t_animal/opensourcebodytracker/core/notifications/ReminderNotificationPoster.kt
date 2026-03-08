@@ -17,7 +17,6 @@ import de.t_animal.opensourcebodytracker.R
 class ReminderNotificationPoster(
     private val context: Context,
 ) {
-    @androidx.annotation.RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
     fun showReminderNotification(): ReminderNotificationResult {
         if (!areNotificationsEnabled()) {
             return ReminderNotificationResult.NotificationsDisabled
@@ -46,16 +45,17 @@ class ReminderNotificationPoster(
             .setContentIntent(contentIntent)
             .build()
 
-        return runCatching {
+
+        try {
             NotificationManagerCompat.from(context).notify(
                 ReminderNotificationContract.ReminderNotificationId,
                 notification,
             )
-        }.fold(
-            onSuccess = { ReminderNotificationResult.Shown },
-            onFailure = { ReminderNotificationResult.Failed },
-        )
-    }
+        } catch (_:SecurityException) {
+            return ReminderNotificationResult.Failed
+        }
+            return ReminderNotificationResult.Shown
+        }
 
     private fun areNotificationsEnabled(): Boolean {
         if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) {

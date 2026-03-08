@@ -41,6 +41,7 @@ Use these commands to build and validate:
 
 ```bash
 ./gradlew :app:compileDebugKotlin --console=plain
+./gradlew :app:lintDebug --console=plain
 ./gradlew :app:testDebugUnitTest --console=plain
 ./gradlew ktlintCheck --console=plain
 ```
