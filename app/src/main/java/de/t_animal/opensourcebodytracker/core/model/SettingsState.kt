@@ -1,5 +1,8 @@
 package de.t_animal.opensourcebodytracker.core.model
 
+import java.time.DayOfWeek
+import java.time.LocalTime
+
 enum class AnalysisMethod {
     Bmi,
     NavyBodyFat,
@@ -16,6 +19,9 @@ data class SettingsState(
     val waistHeightRatioEnabled: Boolean,
     val onboardingCompleted: Boolean,
     val isDemoMode: Boolean,
+    val reminderEnabled: Boolean,
+    val reminderWeekdays: Set<DayOfWeek>,
+    val reminderTime: LocalTime,
     val enabledMeasurements: Set<MeasuredBodyMetric>,
     val visibleInAnalysis: Set<BodyMetric>,
     val visibleInTable: Set<BodyMetric>,
@@ -38,6 +44,9 @@ fun defaultSettingsState(): SettingsState {
         waistHeightRatioEnabled = true,
         onboardingCompleted = false,
         isDemoMode = false,
+        reminderEnabled = false,
+        reminderWeekdays = setOf(DayOfWeek.SUNDAY),
+        reminderTime = LocalTime.of(9, 0),
         enabledMeasurements = MeasuredBodyMetric.entries.toSet(),
         visibleInAnalysis = visibleByDefault,
         visibleInTable = visibleByDefault,

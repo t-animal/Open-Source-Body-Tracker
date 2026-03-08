@@ -5,6 +5,8 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
+import java.time.DayOfWeek
+import java.time.LocalTime
 import org.junit.Assert
 import org.junit.Test
 
@@ -161,6 +163,9 @@ class DerivedMetricsDependencyResolverTest {
             waistHeightRatioEnabled = false,
             onboardingCompleted = false,
             isDemoMode = false,
+            reminderEnabled = false,
+            reminderWeekdays = setOf(DayOfWeek.SUNDAY),
+            reminderTime = LocalTime.of(9, 0),
             enabledMeasurements = emptySet(),
             visibleInAnalysis = setOf(MeasuredBodyMetric.Weight),
             visibleInTable = setOf(MeasuredBodyMetric.Weight),
