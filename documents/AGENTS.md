@@ -37,12 +37,12 @@ Maintain and extend the Android app safely and quickly with consistent architect
 
 ## Build & Validation Commands
 
-Always source profile before Gradle in this environment:
+Use these commands to build and validate:
 
 ```bash
-source /etc/profile && ./gradlew :app:compileDebugKotlin --console=plain
-source /etc/profile && ./gradlew :app:testDebugUnitTest --console=plain
-source /etc/profile && ./gradlew ktlintCheck --console=plain
+./gradlew :app:compileDebugKotlin --console=plain
+./gradlew :app:testDebugUnitTest --console=plain
+./gradlew ktlintCheck --console=plain
 ```
 
 Use `assembleDebug` for full packaging validation when routing/resources/storage behavior changes.
