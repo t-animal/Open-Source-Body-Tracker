@@ -28,11 +28,7 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
                     return@launch
                 }
 
-                try {
-                    container.reminderNotificationPoster.showReminderNotification()
-                } catch (e: SecurityException) {
-                    // user has disallowed notifications in the meantime. We'll do nothing then.
-                }
+                container.reminderNotificationPoster.showReminderNotification()
 
                 // schedule next notification
                 container.reminderAlarmScheduler.syncWithSettings(settings)
