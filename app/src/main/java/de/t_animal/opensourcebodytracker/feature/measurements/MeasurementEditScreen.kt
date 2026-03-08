@@ -43,6 +43,8 @@ import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.photos.NewPhotoCaptureTarget
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DeleteMeasurementDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DiscardChangesDialog
@@ -63,6 +65,8 @@ fun MeasurementEditRoute(
     photoStorage: InternalPhotoStorage,
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
+    deleteMeasurementUseCase: DeleteMeasurementUseCase,
+    saveMeasurementUseCase: SaveMeasurementUseCase,
     measurementId: Long?,
     onFinished: () -> Unit,
     onCancel: () -> Unit,
@@ -74,6 +78,8 @@ fun MeasurementEditRoute(
             photoStorage = photoStorage,
             profileRepository = profileRepository,
             settingsRepository = settingsRepository,
+            deleteMeasurementUseCase = deleteMeasurementUseCase,
+            saveMeasurementUseCase = saveMeasurementUseCase,
             dependencyResolver = DerivedMetricsDependencyResolver(),
             measurementId = measurementId,
         ),

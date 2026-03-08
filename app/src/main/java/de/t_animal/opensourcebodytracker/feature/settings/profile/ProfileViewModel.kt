@@ -6,11 +6,12 @@ import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
+import de.t_animal.opensourcebodytracker.core.util.formatDecimalForInput
+import de.t_animal.opensourcebodytracker.core.util.parseLocalizedFloatOrNull
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
-import java.text.DecimalFormatSymbols
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -89,7 +90,7 @@ class ProfileViewModel(
             return
         }
 
-        val height = parseFloatOrNull(current.heightCmText)
+        val height = parseLocalizedFloatOrNull(current.heightCmText)
         if (height == null || height <= 0f) {
             _uiState.value = current.copy(errorMessage = "Height must be a positive number")
             return
@@ -159,20 +160,4 @@ class ProfileViewModelFactory(
             mode = mode,
         ) as T
     }
-}
-
-private fun parseFloatOrNull(text: String): Float? {
-    val trimmed = text.trim()
-    if (trimmed.isBlank()) return null
-    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
-    return trimmed
-        .replace(decimalSeparator, '.')
-        .replace(',', '.')
-        .toFloatOrNull()
-}
-
-private fun formatDecimalForInput(value: Double): String {
-    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
-    val text = value.toString()
-    return if (decimalSeparator == '.') text else text.replace('.', decimalSeparator)
 }

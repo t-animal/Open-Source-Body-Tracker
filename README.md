@@ -196,6 +196,5 @@ If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
 
 * Allow reordering of measurements for table and analysis
 * Tapping photo preview closes it
-* paths (e.g. in internalphotostorage) should be provided by a central instance, not hardcoded
 * translation
 * prevent android built-in backups (https://developer.android.com/identity/data/autobackup?hl=de) at least for photos, add custom backup logic

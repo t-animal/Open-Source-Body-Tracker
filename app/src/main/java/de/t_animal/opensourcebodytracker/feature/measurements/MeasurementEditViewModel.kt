@@ -3,21 +3,26 @@ package de.t_animal.opensourcebodytracker.feature.measurements
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
+import de.t_animal.opensourcebodytracker.core.util.formatEpochMillisAsIsoDate
+import de.t_animal.opensourcebodytracker.core.util.parseLocalizedDoubleOrNull
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementCommand
+import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementResult
+import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementMetricMapper
+import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementCommand
+import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementResult
+import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
-import java.text.DecimalFormatSymbols
-import java.time.Instant
-import java.time.ZoneId
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -59,6 +64,8 @@ class MeasurementEditViewModel(
     private val photoStorage: InternalPhotoStorage,
     private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
+    private val deleteMeasurementUseCase: DeleteMeasurementUseCase,
+    private val saveMeasurementUseCase: SaveMeasurementUseCase,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
     private val measurementId: Long?,
 ) : ViewModel() {
@@ -115,7 +122,7 @@ class MeasurementEditViewModel(
     }
 
     fun onMetricChanged(metric: MeasuredBodyMetric, text: String) {
-        update {
+        updateUiState {
             it.copy(
                 metricInputs = it.metricInputs + (metric to text),
                 errorMessage = null,
@@ -124,10 +131,10 @@ class MeasurementEditViewModel(
     }
 
     fun onDateChanged(epochMillis: Long) {
-        update {
+        updateUiState {
             it.copy(
                 dateEpochMillis = epochMillis,
-                dateText = formatDate(epochMillis),
+                dateText = formatEpochMillisAsIsoDate(epochMillis),
                 errorMessage = null,
             )
         }
@@ -143,7 +150,7 @@ class MeasurementEditViewModel(
             }
         }
 
-        update {
+        updateUiState {
             it.copy(
                 pendingPhotoAbsolutePath = incomingPhotoPath,
                 isPhotoMarkedForDeletion = false,
@@ -153,7 +160,7 @@ class MeasurementEditViewModel(
     }
 
     fun onDeletePhotoClicked() {
-        update {
+        updateUiState {
             it.copy(
                 pendingPhotoAbsolutePath = null,
                 isPhotoMarkedForDeletion = true,
@@ -163,7 +170,7 @@ class MeasurementEditViewModel(
     }
 
     fun onPhotoPreviewDialogVisibilityChanged(isVisible: Boolean) {
-        update {
+        updateUiState {
             it.copy(isPhotoPreviewDialogVisible = isVisible)
         }
     }
@@ -174,12 +181,19 @@ class MeasurementEditViewModel(
 
         viewModelScope.launch {
             try {
-                repository.deleteById(currentMeasurementId)
-                current.pendingPhotoAbsolutePath?.let { photoStorage.deleteTemporaryCapturePhoto(it) }
-                current.persistedPhotoFilePath?.let { photoStorage.deletePhoto(it) }
-                _events.emit(MeasurementEditEvent.Deleted)
+                when (
+                    deleteMeasurementUseCase(
+                        DeleteMeasurementCommand(
+                            measurementId = currentMeasurementId,
+                            pendingPhotoPath = current.pendingPhotoAbsolutePath,
+                            persistedPhotoPath = current.persistedPhotoFilePath,
+                        ),
+                    )
+                ) {
+                    DeleteMeasurementResult.Success -> _events.emit(MeasurementEditEvent.Deleted)
+                }
             } catch (_: Throwable) {
-                update {
+                updateUiState {
                     it.copy(errorMessage = "Unable to delete measurement")
                 }
             }
@@ -188,121 +202,48 @@ class MeasurementEditViewModel(
 
     fun onSaveClicked() {
         val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
-        val enabledMeasurements = current.enabledMeasurements
         val date = current.dateEpochMillis ?: System.currentTimeMillis()
-        val currentMeasurementId = current.measurementId
-
-        val metricValues = current.metricInputs
-            .mapValues { (_, valueText) -> parseDoubleOrNull(valueText) }
-
-        val invalidSkinfoldInput = MeasuredBodyMetric.entries
-            .filter { it.metricType == BodyMetricType.SkinfoldThickness }
-            .any { metric ->
-                val value = metricValues[metric]
-                value != null && value <= 0.0
-            }
-        if (invalidSkinfoldInput) {
-            _uiState.value = current.copy(errorMessage = "Skinfold values must be greater than 0")
-            return
-        }
-
-        val bodyFat = metricValues[MeasuredBodyMetric.BodyFat]
-        val invalidBodyFatInput = bodyFat != null && (bodyFat < 0.0 || bodyFat > 100.0)
-        if (invalidBodyFatInput) {
-            _uiState.value = current.copy(errorMessage = "Body fat must be between 0 and 100")
-            return
-        }
-
-        val hasAnyValue = metricValues.values.any { it != null }
-        val pendingPhotoAbsolutePath = current.pendingPhotoAbsolutePath
-        val persistedPhotoFilePath = current.persistedPhotoFilePath
-
-        val hasPhoto = pendingPhotoAbsolutePath != null ||
-            (persistedPhotoFilePath != null && !current.isPhotoMarkedForDeletion)
-
-        if (!hasAnyValue && !hasPhoto) {
-            _uiState.value = current.copy(errorMessage = "Enter at least one value or add a photo")
-            return
-        }
 
         viewModelScope.launch {
             try {
-                if (currentMeasurementId == null) {
-                    val insertedId = repository.insert(
-                        buildBodyMeasurement(
-                            id = 0,
+                when (
+                    val result = saveMeasurementUseCase(
+                        SaveMeasurementCommand(
+                            measurementId = current.measurementId,
                             dateEpochMillis = date,
-                            photoFilePath = null,
-                            values = metricValues,
-                            enabledMeasurements = enabledMeasurements,
+                            enabledMeasurements = current.enabledMeasurements,
+                            metricValues = parseMetricValues(current.metricInputs),
+                            existingPhotoPath = current.persistedPhotoFilePath,
+                            newPhotoPath = current.pendingPhotoAbsolutePath,
+                            deleteExistingPhoto = current.isPhotoMarkedForDeletion,
                         ),
                     )
-
-                    if (pendingPhotoAbsolutePath != null) {
-                        val savedPhotoPath = photoStorage.movePhotoForMeasurement(
-                            measurementId = insertedId,
-                            measurementDateEpochMillis = date,
-                            sourceAbsolutePath = pendingPhotoAbsolutePath,
-                        )
-                        repository.update(
-                            buildBodyMeasurement(
-                                id = insertedId,
-                                dateEpochMillis = date,
-                                photoFilePath = savedPhotoPath,
-                                values = metricValues,
-                                enabledMeasurements = enabledMeasurements,
-                            ),
-                        )
-                    }
-                } else {
-                    val shouldRemovePersistedPhoto =
-                        current.isPhotoMarkedForDeletion && pendingPhotoAbsolutePath == null
-
-                    val updatedPhotoPath = when {
-                        pendingPhotoAbsolutePath != null -> photoStorage.movePhotoForMeasurement(
-                            measurementId = currentMeasurementId,
-                            measurementDateEpochMillis = date,
-                            sourceAbsolutePath = pendingPhotoAbsolutePath,
-                        )
-                        shouldRemovePersistedPhoto -> null
-                        else -> persistedPhotoFilePath
-                    }
-
-                    repository.update(
-                        buildBodyMeasurement(
-                            id = currentMeasurementId,
-                            dateEpochMillis = date,
-                            photoFilePath = updatedPhotoPath,
-                            values = metricValues,
-                            enabledMeasurements = enabledMeasurements,
-                        ),
-                    )
-
-                    if (shouldRemovePersistedPhoto) {
-                        persistedPhotoFilePath?.let { photoStorage.deletePhoto(it) }
-                    } else if (pendingPhotoAbsolutePath != null) {
-                        val previousPhotoPath = persistedPhotoFilePath
-                        if (previousPhotoPath != null && previousPhotoPath != updatedPhotoPath) {
-                            photoStorage.deletePhoto(previousPhotoPath)
-                        }
+                ) {
+                    is SaveMeasurementResult.Success -> _events.emit(MeasurementEditEvent.Saved)
+                    is SaveMeasurementResult.ValidationError -> {
+                        _uiState.value = current.copy(errorMessage = result.message)
                     }
                 }
-
-                _events.emit(MeasurementEditEvent.Saved)
             } catch (_: Throwable) {
-                update {
+                updateUiState {
                     it.copy(errorMessage = "Unable to save measurement photo")
                 }
             }
         }
     }
 
-    private fun update(transform: (MeasurementEditUiState.Loaded) -> MeasurementEditUiState.Loaded) {
+    private fun updateUiState(
+        transform: (MeasurementEditUiState.Loaded) -> MeasurementEditUiState.Loaded,
+    ) {
         val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
         val updated = transform(current)
         _uiState.value = updated.copy(
             hasUnsavedChanges = calculateHasUnsavedChanges(updated),
         )
+    }
+
+    private fun parseMetricValues(metricInputs: Map<MeasuredBodyMetric, String>): Map<MeasuredBodyMetric, Double?> {
+        return metricInputs.mapValues { (_, valueText) -> parseLocalizedDoubleOrNull(valueText) }
     }
 
     private fun buildInitialLoadedState(
@@ -318,17 +259,17 @@ class MeasurementEditViewModel(
                 sex = sex,
                 enabledMeasurements = enabledMeasurements,
                 dateEpochMillis = now,
-                dateText = formatDate(now),
+                dateText = formatEpochMillisAsIsoDate(now),
                 initialDateEpochMillis = now,
             )
         } else {
-            val metricInputs = toMetricInputMap(measurement)
+            val metricInputs = MeasurementMetricMapper.toMetricInputMap(measurement)
             MeasurementEditUiState.Loaded(
                 measurementId = measurement.id,
                 sex = sex,
                 enabledMeasurements = enabledMeasurements,
                 dateEpochMillis = measurement.dateEpochMillis,
-                dateText = formatDate(measurement.dateEpochMillis),
+                dateText = formatEpochMillisAsIsoDate(measurement.dateEpochMillis),
                 initialDateEpochMillis = measurement.dateEpochMillis,
                 metricInputs = metricInputs,
                 initialMetricInputs = metricInputs,
@@ -337,36 +278,10 @@ class MeasurementEditViewModel(
             )
         }
     }
+}
 
-    private fun buildBodyMeasurement(
-        id: Long,
-        dateEpochMillis: Long,
-        photoFilePath: PersistedPhotoPath?,
-        values: Map<MeasuredBodyMetric, Double?>,
-        enabledMeasurements: Set<MeasuredBodyMetric>,
-    ): BodyMeasurement {
-        fun ifEnabled(metric: MeasuredBodyMetric): Double? {
-            return if (metric in enabledMeasurements) values[metric] else null
-        }
-
-        return BodyMeasurement(
-            id = id,
-            dateEpochMillis = dateEpochMillis,
-            photoFilePath = photoFilePath,
-            weightKg = ifEnabled(MeasuredBodyMetric.Weight),
-            bodyFatPercent = ifEnabled(MeasuredBodyMetric.BodyFat),
-            neckCircumferenceCm = ifEnabled(MeasuredBodyMetric.NeckCircumference),
-            chestCircumferenceCm = ifEnabled(MeasuredBodyMetric.ChestCircumference),
-            waistCircumferenceCm = ifEnabled(MeasuredBodyMetric.WaistCircumference),
-            abdomenCircumferenceCm = ifEnabled(MeasuredBodyMetric.AbdomenCircumference),
-            hipCircumferenceCm = ifEnabled(MeasuredBodyMetric.HipCircumference),
-            chestSkinfoldMm = ifEnabled(MeasuredBodyMetric.ChestSkinfold),
-            abdomenSkinfoldMm = ifEnabled(MeasuredBodyMetric.AbdomenSkinfold),
-            thighSkinfoldMm = ifEnabled(MeasuredBodyMetric.ThighSkinfold),
-            tricepsSkinfoldMm = ifEnabled(MeasuredBodyMetric.TricepsSkinfold),
-            suprailiacSkinfoldMm = ifEnabled(MeasuredBodyMetric.SuprailiacSkinfold),
-        )
-    }
+private fun defaultMetricInputs(): Map<MeasuredBodyMetric, String> {
+    return MeasuredBodyMetric.entries.associateWith { "" }
 }
 
 class MeasurementEditViewModelFactory(
@@ -374,6 +289,8 @@ class MeasurementEditViewModelFactory(
     private val photoStorage: InternalPhotoStorage,
     private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
+    private val deleteMeasurementUseCase: DeleteMeasurementUseCase,
+    private val saveMeasurementUseCase: SaveMeasurementUseCase,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
     private val measurementId: Long?,
 ) : ViewModelProvider.Factory {
@@ -384,55 +301,11 @@ class MeasurementEditViewModelFactory(
             photoStorage = photoStorage,
             profileRepository = profileRepository,
             settingsRepository = settingsRepository,
+            deleteMeasurementUseCase = deleteMeasurementUseCase,
+            saveMeasurementUseCase = saveMeasurementUseCase,
             dependencyResolver = dependencyResolver,
             measurementId = measurementId,
         ) as T
-    }
-}
-
-private fun parseDoubleOrNull(text: String): Double? {
-    val trimmed = text.trim()
-    if (trimmed.isBlank()) return null
-    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
-    return trimmed
-        .replace(decimalSeparator, '.')
-        .replace(',', '.')
-        .toDoubleOrNull()
-}
-
-private fun formatDecimalForInput(value: Double): String {
-    val decimalSeparator = DecimalFormatSymbols.getInstance().decimalSeparator
-    val text = value.toString()
-    return if (decimalSeparator == '.') text else text.replace('.', decimalSeparator)
-}
-
-private fun formatDate(epochMillis: Long): String {
-    return Instant.ofEpochMilli(epochMillis)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-        .toString()
-}
-
-private fun defaultMetricInputs(): Map<MeasuredBodyMetric, String> {
-    return MeasuredBodyMetric.entries.associateWith { "" }
-}
-
-private fun toMetricInputMap(measurement: BodyMeasurement): Map<MeasuredBodyMetric, String> {
-    return mapOf(
-        MeasuredBodyMetric.Weight to measurement.weightKg,
-        MeasuredBodyMetric.BodyFat to measurement.bodyFatPercent,
-        MeasuredBodyMetric.NeckCircumference to measurement.neckCircumferenceCm,
-        MeasuredBodyMetric.ChestCircumference to measurement.chestCircumferenceCm,
-        MeasuredBodyMetric.WaistCircumference to measurement.waistCircumferenceCm,
-        MeasuredBodyMetric.AbdomenCircumference to measurement.abdomenCircumferenceCm,
-        MeasuredBodyMetric.HipCircumference to measurement.hipCircumferenceCm,
-        MeasuredBodyMetric.ChestSkinfold to measurement.chestSkinfoldMm,
-        MeasuredBodyMetric.AbdomenSkinfold to measurement.abdomenSkinfoldMm,
-        MeasuredBodyMetric.ThighSkinfold to measurement.thighSkinfoldMm,
-        MeasuredBodyMetric.TricepsSkinfold to measurement.tricepsSkinfoldMm,
-        MeasuredBodyMetric.SuprailiacSkinfold to measurement.suprailiacSkinfoldMm,
-    ).mapValues { (_, value) ->
-        value?.let(::formatDecimalForInput).orEmpty()
     }
 }
 
@@ -443,8 +316,8 @@ private fun calculateHasUnsavedChanges(state: MeasurementEditUiState.Loaded): Bo
 
     val hasDateChange = state.dateEpochMillis != state.initialDateEpochMillis
     val hasMetricInputChange = MeasuredBodyMetric.entries.any { metric ->
-        val currentValue = parseDoubleOrNull(state.metricInputs[metric].orEmpty())
-        val initialValue = parseDoubleOrNull(state.initialMetricInputs[metric].orEmpty())
+        val currentValue = parseLocalizedDoubleOrNull(state.metricInputs[metric].orEmpty())
+        val initialValue = parseLocalizedDoubleOrNull(state.initialMetricInputs[metric].orEmpty())
         currentValue != initialValue
     }
     val hasPhotoChange =
