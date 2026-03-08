@@ -14,6 +14,8 @@ import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +40,8 @@ class MainActivity : ComponentActivity() {
                         internalPhotoStorage = container.internalPhotoStorage,
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
                         generateDemoDataUseCase = container.generateDemoDataUseCase,
+                        deleteMeasurementUseCase = container.deleteMeasurementUseCase,
+                        saveMeasurementUseCase = container.saveMeasurementUseCase,
                         reminderNotificationPoster = container.reminderNotificationPoster,
                         reminderAlarmScheduler = container.reminderAlarmScheduler,
                         openMeasurementAddSignal = openMeasurementAddSignal,
@@ -100,6 +104,8 @@ private fun BodyTrackerApp(
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
     generateDemoDataUseCase: GenerateDemoDataUseCase,
+    deleteMeasurementUseCase: DeleteMeasurementUseCase,
+    saveMeasurementUseCase: SaveMeasurementUseCase,
     reminderNotificationPoster: ReminderNotificationPoster,
     reminderAlarmScheduler: ReminderAlarmScheduler,
     openMeasurementAddSignal: StateFlow<Long>,
@@ -112,6 +118,8 @@ private fun BodyTrackerApp(
         internalPhotoStorage = internalPhotoStorage,
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         generateDemoDataUseCase = generateDemoDataUseCase,
+        deleteMeasurementUseCase = deleteMeasurementUseCase,
+        saveMeasurementUseCase = saveMeasurementUseCase,
         reminderNotificationPoster = reminderNotificationPoster,
         reminderAlarmScheduler = reminderAlarmScheduler,
         openMeasurementAddSignal = openMeasurementAddSignal,

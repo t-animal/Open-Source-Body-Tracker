@@ -39,6 +39,8 @@ import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotification
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationResult
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
@@ -66,6 +68,8 @@ fun BodyTrackerNavHost(
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     generateDemoDataUseCase: GenerateDemoDataUseCase,
+    deleteMeasurementUseCase: DeleteMeasurementUseCase,
+    saveMeasurementUseCase: SaveMeasurementUseCase,
     reminderNotificationPoster: ReminderNotificationPoster,
     reminderAlarmScheduler: ReminderAlarmScheduler,
     openMeasurementAddSignal: StateFlow<Long>,
@@ -498,6 +502,8 @@ fun BodyTrackerNavHost(
                 photoStorage = internalPhotoStorage,
                 profileRepository = profileRepository,
                 settingsRepository = settingsRepository,
+                deleteMeasurementUseCase = deleteMeasurementUseCase,
+                saveMeasurementUseCase = saveMeasurementUseCase,
                 measurementId = null,
                 onFinished = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() },
@@ -523,6 +529,8 @@ fun BodyTrackerNavHost(
                 photoStorage = internalPhotoStorage,
                 profileRepository = profileRepository,
                 settingsRepository = settingsRepository,
+                deleteMeasurementUseCase = deleteMeasurementUseCase,
+                saveMeasurementUseCase = saveMeasurementUseCase,
                 measurementId = id,
                 onFinished = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() },

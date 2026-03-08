@@ -15,6 +15,10 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataMeasurementSeriesGenerator
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
+import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaveValidator
+import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaver
+import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsCalculator
 
@@ -75,6 +79,31 @@ class AppContainer(appContext: Context) {
             measurementRepository = measurementRepository,
             demoDataMeasurementSeriesGenerator = demoDataMeasurementSeriesGenerator,
             demoDataPhotoSeeder = demoDataPhotoSeeder,
+        )
+    }
+
+    private val measurementSaveValidator: MeasurementSaveValidator by lazy {
+        MeasurementSaveValidator()
+    }
+
+    private val measurementSaver: MeasurementSaver by lazy {
+        MeasurementSaver(
+            repository = measurementRepository,
+            photoStorage = internalPhotoStorage,
+        )
+    }
+
+    val saveMeasurementUseCase: SaveMeasurementUseCase by lazy {
+        SaveMeasurementUseCase(
+            validator = measurementSaveValidator,
+            saver = measurementSaver,
+        )
+    }
+
+    val deleteMeasurementUseCase: DeleteMeasurementUseCase by lazy {
+        DeleteMeasurementUseCase(
+            repository = measurementRepository,
+            photoStorage = internalPhotoStorage,
         )
     }
 }
