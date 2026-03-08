@@ -17,8 +17,8 @@ android {
         applicationId = "de.t_animal.opensourcebodytracker"
         minSdk = 29
         targetSdk = 36
-        versionCode = 2
-        versionName = "2026.03-01alpha"
+        versionCode = 3
+        versionName = "2026.03-02alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
