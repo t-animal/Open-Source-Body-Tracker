@@ -35,14 +35,12 @@ class PhotosViewModel(
         .map { measurements ->
             measurements
                 .asSequence()
-                .filter { !it.photoFilePath.isNullOrBlank() }
-                .map { measurement ->
+                .mapNotNull { measurement ->
+                    val photoPath = measurement.photoFilePath ?: return@mapNotNull null
                     PhotosItemUiModel(
                         measurementId = measurement.id,
                         dateEpochMillis = measurement.dateEpochMillis,
-                        photoFile = photoStorage.resolvePhotoFile(
-                            measurement.photoFilePath.orEmpty(),
-                        ),
+                        photoFile = photoStorage.resolvePhotoFile(photoPath),
                     )
                 }
                 .toList()

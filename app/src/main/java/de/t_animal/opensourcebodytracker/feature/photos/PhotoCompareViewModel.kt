@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.feature.photos
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
@@ -41,27 +42,18 @@ class PhotoCompareViewModel(
             val leftMeasurement = measurementRepository.getById(leftMeasurementId)
             val rightMeasurement = measurementRepository.getById(rightMeasurementId)
 
-            val leftItem = leftMeasurement
-                ?.photoFilePath
-                ?.takeIf { it.isNotBlank() }
-                ?.let { photoPath ->
+            fun itemFromMeasurement(measurement: BodyMeasurement?) =
+                measurement?.photoFilePath?.let { photoPath ->
                     PhotosItemUiModel(
-                        measurementId = leftMeasurement.id,
-                        dateEpochMillis = leftMeasurement.dateEpochMillis,
+                        measurementId = measurement.id,
+                        dateEpochMillis = measurement.dateEpochMillis,
                         photoFile = photoStorage.resolvePhotoFile(photoPath),
                     )
                 }
 
-            val rightItem = rightMeasurement
-                ?.photoFilePath
-                ?.takeIf { it.isNotBlank() }
-                ?.let { photoPath ->
-                    PhotosItemUiModel(
-                        measurementId = rightMeasurement.id,
-                        dateEpochMillis = rightMeasurement.dateEpochMillis,
-                        photoFile = photoStorage.resolvePhotoFile(photoPath),
-                    )
-                }
+
+            val leftItem = itemFromMeasurement(leftMeasurement)
+            val rightItem = itemFromMeasurement(rightMeasurement)
 
             val missingPhoto = leftItem == null || rightItem == null ||
                 !leftItem.photoFile.exists() ||

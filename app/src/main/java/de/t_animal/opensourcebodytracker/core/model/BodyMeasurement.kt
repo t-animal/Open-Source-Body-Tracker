@@ -1,9 +1,11 @@
 package de.t_animal.opensourcebodytracker.core.model
 
+import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
+
 data class BodyMeasurement(
     val id: Long,
     val dateEpochMillis: Long,
-    val photoFilePath: String? = null,
+    val photoFilePath: PersistedPhotoPath? = null,
     val weightKg: Double? = null,
     val bodyFatPercent: Double? = null,
     val neckCircumferenceCm: Double? = null,

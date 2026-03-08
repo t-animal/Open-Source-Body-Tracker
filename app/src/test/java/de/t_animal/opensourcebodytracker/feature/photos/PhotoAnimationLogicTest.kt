@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.feature.photos
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.DEFAULT_ANIMATION_SPEED_FPS
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.MAX_ANIMATION_SPEED_FPS
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.MIN_ANIMATION_SPEED_FPS
@@ -103,7 +104,7 @@ class PhotoAnimationLogicTest {
         val frames = buildAnimationFrameItems(
             selectedMeasurementIds = selectedIds,
             measurementsById = measurementsById,
-            resolvePhotoFile = { path -> File(path) },
+            resolvePhotoFile = { path -> File(path.value) },
             fileExists = { file -> file.path != "missing.jpg" },
         )
 
@@ -129,7 +130,7 @@ class PhotoAnimationLogicTest {
         val frames = buildAnimationFrameItems(
             selectedMeasurementIds = selectedIds,
             measurementsById = measurementsById,
-            resolvePhotoFile = { path -> File(path) },
+            resolvePhotoFile = { path -> File(path.value) },
             fileExists = { _ -> false },
         )
 
@@ -144,7 +145,7 @@ class PhotoAnimationLogicTest {
         return BodyMeasurement(
             id = id,
             dateEpochMillis = dateEpochMillis,
-            photoFilePath = photoFilePath,
+            photoFilePath = photoFilePath?.let(::PersistedPhotoPath),
         )
     }
 }

@@ -18,7 +18,7 @@ class DemoDataPhotoSeeder(
 ) {
     suspend fun cleanupExistingMeasurementPhotos() {
         val existingPhotoPaths = measurementRepository.getAll()
-            .mapNotNull { it.photoFilePath }
+            .mapNotNull { measurement -> measurement.photoFilePath }
             .distinct()
 
         existingPhotoPaths.forEach { path ->
@@ -67,7 +67,9 @@ class DemoDataPhotoSeeder(
                 measurementDateEpochMillis = navyMeasurement.measurement.dateEpochMillis,
                 photoBinaryContent = photoBinaryContent,
             )
-            measurementRepository.update(navyMeasurement.measurement.copy(photoFilePath = photoPath))
+            measurementRepository.update(
+                navyMeasurement.measurement.copy(photoFilePath = photoPath),
+            )
         }
     }
 

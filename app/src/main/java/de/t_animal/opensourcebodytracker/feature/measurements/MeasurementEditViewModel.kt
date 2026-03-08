@@ -7,6 +7,8 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
+import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
+import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
@@ -37,9 +39,9 @@ sealed interface MeasurementEditUiState {
         val initialDateEpochMillis: Long? = null,
         val metricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
         val initialMetricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
-        val persistedPhotoFilePath: String? = null,
-        val initialPersistedPhotoFilePath: String? = null,
-        val pendingPhotoAbsolutePath: String? = null,
+        val persistedPhotoFilePath: PersistedPhotoPath? = null,
+        val initialPersistedPhotoFilePath: PersistedPhotoPath? = null,
+        val pendingPhotoAbsolutePath: TemporaryCapturePhotoPath? = null,
         val isPhotoMarkedForDeletion: Boolean = false,
         val hasUnsavedChanges: Boolean = false,
         val isPhotoPreviewDialogVisible: Boolean = false,
@@ -131,18 +133,19 @@ class MeasurementEditViewModel(
         }
     }
 
-    fun onPhotoCaptured(pendingPhotoAbsolutePath: String?) {
+    fun onPhotoCaptured(pendingPhotoAbsolutePath: TemporaryCapturePhotoPath?) {
         val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
         val previousPhotoPath = current.pendingPhotoAbsolutePath
-        if (!previousPhotoPath.isNullOrBlank() && previousPhotoPath != pendingPhotoAbsolutePath) {
+        val incomingPhotoPath = pendingPhotoAbsolutePath
+        if (previousPhotoPath != null && previousPhotoPath != incomingPhotoPath) {
             viewModelScope.launch {
-                photoStorage.deletePhotoAtAbsolutePath(previousPhotoPath)
+                photoStorage.deleteTemporaryCapturePhoto(previousPhotoPath)
             }
         }
 
         update {
             it.copy(
-                pendingPhotoAbsolutePath = pendingPhotoAbsolutePath,
+                pendingPhotoAbsolutePath = incomingPhotoPath,
                 isPhotoMarkedForDeletion = false,
                 isPhotoPreviewDialogVisible = false,
             )
@@ -172,7 +175,7 @@ class MeasurementEditViewModel(
         viewModelScope.launch {
             try {
                 repository.deleteById(currentMeasurementId)
-                current.pendingPhotoAbsolutePath?.let { photoStorage.deletePhotoAtAbsolutePath(it) }
+                current.pendingPhotoAbsolutePath?.let { photoStorage.deleteTemporaryCapturePhoto(it) }
                 current.persistedPhotoFilePath?.let { photoStorage.deletePhoto(it) }
                 _events.emit(MeasurementEditEvent.Deleted)
             } catch (_: Throwable) {
@@ -211,9 +214,11 @@ class MeasurementEditViewModel(
         }
 
         val hasAnyValue = metricValues.values.any { it != null }
+        val pendingPhotoAbsolutePath = current.pendingPhotoAbsolutePath
+        val persistedPhotoFilePath = current.persistedPhotoFilePath
 
-        val hasPhoto = current.pendingPhotoAbsolutePath != null ||
-            (current.persistedPhotoFilePath != null && !current.isPhotoMarkedForDeletion)
+        val hasPhoto = pendingPhotoAbsolutePath != null ||
+            (persistedPhotoFilePath != null && !current.isPhotoMarkedForDeletion)
 
         if (!hasAnyValue && !hasPhoto) {
             _uiState.value = current.copy(errorMessage = "Enter at least one value or add a photo")
@@ -221,8 +226,6 @@ class MeasurementEditViewModel(
         }
 
         viewModelScope.launch {
-            val pendingPhotoAbsolutePath = current.pendingPhotoAbsolutePath
-
             try {
                 if (currentMeasurementId == null) {
                     val insertedId = repository.insert(
@@ -262,7 +265,7 @@ class MeasurementEditViewModel(
                             sourceAbsolutePath = pendingPhotoAbsolutePath,
                         )
                         shouldRemovePersistedPhoto -> null
-                        else -> current.persistedPhotoFilePath
+                        else -> persistedPhotoFilePath
                     }
 
                     repository.update(
@@ -276,10 +279,10 @@ class MeasurementEditViewModel(
                     )
 
                     if (shouldRemovePersistedPhoto) {
-                        current.persistedPhotoFilePath?.let { photoStorage.deletePhoto(it) }
+                        persistedPhotoFilePath?.let { photoStorage.deletePhoto(it) }
                     } else if (pendingPhotoAbsolutePath != null) {
-                        val previousPhotoPath = current.persistedPhotoFilePath
-                        if (!previousPhotoPath.isNullOrBlank() && previousPhotoPath != updatedPhotoPath) {
+                        val previousPhotoPath = persistedPhotoFilePath
+                        if (previousPhotoPath != null && previousPhotoPath != updatedPhotoPath) {
                             photoStorage.deletePhoto(previousPhotoPath)
                         }
                     }
@@ -338,7 +341,7 @@ class MeasurementEditViewModel(
     private fun buildBodyMeasurement(
         id: Long,
         dateEpochMillis: Long,
-        photoFilePath: String?,
+        photoFilePath: PersistedPhotoPath?,
         values: Map<MeasuredBodyMetric, Double?>,
         enabledMeasurements: Set<MeasuredBodyMetric>,
     ): BodyMeasurement {
@@ -446,7 +449,7 @@ private fun calculateHasUnsavedChanges(state: MeasurementEditUiState.Loaded): Bo
     }
     val hasPhotoChange =
         state.isPhotoMarkedForDeletion ||
-            !state.pendingPhotoAbsolutePath.isNullOrBlank() ||
+            state.pendingPhotoAbsolutePath != null ||
             state.persistedPhotoFilePath != state.initialPersistedPhotoFilePath
 
     return hasDateChange || hasMetricInputChange || hasPhotoChange

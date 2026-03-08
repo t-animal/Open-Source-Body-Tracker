@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
@@ -70,12 +71,12 @@ class PhotoAnimationViewModel(
 internal fun buildAnimationFrameItems(
     selectedMeasurementIds: List<Long>,
     measurementsById: Map<Long, BodyMeasurement?>,
-    resolvePhotoFile: (String) -> File,
+    resolvePhotoFile: (PersistedPhotoPath) -> File,
     fileExists: (File) -> Boolean = { file -> file.exists() },
 ): List<PhotosItemUiModel> {
     return selectedMeasurementIds.mapNotNull { measurementId ->
         val measurement = measurementsById[measurementId] ?: return@mapNotNull null
-        val photoPath = measurement.photoFilePath?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+        val photoPath = measurement.photoFilePath ?: return@mapNotNull null
         val photoFile = resolvePhotoFile(photoPath)
         if (!fileExists(photoFile)) {
             return@mapNotNull null

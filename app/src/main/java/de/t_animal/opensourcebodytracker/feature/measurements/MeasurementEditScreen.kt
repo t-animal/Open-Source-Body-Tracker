@@ -29,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -37,11 +36,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import de.t_animal.opensourcebodytracker.data.photos.NewPhotoCaptureTarget
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
@@ -52,8 +51,6 @@ import de.t_animal.opensourcebodytracker.feature.measurements.components.Measure
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MetricSections
 import de.t_animal.opensourcebodytracker.feature.measurements.components.PhotoPreviewCard
 import de.t_animal.opensourcebodytracker.feature.measurements.components.PhotoPreviewDialog
-import de.t_animal.opensourcebodytracker.feature.measurements.helpers.PendingCaptureTarget
-import de.t_animal.opensourcebodytracker.feature.measurements.helpers.createTemporaryImageUri
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.resolveVisibleMeasuredMetrics
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -70,7 +67,6 @@ fun MeasurementEditRoute(
     onFinished: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val vm: MeasurementEditViewModel = viewModel(
         factory = MeasurementEditViewModelFactory(
@@ -83,29 +79,29 @@ fun MeasurementEditRoute(
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
-    var pendingCaptureTarget by remember { mutableStateOf<PendingCaptureTarget?>(null) }
+    var newPhotoCaptureTarget by remember { mutableStateOf<NewPhotoCaptureTarget?>(null) }
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
     ) { didCapture ->
-        val capturedPhotoPath = pendingCaptureTarget?.let {
+        val capturedPhotoPath = newPhotoCaptureTarget?.let {
             if (didCapture) {
-                it.file.absolutePath
+                it.absolutePath
             } else {
                 it.file.delete()
                 null
             }
         }
         vm.onPhotoCaptured(capturedPhotoPath)
-        pendingCaptureTarget = null
+        newPhotoCaptureTarget = null
     }
 
     val loadedState = state as? MeasurementEditUiState.Loaded
-    val newPhotoTaken = !loadedState?.pendingPhotoAbsolutePath.isNullOrBlank()
+    val newPhotoTaken = loadedState?.pendingPhotoAbsolutePath != null
     val oldPhotoExistsAndNotDeleted =
-        !loadedState?.persistedPhotoFilePath.isNullOrBlank() && loadedState?.isPhotoMarkedForDeletion == false
+        loadedState?.persistedPhotoFilePath != null && loadedState?.isPhotoMarkedForDeletion == false
     val photoPreviewModel: File? = when {
         newPhotoTaken -> {
-            loadedState?.pendingPhotoAbsolutePath?.let(::File)
+            loadedState?.pendingPhotoAbsolutePath?.let(photoStorage::resolveTemporaryCapturePhotoFile)
         }
 
         oldPhotoExistsAndNotDeleted -> {
@@ -133,9 +129,9 @@ fun MeasurementEditRoute(
         onMetricChanged = vm::onMetricChanged,
         photoPreviewModel = photoPreviewModel,
         onTakePhotoClicked = {
-            val captureTarget = createTemporaryImageUri(context)
+            val captureTarget = photoStorage.createTemporaryNewPhotoCaptureTarget()
             if (captureTarget != null) {
-                pendingCaptureTarget = captureTarget
+                newPhotoCaptureTarget = captureTarget
                 takePictureLauncher.launch(captureTarget.uri)
             }
         },
