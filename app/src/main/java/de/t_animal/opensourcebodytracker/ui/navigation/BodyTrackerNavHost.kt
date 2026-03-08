@@ -47,6 +47,7 @@ import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingA
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingStartRoute
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileRoute
+import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderSettingsRoute
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,6 +160,13 @@ fun BodyTrackerNavHost(
             }
         }
 
+        composable(Routes.Reminders) {
+            ReminderSettingsRoute(
+                settingsRepository = settingsRepository,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
         composable(Routes.MeasurementList) {
             MainScreenScaffold(
                 selectedDestination = MainDestination.Measurements,
@@ -169,6 +177,7 @@ fun BodyTrackerNavHost(
                 },
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
+                onOpenReminders = { navController.navigate(Routes.Reminders) },
                 onOpenFakeDataGenerator = if (isDebuggable) {
                     { navController.navigate(Routes.FakeDataGenerator) }
                 } else {
@@ -235,6 +244,7 @@ fun BodyTrackerNavHost(
                 },
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
+                onOpenReminders = { navController.navigate(Routes.Reminders) },
                 onOpenFakeDataGenerator = if (isDebuggable) {
                     { navController.navigate(Routes.FakeDataGenerator) }
                 } else {
@@ -261,6 +271,7 @@ fun BodyTrackerNavHost(
                 },
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
+                onOpenReminders = { navController.navigate(Routes.Reminders) },
                 onOpenFakeDataGenerator = if (isDebuggable) {
                     { navController.navigate(Routes.FakeDataGenerator) }
                 } else {

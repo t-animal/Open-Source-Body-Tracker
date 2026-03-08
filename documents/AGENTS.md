@@ -72,5 +72,5 @@ Use `assembleDebug` for full packaging validation when routing/resources/storage
 - [NAVIGATION.md](NAVIGATION.md): Route map, scaffold behavior, gating, and back-stack notes.
 - [ONBOARDING.md](ONBOARDING.md): Onboarding flow, demo mode, reset behavior, and completion conditions.
 - [PHOTOS.md](PHOTOS.md): Photo capture/storage/gallery/compare/animate feature specification.
-- [REMINDER.md](REMINDER.md): Reserved placeholder
+- [REMINDER.md](REMINDER.md): Reminder phases and implementation spec (settings UI, manual trigger, scheduling).
 - [SETTINGS.md](SETTINGS.md): Settings model, method toggles, required measurement dependencies, and display config.

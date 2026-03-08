@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
@@ -12,6 +13,8 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
+import java.time.DayOfWeek
+import java.time.LocalTime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -29,6 +32,9 @@ class PreferencesSettingsRepository(
         val waistHeightRatioEnabled = booleanPreferencesKey("waistHeightRatioEnabled")
         val onboardingCompleted = booleanPreferencesKey("onboardingCompleted")
         val isDemoMode = booleanPreferencesKey("isDemoMode")
+        val reminderEnabled = booleanPreferencesKey("reminderEnabled")
+        val reminderWeekdays = stringSetPreferencesKey("reminderWeekdays")
+        val reminderTime = stringPreferencesKey("reminderTime")
         val enabledMeasurements = stringSetPreferencesKey("enabledMeasurements")
         val visibleInAnalysis = stringSetPreferencesKey("visibleInAnalysis")
         val visibleInTable = stringSetPreferencesKey("visibleInTable")
@@ -44,6 +50,16 @@ class PreferencesSettingsRepository(
             waistHeightRatioEnabled = prefs[Keys.waistHeightRatioEnabled] ?: defaults.waistHeightRatioEnabled,
             onboardingCompleted = prefs[Keys.onboardingCompleted] ?: defaults.onboardingCompleted,
             isDemoMode = prefs[Keys.isDemoMode] ?: defaults.isDemoMode,
+            reminderEnabled = prefs[Keys.reminderEnabled] ?: defaults.reminderEnabled,
+            reminderWeekdays = parseEnumSet(
+                raw = prefs[Keys.reminderWeekdays],
+                values = DayOfWeek.values().toList(),
+                fallback = defaults.reminderWeekdays,
+            ),
+            reminderTime = parseLocalTime(
+                raw = prefs[Keys.reminderTime],
+                fallback = defaults.reminderTime,
+            ),
             enabledMeasurements = parseEnumSet(
                 raw = prefs[Keys.enabledMeasurements],
                 values = MeasuredBodyMetric.entries,
@@ -69,6 +85,9 @@ class PreferencesSettingsRepository(
             prefs[Keys.waistHeightRatioEnabled] = settings.waistHeightRatioEnabled
             prefs[Keys.onboardingCompleted] = settings.onboardingCompleted
             prefs[Keys.isDemoMode] = settings.isDemoMode
+            prefs[Keys.reminderEnabled] = settings.reminderEnabled
+            prefs[Keys.reminderWeekdays] = settings.reminderWeekdays.mapTo(mutableSetOf()) { it.name }
+            prefs[Keys.reminderTime] = settings.reminderTime.toString()
             prefs[Keys.enabledMeasurements] = settings.enabledMeasurements.mapTo(mutableSetOf()) { it.name }
             prefs[Keys.visibleInAnalysis] = settings.visibleInAnalysis.mapTo(mutableSetOf()) { it.storageName() }
             prefs[Keys.visibleInTable] = settings.visibleInTable.mapTo(mutableSetOf()) { it.storageName() }
@@ -105,4 +124,15 @@ private fun <E : Enum<E>> parseEnumSet(
     val byName = values.associateBy { it.name }
     val parsed = raw.mapNotNull { byName[it] }.toSet()
     return if (parsed.isEmpty()) fallback else parsed
+}
+
+private fun parseLocalTime(
+    raw: String?,
+    fallback: LocalTime,
+): LocalTime {
+    if (raw.isNullOrBlank()) {
+        return fallback
+    }
+
+    return runCatching { LocalTime.parse(raw) }.getOrDefault(fallback)
 }

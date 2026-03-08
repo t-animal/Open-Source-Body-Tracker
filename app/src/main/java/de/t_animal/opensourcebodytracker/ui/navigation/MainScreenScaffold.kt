@@ -35,6 +35,7 @@ fun MainScreenScaffold(
     onMainDestinationSelected: (MainDestination) -> Unit,
     onOpenProfile: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenReminders: () -> Unit,
     onOpenFakeDataGenerator: (() -> Unit)? = null,
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
@@ -71,6 +72,13 @@ fun MainScreenScaffold(
                             onClick = {
                                 overflowExpanded = false
                                 onOpenSettings()
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Reminders") },
+                            onClick = {
+                                overflowExpanded = false
+                                onOpenReminders()
                             },
                         )
                         if (onOpenFakeDataGenerator != null) {
@@ -112,6 +120,7 @@ private fun MainScreenScaffoldPreview() {
             onMainDestinationSelected = {},
             onOpenProfile = {},
             onOpenSettings = {},
+            onOpenReminders = {},
         ) { contentPadding ->
             Text(
                 text = "Preview Content",
