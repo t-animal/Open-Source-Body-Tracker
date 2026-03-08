@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker
 
 import android.app.ActivityManager
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -8,16 +9,23 @@ import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationContract
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class MainActivity : ComponentActivity() {
+    private val openMeasurementAddSignal = MutableStateFlow(0L)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val container = (application as BodyTrackerApplication).container
+        handleNotificationIntent(intent)
 
         setContent {
             BodyTrackerTheme {
@@ -29,11 +37,35 @@ class MainActivity : ComponentActivity() {
                         internalPhotoStorage = container.internalPhotoStorage,
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
                         generateDemoDataUseCase = container.generateDemoDataUseCase,
+                        reminderNotificationPoster = container.reminderNotificationPoster,
+                        openMeasurementAddSignal = openMeasurementAddSignal,
                         onResetApp = ::resetApp,
                     )
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleNotificationIntent(intent)
+    }
+
+    private fun handleNotificationIntent(intent: Intent?) {
+        val shouldOpenAddMeasurement = intent?.action == ReminderNotificationContract.OpenAddMeasurementScreenAction ||
+            intent?.getBooleanExtra(ReminderNotificationContract.OpenAddMeasurementScreen, false) == true
+
+        if (!shouldOpenAddMeasurement) {
+            return
+        }
+
+        intent?.removeExtra(ReminderNotificationContract.OpenAddMeasurementScreen)
+        if (intent?.action == ReminderNotificationContract.OpenAddMeasurementScreenAction) {
+            intent.action = null
+        }
+
+        openMeasurementAddSignal.value += 1L
     }
 
     private fun resetApp() {
@@ -66,6 +98,8 @@ private fun BodyTrackerApp(
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
     generateDemoDataUseCase: GenerateDemoDataUseCase,
+    reminderNotificationPoster: ReminderNotificationPoster,
+    openMeasurementAddSignal: StateFlow<Long>,
     onResetApp: () -> Unit,
 ) {
     BodyTrackerNavHost(
@@ -75,6 +109,8 @@ private fun BodyTrackerApp(
         internalPhotoStorage = internalPhotoStorage,
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         generateDemoDataUseCase = generateDemoDataUseCase,
+        reminderNotificationPoster = reminderNotificationPoster,
+        openMeasurementAddSignal = openMeasurementAddSignal,
         onResetApp = onResetApp,
     )
 }

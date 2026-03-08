@@ -157,6 +157,11 @@ Trigger Reminder
 
 Selecting **Trigger Reminder** immediately shows a notification.
 
+On Android 13+:
+
+* If notification permission is missing, no permission dialog is opened in this phase.
+* The app shows a message that notifications are disabled.
+
 ## Notification Content
 
 Title:

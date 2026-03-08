@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.ui.navigation
 
 import android.content.pm.ApplicationInfo
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,7 +51,10 @@ import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingA
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingStartRoute
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileRoute
+import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderNotificationPoster
+import de.t_animal.opensourcebodytracker.feature.settings.reminders.ManualReminderResult
 import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderSettingsRoute
+import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,14 +65,21 @@ fun BodyTrackerNavHost(
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     generateDemoDataUseCase: GenerateDemoDataUseCase,
+    reminderNotificationPoster: ReminderNotificationPoster,
+    openMeasurementAddSignal: StateFlow<Long>,
     onResetApp: () -> Unit,
 ) {
-    val isDebuggable = (LocalContext.current.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    val context = LocalContext.current
+    val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val navController = rememberNavController()
 
     val settings by settingsRepository.settingsFlow.collectAsStateWithLifecycle(
         initialValue = defaultSettingsState(),
     )
+    val openMeasurementAddRequest by openMeasurementAddSignal.collectAsStateWithLifecycle(
+        initialValue = 0L,
+    )
+    var handledOpenMeasurementAddRequest by remember { mutableStateOf(0L) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val onboardingRoutes = setOf(
@@ -85,10 +99,60 @@ fun BodyTrackerNavHost(
             navController.navigate(Routes.OnboardingStart) {
                 launchSingleTop = true
             }
-        } else if (!shouldShowOnboarding && route in onboardingRoutes) {
+        } else if (!shouldShowOnboarding && route in onboardingRoutes && openMeasurementAddRequest <= 0L) {
             navController.navigate(Routes.MeasurementList) {
                 popUpTo(Routes.OnboardingStart) { inclusive = true }
                 launchSingleTop = true
+            }
+        }
+    }
+
+    LaunchedEffect(openMeasurementAddRequest, settings.onboardingCompleted, currentRoute) {
+        if (openMeasurementAddRequest <= handledOpenMeasurementAddRequest) {
+            return@LaunchedEffect
+        }
+        if (!settings.onboardingCompleted) {
+            return@LaunchedEffect
+        }
+
+        val route = currentRoute ?: return@LaunchedEffect
+        handledOpenMeasurementAddRequest = openMeasurementAddRequest
+
+        if (route == Routes.MeasurementAdd) {
+            return@LaunchedEffect
+        }
+
+        if (route != Routes.MeasurementList) {
+            navController.navigate(Routes.MeasurementList) {
+                if (route in onboardingRoutes) {
+                    popUpTo(Routes.OnboardingStart) { inclusive = true }
+                }
+                launchSingleTop = true
+            }
+        }
+
+        navController.navigate(Routes.MeasurementAdd) {
+            launchSingleTop = true
+        }
+    }
+
+    val onTriggerReminder = {
+        when (reminderNotificationPoster.postReminderNotification()) {
+            ManualReminderResult.Shown -> Unit
+            ManualReminderResult.NotificationsDisabled -> {
+                Toast.makeText(
+                    context,
+                    "Notifications are disabled for this app.",
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+
+            ManualReminderResult.Failed -> {
+                Toast.makeText(
+                    context,
+                    "Could not show reminder notification.",
+                    Toast.LENGTH_LONG,
+                ).show()
             }
         }
     }
@@ -178,6 +242,7 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
+                onTriggerReminder = onTriggerReminder,
                 onOpenFakeDataGenerator = if (isDebuggable) {
                     { navController.navigate(Routes.FakeDataGenerator) }
                 } else {
@@ -245,6 +310,7 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
+                onTriggerReminder = onTriggerReminder,
                 onOpenFakeDataGenerator = if (isDebuggable) {
                     { navController.navigate(Routes.FakeDataGenerator) }
                 } else {
@@ -272,6 +338,7 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
+                onTriggerReminder = onTriggerReminder,
                 onOpenFakeDataGenerator = if (isDebuggable) {
                     { navController.navigate(Routes.FakeDataGenerator) }
                 } else {

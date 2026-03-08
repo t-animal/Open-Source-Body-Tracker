@@ -15,6 +15,7 @@ import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsCalculator
+import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderNotificationPoster
 
 class AppContainer(appContext: Context) {
     private val applicationContext = appContext.applicationContext
@@ -38,6 +39,10 @@ class AppContainer(appContext: Context) {
 
     val internalPhotoStorage: InternalPhotoStorage by lazy {
         InternalPhotoStorage(applicationContext)
+    }
+
+    val reminderNotificationPoster: ReminderNotificationPoster by lazy {
+        ReminderNotificationPoster(applicationContext)
     }
 
     private val derivedMetricsCalculator: DerivedMetricsCalculator by lazy {
