@@ -6,6 +6,7 @@ import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalTime
 import org.junit.Assert
 import org.junit.Test
@@ -185,7 +186,7 @@ class DerivedMetricsDependencyResolverTest {
 
     private fun profile(sex: Sex) = UserProfile(
         sex = sex,
-        dateOfBirthEpochMillis = 0L,
+        dateOfBirth = LocalDate.of(1990, 1, 1),
         heightCm = 180f,
     )
 }

@@ -20,7 +20,7 @@ class GenerateDemoDataUseCase(
             demoDataMeasurementSeriesGenerator.generateMeasurements(
                 sex = profile?.sex,
                 heightCm = profile?.heightCm?.toDouble(),
-                dateOfBirthEpochMillis = profile?.dateOfBirthEpochMillis,
+                dateOfBirth = profile?.dateOfBirth,
                 leanBodyWeightKg = leanBodyWeightKg,
                 minFatBodyWeightKg = minFatBodyWeightKg,
                 maxFatBodyWeightKg = maxFatBodyWeightKg,
