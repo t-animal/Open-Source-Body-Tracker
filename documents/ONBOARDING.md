@@ -59,7 +59,7 @@ This allows the user to switch from demo mode to a real profile at any time.
 
 # Create Profile Flow
 
-If the user selects **"Create Profile"**, a two-step setup process starts.
+If the user selects **"Create Profile"**, a three-step setup process starts.
 
 ## Step 1 – Profile Creation
 
@@ -104,9 +104,29 @@ This allows the onboarding process to stay simple while still making the configu
 
 ---
 
+## Step 3 – Reminder Setup
+
+In the last step, the user configures measurement reminders using the same reminder configuration functionality that is also available later through **Settings -> Reminders**.
+
+Available options:
+
+- Enable or disable reminders
+- Select weekdays
+- Select reminder time
+
+On this onboarding variant of the screen:
+
+- No back controls are shown
+- There is no bottom **Cancel** button
+- The primary button label is **Finish** (instead of **Save**)
+
+This keeps onboarding linear while reusing the standard reminder configuration logic.
+
+---
+
 ## Completion
 
-After the analysis methods are selected:
+After reminder setup is finished:
 
 1. The onboarding process is completed
 2. The app opens normally
@@ -124,4 +144,3 @@ The onboarding screen is shown only if it has not been set up yet (no user data)
 - The user resets the app via the **Reset App** button in demo mode
 
 Otherwise, the app launches directly into the main interface.
-```

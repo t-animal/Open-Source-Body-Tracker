@@ -55,6 +55,7 @@ import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingA
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingStartRoute
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileRoute
+import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderMode
 import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderSettingsRoute
 import kotlinx.coroutines.flow.StateFlow
 
@@ -91,6 +92,7 @@ fun BodyTrackerNavHost(
         Routes.OnboardingStart,
         Routes.OnboardingProfile,
         Routes.OnboardingAnalysis,
+        Routes.OnboardingReminders,
     )
 
     LaunchedEffect(settings, currentRoute) {
@@ -202,6 +204,19 @@ fun BodyTrackerNavHost(
                 settingsRepository = settingsRepository,
                 profileRepository = profileRepository,
                 onFinished = {
+                    navController.navigate(Routes.OnboardingReminders) {
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        composable(Routes.OnboardingReminders) {
+            ReminderSettingsRoute(
+                settingsRepository = settingsRepository,
+                reminderAlarmScheduler = reminderAlarmScheduler,
+                mode = ReminderMode.Onboarding,
+                onNavigateBack = {
                     navController.navigate(Routes.MeasurementList) {
                         popUpTo(Routes.OnboardingStart) { inclusive = true }
                     }

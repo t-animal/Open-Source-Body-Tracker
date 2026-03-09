@@ -5,8 +5,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.app.TimePickerDialog
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,12 +68,14 @@ private val weekdayDisplayOrder = listOf(
 fun ReminderSettingsRoute(
     settingsRepository: SettingsRepository,
     reminderAlarmScheduler: ReminderAlarmScheduler,
+    mode: ReminderMode = ReminderMode.Settings,
     onNavigateBack: () -> Unit,
 ) {
     val vm: ReminderSettingsViewModel = viewModel(
         factory = ReminderSettingsViewModelFactory(
             settingsRepository = settingsRepository,
             reminderAlarmScheduler = reminderAlarmScheduler,
+            mode = mode,
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
@@ -84,12 +88,9 @@ fun ReminderSettingsRoute(
     }
 
     val onSaveRequested = onSaveRequested@{
-        if (!state.enabled) {
-            return@onSaveRequested
-        }
-
-        if (shouldRequestNotificationPermission(context)) {
+        if (state.enabled && shouldRequestNotificationPermission(context)) {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            return@onSaveRequested
         }
 
         vm.onSaveClicked()
@@ -141,16 +142,9 @@ fun ReminderSettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Reminder Settings") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClicked) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                        )
-                    }
-                }
+            ReminderSettingsTopAppBar(
+                mode = state.mode,
+                onBackClicked = onBackClicked,
             )
         },
     ) { contentPadding ->
@@ -264,6 +258,52 @@ fun ReminderSettingsScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
+            ReminderSettingsActionButtons(
+                mode = state.mode,
+                onBackClicked = onBackClicked,
+                onSaveClicked = onSaveClicked,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReminderSettingsTopAppBar(
+    mode: ReminderMode,
+    onBackClicked: () -> Unit,
+) {
+    TopAppBar(
+        title = { Text(mode.titleText()) },
+        navigationIcon = {
+            if (mode.showsBackNavigation()) {
+                IconButton(onClick = onBackClicked) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                    )
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun ReminderSettingsActionButtons(
+    mode: ReminderMode,
+    onBackClicked: () -> Unit,
+    onSaveClicked: () -> Unit,
+) {
+    when (mode) {
+        ReminderMode.Onboarding -> {
+            ReminderSaveButton(
+                label = mode.primaryButtonText(),
+                onSaveClicked = onSaveClicked,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        ReminderMode.Settings -> {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -274,16 +314,40 @@ fun ReminderSettingsScreen(
                 ) {
                     Text("Cancel")
                 }
-                Button(
-                    onClick = onSaveClicked,
+                ReminderSaveButton(
+                    label = mode.primaryButtonText(),
+                    onSaveClicked = onSaveClicked,
                     modifier = Modifier.weight(1f),
-                ) {
-                    Text("Save")
-                }
-
+                )
             }
         }
     }
+}
+
+@Composable
+private fun ReminderSaveButton(
+    label: String,
+    onSaveClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onSaveClicked,
+        modifier = modifier,
+    ) {
+        Text(label)
+    }
+}
+
+private fun ReminderMode.showsBackNavigation(): Boolean = this == ReminderMode.Settings
+
+private fun ReminderMode.titleText(): String = when (this) {
+    ReminderMode.Onboarding -> "Reminder Setup"
+    ReminderMode.Settings -> "Reminder Settings"
+}
+
+private fun ReminderMode.primaryButtonText(): String = when (this) {
+    ReminderMode.Onboarding -> "Finish"
+    ReminderMode.Settings -> "Save"
 }
 
 private fun formatReminderTime(time: LocalTime): String {
@@ -296,6 +360,28 @@ private fun ReminderSettingsScreenPreview() {
     BodyTrackerTheme {
         ReminderSettingsScreen(
             state = ReminderSettingsUiState(
+                mode = ReminderMode.Settings,
+                isLoading = false,
+                enabled = true,
+                weekdays = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
+                time = LocalTime.of(20, 0),
+            ),
+            onEnabledChanged = {},
+            onWeekdayToggled = {},
+            onTimeChanged = {},
+            onSaveClicked = {},
+            onBackClicked = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ReminderSettingsScreenOnboardingPreview() {
+    BodyTrackerTheme {
+        ReminderSettingsScreen(
+            state = ReminderSettingsUiState(
+                mode = ReminderMode.Onboarding,
                 isLoading = false,
                 enabled = true,
                 weekdays = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),

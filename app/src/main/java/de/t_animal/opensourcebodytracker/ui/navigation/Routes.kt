@@ -4,6 +4,7 @@ object Routes {
     const val OnboardingStart = "onboarding/start"
     const val OnboardingProfile = "onboarding/profile"
     const val OnboardingAnalysis = "onboarding/analysis"
+    const val OnboardingReminders = "onboarding/reminders"
 
     const val Profile = "profile"
     const val Settings = "settings"

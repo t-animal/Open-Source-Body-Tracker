@@ -146,7 +146,7 @@ fun OnboardingAnalysisScreen(
                                 modifier = Modifier.padding(vertical = 2.dp),
                             )
                         } else {
-                            Text("Finish setup")
+                            Text("Continue")
                         }
                     }
                 }

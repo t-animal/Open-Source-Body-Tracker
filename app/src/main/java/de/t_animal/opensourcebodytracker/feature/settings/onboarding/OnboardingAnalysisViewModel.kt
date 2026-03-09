@@ -126,20 +126,9 @@ class OnboardingAnalysisViewModel(
 
             runCatching {
                 lastPersistJob?.join()
-
-                settingsWriteMutex.withLock {
-                    val current = settingsRepository.settingsFlow.first()
-                    val finalizedSettings = current.copy(
-                        onboardingCompleted = true,
-                        isDemoMode = false,
-                    )
-                    if (finalizedSettings != current) {
-                        settingsRepository.saveSettings(finalizedSettings)
-                    }
-                }
                 _events.emit(OnboardingAnalysisEvent.Completed)
             }.onFailure { throwable ->
-                _errorMessage.value = throwable.message ?: "Could not complete onboarding"
+                _errorMessage.value = throwable.message ?: "Could not continue onboarding"
             }
 
             _isSaving.value = false
