@@ -1,0 +1,19 @@
+{
+    "name": "Android Dev Container",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "vscjava.vscode-java-pack",
+                "vscjava.vscode-gradle",
+                "mathiasfrohlich.Kotlin"
+            ]
+        }
+    },
+    "remoteUser": "vscode"
+}

@@ -11,5 +11,8 @@
         "Suprailiac",
         "Unitless",
         "viewmodel"
-    ]
+    ],
+    "chat.tools.terminal.autoApprove": {
+        "./gradlew": true
+    }
 }
