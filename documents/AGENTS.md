@@ -46,7 +46,9 @@ Use these commands to build and validate:
 ./gradlew ktlintCheck --console=plain
 ```
 
-Use `assembleDebug` for full packaging validation when routing/resources/storage behavior changes.
+All code must compile and lint with both linters (`lintDebug` and `ktlintCheck`). **There are no exceptions**.
+
+Test must succeed and may only be changed if they fail because the tested behavior has changed on purpose.
 
 ## Known Toolchain Constraints
 
@@ -67,6 +69,7 @@ Use `assembleDebug` for full packaging validation when routing/resources/storage
 
 - [AI-DEVEL.md](AI-DEVEL.md): Minimal AI-agent handoff and operating constraints.
 - [ANALYSIS.md](ANALYSIS.md): Analysis tab behavior, data flow, chart rules, and transforms.
+- [EXPORT.md](EXPORT.md): Data export for backup and synchronization.
 - [FORMULAS.md](FORMULAS.md): Forward formulas for derived body metrics and implementation notes.
 - [FORMULAS_INVERTED.md](FORMULAS_INVERTED.md): Inverted formula math for generating target-compatible measurements.
 - [MEASUREMENT-SCREEN.md](MEASUREMENT-SCREEN.md): Measurements UI structure, layout rules, and behavior details.
