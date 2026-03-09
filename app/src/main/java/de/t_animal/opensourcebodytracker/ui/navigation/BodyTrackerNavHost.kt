@@ -164,6 +164,14 @@ fun BodyTrackerNavHost(
         }
     }
 
+    val onDebugTriggerReminder: (() -> Unit)? = if (isDebuggable) onTriggerReminder else null
+    val onDebugResetApp: (() -> Unit)? = if (isDebuggable) onResetApp else null
+    val onDebugOpenFakeDataGenerator: (() -> Unit)? = if (isDebuggable) {
+        { navController.navigate(Routes.FakeDataGenerator) }
+    } else {
+        null
+    }
+
     NavHost(
         navController = navController,
         startDestination = Routes.OnboardingStart,
@@ -263,12 +271,9 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
-                onTriggerReminder = onTriggerReminder,
-                onOpenFakeDataGenerator = if (isDebuggable) {
-                    { navController.navigate(Routes.FakeDataGenerator) }
-                } else {
-                    null
-                },
+                onTriggerReminder = onDebugTriggerReminder,
+                onResetApp = onDebugResetApp,
+                onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
             ) { contentPadding ->
                 MeasurementListRoute(
                     measurementRepository = measurementRepository,
@@ -328,12 +333,9 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
-                onTriggerReminder = onTriggerReminder,
-                onOpenFakeDataGenerator = if (isDebuggable) {
-                    { navController.navigate(Routes.FakeDataGenerator) }
-                } else {
-                    null
-                },
+                onTriggerReminder = onDebugTriggerReminder,
+                onResetApp = onDebugResetApp,
+                onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
             ) { contentPadding ->
                 AnalysisRoute(
                     measurementRepository = measurementRepository,
@@ -356,12 +358,9 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
-                onTriggerReminder = onTriggerReminder,
-                onOpenFakeDataGenerator = if (isDebuggable) {
-                    { navController.navigate(Routes.FakeDataGenerator) }
-                } else {
-                    null
-                },
+                onTriggerReminder = onDebugTriggerReminder,
+                onResetApp = onDebugResetApp,
+                onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
             ) { contentPadding ->
                 Box(
                     modifier = Modifier

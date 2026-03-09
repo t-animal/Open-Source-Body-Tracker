@@ -36,7 +36,8 @@ fun MainScreenScaffold(
     onOpenProfile: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenReminders: () -> Unit,
-    onTriggerReminder: () -> Unit,
+    onTriggerReminder: (() -> Unit)? = null,
+    onResetApp: (() -> Unit)? = null,
     onOpenFakeDataGenerator: (() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
@@ -81,19 +82,30 @@ fun MainScreenScaffold(
                                 onOpenReminders()
                             },
                         )
-                        DropdownMenuItem(
-                            text = { Text("Trigger Reminder") },
-                            onClick = {
-                                overflowExpanded = false
-                                onTriggerReminder()
-                            },
-                        )
+                        if (onTriggerReminder != null) {
+                            DropdownMenuItem(
+                                text = { Text("Trigger Reminder") },
+                                onClick = {
+                                    overflowExpanded = false
+                                    onTriggerReminder()
+                                },
+                            )
+                        }
                         if (onOpenFakeDataGenerator != null) {
                             DropdownMenuItem(
                                 text = { Text("Fake data generator") },
                                 onClick = {
                                     overflowExpanded = false
                                     onOpenFakeDataGenerator()
+                                },
+                            )
+                        }
+                        if (onResetApp != null) {
+                            DropdownMenuItem(
+                                text = { Text("Reset App Data") },
+                                onClick = {
+                                    overflowExpanded = false
+                                    onResetApp()
                                 },
                             )
                         }
@@ -127,7 +139,6 @@ private fun MainScreenScaffoldPreview() {
             onOpenProfile = {},
             onOpenSettings = {},
             onOpenReminders = {},
-            onTriggerReminder = {},
         ) { contentPadding ->
             Text(
                 text = "Preview Content",
