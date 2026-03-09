@@ -83,6 +83,13 @@ class ReminderSettingsViewModel(
         )
     }
 
+    fun onPermissionDeniedWhileSaving() {
+        _uiState.value = _uiState.value.copy(
+            enabled = false,
+            errorMessage = null,
+        )
+    }
+
     fun onSaveClicked() {
         val current = _uiState.value
         if (current.isLoading) {

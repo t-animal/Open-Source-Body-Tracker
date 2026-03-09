@@ -1,14 +1,12 @@
 package de.t_animal.opensourcebodytracker.feature.settings.reminders
 
 import android.Manifest
+import android.app.TimePickerDialog
 import android.content.Context
 import android.content.pm.PackageManager
-import android.app.TimePickerDialog
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -37,7 +36,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -81,10 +83,17 @@ fun ReminderSettingsRoute(
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val latestOnSaveClicked by rememberUpdatedState(vm::onSaveClicked)
+    var showPermissionDeniedAlert by remember { mutableStateOf(false) }
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-    ) {
-        latestOnSaveClicked()
+    ) { isGranted ->
+        if (isGranted) {
+            latestOnSaveClicked()
+            return@rememberLauncherForActivityResult
+        }
+
+        vm.onPermissionDeniedWhileSaving()
+        showPermissionDeniedAlert = true
     }
 
     val onSaveRequested = onSaveRequested@{
@@ -111,6 +120,34 @@ fun ReminderSettingsRoute(
         onTimeChanged = vm::onTimeChanged,
         onSaveClicked = onSaveRequested,
         onBackClicked = onNavigateBack,
+    )
+
+    if (showPermissionDeniedAlert) {
+        PermissionDeniedAlert(
+            onDismiss = { showPermissionDeniedAlert = false },
+        )
+    }
+}
+
+@Composable
+private fun PermissionDeniedAlert(
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Notification Permission Required") },
+        text = {
+            Text(
+                "Notification permission is required to keep reminders enabled." +
+                    "Reminders have been disabled for now." + 
+                    "To enable reminders, please grant notification permission in the app settings.",
+            )
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("OK")
+            }
+        },
     )
 }
 
