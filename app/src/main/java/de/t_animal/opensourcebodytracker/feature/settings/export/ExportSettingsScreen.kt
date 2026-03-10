@@ -56,18 +56,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.export.CreateLocalExportTestFileUseCase
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun ExportSettingsRoute(
     settingsRepository: SettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
+    createLocalExportTestFileUseCase: CreateLocalExportTestFileUseCase,
     onNavigateBack: () -> Unit,
 ) {
     val vm: ExportSettingsViewModel = viewModel(
         factory = ExportSettingsViewModelFactory(
             settingsRepository = settingsRepository,
             exportPasswordRepository = exportPasswordRepository,
+            createLocalExportTestFileUseCase = createLocalExportTestFileUseCase,
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
@@ -102,9 +105,7 @@ fun ExportSettingsRoute(
         onExportToDeviceStorageEnabledChanged = vm::onExportToDeviceStorageEnabledChanged,
         onSelectFolderClicked = { folderPicker.launch(state.exportFolderUri?.toUri()) },
         onExportPasswordChanged = vm::onExportPasswordChanged,
-        onExportNowClicked = {
-            // Placeholder action for Phase 8.1.
-        },
+        onExportNowClicked = vm::onExportNowClicked,
         onSaveClicked = vm::onSaveClicked,
     )
 }
@@ -265,9 +266,18 @@ fun ExportSettingsScreen(
 
             OutlinedButton(
                 onClick = onExportNowClicked,
-                enabled = state.exportToDeviceStorageEnabled,
+                enabled = state.exportToDeviceStorageEnabled && !state.isExporting,
             ) {
-                Text("Export Now")
+                Text(if (state.isExporting) "Exporting..." else "Export Now")
+            }
+
+            val status = state.statusMessage
+            if (!status.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = status,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
 
             val error = state.errorMessage
@@ -287,12 +297,14 @@ fun ExportSettingsScreen(
             ) {
                 OutlinedButton(
                     onClick = onBackClicked,
+                    enabled = !state.isExporting,
                     modifier = Modifier.weight(1f),
                 ) {
                     Text("Cancel")
                 }
                 Button(
                     onClick = onSaveClicked,
+                    enabled = !state.isExporting,
                     modifier = Modifier.weight(1f),
                 ) {
                     Text("Save")

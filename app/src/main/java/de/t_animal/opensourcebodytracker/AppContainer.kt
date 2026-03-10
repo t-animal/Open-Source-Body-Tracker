@@ -2,6 +2,8 @@ package de.t_animal.opensourcebodytracker
 
 import android.content.Context
 import androidx.room.Room
+import de.t_animal.opensourcebodytracker.data.export.AndroidExportDocumentTreeStorage
+import de.t_animal.opensourcebodytracker.data.export.ExportDocumentTreeStorage
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordCrypto
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.export.KeystoreExportPasswordRepository
@@ -18,6 +20,7 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataMeasurementSeriesGenerator
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.domain.export.CreateLocalExportTestFileUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaveValidator
 import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaver
@@ -40,6 +43,16 @@ class AppContainer(appContext: Context) {
         KeystoreExportPasswordRepository(
             context = applicationContext,
             crypto = ExportPasswordCrypto(applicationContext),
+        )
+    }
+
+    val exportDocumentTreeStorage: ExportDocumentTreeStorage by lazy {
+        AndroidExportDocumentTreeStorage(applicationContext)
+    }
+
+    val createLocalExportTestFileUseCase: CreateLocalExportTestFileUseCase by lazy {
+        CreateLocalExportTestFileUseCase(
+            exportStorage = exportDocumentTreeStorage,
         )
     }
 
