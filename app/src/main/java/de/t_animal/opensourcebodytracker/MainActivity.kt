@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationContract
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
@@ -36,6 +37,7 @@ class MainActivity : ComponentActivity() {
                     BodyTrackerApp(
                         profileRepository = container.profileRepository,
                         settingsRepository = container.settingsRepository,
+                        exportPasswordRepository = container.exportPasswordRepository,
                         measurementRepository = container.measurementRepository,
                         internalPhotoStorage = container.internalPhotoStorage,
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
@@ -100,6 +102,7 @@ class MainActivity : ComponentActivity() {
 private fun BodyTrackerApp(
     profileRepository: de.t_animal.opensourcebodytracker.data.profile.ProfileRepository,
     settingsRepository: de.t_animal.opensourcebodytracker.data.settings.SettingsRepository,
+    exportPasswordRepository: ExportPasswordRepository,
     measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
@@ -114,6 +117,7 @@ private fun BodyTrackerApp(
     BodyTrackerNavHost(
         profileRepository = profileRepository,
         settingsRepository = settingsRepository,
+        exportPasswordRepository = exportPasswordRepository,
         measurementRepository = measurementRepository,
         internalPhotoStorage = internalPhotoStorage,
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,

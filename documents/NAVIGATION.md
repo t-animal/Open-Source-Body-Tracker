@@ -29,6 +29,7 @@ Main tabs expose overflow actions:
 - Profile
 - Settings
 - Reminders
+- Export
 - Trigger Reminder
 
 In debug builds, a fake data generator action is also available.
@@ -56,6 +57,7 @@ If a profile exists while the current route is onboarding, navigation automatica
 - `profile`: editable profile form.
 - `settings`: implemented settings configuration screen.
 - `reminders`: reminder configuration screen.
+- `export`: export settings screen with folder/password draft save.
 - `measurement_add`: add measurement flow.
 - `measurement_edit/{id}`: edit measurement flow.
 - `measurement_list_all`: full measurement table screen with back button.
@@ -77,6 +79,7 @@ If a profile exists while the current route is onboarding, navigation automatica
 
 - Add/edit/full-list screens are pushed onto the main stack and return with system/back icon.
 - Profile/settings/reminders are opened from overflow and return to previous screen on back.
+- Export is opened from overflow and returns to previous screen on back.
 - Main tabs remain top-level destinations selected via bottom navigation.
 
 ---
@@ -120,6 +123,7 @@ Each main screen contains a top navigation bar with:
 * **Profile**
 * **Settings**
 * **Reminders**
+* **Export**
 * **Trigger Reminder**
 
 ### Navigation Behavior
@@ -129,6 +133,7 @@ Each main screen contains a top navigation bar with:
 | Profile   | Profile screen                                |
 | Settings  | Settings configuration screen                 |
 | Reminders | Reminder settings screen                      |
+| Export | Export settings screen (folder + password config) |
 | Trigger Reminder | Shows a notification that opens Add Measurement on tap |
 
 ---

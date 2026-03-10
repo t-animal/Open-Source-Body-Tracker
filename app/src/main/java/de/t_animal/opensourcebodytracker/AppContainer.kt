@@ -2,6 +2,9 @@ package de.t_animal.opensourcebodytracker
 
 import android.content.Context
 import androidx.room.Room
+import de.t_animal.opensourcebodytracker.data.export.ExportPasswordCrypto
+import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
+import de.t_animal.opensourcebodytracker.data.export.KeystoreExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.measurements.AppDatabase
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.measurements.RoomMeasurementRepository
@@ -31,6 +34,13 @@ class AppContainer(appContext: Context) {
 
     val settingsRepository: SettingsRepository by lazy {
         PreferencesSettingsRepository(applicationContext)
+    }
+
+    val exportPasswordRepository: ExportPasswordRepository by lazy {
+        KeystoreExportPasswordRepository(
+            context = applicationContext,
+            crypto = ExportPasswordCrypto(applicationContext),
+        )
     }
 
     private val database: AppDatabase by lazy {

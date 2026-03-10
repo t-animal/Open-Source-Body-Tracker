@@ -167,6 +167,8 @@ class DerivedMetricsDependencyResolverTest {
             reminderEnabled = false,
             reminderWeekdays = setOf(DayOfWeek.SUNDAY),
             reminderTime = LocalTime.of(9, 0),
+            exportToDeviceStorageEnabled = false,
+            exportFolderUri = null,
             enabledMeasurements = emptySet(),
             visibleInAnalysis = setOf(MeasuredBodyMetric.Weight),
             visibleInTable = setOf(MeasuredBodyMetric.Weight),

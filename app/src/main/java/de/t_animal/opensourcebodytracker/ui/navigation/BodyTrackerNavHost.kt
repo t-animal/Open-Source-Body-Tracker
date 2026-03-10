@@ -38,6 +38,7 @@ import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmSchedul
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationResult
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
@@ -51,6 +52,7 @@ import de.t_animal.opensourcebodytracker.feature.photos.PhotoAnimationRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoCompareRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
+import de.t_animal.opensourcebodytracker.feature.settings.export.ExportSettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingAnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingStartRoute
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
@@ -64,6 +66,7 @@ import kotlinx.coroutines.flow.StateFlow
 fun BodyTrackerNavHost(
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
+    exportPasswordRepository: ExportPasswordRepository,
     measurementRepository: MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
@@ -260,6 +263,14 @@ fun BodyTrackerNavHost(
             )
         }
 
+        composable(Routes.Export) {
+            ExportSettingsRoute(
+                settingsRepository = settingsRepository,
+                exportPasswordRepository = exportPasswordRepository,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
         composable(Routes.MeasurementList) {
             MainScreenScaffold(
                 selectedDestination = MainDestination.Measurements,
@@ -271,6 +282,7 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
+                onOpenExport = { navController.navigate(Routes.Export) },
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
@@ -333,6 +345,7 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
+                onOpenExport = { navController.navigate(Routes.Export) },
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
@@ -358,6 +371,7 @@ fun BodyTrackerNavHost(
                 onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
+                onOpenExport = { navController.navigate(Routes.Export) },
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
