@@ -36,6 +36,7 @@ fun MainScreenScaffold(
     onOpenProfile: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenReminders: () -> Unit,
+    onOpenExport: () -> Unit,
     onTriggerReminder: (() -> Unit)? = null,
     onResetApp: (() -> Unit)? = null,
     onOpenFakeDataGenerator: (() -> Unit)? = null,
@@ -80,6 +81,13 @@ fun MainScreenScaffold(
                             onClick = {
                                 overflowExpanded = false
                                 onOpenReminders()
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Export") },
+                            onClick = {
+                                overflowExpanded = false
+                                onOpenExport()
                             },
                         )
                         if (onTriggerReminder != null) {
@@ -139,6 +147,7 @@ private fun MainScreenScaffoldPreview() {
             onOpenProfile = {},
             onOpenSettings = {},
             onOpenReminders = {},
+            onOpenExport = {},
         ) { contentPadding ->
             Text(
                 text = "Preview Content",

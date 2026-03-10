@@ -9,6 +9,7 @@ object Routes {
     const val Profile = "profile"
     const val Settings = "settings"
     const val Reminders = "reminders"
+    const val Export = "export"
     const val FakeDataGenerator = "fake_data_generator"
     
     const val MeasurementList = "measurement_list"

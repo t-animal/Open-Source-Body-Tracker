@@ -35,6 +35,8 @@ class PreferencesSettingsRepository(
         val reminderEnabled = booleanPreferencesKey("reminderEnabled")
         val reminderWeekdays = stringSetPreferencesKey("reminderWeekdays")
         val reminderTime = stringPreferencesKey("reminderTime")
+        val exportToDeviceStorageEnabled = booleanPreferencesKey("exportToDeviceStorageEnabled")
+        val exportFolderUri = stringPreferencesKey("exportFolderUri")
         val enabledMeasurements = stringSetPreferencesKey("enabledMeasurements")
         val visibleInAnalysis = stringSetPreferencesKey("visibleInAnalysis")
         val visibleInTable = stringSetPreferencesKey("visibleInTable")
@@ -60,6 +62,9 @@ class PreferencesSettingsRepository(
                 raw = prefs[Keys.reminderTime],
                 fallback = defaults.reminderTime,
             ),
+            exportToDeviceStorageEnabled =
+                prefs[Keys.exportToDeviceStorageEnabled] ?: defaults.exportToDeviceStorageEnabled,
+            exportFolderUri = prefs[Keys.exportFolderUri] ?: defaults.exportFolderUri,
             enabledMeasurements = parseEnumSet(
                 raw = prefs[Keys.enabledMeasurements],
                 values = MeasuredBodyMetric.entries,
@@ -88,6 +93,12 @@ class PreferencesSettingsRepository(
             prefs[Keys.reminderEnabled] = settings.reminderEnabled
             prefs[Keys.reminderWeekdays] = settings.reminderWeekdays.mapTo(mutableSetOf()) { it.name }
             prefs[Keys.reminderTime] = settings.reminderTime.toString()
+            prefs[Keys.exportToDeviceStorageEnabled] = settings.exportToDeviceStorageEnabled
+            if (settings.exportFolderUri.isNullOrBlank()) {
+                prefs.remove(Keys.exportFolderUri)
+            } else {
+                prefs[Keys.exportFolderUri] = settings.exportFolderUri
+            }
             prefs[Keys.enabledMeasurements] = settings.enabledMeasurements.mapTo(mutableSetOf()) { it.name }
             prefs[Keys.visibleInAnalysis] = settings.visibleInAnalysis.mapTo(mutableSetOf()) { it.storageName() }
             prefs[Keys.visibleInTable] = settings.visibleInTable.mapTo(mutableSetOf()) { it.storageName() }

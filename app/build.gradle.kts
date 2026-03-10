@@ -77,6 +77,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.tink.android)
 
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
@@ -84,6 +85,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
