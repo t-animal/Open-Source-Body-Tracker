@@ -212,9 +212,46 @@ measurements.csv
 
 The CSV contains:
 
-- Timestamp
-- All recorded measurement values
-- Associated metadata if needed
+- Raw stored timestamp (`dateEpochMillis`)
+- All raw recorded measurement values
+- Raw stored photo path when a measurement has an image
+
+### Profile
+
+The current user profile is exported as JSON.
+
+Example:
+
+```
+
+profile.json
+
+```
+
+The JSON contains:
+
+- Sex
+- Date of birth
+- Height in centimeters
+
+### Metadata
+
+The archive also contains metadata about the export.
+
+Example:
+
+```
+
+metadata.json
+
+```
+
+The metadata includes:
+
+- Export schema version
+- Export timestamp
+- Counts for measurements and images
+- Count of missing images that could not be included
 
 ---
 
@@ -238,13 +275,11 @@ Example export archive:
 ```
 
 bodytracker_export.zip
-
-```
+profile.json
+metadata.json
 measurements.csv
-
 images/
     image-filename-as-stored-in-private-storage.jpg
-```
 
 ```
 
@@ -267,11 +302,11 @@ Example:
 ```
 
 /Documents/BodyTrackerExports/
-bodytracker_export_2026-03-09.zip
+bodytracker_export_2026-03-09_03-00-00_000.zip
 
 ```
 
-If the file exists, it is overridden. Only the two latest exports are kept, the others are deleted.
+If the file exists, it is overridden. Only the two latest export archives are kept; older ones are deleted.
 
 ---
 

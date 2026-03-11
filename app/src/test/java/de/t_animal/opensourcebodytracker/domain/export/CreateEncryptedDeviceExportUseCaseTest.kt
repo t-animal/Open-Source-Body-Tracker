@@ -45,6 +45,7 @@ class CreateEncryptedDeviceExportUseCaseTest {
                 exportFolderUri = "content://example/tree/export",
                 exportPassword = "",
             ),
+            onProgress = { }
         )
 
         assertEquals(0, storage.writeCalls)
@@ -90,7 +91,7 @@ class CreateEncryptedDeviceExportUseCaseTest {
             clock = fixedClock(),
         )
 
-        val result = useCase(validCommand())
+        val result = useCase(validCommand(), {})
 
         assertEquals(
             ExportActionResult.Success("bodytracker_export_2026-03-11_08-30-45.zip"),
@@ -132,6 +133,81 @@ class CreateEncryptedDeviceExportUseCaseTest {
     }
 
     @Test
+    fun invoke_reportsProgress_forCollectionWritingAndCleanup() = runTest {
+        val storage = FakeExportDocumentTreeStorage()
+        val measurements = listOf(
+            BodyMeasurement(
+                id = 7,
+                dateEpochMillis = 1_741_564_800_000,
+                photoFilePath = PersistedPhotoPath("measurement_7_2025-03-09.jpg"),
+            ),
+            BodyMeasurement(
+                id = 8,
+                dateEpochMillis = 1_741_651_200_000,
+            ),
+        )
+        val progressEvents = mutableListOf<ExportProgress>()
+        val useCase = createUseCase(
+            measurementRepository = FakeMeasurementRepository(measurements),
+            exportStorage = storage,
+            exportPhotoCollector = FakeExportPhotoCollector(
+                contentByPath = mapOf(
+                    "measurement_7_2025-03-09.jpg" to "jpeg-data".toByteArray(),
+                ),
+            ),
+            clock = fixedClock(),
+        )
+
+        val result = useCase(validCommand(), progressEvents::add)
+
+        assertEquals(
+            ExportActionResult.Success("bodytracker_export_2026-03-11_08-30-45.zip"),
+            result,
+        )
+        assertEquals(
+            listOf(
+                ExportProgress.Validating,
+                ExportProgress.LoadingProfile,
+                ExportProgress.LoadingMeasurements,
+                ExportProgress.CollectingPhotos(
+                    processedMeasurementCount = 1,
+                    totalMeasurementCount = 2,
+                    exportedPhotoCount = 1,
+                    missingPhotoCount = 0,
+                ),
+                ExportProgress.CollectingPhotos(
+                    processedMeasurementCount = 2,
+                    totalMeasurementCount = 2,
+                    exportedPhotoCount = 1,
+                    missingPhotoCount = 0,
+                ),
+                ExportProgress.WritingArchiveData(
+                    currentDocumentIndex = 1,
+                    totalDocumentCount = 3,
+                    documentName = "measurements.csv",
+                ),
+                ExportProgress.WritingArchiveData(
+                    currentDocumentIndex = 2,
+                    totalDocumentCount = 3,
+                    documentName = "profile.json",
+                ),
+                ExportProgress.WritingArchiveData(
+                    currentDocumentIndex = 3,
+                    totalDocumentCount = 3,
+                    documentName = "metadata.json",
+                ),
+                ExportProgress.WritingPhoto(
+                    currentPhotoIndex = 1,
+                    totalPhotoCount = 1,
+                    photoName = "measurement_7_2025-03-09.jpg",
+                ),
+                ExportProgress.CleaningUpOldExports,
+            ),
+            progressEvents,
+        )
+    }
+
+    @Test
     fun invoke_recordsMissingImagesInMetadata_whenPhotoFileIsAbsent() = runTest {
         val storage = FakeExportDocumentTreeStorage()
         val measurements = listOf(
@@ -148,7 +224,7 @@ class CreateEncryptedDeviceExportUseCaseTest {
             clock = fixedClock(),
         )
 
-        val result = useCase(validCommand())
+        val result = useCase(validCommand(), {})
 
         assertEquals(
             ExportActionResult.Success("bodytracker_export_2026-03-11_08-30-45.zip"),
@@ -163,6 +239,43 @@ class CreateEncryptedDeviceExportUseCaseTest {
     }
 
     @Test
+    fun invoke_reportsMissingPhotosWithoutPhotoWriteProgress() = runTest {
+        val storage = FakeExportDocumentTreeStorage()
+        val measurements = listOf(
+            BodyMeasurement(
+                id = 11,
+                dateEpochMillis = 1_741_564_800_000,
+                photoFilePath = PersistedPhotoPath("missing.jpg"),
+            ),
+        )
+        val progressEvents = mutableListOf<ExportProgress>()
+        val useCase = createUseCase(
+            measurementRepository = FakeMeasurementRepository(measurements),
+            exportStorage = storage,
+            exportPhotoCollector = FakeExportPhotoCollector(),
+            clock = fixedClock(),
+        )
+
+        val result = useCase(validCommand(), progressEvents::add)
+
+        assertEquals(
+            ExportActionResult.Success("bodytracker_export_2026-03-11_08-30-45.zip"),
+            result,
+        )
+        assertTrue(
+            progressEvents.contains(
+                ExportProgress.CollectingPhotos(
+                    processedMeasurementCount = 1,
+                    totalMeasurementCount = 1,
+                    exportedPhotoCount = 0,
+                    missingPhotoCount = 1,
+                ),
+            ),
+        )
+        assertTrue(progressEvents.none { it is ExportProgress.WritingPhoto })
+    }
+
+    @Test
     fun invoke_returnsPermissionError_whenStorageWriteFails() = runTest {
         val storage = FakeExportDocumentTreeStorage(
             nextWriteResult = ExportStorageResult.Failure(ExportStorageError.PermissionDenied),
@@ -171,7 +284,7 @@ class CreateEncryptedDeviceExportUseCaseTest {
             exportStorage = storage,
         )
 
-        val result = useCase(validCommand())
+        val result = useCase(validCommand(), {})
 
         assertEquals(
             ExportActionResult.Failure(ExportActionError.PermissionDenied),
@@ -283,25 +396,38 @@ private class FakeProfileRepository(
 private class FakeExportPhotoCollector(
     private val contentByPath: Map<String, ByteArray> = emptyMap(),
 ) : ExportPhotoCollector {
-    override fun collect(measurements: List<BodyMeasurement>): CollectedExportPhotos {
+    override fun collect(
+        measurements: List<BodyMeasurement>,
+        onProgress: ((ExportPhotoCollectionProgress) -> Unit)?,
+    ): CollectedExportPhotos {
         val entries = mutableListOf<ExportArchiveEntry.FileEntry>()
         var missingImageCount = 0
 
-        measurements.forEach { measurement ->
-            val photoPath = measurement.photoFilePath ?: return@forEach
-            val content = contentByPath[photoPath.value]
-            if (content == null) {
-                missingImageCount += 1
-                return@forEach
+        measurements.forEachIndexed { index, measurement ->
+            val photoPath = measurement.photoFilePath
+            if (photoPath != null) {
+                val content = contentByPath[photoPath.value]
+                if (content == null) {
+                    missingImageCount += 1
+                } else {
+                    val tempFile = File.createTempFile("export-photo", ".bin").apply {
+                        writeBytes(content)
+                        deleteOnExit()
+                    }
+                    entries += ExportArchiveEntry.FileEntry(
+                        path = "images/${photoPath.value}",
+                        file = tempFile,
+                    )
+                }
             }
 
-            val tempFile = File.createTempFile("export-photo", ".bin").apply {
-                writeBytes(content)
-                deleteOnExit()
-            }
-            entries += ExportArchiveEntry.FileEntry(
-                path = "images/${photoPath.value}",
-                file = tempFile,
+            onProgress?.invoke(
+                ExportPhotoCollectionProgress(
+                    processedMeasurementCount = index + 1,
+                    totalMeasurementCount = measurements.size,
+                    exportedPhotoCount = entries.size,
+                    missingPhotoCount = missingImageCount,
+                ),
             )
         }
 

@@ -8,6 +8,8 @@ import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionResult
 import de.t_animal.opensourcebodytracker.domain.export.ExportExecutionCommand
 import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportProgress
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -191,6 +193,60 @@ class ExportSettingsViewModelTest {
     }
 
     @Test
+    fun onExportNowClicked_updatesProgressWhileExportRuns() = runTest {
+        val settingsRepository = FakeSettingsRepository(defaultSettingsState())
+        val passwordRepository = FakeExportPasswordRepository()
+        val completionGate = CompletableDeferred<Unit>()
+        val exportNowUseCase = FakeExportNowUseCase(
+            progressUpdates = listOf(
+                ExportProgress.CollectingPhotos(
+                    processedMeasurementCount = 2,
+                    totalMeasurementCount = 4,
+                    exportedPhotoCount = 1,
+                    missingPhotoCount = 0,
+                ),
+                ExportProgress.WritingPhoto(
+                    currentPhotoIndex = 2,
+                    totalPhotoCount = 3,
+                    photoName = "measurement_2.jpg",
+                ),
+            ),
+            completionGate = completionGate,
+        )
+        val viewModel = ExportSettingsViewModel(
+            settingsRepository,
+            passwordRepository,
+            exportNowUseCase,
+        )
+
+        advanceUntilIdle()
+
+        viewModel.onExportToDeviceStorageEnabledChanged(true)
+        viewModel.onExportFolderSelected("content://example/tree/export")
+        viewModel.onExportPasswordChanged("super-secret")
+        viewModel.onExportNowClicked()
+
+        advanceUntilIdle()
+
+        assertTrue(viewModel.uiState.value.isExporting)
+        assertEquals("Writing photo 2 of 3", viewModel.uiState.value.exportProgress?.message)
+        assertEquals(2, viewModel.uiState.value.exportProgress?.current)
+        assertEquals(3, viewModel.uiState.value.exportProgress?.total)
+        assertNull(viewModel.uiState.value.statusMessage)
+        assertNull(viewModel.uiState.value.errorMessage)
+
+        exportNowUseCase.complete()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isExporting)
+        assertNull(viewModel.uiState.value.exportProgress)
+        assertEquals(
+            "Export archive created: bodytracker_export_2026-03-11_08-30-45_123.zip",
+            viewModel.uiState.value.statusMessage,
+        )
+    }
+
+    @Test
     fun onExportNowClicked_showsError_whenPermissionIsDenied() = runTest {
         val settingsRepository = FakeSettingsRepository(defaultSettingsState())
         val passwordRepository = FakeExportPasswordRepository()
@@ -255,13 +311,26 @@ private class FakeExportNowUseCase(
     private val nextResult: ExportActionResult = ExportActionResult.Success(
         "bodytracker_export_2026-03-11_08-30-45_123.zip",
     ),
+    private val progressUpdates: List<ExportProgress> = emptyList(),
+    private val completionGate: CompletableDeferred<Unit>? = null,
 ) : ExportNowUseCase {
     var calls: Int = 0
     var lastCommand: ExportExecutionCommand? = null
 
-    override suspend fun invoke(command: ExportExecutionCommand): ExportActionResult {
+    override suspend fun invoke(
+        command: ExportExecutionCommand,
+        onProgress: ((ExportProgress) -> Unit)?,
+    ): ExportActionResult {
         calls += 1
         lastCommand = command
+        progressUpdates.forEach { progress ->
+            onProgress?.invoke(progress)
+        }
+        completionGate?.await()
         return nextResult
+    }
+
+    fun complete() {
+        completionGate?.complete(Unit)
     }
 }

@@ -21,6 +21,7 @@ coil = "2.7.0"
 reorderable = "2.4.0"
 kotlinxCoroutines = "1.10.2"
 tink = "1.20.0"
+zip4j = "2.11.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,6 +55,7 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 reorderable = { group = "sh.calvin.reorderable", name = "reorderable", version.ref = "reorderable" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 tink-android = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
+zip4j = { group = "net.lingala.zip4j", name = "zip4j", version.ref = "zip4j" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
