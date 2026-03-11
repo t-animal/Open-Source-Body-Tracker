@@ -8,7 +8,7 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionResult
 import de.t_animal.opensourcebodytracker.domain.export.ExportExecutionCommand
-import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportProgress
 import de.t_animal.opensourcebodytracker.domain.export.ExportValidationError
 import de.t_animal.opensourcebodytracker.domain.export.validateExportCommandForSave
@@ -51,7 +51,7 @@ sealed interface ExportSettingsEvent {
 class ExportSettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val exportPasswordRepository: ExportPasswordRepository,
-    private val exportNowUseCase: ExportNowUseCase,
+    private val exportToFileSystemUseCase: ExportToFilesystemUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ExportSettingsUiState())
     val uiState: StateFlow<ExportSettingsUiState> = _uiState.asStateFlow()
@@ -120,7 +120,7 @@ class ExportSettingsViewModel(
         )
 
         viewModelScope.launch {
-            val result = exportNowUseCase(command) { progress ->
+            val result = exportToFileSystemUseCase(command) { progress ->
                 _uiState.update { state ->
                     state.copy(
                         exportProgress = progress.toUiProgress(),
@@ -235,14 +235,14 @@ class ExportSettingsViewModel(
 class ExportSettingsViewModelFactory(
     private val settingsRepository: SettingsRepository,
     private val exportPasswordRepository: ExportPasswordRepository,
-    private val exportNowUseCase: ExportNowUseCase,
+    private val exportToFileSystemUseCase: ExportToFilesystemUseCase,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return ExportSettingsViewModel(
             settingsRepository = settingsRepository,
             exportPasswordRepository = exportPasswordRepository,
-            exportNowUseCase = exportNowUseCase,
+            exportToFileSystemUseCase = exportToFileSystemUseCase,
         ) as T
     }
 }

@@ -24,8 +24,7 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataMeasurementSeriesGenerator
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
-import de.t_animal.opensourcebodytracker.domain.export.CreateEncryptedDeviceExportUseCase
-import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportDocumentsCreator
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaveValidator
@@ -68,8 +67,8 @@ class AppContainer(appContext: Context) {
         InternalStorageExportPhotoCollector(internalPhotoStorage)
     }
 
-    val exportNowUseCase: ExportNowUseCase by lazy {
-        CreateEncryptedDeviceExportUseCase(
+    val exportToFilesystemUseCase: ExportToFilesystemUseCase by lazy {
+        ExportToFilesystemUseCase(
             measurementRepository = measurementRepository,
             profileRepository = profileRepository,
             exportStorage = exportDocumentTreeStorage,
