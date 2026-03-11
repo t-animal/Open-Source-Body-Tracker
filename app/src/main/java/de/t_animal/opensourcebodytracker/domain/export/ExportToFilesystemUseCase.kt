@@ -68,7 +68,7 @@ open class ExportToFilesystemUseCase(
         var currentDocumentIndex = 0
         var currentPhotoIndex = 0
 
-        val writeResult = exportStorage.writeOrReplaceFile(
+        val writeResult = exportStorage.writeFile(
             treeUri = validatedCommand.exportFolderUri,
             fileName = exportFileName,
             mimeType = ZIP_MIME_TYPE,

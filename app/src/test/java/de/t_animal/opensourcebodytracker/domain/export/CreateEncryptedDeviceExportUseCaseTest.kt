@@ -451,7 +451,7 @@ private class FakeExportDocumentTreeStorage(
     var lastWriteContent: ByteArray = ByteArray(0)
     val deletedFileNames = mutableListOf<String>()
 
-    override suspend fun writeOrReplaceFile(
+    override suspend fun writeFile(
         treeUri: String,
         fileName: String,
         mimeType: String,

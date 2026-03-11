@@ -47,24 +47,12 @@ sealed interface ExportStorageResult<out T> {
 }
 
 interface ExportDocumentTreeStorage {
-    suspend fun writeOrReplaceFile(
+    suspend fun writeFile(
         treeUri: String,
         fileName: String,
         mimeType: String,
         writeContent: (OutputStream) -> Unit,
     ): ExportStorageResult<ExportTreeFile>
-
-    suspend fun writeOrReplaceFile(
-        treeUri: String,
-        fileName: String,
-        mimeType: String,
-        content: ByteArray,
-    ): ExportStorageResult<ExportTreeFile> {
-        return writeOrReplaceFile(treeUri, fileName, mimeType) { outputStream ->
-            outputStream.write(content)
-            outputStream.flush()
-        }
-    }
 
     suspend fun listFiles(treeUri: String): ExportStorageResult<List<ExportTreeFile>>
 
@@ -79,7 +67,7 @@ class AndroidExportDocumentTreeStorage(
 ) : ExportDocumentTreeStorage {
     private val contentResolver: ContentResolver = context.applicationContext.contentResolver
 
-    override suspend fun writeOrReplaceFile(
+    override suspend fun writeFile(
         treeUri: String,
         fileName: String,
         mimeType: String,
@@ -89,67 +77,32 @@ class AndroidExportDocumentTreeStorage(
             ExportStorageError.InvalidTreeUri(treeUri),
         )
 
-        val existing = when (val queryResult = queryDocuments(tree, treeUri)) {
-            is ExportStorageResult.Success -> queryResult.value
-            is ExportStorageResult.Failure -> return@withContext queryResult
-        }
-        val existingDocumentUri = existing.firstOrNull { it.name == fileName }?.let { existingDocument ->
-            DocumentsContract.buildDocumentUriUsingTree(tree.treeUri, existingDocument.documentId)
-        }
+        val createdUri = runCatching {
+            DocumentsContract.createDocument(contentResolver, tree.treeDocumentUri, mimeType, fileName)
+        }.getOrElse { throwable ->
+            return@withContext mapFailure(throwable, treeUri)
+        } ?: return@withContext ExportStorageResult.Failure(
+            ExportStorageError.IoFailure("Could not create file"),
+        )
 
-        val tempName = "$fileName.tmp.${System.currentTimeMillis()}"
-        val tempUri = DocumentsContract.createDocument(contentResolver, tree.treeDocumentUri, mimeType, tempName)
-            ?: return@withContext ExportStorageResult.Failure(
-                ExportStorageError.IoFailure("Could not create temporary file"),
-            )
-
-        val writeTempResult = runCatching {
-            contentResolver.openOutputStream(tempUri, "w")?.use { outputStream ->
+        runCatching {
+            contentResolver.openOutputStream(createdUri, "w")?.use { outputStream ->
                 writeContent(outputStream)
                 outputStream.flush()
             } ?: throw IOException("Could not open output stream")
-        }.fold(
-            onSuccess = { ExportStorageResult.Success(Unit) },
-            onFailure = { throwable ->
-                runCatching { DocumentsContract.deleteDocument(contentResolver, tempUri) }
-                mapFailure(throwable, treeUri)
-            },
+        }.getOrElse { throwable ->
+            runCatching { DocumentsContract.deleteDocument(contentResolver, createdUri) }
+            return@withContext mapFailure(throwable, treeUri)
+        }
+
+        return@withContext ExportStorageResult.Success(
+            ExportTreeFile(
+                name = fileName,
+                documentUri = createdUri.toString(),
+                mimeType = mimeType,
+                lastModifiedEpochMillis = null,
+            ),
         )
-        if (writeTempResult is ExportStorageResult.Failure) return@withContext writeTempResult
-
-        val directRename = renameDocument(treeUri, tempUri, fileName)
-        if (directRename is ExportStorageResult.Success) {
-            return@withContext ExportStorageResult.Success(
-                buildExportTreeFile(fileName, mimeType, directRename.value),
-            )
-        }
-        val directRenameFailure = directRename as ExportStorageResult.Failure
-
-        // fallback only if needed for providers that don't support overwrite-by-rename
-        if (existingDocumentUri != null && directRenameFailure.error.supportsReplaceFallback()) {
-            val deleteExistingResult = deleteDocument(
-                documentUri = existingDocumentUri,
-                treeUri = treeUri,
-                failureReason = "Could not replace existing file",
-            )
-            if (deleteExistingResult is ExportStorageResult.Failure) {
-                deleteDocumentQuietly(tempUri)
-                return@withContext deleteExistingResult
-            }
-
-            val renameAfterDelete = renameDocument(treeUri, tempUri, fileName)
-            if (renameAfterDelete is ExportStorageResult.Success) {
-                return@withContext ExportStorageResult.Success(
-                    buildExportTreeFile(fileName, mimeType, renameAfterDelete.value),
-                )
-            }
-            val renameAfterDeleteFailure = renameAfterDelete as ExportStorageResult.Failure
-            // keep temp for recovery when fallback rename fails
-            return@withContext renameAfterDeleteFailure
-        }
-
-        deleteDocumentQuietly(tempUri)
-        return@withContext directRenameFailure
     }
 
     override suspend fun listFiles(treeUri: String): ExportStorageResult<List<ExportTreeFile>> =
@@ -202,35 +155,6 @@ class AndroidExportDocumentTreeStorage(
         )
     }
 
-    private fun buildExportTreeFile(
-        fileName: String,
-        mimeType: String,
-        documentUri: Uri,
-    ): ExportTreeFile {
-        return ExportTreeFile(
-            name = fileName,
-            documentUri = documentUri.toString(),
-            mimeType = mimeType,
-            lastModifiedEpochMillis = null,
-        )
-    }
-
-    private fun renameDocument(
-        treeUri: String,
-        documentUri: Uri,
-        targetName: String,
-    ): ExportStorageResult<Uri> {
-        val renamedDocumentUri = runCatching {
-            DocumentsContract.renameDocument(contentResolver, documentUri, targetName)
-        }.getOrElse { throwable ->
-            return mapFailure(throwable, treeUri)
-        } ?: return ExportStorageResult.Failure(
-            ExportStorageError.IoFailure("Could not rename temporary file"),
-        )
-
-        return ExportStorageResult.Success(renamedDocumentUri)
-    }
-
     private fun deleteDocument(
         documentUri: Uri,
         treeUri: String,
@@ -249,21 +173,6 @@ class AndroidExportDocumentTreeStorage(
         }
 
         return ExportStorageResult.Success(Unit)
-    }
-
-    private fun deleteDocumentQuietly(documentUri: Uri) {
-        runCatching { DocumentsContract.deleteDocument(contentResolver, documentUri) }
-    }
-
-    private fun ExportStorageError.supportsReplaceFallback(): Boolean = when (this) {
-        is ExportStorageError.IoFailure -> true
-        is ExportStorageError.Unknown -> {
-            reason.contains("exist", ignoreCase = true) ||
-                reason.contains("conflict", ignoreCase = true)
-        }
-        is ExportStorageError.InvalidTreeUri -> false
-        is ExportStorageError.PermissionDenied -> false
-        is ExportStorageError.FileNotFound -> false
     }
 
     private fun mapFailure(
