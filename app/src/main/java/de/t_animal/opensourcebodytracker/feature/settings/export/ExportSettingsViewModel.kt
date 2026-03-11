@@ -5,13 +5,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
-import de.t_animal.opensourcebodytracker.domain.export.CreateLocalExportTestFileUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionResult
+import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
 import de.t_animal.opensourcebodytracker.domain.export.ExportExecutionCommand
+import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportValidationError
 import de.t_animal.opensourcebodytracker.domain.export.validateExportCommandForSave
-import de.t_animal.opensourcebodytracker.domain.export.validateExportExecutionCommand
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +36,7 @@ sealed interface ExportSettingsEvent {
 class ExportSettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val exportPasswordRepository: ExportPasswordRepository,
-    private val createLocalExportTestFileUseCase: CreateLocalExportTestFileUseCase,
+    private val exportNowUseCase: ExportNowUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ExportSettingsUiState())
     val uiState: StateFlow<ExportSettingsUiState> = _uiState.asStateFlow()
@@ -101,11 +100,11 @@ class ExportSettingsViewModel(
         )
 
         viewModelScope.launch {
-            val result = createLocalExportTestFileUseCase(command)
+            val result = exportNowUseCase(command)
             _uiState.value = when (result) {
                 is ExportActionResult.Success -> _uiState.value.copy(
                     isExporting = false,
-                    statusMessage = EXPORT_TEST_SUCCESS_MESSAGE,
+                    statusMessage = "Export archive created: ${result.exportedFileName}",
                     errorMessage = null,
                 )
 
@@ -167,26 +166,22 @@ class ExportSettingsViewModel(
         is ExportActionError.Validation -> error.toUserMessage()
         ExportActionError.InvalidFolder -> "Export folder is invalid. Select folder again"
         ExportActionError.PermissionDenied -> "Export folder permission was lost. Select folder again"
-        ExportActionError.WriteFailed -> "Could not write export test file"
+        ExportActionError.WriteFailed -> "Could not create export archive"
         ExportActionError.Unknown -> "Export failed"
-    }
-
-    private companion object {
-        const val EXPORT_TEST_SUCCESS_MESSAGE = "Export test file created"
     }
 }
 
 class ExportSettingsViewModelFactory(
     private val settingsRepository: SettingsRepository,
     private val exportPasswordRepository: ExportPasswordRepository,
-    private val createLocalExportTestFileUseCase: CreateLocalExportTestFileUseCase,
+    private val exportNowUseCase: ExportNowUseCase,
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return ExportSettingsViewModel(
             settingsRepository = settingsRepository,
             exportPasswordRepository = exportPasswordRepository,
-            createLocalExportTestFileUseCase = createLocalExportTestFileUseCase,
+            exportNowUseCase = exportNowUseCase,
         ) as T
     }
 }

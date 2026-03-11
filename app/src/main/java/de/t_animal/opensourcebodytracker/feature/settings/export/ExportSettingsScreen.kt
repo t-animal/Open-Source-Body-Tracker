@@ -56,21 +56,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.export.CreateLocalExportTestFileUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun ExportSettingsRoute(
     settingsRepository: SettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
-    createLocalExportTestFileUseCase: CreateLocalExportTestFileUseCase,
+    exportNowUseCase: ExportNowUseCase,
     onNavigateBack: () -> Unit,
 ) {
     val vm: ExportSettingsViewModel = viewModel(
         factory = ExportSettingsViewModelFactory(
             settingsRepository = settingsRepository,
             exportPasswordRepository = exportPasswordRepository,
-            createLocalExportTestFileUseCase = createLocalExportTestFileUseCase,
+            exportNowUseCase = exportNowUseCase,
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
@@ -159,8 +159,9 @@ fun ExportSettingsScreen(
             Text(
                 text = buildAnnotatedString {
                     append(
-                        "Your settings, measurements, profile and photos will be exported " +
-                            "every night at 3am. An encrypted zip will be created at the storage location you choose."
+                        "Your measurements, profile and photos are exported into an encrypted " +
+                            "ZIP archive in the folder you choose. Automatic nightly export " +
+                            "will be added in a later phase."
                     )
                 },
                 modifier = Modifier.fillMaxWidth(),

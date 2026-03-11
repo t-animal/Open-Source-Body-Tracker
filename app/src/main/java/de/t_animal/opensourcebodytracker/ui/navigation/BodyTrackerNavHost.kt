@@ -37,10 +37,10 @@ import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationResult
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
-import de.t_animal.opensourcebodytracker.domain.export.CreateLocalExportTestFileUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
@@ -68,7 +68,7 @@ fun BodyTrackerNavHost(
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
-    createLocalExportTestFileUseCase: CreateLocalExportTestFileUseCase,
+    exportNowUseCase: ExportNowUseCase,
     measurementRepository: MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
@@ -269,7 +269,7 @@ fun BodyTrackerNavHost(
             ExportSettingsRoute(
                 settingsRepository = settingsRepository,
                 exportPasswordRepository = exportPasswordRepository,
-                createLocalExportTestFileUseCase = createLocalExportTestFileUseCase,
+                exportNowUseCase = exportNowUseCase,
                 onNavigateBack = { navController.popBackStack() },
             )
         }

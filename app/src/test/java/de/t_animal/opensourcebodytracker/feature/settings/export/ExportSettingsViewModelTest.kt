@@ -2,13 +2,12 @@ package de.t_animal.opensourcebodytracker.feature.settings.export
 
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
-import de.t_animal.opensourcebodytracker.data.export.ExportDocumentTreeStorage
-import de.t_animal.opensourcebodytracker.data.export.ExportStorageError
-import de.t_animal.opensourcebodytracker.data.export.ExportStorageResult
-import de.t_animal.opensourcebodytracker.data.export.ExportTreeFile
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.export.CreateLocalExportTestFileUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
+import de.t_animal.opensourcebodytracker.domain.export.ExportActionResult
+import de.t_animal.opensourcebodytracker.domain.export.ExportExecutionCommand
+import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -46,11 +45,11 @@ class ExportSettingsViewModelTest {
     fun onSaveClicked_showsErrorAndPersistsNothing_whenExportEnabledAndFolderMissing() = runTest {
         val settingsRepository = FakeSettingsRepository(defaultSettingsState())
         val passwordRepository = FakeExportPasswordRepository()
-        val storage = FakeExportDocumentTreeStorage()
+        val exportNowUseCase = FakeExportNowUseCase()
         val viewModel = ExportSettingsViewModel(
             settingsRepository,
             passwordRepository,
-            CreateLocalExportTestFileUseCase(storage),
+            exportNowUseCase,
         )
 
         advanceUntilIdle()
@@ -70,11 +69,11 @@ class ExportSettingsViewModelTest {
     fun onSaveClicked_showsErrorAndPersistsNothing_whenExportEnabledAndPasswordMissing() = runTest {
         val settingsRepository = FakeSettingsRepository(defaultSettingsState())
         val passwordRepository = FakeExportPasswordRepository()
-        val storage = FakeExportDocumentTreeStorage()
+        val exportNowUseCase = FakeExportNowUseCase()
         val viewModel = ExportSettingsViewModel(
             settingsRepository,
             passwordRepository,
-            CreateLocalExportTestFileUseCase(storage),
+            exportNowUseCase,
         )
 
         advanceUntilIdle()
@@ -94,11 +93,11 @@ class ExportSettingsViewModelTest {
     fun onSaveClicked_persistsSettingsAndPasswordAndEmitsSaved_whenInputValid() = runTest {
         val settingsRepository = FakeSettingsRepository(defaultSettingsState())
         val passwordRepository = FakeExportPasswordRepository()
-        val storage = FakeExportDocumentTreeStorage()
+        val exportNowUseCase = FakeExportNowUseCase()
         val viewModel = ExportSettingsViewModel(
             settingsRepository,
             passwordRepository,
-            CreateLocalExportTestFileUseCase(storage),
+            exportNowUseCase,
         )
         val emittedEvents = mutableListOf<ExportSettingsEvent>()
         val collectJob = launch {
@@ -133,11 +132,15 @@ class ExportSettingsViewModelTest {
     fun onExportNowClicked_showsErrorAndSkipsStorage_whenFolderMissing() = runTest {
         val settingsRepository = FakeSettingsRepository(defaultSettingsState())
         val passwordRepository = FakeExportPasswordRepository()
-        val storage = FakeExportDocumentTreeStorage()
+        val exportNowUseCase = FakeExportNowUseCase(
+            nextResult = ExportActionResult.Failure(
+                ExportActionError.Validation(de.t_animal.opensourcebodytracker.domain.export.ExportValidationError.SelectFolder),
+            ),
+        )
         val viewModel = ExportSettingsViewModel(
             settingsRepository,
             passwordRepository,
-            CreateLocalExportTestFileUseCase(storage),
+            exportNowUseCase,
         )
 
         advanceUntilIdle()
@@ -149,7 +152,7 @@ class ExportSettingsViewModelTest {
         advanceUntilIdle()
 
         assertEquals("Select an export folder", viewModel.uiState.value.errorMessage)
-        assertEquals(0, storage.writeCalls)
+        assertEquals(1, exportNowUseCase.calls)
         assertFalse(viewModel.uiState.value.isExporting)
     }
 
@@ -157,11 +160,13 @@ class ExportSettingsViewModelTest {
     fun onExportNowClicked_usesUnsavedStateAndShowsSuccess_whenWriteSucceeds() = runTest {
         val settingsRepository = FakeSettingsRepository(defaultSettingsState())
         val passwordRepository = FakeExportPasswordRepository()
-        val storage = FakeExportDocumentTreeStorage()
+        val exportNowUseCase = FakeExportNowUseCase(
+            nextResult = ExportActionResult.Success("bodytracker_export_2026-03-11_08-30-45_123.zip"),
+        )
         val viewModel = ExportSettingsViewModel(
             settingsRepository,
             passwordRepository,
-            CreateLocalExportTestFileUseCase(storage),
+            exportNowUseCase,
         )
 
         advanceUntilIdle()
@@ -175,24 +180,27 @@ class ExportSettingsViewModelTest {
 
         advanceUntilIdle()
 
-        assertEquals(1, storage.writeCalls)
-        assertEquals(selectedFolder, storage.lastWriteTreeUri)
-        assertEquals("export_test.txt", storage.lastWriteFileName)
-        assertEquals("Export test file created", viewModel.uiState.value.statusMessage)
+        assertEquals(1, exportNowUseCase.calls)
+        assertEquals(selectedFolder, exportNowUseCase.lastCommand?.exportFolderUri)
+        assertEquals(selectedPassword, exportNowUseCase.lastCommand?.exportPassword)
+        assertEquals(
+            "Export archive created: bodytracker_export_2026-03-11_08-30-45_123.zip",
+            viewModel.uiState.value.statusMessage,
+        )
         assertNull(viewModel.uiState.value.errorMessage)
     }
 
     @Test
-    fun onExportNowClicked_showsError_whenStoragePermissionIsDenied() = runTest {
+    fun onExportNowClicked_showsError_whenPermissionIsDenied() = runTest {
         val settingsRepository = FakeSettingsRepository(defaultSettingsState())
         val passwordRepository = FakeExportPasswordRepository()
-        val storage = FakeExportDocumentTreeStorage(
-            nextWriteResult = ExportStorageResult.Failure(ExportStorageError.PermissionDenied),
+        val exportNowUseCase = FakeExportNowUseCase(
+            nextResult = ExportActionResult.Failure(ExportActionError.PermissionDenied),
         )
         val viewModel = ExportSettingsViewModel(
             settingsRepository,
             passwordRepository,
-            CreateLocalExportTestFileUseCase(storage),
+            exportNowUseCase,
         )
 
         advanceUntilIdle()
@@ -243,37 +251,17 @@ private class FakeExportPasswordRepository(
     }
 }
 
-private class FakeExportDocumentTreeStorage(
-    private val nextWriteResult: ExportStorageResult<ExportTreeFile> = ExportStorageResult.Success(
-        ExportTreeFile(
-            name = "export_test.txt",
-            documentUri = "content://example/document/export_test.txt",
-            mimeType = "text/plain",
-            lastModifiedEpochMillis = null,
-        ),
+private class FakeExportNowUseCase(
+    private val nextResult: ExportActionResult = ExportActionResult.Success(
+        "bodytracker_export_2026-03-11_08-30-45_123.zip",
     ),
-) : ExportDocumentTreeStorage {
-    var writeCalls: Int = 0
-    var lastWriteTreeUri: String? = null
-    var lastWriteFileName: String? = null
+) : ExportNowUseCase {
+    var calls: Int = 0
+    var lastCommand: ExportExecutionCommand? = null
 
-    override suspend fun writeOrReplaceFile(
-        treeUri: String,
-        fileName: String,
-        mimeType: String,
-        content: ByteArray,
-    ): ExportStorageResult<ExportTreeFile> {
-        writeCalls += 1
-        lastWriteTreeUri = treeUri
-        lastWriteFileName = fileName
-        return nextWriteResult
-    }
-
-    override suspend fun listFiles(treeUri: String): ExportStorageResult<List<ExportTreeFile>> {
-        return ExportStorageResult.Success(emptyList())
-    }
-
-    override suspend fun deleteFile(treeUri: String, fileName: String): ExportStorageResult<Unit> {
-        return ExportStorageResult.Success(Unit)
+    override suspend fun invoke(command: ExportExecutionCommand): ExportActionResult {
+        calls += 1
+        lastCommand = command
+        return nextResult
     }
 }

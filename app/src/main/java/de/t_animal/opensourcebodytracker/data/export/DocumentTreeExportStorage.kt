@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
 import java.io.IOException
+import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -50,8 +51,20 @@ interface ExportDocumentTreeStorage {
         treeUri: String,
         fileName: String,
         mimeType: String,
-        content: ByteArray,
+        writeContent: (OutputStream) -> Unit,
     ): ExportStorageResult<ExportTreeFile>
+
+    suspend fun writeOrReplaceFile(
+        treeUri: String,
+        fileName: String,
+        mimeType: String,
+        content: ByteArray,
+    ): ExportStorageResult<ExportTreeFile> {
+        return writeOrReplaceFile(treeUri, fileName, mimeType) { outputStream ->
+            outputStream.write(content)
+            outputStream.flush()
+        }
+    }
 
     suspend fun listFiles(treeUri: String): ExportStorageResult<List<ExportTreeFile>>
 
@@ -70,7 +83,7 @@ class AndroidExportDocumentTreeStorage(
         treeUri: String,
         fileName: String,
         mimeType: String,
-        content: ByteArray,
+        writeContent: (OutputStream) -> Unit,
     ): ExportStorageResult<ExportTreeFile> = withContext(Dispatchers.IO) {
         val tree = resolveTree(treeUri) ?: return@withContext ExportStorageResult.Failure(
             ExportStorageError.InvalidTreeUri(treeUri),
@@ -91,8 +104,10 @@ class AndroidExportDocumentTreeStorage(
             )
 
         val writeTempResult = runCatching {
-            contentResolver.openOutputStream(tempUri, "w")?.use { it.write(content) }
-                ?: throw IOException("Could not open output stream")
+            contentResolver.openOutputStream(tempUri, "w")?.use { outputStream ->
+                writeContent(outputStream)
+                outputStream.flush()
+            } ?: throw IOException("Could not open output stream")
         }.fold(
             onSuccess = { ExportStorageResult.Success(Unit) },
             onFailure = { throwable ->

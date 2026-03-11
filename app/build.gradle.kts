@@ -78,6 +78,7 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.tink.android)
+    implementation(libs.zip4j)
 
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
