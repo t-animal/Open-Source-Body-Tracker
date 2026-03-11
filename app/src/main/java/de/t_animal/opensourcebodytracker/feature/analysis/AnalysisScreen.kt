@@ -5,14 +5,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -72,6 +81,8 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.absoluteValue
 import kotlin.math.roundToLong
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun AnalysisRoute(
@@ -94,6 +105,7 @@ fun AnalysisRoute(
     AnalysisScreen(
         state = state,
         onDurationSelected = vm::onDurationSelected,
+        onChartOrderChanged = vm::onChartOrderChanged,
         contentPadding = contentPadding,
     )
 }
@@ -103,11 +115,23 @@ fun AnalysisRoute(
 fun AnalysisScreen(
     state: AnalysisUiState,
     onDurationSelected: (AnalysisDuration) -> Unit,
+    onChartOrderChanged: (List<BodyMetric>) -> Unit,
     contentPadding: PaddingValues,
 ) {
     var selectedEpochMillis by remember { mutableStateOf<Long?>(null) }
+    var collapsedChartIds by remember { mutableStateOf(emptySet<String>()) }
+
+    val lazyListState = rememberLazyListState()
+    val headerItemCount = 2
+    val reorderableState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        val reordered = state.metricCharts.toMutableList().apply {
+            add(to.index - headerItemCount, removeAt(from.index - headerItemCount))
+        }
+        onChartOrderChanged(reordered.map { it.definition })
+    }
 
     LazyColumn(
+        state = lazyListState,
         modifier = Modifier
             .fillMaxSize()
             .padding(contentPadding),
@@ -134,17 +158,24 @@ fun AnalysisScreen(
         }
 
         item {
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
         items(state.metricCharts, key = { it.definition.id }) { chart ->
-            MetricChartCard(
-                chart = chart,
-                duration = state.selectedDuration,
-                selectedEpochMillis = selectedEpochMillis,
-                onSelectedEpochMillisChange = { selectedEpochMillis = it },
-            )
-            androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(12.dp))
+            ReorderableItem(reorderableState, key = chart.definition.id) { _ ->
+                MetricChartCard(
+                    chart = chart,
+                    duration = state.selectedDuration,
+                    selectedEpochMillis = selectedEpochMillis,
+                    onSelectedEpochMillisChange = { selectedEpochMillis = it },
+                    isCollapsed = chart.definition.id in collapsedChartIds,
+                    onToggleCollapsed = {
+                        collapsedChartIds = collapsedChartIds.toggle(chart.definition.id)
+                    },
+                    dragHandleModifier = Modifier.draggableHandle(),
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
@@ -155,42 +186,63 @@ private fun MetricChartCard(
     duration: AnalysisDuration,
     selectedEpochMillis: Long?,
     onSelectedEpochMillisChange: (Long?) -> Unit,
+    isCollapsed: Boolean,
+    onToggleCollapsed: () -> Unit,
+    dragHandleModifier: Modifier,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 16.dp),
         ) {
-            Text(
-                text = chart.definition.analysisTitle(),
-                style = MaterialTheme.typography.titleMedium,
-            )
-
-            if (chart.points.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(CHART_HEIGHT),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = "no data yet",
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = chart.definition.analysisTitle(),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = onToggleCollapsed) {
+                    Icon(
+                        imageVector = if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
+                        contentDescription = if (isCollapsed) "Expand" else "Collapse",
                     )
                 }
-            } else {
-                MetricLineChart(
-                    chart = chart,
-                    duration = duration,
-                    selectedEpochMillis = selectedEpochMillis,
-                    onSelectedEpochMillisChange = onSelectedEpochMillisChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(CHART_HEIGHT),
+                Icon(
+                    imageVector = Icons.Default.DragHandle,
+                    contentDescription = "Drag to reorder",
+                    modifier = dragHandleModifier,
                 )
+            }
+
+            if (!isCollapsed) {
+                if (chart.points.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(CHART_HEIGHT),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = "no data yet",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else {
+                    MetricLineChart(
+                        chart = chart,
+                        duration = duration,
+                        selectedEpochMillis = selectedEpochMillis,
+                        onSelectedEpochMillisChange = onSelectedEpochMillisChange,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(CHART_HEIGHT),
+                    )
+                }
             }
         }
     }
@@ -364,6 +416,8 @@ private fun BodyMetricUnit.suffixWithLeadingSpace(): String = when (this) {
     else -> " $symbol"
 }
 
+private fun <T> Set<T>.toggle(item: T) = if (item in this) this - item else this + item
+
 @Preview(showBackground = true)
 @Composable
 private fun AnalysisScreenPreview() {
@@ -391,6 +445,7 @@ private fun AnalysisScreenPreview() {
                 isLoading = false,
             ),
             onDurationSelected = {},
+            onChartOrderChanged = {},
             contentPadding = PaddingValues(),
         )
     }

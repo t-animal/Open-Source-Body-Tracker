@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.feature.analysis
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
@@ -26,12 +27,15 @@ class AnalysisViewModel(
 ) : ViewModel() {
     private val selectedDuration = MutableStateFlow(AnalysisDuration.ThreeMonths)
 
+    private val customChartOrder = MutableStateFlow<List<BodyMetric>>(emptyList())
+
     val uiState: StateFlow<AnalysisUiState> = combine(
         measurementRepository.observeAll(),
         profileRepository.requiredProfileFlow,
         settingsRepository.settingsFlow,
         selectedDuration,
-    ) { measurements, profile, settings, duration ->
+        customChartOrder,
+    ) { measurements, profile, settings, duration, chartOrder ->
         val withDerived = measurements.map { measurement ->
             MeasurementWithDerived(
                 measurement = measurement,
@@ -39,7 +43,13 @@ class AnalysisViewModel(
             )
         }
 
-        val orderedVisibleInAnalysisMetrics = settings.visibleInAnalysisOrdered()
+        val baseOrder = settings.visibleInAnalysisOrdered()
+        val orderedMetrics = if (chartOrder.isEmpty()) {
+            baseOrder
+        } else {
+            val baseSet = baseOrder.toSet()
+            baseOrder.filter { it !in chartOrder.toSet() } + chartOrder.filter { it in baseSet }
+        }
 
         val filteredItems = filterByDuration(
             items = withDerived,
@@ -50,7 +60,7 @@ class AnalysisViewModel(
 
         AnalysisUiState(
             selectedDuration = duration,
-            metricCharts = buildMetricCharts(filteredItems, orderedVisibleInAnalysisMetrics),
+            metricCharts = buildMetricCharts(filteredItems, orderedMetrics),
             isLoading = false,
         )
     }.stateIn(
@@ -61,6 +71,10 @@ class AnalysisViewModel(
 
     fun onDurationSelected(duration: AnalysisDuration) {
         selectedDuration.value = duration
+    }
+
+    fun onChartOrderChanged(newOrder: List<BodyMetric>) {
+        customChartOrder.value = newOrder
     }
 }
 
