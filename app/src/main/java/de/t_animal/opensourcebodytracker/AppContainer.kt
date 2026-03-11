@@ -3,10 +3,14 @@ package de.t_animal.opensourcebodytracker
 import android.content.Context
 import androidx.room.Room
 import de.t_animal.opensourcebodytracker.data.export.AndroidExportDocumentTreeStorage
+import de.t_animal.opensourcebodytracker.data.export.ExportArchiveWriter
 import de.t_animal.opensourcebodytracker.data.export.ExportDocumentTreeStorage
+import de.t_animal.opensourcebodytracker.domain.export.ExportPhotoCollector
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordCrypto
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
+import de.t_animal.opensourcebodytracker.domain.export.InternalStorageExportPhotoCollector
 import de.t_animal.opensourcebodytracker.data.export.KeystoreExportPasswordRepository
+import de.t_animal.opensourcebodytracker.data.export.Zip4jExportArchiveWriter
 import de.t_animal.opensourcebodytracker.data.measurements.AppDatabase
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.measurements.RoomMeasurementRepository
@@ -20,7 +24,9 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataMeasurementSeriesGenerator
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
-import de.t_animal.opensourcebodytracker.domain.export.CreateLocalExportTestFileUseCase
+import de.t_animal.opensourcebodytracker.domain.export.CreateEncryptedDeviceExportUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportDocumentsCreator
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaveValidator
 import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaver
@@ -50,9 +56,26 @@ class AppContainer(appContext: Context) {
         AndroidExportDocumentTreeStorage(applicationContext)
     }
 
-    val createLocalExportTestFileUseCase: CreateLocalExportTestFileUseCase by lazy {
-        CreateLocalExportTestFileUseCase(
+    private val exportArchiveWriter: ExportArchiveWriter by lazy {
+        Zip4jExportArchiveWriter()
+    }
+
+    private val exportDocumentsCreator: ExportDocumentsCreator by lazy {
+        ExportDocumentsCreator()
+    }
+
+    private val exportPhotoCollector: ExportPhotoCollector by lazy {
+        InternalStorageExportPhotoCollector(internalPhotoStorage)
+    }
+
+    val exportNowUseCase: ExportNowUseCase by lazy {
+        CreateEncryptedDeviceExportUseCase(
+            measurementRepository = measurementRepository,
+            profileRepository = profileRepository,
             exportStorage = exportDocumentTreeStorage,
+            exportArchiveWriter = exportArchiveWriter,
+            exportDocumentsCreator = exportDocumentsCreator,
+            exportPhotoCollector = exportPhotoCollector,
         )
     }
 
