@@ -193,17 +193,29 @@ fun MeasurementListScreen(
             }
         }
 
-        if (selectedMeasurementIds.size == 1) {
-            FloatingActionButton(
-                onClick = { selectedMeasurementIds.singleOrNull()?.let { onEdit(it) } },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(contentPadding)
-                    .padding(bottom = MEASUREMENT_LIST_FAB_CLEARANCE, end = 16.dp),
-            ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(contentPadding)
+                .padding(bottom = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.End,
+        ) {
+            if (selectedMeasurementIds.size == 1) {
+                FloatingActionButton(
+                    onClick = { selectedMeasurementIds.singleOrNull()?.let { onEdit(it) } },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Edit measurement",
+                    )
+                }
+            }
+
+            FloatingActionButton(onClick = onAdd) {
                 Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = "Edit measurement",
+                    imageVector = Icons.Filled.MonitorWeight,
+                    contentDescription = "Add measurement",
                 )
             }
         }
@@ -259,18 +271,6 @@ fun MeasurementFullListScreen(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun MeasurementListAddButton(
-    onAdd: () -> Unit,
-) {
-    FloatingActionButton(onClick = onAdd) {
-        Icon(
-            imageVector = Icons.Filled.MonitorWeight,
-            contentDescription = "Add measurement"
-        )
     }
 }
 
