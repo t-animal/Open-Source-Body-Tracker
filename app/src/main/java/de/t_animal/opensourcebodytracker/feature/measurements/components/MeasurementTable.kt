@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
@@ -40,8 +41,9 @@ private fun BodyMetric.tableCellWidth(): Dp = when (unit) {
 internal fun MeasurementTable(
     items: List<MeasurementListItemUiModel>,
     visibleMetrics: List<BodyMetric>,
-    onRowClick: (Long) -> Unit,
+    onRowSelect: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    selectedIds: Set<Long> = emptySet(),
 ) {
     val horizontalScroll = rememberScrollState()
 
@@ -89,11 +91,16 @@ internal fun MeasurementTable(
         }
 
         items.forEach { item ->
+            val isSelected = item.measurement.id in selectedIds
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .horizontalScroll(horizontalScroll)
-                    .clickable { onRowClick(item.measurement.id) }
+                    .then(
+                        if (isSelected) Modifier.background(MaterialTheme.colorScheme.secondaryContainer)
+                        else Modifier
+                    )
+                    .clickable { onRowSelect(item.measurement.id) }
                     .padding(vertical = 8.dp),
             ) {
                 Text(

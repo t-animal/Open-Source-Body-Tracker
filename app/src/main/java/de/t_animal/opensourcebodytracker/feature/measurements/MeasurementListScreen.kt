@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MonitorWeight
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -24,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -112,6 +115,7 @@ fun MeasurementListScreen(
     contentPadding: PaddingValues,
 ) {
     var showResetConfirmationDialog by remember { mutableStateOf(false) }
+    var selectedMeasurementIds by remember { mutableStateOf(emptySet<Long>()) }
 
     if (showResetConfirmationDialog) {
         ResetAppConfirmationDialog(
@@ -123,61 +127,85 @@ fun MeasurementListScreen(
         )
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding),
-        contentPadding = PaddingValues(16.dp),
-    ) {
-        if (showDemoBanner) {
-            item {
-                DemoModeBanner(
-                    onResetApp = { showResetConfirmationDialog = true },
-                )
-                Spacer(modifier = Modifier.height(12.dp))
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            contentPadding = PaddingValues(16.dp),
+        ) {
+            if (showDemoBanner) {
+                item {
+                    DemoModeBanner(
+                        onResetApp = { showResetConfirmationDialog = true },
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
-        }
 
-        item {
-            LatestMeasurementCard(
-                state = state,
-                onAdd = onAdd,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        item {
-            Text(
-                text = "All Measurements",
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-
-        item {
-            MeasurementTable(
-                items = state.previewMeasurements,
-                visibleMetrics = state.visibleInTableMetrics,
-                onRowClick = { onEdit(it) },
-            )
-        }
-
-        if (state.hasMoreMeasurements) {
             item {
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    TextButton(onClick = onOpenMore) {
-                        Text("More")
+                LatestMeasurementCard(
+                    state = state,
+                    onAdd = onAdd,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            item {
+                Text(
+                    text = "All Measurements",
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            item {
+                MeasurementTable(
+                    items = state.previewMeasurements,
+                    visibleMetrics = state.visibleInTableMetrics,
+                    selectedIds = selectedMeasurementIds,
+                    onRowSelect = { id ->
+                        selectedMeasurementIds = if (id in selectedMeasurementIds) {
+                            selectedMeasurementIds - id
+                        } else {
+                            selectedMeasurementIds + id
+                        }
+                    },
+                )
+            }
+
+            if (state.hasMoreMeasurements) {
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                    ) {
+                        TextButton(onClick = onOpenMore) {
+                            Text("More")
+                        }
                     }
                 }
             }
+
+            item {
+                Spacer(modifier = Modifier.height(MEASUREMENT_LIST_FAB_CLEARANCE))
+            }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(MEASUREMENT_LIST_FAB_CLEARANCE))
+        if (selectedMeasurementIds.size == 1) {
+            FloatingActionButton(
+                onClick = { selectedMeasurementIds.singleOrNull()?.let { onEdit(it) } },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(contentPadding)
+                    .padding(bottom = MEASUREMENT_LIST_FAB_CLEARANCE, end = 16.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Edit,
+                    contentDescription = "Edit measurement",
+                )
+            }
         }
     }
 }
@@ -187,23 +215,50 @@ fun MeasurementFullListScreen(
     state: MeasurementListUiState,
     onEdit: (Long) -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-    ) {
-        Text(
-            text = "All Measurements",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
+    var selectedMeasurementIds by remember { mutableStateOf(emptySet<Long>()) }
 
-        MeasurementTable(
-            items = state.allMeasurements,
-            visibleMetrics = state.visibleInTableMetrics,
-            onRowClick = onEdit,
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            Text(
+                text = "All Measurements",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+
+            MeasurementTable(
+                items = state.allMeasurements,
+                visibleMetrics = state.visibleInTableMetrics,
+                selectedIds = selectedMeasurementIds,
+                onRowSelect = { id ->
+                    selectedMeasurementIds = if (id in selectedMeasurementIds) {
+                        selectedMeasurementIds - id
+                    } else {
+                        selectedMeasurementIds + id
+                    }
+                },
+            )
+
+            Spacer(modifier = Modifier.height(MEASUREMENT_LIST_FAB_CLEARANCE))
+        }
+
+        if (selectedMeasurementIds.size == 1) {
+            FloatingActionButton(
+                onClick = { selectedMeasurementIds.singleOrNull()?.let { onEdit(it) } },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Edit,
+                    contentDescription = "Edit measurement",
+                )
+            }
+        }
     }
 }
 
