@@ -45,7 +45,6 @@ import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDeri
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRoute
-import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListAddButton
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListFullRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoAnimationRoute
@@ -254,9 +253,6 @@ fun BodyTrackerNavHost(
                     { navController.navigate(Routes.FakeDataGenerator) }
                 } else {
                     null
-                },
-                floatingActionButton = {
-                    MeasurementListAddButton(onAdd = { navController.navigate(Routes.MeasurementAdd) })
                 },
             ) { contentPadding ->
                 MeasurementListRoute(

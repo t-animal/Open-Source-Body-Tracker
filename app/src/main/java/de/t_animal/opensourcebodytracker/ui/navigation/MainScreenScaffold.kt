@@ -38,7 +38,6 @@ fun MainScreenScaffold(
     onOpenReminders: () -> Unit,
     onTriggerReminder: () -> Unit,
     onOpenFakeDataGenerator: (() -> Unit)? = null,
-    floatingActionButton: @Composable () -> Unit = {},
     content: @Composable (PaddingValues) -> Unit,
 ) {
     var overflowExpanded by remember { mutableStateOf(false) }
@@ -114,7 +113,6 @@ fun MainScreenScaffold(
                 }
             }
         },
-        floatingActionButton = floatingActionButton,
         content = content,
     )
 }
