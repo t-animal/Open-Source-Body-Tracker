@@ -15,7 +15,7 @@ import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmSchedul
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
-import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         profileRepository = container.profileRepository,
                         settingsRepository = container.settingsRepository,
                         exportPasswordRepository = container.exportPasswordRepository,
-                        exportNowUseCase = container.exportNowUseCase,
+                        exportToFileSystemUseCase = container.exportToFilesystemUseCase,
                         measurementRepository = container.measurementRepository,
                         internalPhotoStorage = container.internalPhotoStorage,
                         calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
@@ -105,7 +105,7 @@ private fun BodyTrackerApp(
     profileRepository: de.t_animal.opensourcebodytracker.data.profile.ProfileRepository,
     settingsRepository: de.t_animal.opensourcebodytracker.data.settings.SettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
-    exportNowUseCase: ExportNowUseCase,
+    exportToFileSystemUseCase: ExportToFilesystemUseCase,
     measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
     calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
@@ -121,7 +121,7 @@ private fun BodyTrackerApp(
         profileRepository = profileRepository,
         settingsRepository = settingsRepository,
         exportPasswordRepository = exportPasswordRepository,
-        exportNowUseCase = exportNowUseCase,
+        exportToFileSystemUseCase = exportToFileSystemUseCase,
         measurementRepository = measurementRepository,
         internalPhotoStorage = internalPhotoStorage,
         calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,

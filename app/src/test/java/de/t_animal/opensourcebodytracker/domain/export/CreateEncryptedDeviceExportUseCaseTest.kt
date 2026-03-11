@@ -306,8 +306,8 @@ class CreateEncryptedDeviceExportUseCaseTest {
         exportDocumentsCreator: ExportDocumentsCreator = ExportDocumentsCreator(),
         exportPhotoCollector: ExportPhotoCollector = FakeExportPhotoCollector(),
         clock: Clock = fixedClock(),
-    ): CreateEncryptedDeviceExportUseCase {
-        return CreateEncryptedDeviceExportUseCase(
+    ): ExportToFilesystemUseCase {
+        return ExportToFilesystemUseCase(
             measurementRepository = measurementRepository,
             profileRepository = profileRepository,
             exportStorage = exportStorage,

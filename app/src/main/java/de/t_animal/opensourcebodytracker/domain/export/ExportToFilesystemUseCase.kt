@@ -14,7 +14,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.first
 
-class CreateEncryptedDeviceExportUseCase(
+open class ExportToFilesystemUseCase(
     private val measurementRepository: MeasurementRepository,
     private val profileRepository: ProfileRepository,
     private val exportStorage: ExportDocumentTreeStorage,
@@ -22,8 +22,8 @@ class CreateEncryptedDeviceExportUseCase(
     private val exportDocumentsCreator: ExportDocumentsCreator,
     private val exportPhotoCollector: ExportPhotoCollector,
     private val clock: Clock = Clock.systemDefaultZone(),
-) : ExportNowUseCase {
-    override suspend operator fun invoke(
+)  {
+    suspend operator fun invoke(
         command: ExportExecutionCommand,
         onProgress: ((ExportProgress) -> Unit)?,
     ): ExportActionResult {

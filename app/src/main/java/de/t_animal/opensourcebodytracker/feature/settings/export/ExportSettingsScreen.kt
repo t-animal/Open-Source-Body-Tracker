@@ -57,21 +57,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.export.ExportNowUseCase
+import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun ExportSettingsRoute(
     settingsRepository: SettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
-    exportNowUseCase: ExportNowUseCase,
+    exportToFileSystemUseCase: ExportToFilesystemUseCase,
     onNavigateBack: () -> Unit,
 ) {
     val vm: ExportSettingsViewModel = viewModel(
         factory = ExportSettingsViewModelFactory(
             settingsRepository = settingsRepository,
             exportPasswordRepository = exportPasswordRepository,
-            exportNowUseCase = exportNowUseCase,
+            exportToFileSystemUseCase = exportToFileSystemUseCase,
         ),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
