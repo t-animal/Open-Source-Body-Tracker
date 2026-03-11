@@ -4,7 +4,6 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.photos.PhotoStorageContract
 import de.t_animal.opensourcebodytracker.data.export.ExportArchiveEntry
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
-import kotlin.collections.plusAssign
 
 data class CollectedExportPhotos(
     val entries: List<ExportArchiveEntry.FileEntry>,
@@ -12,29 +11,55 @@ data class CollectedExportPhotos(
     val missingImageCount: Int,
 )
 
+data class ExportPhotoCollectionProgress(
+    val processedMeasurementCount: Int,
+    val totalMeasurementCount: Int,
+    val exportedPhotoCount: Int,
+    val missingPhotoCount: Int,
+)
+
 interface ExportPhotoCollector {
-    fun collect(measurements: List<BodyMeasurement>): CollectedExportPhotos
+    fun collect(
+        measurements: List<BodyMeasurement>,
+        onProgress: ((ExportPhotoCollectionProgress) -> Unit)? = null,
+    ): CollectedExportPhotos
 }
 
 class InternalStorageExportPhotoCollector(
     private val photoStorage: InternalPhotoStorage,
 ) : ExportPhotoCollector {
-    override fun collect(measurements: List<BodyMeasurement>): CollectedExportPhotos {
+    override fun collect(
+        measurements: List<BodyMeasurement>,
+        onProgress: ((ExportPhotoCollectionProgress) -> Unit)?,
+    ): CollectedExportPhotos {
         val entries = mutableListOf<ExportArchiveEntry.FileEntry>()
         var missingImageCount = 0
+        val totalMeasurementCount = measurements.size
 
-        measurements.forEach { measurement ->
-            val photoPath = measurement.photoFilePath ?: return@forEach
-            val photoFile = photoStorage.resolvePhotoFile(photoPath)
-            if (!photoFile.isFile) {
-                missingImageCount += 1
-                return@forEach
+        measurements.forEachIndexed { index, measurement ->
+            val photoPath = measurement.photoFilePath
+            if (photoPath != null) {
+                val photoFile = photoStorage.resolvePhotoFile(photoPath)
+                if (!photoFile.isFile) {
+                    missingImageCount += 1
+                } else {
+                    entries.add(
+                        ExportArchiveEntry.FileEntry(
+                            path = "${PhotoStorageContract.PERSISTED_PHOTOS_DIRECTORY}/${photoPath.value}",
+                            file = photoFile,
+                        ),
+                    )
+                }
             }
 
-            entries.add(ExportArchiveEntry.FileEntry(
-                path = "${PhotoStorageContract.PERSISTED_PHOTOS_DIRECTORY}/${photoPath.value}",
-                file = photoFile,
-            ))
+            onProgress?.invoke(
+                ExportPhotoCollectionProgress(
+                    processedMeasurementCount = index + 1,
+                    totalMeasurementCount = totalMeasurementCount,
+                    exportedPhotoCount = entries.size,
+                    missingPhotoCount = missingImageCount,
+                ),
+            )
         }
 
         return CollectedExportPhotos(

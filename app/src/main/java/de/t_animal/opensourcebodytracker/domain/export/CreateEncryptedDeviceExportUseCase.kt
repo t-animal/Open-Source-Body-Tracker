@@ -1,5 +1,6 @@
 package de.t_animal.opensourcebodytracker.domain.export
 
+import de.t_animal.opensourcebodytracker.data.export.ExportArchiveEntry
 import de.t_animal.opensourcebodytracker.data.export.ExportArchiveWriter
 import de.t_animal.opensourcebodytracker.data.export.ExportDocumentTreeStorage
 import de.t_animal.opensourcebodytracker.data.export.ExportStorageError
@@ -22,7 +23,11 @@ class CreateEncryptedDeviceExportUseCase(
     private val exportPhotoCollector: ExportPhotoCollector,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : ExportNowUseCase {
-    override suspend operator fun invoke(command: ExportExecutionCommand): ExportActionResult {
+    override suspend operator fun invoke(
+        command: ExportExecutionCommand,
+        onProgress: ((ExportProgress) -> Unit)?,
+    ): ExportActionResult {
+        reportProgress(onProgress, ExportProgress.Validating)
         val validationResult = validateExportExecutionCommand(command)
         val validatedCommand = when (validationResult) {
             is ExportExecutionValidationResult.Valid -> validationResult.command
@@ -33,12 +38,25 @@ class CreateEncryptedDeviceExportUseCase(
             }
         }
 
+        reportProgress(onProgress, ExportProgress.LoadingProfile)
         val profile = profileRepository.profileFlow.first()
             ?: return ExportActionResult.Failure(ExportActionError.Unknown)
+
+        reportProgress(onProgress, ExportProgress.LoadingMeasurements)
         val measurements = measurementRepository.getAll().sortedBy { it.dateEpochMillis }
         val exportInstant = clock.instant()
         val exportFileName = buildExportFileName(exportInstant, clock.zone)
-        val collectedPhotos = exportPhotoCollector.collect(measurements)
+        val collectedPhotos = exportPhotoCollector.collect(measurements) { progress ->
+            reportProgress(
+                onProgress,
+                ExportProgress.CollectingPhotos(
+                    processedMeasurementCount = progress.processedMeasurementCount,
+                    totalMeasurementCount = progress.totalMeasurementCount,
+                    exportedPhotoCount = progress.exportedPhotoCount,
+                    missingPhotoCount = progress.missingPhotoCount,
+                ),
+            )
+        }
         val documentEntries = exportDocumentsCreator.create(
             measurements = measurements,
             profile = profile,
@@ -47,6 +65,8 @@ class CreateEncryptedDeviceExportUseCase(
             imageCount = collectedPhotos.exportedImageCount,
             missingImageCount = collectedPhotos.missingImageCount,
         )
+        var currentDocumentIndex = 0
+        var currentPhotoIndex = 0
 
         val writeResult = exportStorage.writeOrReplaceFile(
             treeUri = validatedCommand.exportFolderUri,
@@ -61,6 +81,33 @@ class CreateEncryptedDeviceExportUseCase(
                     },
                     password = validatedCommand.exportPassword,
                     outputStream = outputStream,
+                    onEntryStarted = { progress ->
+                        when (val entry = progress.entry) {
+                            is ExportArchiveEntry.InMemory -> {
+                                currentDocumentIndex += 1
+                                reportProgress(
+                                    onProgress,
+                                    ExportProgress.WritingArchiveData(
+                                        currentDocumentIndex = currentDocumentIndex,
+                                        totalDocumentCount = documentEntries.size,
+                                        documentName = entry.path,
+                                    ),
+                                )
+                            }
+
+                            is ExportArchiveEntry.FileEntry -> {
+                                currentPhotoIndex += 1
+                                reportProgress(
+                                    onProgress,
+                                    ExportProgress.WritingPhoto(
+                                        currentPhotoIndex = currentPhotoIndex,
+                                        totalPhotoCount = collectedPhotos.exportedImageCount,
+                                        photoName = entry.path.substringAfterLast('/'),
+                                    ),
+                                )
+                            }
+                        }
+                    },
                 )
             }.getOrElse { throwable ->
                 throw IOException("Could not write encrypted archive", throwable)
@@ -69,6 +116,7 @@ class CreateEncryptedDeviceExportUseCase(
 
         return when (writeResult) {
             is ExportStorageResult.Success -> {
+                reportProgress(onProgress, ExportProgress.CleaningUpOldExports)
                 cleanupOldExports(validatedCommand.exportFolderUri)
                 ExportActionResult.Success(exportedFileName = exportFileName)
             }
@@ -108,6 +156,13 @@ class CreateEncryptedDeviceExportUseCase(
         is ExportStorageError.IoFailure -> ExportActionError.WriteFailed
         is ExportStorageError.FileNotFound -> ExportActionError.WriteFailed
         is ExportStorageError.Unknown -> ExportActionError.Unknown
+    }
+
+    private fun reportProgress(
+        onProgress: ((ExportProgress) -> Unit)?,
+        progress: ExportProgress,
+    ) {
+        onProgress?.invoke(progress)
     }
 
     private companion object {

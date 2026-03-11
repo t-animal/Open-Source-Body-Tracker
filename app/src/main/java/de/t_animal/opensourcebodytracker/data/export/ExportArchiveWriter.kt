@@ -22,11 +22,17 @@ sealed interface ExportArchiveEntry {
     ) : ExportArchiveEntry
 }
 
+data class ExportArchiveWriteProgress(
+    val currentEntryIndex: Int,
+    val entry: ExportArchiveEntry,
+)
+
 interface ExportArchiveWriter {
     fun writeEncryptedZip(
         entries: Sequence<ExportArchiveEntry>,
         password: String,
         outputStream: OutputStream,
+        onEntryStarted: ((ExportArchiveWriteProgress) -> Unit)? = null,
     )
 }
 
@@ -35,9 +41,18 @@ class Zip4jExportArchiveWriter : ExportArchiveWriter {
         entries: Sequence<ExportArchiveEntry>,
         password: String,
         outputStream: OutputStream,
+        onEntryStarted: ((ExportArchiveWriteProgress) -> Unit)?,
     ) {
         ZipOutputStream(outputStream, password.toCharArray()).use { zipOutputStream ->
+            var currentEntryIndex = 0
             entries.forEach { entry ->
+                currentEntryIndex += 1
+                onEntryStarted?.invoke(
+                    ExportArchiveWriteProgress(
+                        currentEntryIndex = currentEntryIndex,
+                        entry = entry,
+                    ),
+                )
                 zipOutputStream.putNextEntry(buildZipParameters(entry.path))
                 when (entry) {
                     is ExportArchiveEntry.InMemory -> zipOutputStream.write(entry.content)

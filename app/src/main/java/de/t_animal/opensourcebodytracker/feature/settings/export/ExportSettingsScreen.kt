@@ -26,6 +26,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -270,6 +271,26 @@ fun ExportSettingsScreen(
                 enabled = state.exportToDeviceStorageEnabled && !state.isExporting,
             ) {
                 Text(if (state.isExporting) "Exporting..." else "Export Now")
+            }
+
+            val progress = state.exportProgress
+            if (progress != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = progress.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                if (progress.isDeterminate) {
+                    LinearProgressIndicator(
+                        progress = { progress.progressFraction ?: 0f },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
             val status = state.statusMessage
