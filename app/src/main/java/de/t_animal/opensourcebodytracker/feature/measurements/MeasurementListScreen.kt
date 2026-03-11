@@ -46,6 +46,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -412,7 +413,7 @@ private fun MeasurementTable(
                 text = "Date",
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier
-                    .width(TABLE_CELL_WIDTH)
+                    .width(TABLE_DATE_CELL_WIDTH)
                     .padding(horizontal = 8.dp),
             )
             visibleMetrics.forEach { column ->
@@ -420,7 +421,7 @@ private fun MeasurementTable(
                     text = column.label(),
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier
-                        .width(TABLE_CELL_WIDTH)
+                        .width(column.tableCellWidth())
                         .padding(horizontal = 8.dp),
                 )
             }
@@ -447,7 +448,7 @@ private fun MeasurementTable(
                 Text(
                     text = formatEpochMillisToLocalizedNumericDate(item.measurement.dateEpochMillis),
                     modifier = Modifier
-                        .width(TABLE_CELL_WIDTH)
+                        .width(TABLE_DATE_CELL_WIDTH)
                         .padding(horizontal = 8.dp),
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -455,7 +456,7 @@ private fun MeasurementTable(
                     Text(
                         text = column.formattedValue(item),
                         modifier = Modifier
-                            .width(TABLE_CELL_WIDTH)
+                            .width(column.tableCellWidth())
                             .padding(horizontal = 8.dp),
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -472,7 +473,15 @@ private data class MetricDisplayItem(
     val value: String,
 )
 
-private val TABLE_CELL_WIDTH = 136.dp
+private val TABLE_DATE_CELL_WIDTH = 90.dp
+
+private fun BodyMetric.tableCellWidth(): Dp = when (unit) {
+    BodyMetricUnit.Kilogram   -> 80.dp  // e.g. "300.00 kg"
+    BodyMetricUnit.Centimeter -> 80.dp  // e.g. "200.00 cm"
+    BodyMetricUnit.Millimeter -> 68.dp  // e.g. "50.00 mm"
+    BodyMetricUnit.Percent    -> 70.dp  // e.g. "60.00 %"
+    BodyMetricUnit.Unitless   -> 60.dp  // e.g. "60.00"
+}
 private val MEASUREMENT_LIST_FAB_CLEARANCE = 96.dp
 
 private fun buildLatestMeasurementMetrics(
@@ -510,8 +519,8 @@ private fun BodyMetric.label(): String = when (this) {
 
     is DerivedBodyMetric -> when (this) {
         DerivedBodyMetric.Bmi -> "BMI"
-        DerivedBodyMetric.NavyBodyFatPercent -> "Body Fat (Navy)"
-        DerivedBodyMetric.SkinfoldBodyFatPercent -> "Body Fat (Skinfold)"
+        DerivedBodyMetric.NavyBodyFatPercent -> "Body Fat Navy"
+        DerivedBodyMetric.SkinfoldBodyFatPercent -> "Body Fat Skinfold"
         DerivedBodyMetric.WaistHipRatio -> "WHR"
         DerivedBodyMetric.WaistHeightRatio -> "WHtR"
     }
