@@ -1,5 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.analysis
 
+import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics

@@ -24,7 +24,9 @@ import de.t_animal.opensourcebodytracker.data.profile.PreferencesProfileReposito
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.data.settings.PreferencesSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.PreferencesUiSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataMeasurementSeriesGenerator
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
@@ -66,6 +68,10 @@ class AppContainer(appContext: Context) {
 
     val settingsRepository: SettingsRepository by lazy {
         PreferencesSettingsRepository(applicationContext)
+    }
+
+    val uiSettingsRepository: UiSettingsRepository by lazy {
+        PreferencesUiSettingsRepository(applicationContext)
     }
 
     val exportPasswordRepository: ExportPasswordRepository by lazy {
