@@ -52,7 +52,7 @@ import de.t_animal.opensourcebodytracker.feature.measurements.components.Measure
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditTopBar
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MetricSections
 import de.t_animal.opensourcebodytracker.feature.measurements.components.PhotoPreviewCard
-import de.t_animal.opensourcebodytracker.feature.measurements.components.PhotoPreviewDialog
+import de.t_animal.opensourcebodytracker.ui.components.PhotoPreviewDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.resolveVisibleMeasuredMetrics
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme

@@ -194,7 +194,5 @@ If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
 
 # Ideas for the future and tech debt
 
-* Allow reordering of measurements for table and analysis
-* Tapping photo preview closes it
+* Allow reordering of measurements for table
 * translation
-* prevent android built-in backups (https://developer.android.com/identity/data/autobackup?hl=de) at least for photos, add custom backup logic

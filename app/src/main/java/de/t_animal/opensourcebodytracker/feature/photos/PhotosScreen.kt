@@ -1,4 +1,5 @@
 package de.t_animal.opensourcebodytracker.feature.photos
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -6,7 +7,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import de.t_animal.opensourcebodytracker.ui.components.PhotoPreviewDialog
 import de.t_animal.opensourcebodytracker.feature.photos.components.AnimateSelectionBottomBar
 import de.t_animal.opensourcebodytracker.feature.photos.components.CompareSelectionBottomBar
 import de.t_animal.opensourcebodytracker.feature.photos.components.PhotosFeed
@@ -77,10 +81,12 @@ fun PhotosScreen(
     onCompareClicked: () -> Unit,
     onAnimateClicked: () -> Unit,
 ) {
+    var previewPhoto by remember { mutableStateOf<File?>(null) }
     val selectedIds = state.selectedMeasurementIds.toSet()
     val selectedItems = state.selectedMeasurementIds.mapNotNull { selectedId ->
         state.items.firstOrNull { item -> item.measurementId == selectedId }
     }
+    val isSelectionMode = state.mode != PhotoMode.NORMAL
     val isCompareMode = state.mode == PhotoMode.COMPARE
     val isAnimateMode = state.mode == PhotoMode.ANIMATE
     val isCompareBottomBarVisible = isCompareMode && selectedItems.isNotEmpty()
@@ -112,9 +118,17 @@ fun PhotosScreen(
         PhotosFeed(
             items = state.items,
             selectedIds = selectedIds,
-            mode = state.mode,
+            isSelectionMode = isSelectionMode,
             listBottomPadding = listBottomPadding,
-            onPhotoClicked = onPhotoClicked,
+            onPhotoClicked = { measurementId ->
+                if (state.mode == PhotoMode.NORMAL) {
+                    previewPhoto = state.items
+                        .firstOrNull { item -> item.measurementId == measurementId }
+                        ?.photoFile
+                } else {
+                    onPhotoClicked(measurementId)
+                }
+            },
         )
 
         if (isCompareBottomBarVisible) {
@@ -165,6 +179,12 @@ fun PhotosScreen(
             isSelectionBottomBarVisible = isSelectionBottomBarVisible,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+        )
+
+        PhotoPreviewDialog(
+            isVisible = previewPhoto != null,
+            photoPreviewModel = previewPhoto,
+            onDismiss = { previewPhoto = null },
         )
     }
 }
