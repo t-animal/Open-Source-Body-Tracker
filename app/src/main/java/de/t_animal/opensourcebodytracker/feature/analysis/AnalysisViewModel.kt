@@ -57,7 +57,7 @@ class AnalysisViewModel(
         val withDerived = measurements.map { measurement ->
             MeasurementWithDerived(
                 measurement = measurement,
-                derivedMetrics = calculateMeasurementDerivedMetrics(profile, measurement),
+                derivedMetrics = calculateMeasurementDerivedMetrics(profile, measurement).metrics,
             )
         }
 

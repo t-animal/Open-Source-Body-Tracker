@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric.Companion.entries
 import de.t_animal.opensourcebodytracker.core.model.visibleInTableOrdered
@@ -30,6 +31,7 @@ data class MeasurementListUiState(
 data class MeasurementListItemUiModel(
     val measurement: BodyMeasurement,
     val derivedMetrics: DerivedMetrics,
+    val derivedMetricRatings: DerivedMetricRatings = DerivedMetricRatings(),
 )
 
 class MeasurementListViewModel(
@@ -44,9 +46,11 @@ class MeasurementListViewModel(
         settingsRepository.settingsFlow,
     ) { measurements, profile, settings ->
         val items = measurements.map { measurement ->
+            val analysis = calculateMeasurementDerivedMetrics(profile, measurement)
             MeasurementListItemUiModel(
                 measurement = measurement,
-                derivedMetrics = calculateMeasurementDerivedMetrics(profile, measurement),
+                derivedMetrics = analysis.metrics,
+                derivedMetricRatings = analysis.ratings,
             )
         }
 
