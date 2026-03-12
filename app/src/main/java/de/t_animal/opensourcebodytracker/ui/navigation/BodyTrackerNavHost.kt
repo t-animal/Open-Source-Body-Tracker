@@ -180,6 +180,11 @@ fun BodyTrackerNavHost(
     } else {
         null
     }
+    val onDebugScheduleExportIn2Minutes: (() -> Unit)? = if (isDebuggable) {
+        { automaticExportScheduler.scheduleExportInMinutes(2) }
+    } else {
+        null
+    }
 
     NavHost(
         navController = navController,
@@ -294,6 +299,7 @@ fun BodyTrackerNavHost(
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
+                onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
             ) { contentPadding ->
                 MeasurementListRoute(
                     measurementRepository = measurementRepository,
@@ -357,6 +363,7 @@ fun BodyTrackerNavHost(
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
+                onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
             ) { contentPadding ->
                 AnalysisRoute(
                     measurementRepository = measurementRepository,
@@ -384,6 +391,7 @@ fun BodyTrackerNavHost(
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
+                onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
             ) { contentPadding ->
                 Box(
                     modifier = Modifier
