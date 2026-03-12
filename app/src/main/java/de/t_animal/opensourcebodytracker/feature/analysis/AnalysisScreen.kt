@@ -76,6 +76,7 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -118,7 +119,7 @@ fun AnalysisScreen(
     onChartOrderChanged: (List<BodyMetric>) -> Unit,
     contentPadding: PaddingValues,
 ) {
-    var selectedEpochMillis by remember { mutableStateOf<Long?>(null) }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var collapsedChartIds by remember { mutableStateOf(emptySet<String>()) }
 
     val lazyListState = rememberLazyListState()
@@ -166,8 +167,8 @@ fun AnalysisScreen(
                 MetricChartCard(
                     chart = chart,
                     duration = state.selectedDuration,
-                    selectedEpochMillis = selectedEpochMillis,
-                    onSelectedEpochMillisChange = { selectedEpochMillis = it },
+                    selectedDate = selectedDate,
+                    onSelectedDateChange = { selectedDate = it },
                     isCollapsed = chart.definition.id in collapsedChartIds,
                     onToggleCollapsed = {
                         collapsedChartIds = collapsedChartIds.toggle(chart.definition.id)
@@ -184,8 +185,8 @@ fun AnalysisScreen(
 private fun MetricChartCard(
     chart: AnalysisMetricChartUiModel,
     duration: AnalysisDuration,
-    selectedEpochMillis: Long?,
-    onSelectedEpochMillisChange: (Long?) -> Unit,
+    selectedDate: LocalDate?,
+    onSelectedDateChange: (LocalDate?) -> Unit,
     isCollapsed: Boolean,
     onToggleCollapsed: () -> Unit,
     dragHandleModifier: Modifier,
@@ -236,8 +237,8 @@ private fun MetricChartCard(
                     MetricLineChart(
                         chart = chart,
                         duration = duration,
-                        selectedEpochMillis = selectedEpochMillis,
-                        onSelectedEpochMillisChange = onSelectedEpochMillisChange,
+                        selectedDate = selectedDate,
+                        onSelectedDateChange = onSelectedDateChange,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(CHART_HEIGHT),
@@ -252,14 +253,16 @@ private fun MetricChartCard(
 private fun MetricLineChart(
     chart: AnalysisMetricChartUiModel,
     duration: AnalysisDuration,
-    selectedEpochMillis: Long?,
-    onSelectedEpochMillisChange: (Long?) -> Unit,
+    selectedDate: LocalDate?,
+    onSelectedDateChange: (LocalDate?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val points = chart.points
     val yAxisRange = chart.yAxisRange ?: return
     val modelProducer = remember(chart.definition.id) { CartesianChartModelProducer() }
-    val xValues = remember(points) { points.map { it.epochMillis } }
+    // Use epoch days as x-values: vico's AlignedHorizontalAxisItemPlacer iterates every integer
+    // between min and max x, so epoch milliseconds would produce trillions of allocations.
+    val xValues = remember(points) { points.map { it.epochMillis.toLocalDateInSystemZone().toEpochDay() } }
     val yValues = remember(points) { points.map { it.value } }
 
     val unitSuffix = remember(chart.definition.unit) {
@@ -267,7 +270,7 @@ private fun MetricLineChart(
     }
     val xAxisValueFormatter = remember(duration) {
         CartesianValueFormatter { _, value, _ ->
-            formatXAxisLabel(value.toLong(), duration)
+            formatXAxisLabel(LocalDate.ofEpochDay(value.toLong()), duration)
         }
     }
     val yAxisValueFormatter = remember(unitSuffix) {
@@ -293,16 +296,12 @@ private fun MetricLineChart(
         indicatorSize = CHART_SELECTED_POINT_SIZE,
     )
     val markerController = rememberTapSelectionMarkerController(
-        onSelectedEpochMillisChange = onSelectedEpochMillisChange,
+        onSelectedXValueChange = { epochDay ->
+            onSelectedDateChange(epochDay?.let { LocalDate.ofEpochDay(it) })
+        },
     )
-    val selectedPersistentMarkerX = remember(selectedEpochMillis, xValues) {
-        selectedEpochMillis
-            ?.let { selected ->
-                xValues.firstOrNull { it == selected }
-                    ?: xValues.firstOrNull { candidate ->
-                        candidate.toLocalDateInSystemZone() == selected.toLocalDateInSystemZone()
-                    }
-            }
+    val selectedPersistentMarkerX = remember(selectedDate, xValues) {
+        selectedDate?.let { xValues.firstOrNull { it == selectedDate.toEpochDay() } }
     }
     val rangeProvider = remember(yAxisRange) {
         fixedYRangeProvider(yAxisRange)
@@ -365,9 +364,9 @@ private fun fixedYRangeProvider(yAxisRange: AnalysisYAxisRange): CartesianLayerR
 
 @Composable
 private fun rememberTapSelectionMarkerController(
-    onSelectedEpochMillisChange: (Long?) -> Unit,
+    onSelectedXValueChange: (Long?) -> Unit,
 ): CartesianMarkerController {
-    val latestOnSelectedEpochMillisChange = rememberUpdatedState(onSelectedEpochMillisChange)
+    val latestOnSelectedXValueChange = rememberUpdatedState(onSelectedXValueChange)
     return remember {
         object : CartesianMarkerController {
             override fun shouldAcceptInteraction(
@@ -379,7 +378,7 @@ private fun rememberTapSelectionMarkerController(
                 interaction: Interaction,
                 targets: List<CartesianMarker.Target>,
             ): Boolean {
-                latestOnSelectedEpochMillisChange.value(targets.firstOrNull()?.x?.roundToLong())
+                latestOnSelectedXValueChange.value(targets.firstOrNull()?.x?.roundToLong())
                 return false
             }
         }
@@ -387,10 +386,9 @@ private fun rememberTapSelectionMarkerController(
 }
 
 private fun formatXAxisLabel(
-    epochMillis: Long,
+    date: LocalDate,
     duration: AnalysisDuration,
 ): String {
-    val date = epochMillis.toLocalDateInSystemZone()
     val pattern = when (duration) {
         AnalysisDuration.OneMonth -> "dd.MM"
         AnalysisDuration.OneYear -> "MM.yy"
