@@ -196,3 +196,5 @@ If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
 
 * Allow reordering of measurements for table
 * translation
+* fab button colors (primary/secondary photos screen and measurement edit)
+* lazycolumn (?) ruckler auf measurement list und visibility settings
