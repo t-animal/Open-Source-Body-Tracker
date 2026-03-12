@@ -4,12 +4,15 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.MetricRating
+import de.t_animal.opensourcebodytracker.core.model.forMetric
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import java.text.NumberFormat
 
 internal data class MetricDisplayItem(
     val label: String,
     val value: String,
+    val rating: MetricRating? = null,
 )
 
 internal fun buildLatestMeasurementMetrics(
@@ -20,6 +23,7 @@ internal fun buildLatestMeasurementMetrics(
         MetricDisplayItem(
             label = metric.label(),
             value = metric.formattedValue(item),
+            rating = (metric as? DerivedBodyMetric)?.let { item.derivedMetricRatings.forMetric(it) },
         )
     }
 }

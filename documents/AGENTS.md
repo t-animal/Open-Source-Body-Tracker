@@ -69,6 +69,7 @@ Test must succeed and may only be changed if they fail because the tested behavi
 
 - [AI-DEVEL.md](AI-DEVEL.md): Minimal AI-agent handoff and operating constraints.
 - [ANALYSIS.md](ANALYSIS.md): Analysis tab behavior, data flow, chart rules, and transforms.
+- [ANALYSIS_RATING.md](ANALYSIS_RATING.md): Health rating thresholds and severity levels for derived metrics (BMI, body fat %, WHR, WHtR).
 - [EXPORT.md](EXPORT.md): Data export for backup and synchronization.
 - [FORMULAS.md](FORMULAS.md): Forward formulas for derived body metrics and implementation notes.
 - [FORMULAS_INVERTED.md](FORMULAS_INVERTED.md): Inverted formula math for generating target-compatible measurements.

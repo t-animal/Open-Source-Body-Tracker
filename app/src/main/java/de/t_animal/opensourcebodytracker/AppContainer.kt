@@ -40,6 +40,7 @@ import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaver
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsCalculator
+import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsRater
 
 class AppContainer(appContext: Context) {
     private val applicationContext = appContext.applicationContext
@@ -147,7 +148,10 @@ class AppContainer(appContext: Context) {
     }
 
     val calculateMeasurementDerivedMetricsUseCase: CalculateMeasurementDerivedMetricsUseCase by lazy {
-        CalculateMeasurementDerivedMetricsUseCase(derivedMetricsCalculator)
+        CalculateMeasurementDerivedMetricsUseCase(
+            calculator = derivedMetricsCalculator,
+            rater = DerivedMetricsRater(),
+        )
     }
 
     private val demoDataMeasurementSeriesGenerator: DemoDataMeasurementSeriesGenerator by lazy {
