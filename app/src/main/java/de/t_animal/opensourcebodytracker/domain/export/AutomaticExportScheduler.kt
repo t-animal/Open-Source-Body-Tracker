@@ -1,12 +1,14 @@
 package de.t_animal.opensourcebodytracker.domain.export
 
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import de.t_animal.opensourcebodytracker.core.export.AutomaticExportWorker
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import java.time.Duration
 import java.time.ZonedDateTime
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.first
 
 class AutomaticExportScheduler(
@@ -41,6 +43,18 @@ class AutomaticExportScheduler(
 
     fun cancelScheduledExport() {
         workManager.cancelUniqueWork(EXPORT_WORK_NAME)
+    }
+
+    fun scheduleExportInMinutes(minutes: Long) {
+        val exportWorkRequest = OneTimeWorkRequestBuilder<AutomaticExportWorker>()
+            .setInitialDelay(minutes, TimeUnit.MINUTES)
+            .build()
+
+        workManager.enqueueUniqueWork(
+            "debug_export_in_$minutes",
+            androidx.work.ExistingWorkPolicy.KEEP,
+            exportWorkRequest,
+        )
     }
 
     private fun calculateInitialDelayToThreeAm(): Duration {

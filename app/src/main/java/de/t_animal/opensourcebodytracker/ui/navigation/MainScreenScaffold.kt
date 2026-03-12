@@ -40,6 +40,7 @@ fun MainScreenScaffold(
     onTriggerReminder: (() -> Unit)? = null,
     onResetApp: (() -> Unit)? = null,
     onOpenFakeDataGenerator: (() -> Unit)? = null,
+    onScheduleExportIn2Minutes: (() -> Unit)? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     var overflowExpanded by remember { mutableStateOf(false) }
@@ -114,6 +115,15 @@ fun MainScreenScaffold(
                                 onClick = {
                                     overflowExpanded = false
                                     onResetApp()
+                                },
+                            )
+                        }
+                        if (onScheduleExportIn2Minutes != null) {
+                            DropdownMenuItem(
+                                text = { Text("Schedule Export in 2 min") },
+                                onClick = {
+                                    overflowExpanded = false
+                                    onScheduleExportIn2Minutes()
                                 },
                             )
                         }
