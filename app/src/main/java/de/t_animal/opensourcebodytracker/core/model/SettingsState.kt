@@ -30,7 +30,16 @@ data class SettingsState(
     val enabledMeasurements: Set<MeasuredBodyMetric>,
     val visibleInAnalysis: Set<BodyMetric>,
     val visibleInTable: Set<BodyMetric>,
-)
+) {
+    val enabledDerivedMetrics: Set<DerivedBodyMetric>
+        get() = buildSet {
+            if(bmiEnabled) add(DerivedBodyMetric.Bmi)
+            if(navyBodyFatEnabled) add(DerivedBodyMetric.NavyBodyFatPercent)
+            if(skinfoldBodyFatEnabled) add(DerivedBodyMetric.SkinfoldBodyFatPercent)
+            if(waistHipRatioEnabled) add(DerivedBodyMetric.WaistHipRatio)
+            if(waistHeightRatioEnabled) add(DerivedBodyMetric.WaistHeightRatio)
+        }
+}
 
 fun defaultSettingsState(): SettingsState {
     val visibleByDefault = BodyMetric.entries.toSet() - setOf(

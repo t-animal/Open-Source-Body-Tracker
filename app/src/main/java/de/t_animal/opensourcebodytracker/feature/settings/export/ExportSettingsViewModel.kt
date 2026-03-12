@@ -67,13 +67,14 @@ class ExportSettingsViewModel(
         viewModelScope.launch {
             val settings = settingsRepository.settingsFlow.first()
             val password = exportPasswordRepository.getPassword().orEmpty()
+            val hasPassword = password.isNotBlank()
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
                 isExporting = false,
-                exportToDeviceStorageEnabled = settings.exportToDeviceStorageEnabled,
+                exportToDeviceStorageEnabled = settings.exportToDeviceStorageEnabled && hasPassword,
                 exportFolderUri = settings.exportFolderUri,
                 exportPassword = password,
-                automaticExportEnabled = settings.automaticExportEnabled,
+                automaticExportEnabled = settings.automaticExportEnabled && settings.exportToDeviceStorageEnabled && hasPassword,
                 exportProgress = null,
                 statusMessage = null,
                 errorMessage = null,
@@ -83,10 +84,11 @@ class ExportSettingsViewModel(
     }
 
     fun onExportToDeviceStorageEnabledChanged(enabled: Boolean) {
+        val canEnable = enabled && _uiState.value.exportPassword.isNotBlank()
         _uiState.value = _uiState.value.copy(
-            exportToDeviceStorageEnabled = enabled,
-            exportFolderUri = if (enabled) _uiState.value.exportFolderUri else null,
-            automaticExportEnabled = if (enabled) _uiState.value.automaticExportEnabled else false,
+            exportToDeviceStorageEnabled = canEnable,
+            exportFolderUri = if (canEnable) _uiState.value.exportFolderUri else null,
+            automaticExportEnabled = if (canEnable) _uiState.value.automaticExportEnabled else false,
             exportProgress = null,
             statusMessage = null,
             errorMessage = null,
@@ -94,8 +96,11 @@ class ExportSettingsViewModel(
     }
 
     fun onAutomaticExportEnabledChanged(enabled: Boolean) {
+        val canEnableAutomatic = enabled &&
+            _uiState.value.exportToDeviceStorageEnabled &&
+            _uiState.value.exportPassword.isNotBlank()
         _uiState.value = _uiState.value.copy(
-            automaticExportEnabled = enabled && _uiState.value.exportToDeviceStorageEnabled,
+            automaticExportEnabled = canEnableAutomatic,
             statusMessage = null,
             errorMessage = null,
         )
@@ -111,8 +116,11 @@ class ExportSettingsViewModel(
     }
 
     fun onExportPasswordChanged(password: String) {
+        val hasPassword = password.isNotBlank()
         _uiState.value = _uiState.value.copy(
             exportPassword = password,
+            exportToDeviceStorageEnabled = _uiState.value.exportToDeviceStorageEnabled && hasPassword,
+            automaticExportEnabled = _uiState.value.automaticExportEnabled && hasPassword,
             exportProgress = null,
             statusMessage = null,
             errorMessage = null,

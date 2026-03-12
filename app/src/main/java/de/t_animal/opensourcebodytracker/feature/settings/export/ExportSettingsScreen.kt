@@ -196,6 +196,8 @@ fun ExportSettingsScreen(
                 .padding(contentPadding)
                 .padding(16.dp),
         ) {
+            val hasPassword = state.exportPassword.isNotBlank()
+
             if (!state.lastAutomaticExportError.isNullOrBlank()) {
                 ExportErrorBanner(
                     errorMessage = state.lastAutomaticExportError,
@@ -219,6 +221,35 @@ fun ExportSettingsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            OutlinedCard {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = buildAnnotatedString {
+                            append("Set a password to encrypt your exported data.  ")
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("You need this password to import your data later, so make sure to keep it safe! ")
+                            }
+                            append(
+                                "All usual password security rules apply here: No reuse, long and complex passwords are best.",
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Light),
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    PasswordTextField(
+                        value = state.exportPassword,
+                        onValueChange = onExportPasswordChanged,
+                        label = { Text("Encryption Password") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             OutlinedCard(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -233,7 +264,17 @@ fun ExportSettingsScreen(
                         Switch(
                             checked = state.exportToDeviceStorageEnabled,
                             onCheckedChange = onExportToDeviceStorageEnabledChanged,
+                            enabled = hasPassword && !state.isExporting,
                         )
+                    }
+
+                    if (!hasPassword) {
+                        Text(
+                            text = "Enter an export password to enable export destinations.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
 
                     Text(
@@ -285,7 +326,7 @@ fun ExportSettingsScreen(
                         Switch(
                             checked = state.automaticExportEnabled,
                             onCheckedChange = onAutomaticExportEnabledChanged,
-                            enabled = state.exportToDeviceStorageEnabled && !state.isExporting,
+                            enabled = state.exportToDeviceStorageEnabled && hasPassword && !state.isExporting,
                         )
                     }
                 }
@@ -315,35 +356,9 @@ fun ExportSettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = buildAnnotatedString {
-                    append("Set a password to encrypt your exported data.  ")
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("You need this password to import your data later, so make sure to keep it safe! ")
-                    }
-                    append(
-                        "All usual password security rules apply here: No reuse, long and complex passwords are best.",
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Light),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            PasswordTextField(
-                value = state.exportPassword,
-                onValueChange = onExportPasswordChanged,
-                label = { Text("Encryption Password") },
-                enabled = state.exportToDeviceStorageEnabled,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             OutlinedButton(
                 onClick = onExportNowClicked,
-                enabled = state.exportToDeviceStorageEnabled && !state.isExporting,
+                enabled = state.exportToDeviceStorageEnabled && hasPassword && !state.isExporting,
             ) {
                 Text(if (state.isExporting) "Exporting..." else "Export Now")
             }

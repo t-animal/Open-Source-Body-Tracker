@@ -8,8 +8,11 @@ object Routes {
 
     const val Profile = "profile"
     const val Settings = "settings"
-    const val Reminders = "reminders"
+    const val SettingsMeasurements = "settings/measurements"
+    const val SettingsMeasurementVisibility = "settings/measurement_visibility"
+    const val Reminders = "reminders" // TODO: align name and value with other routes, e.g. "settings/reminders"
     const val Export = "export"
+    const val About = "about"
     const val FakeDataGenerator = "fake_data_generator"
     
     const val MeasurementList = "measurement_list"

@@ -55,13 +55,16 @@ import de.t_animal.opensourcebodytracker.feature.photos.PhotoAnimationRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoCompareRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
+import de.t_animal.opensourcebodytracker.feature.settings.about.AboutRoute
 import de.t_animal.opensourcebodytracker.feature.settings.export.ExportSettingsRoute
+import de.t_animal.opensourcebodytracker.feature.settings.measurements.MeasurementSettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingAnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingStartRoute
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileRoute
 import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderMode
 import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderSettingsRoute
+import de.t_animal.opensourcebodytracker.feature.settings.visibility.MeasurementVisibilitySettingsRoute
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -252,18 +255,42 @@ fun BodyTrackerNavHost(
                 settingsRepository = settingsRepository,
                 mode = ProfileMode.Settings,
                 onFinished = { navController.popBackStack() },
+                onNavigateBack = { navController.popBackStack() },
             )
         }
 
         composable(Routes.Settings) {
-            Scaffold { contentPadding ->
-                SettingsRoute(
-                    settingsRepository = settingsRepository,
-                    profileRepository = profileRepository,
-                    onNavigateBack = { navController.popBackStack() },
-                    contentPadding = contentPadding,
-                )
-            }
+            SettingsRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onOpenProfile = { navController.navigate(Routes.Profile) },
+                onOpenMeasurementsAndAnalysis = { navController.navigate(Routes.SettingsMeasurements) },
+                onOpenMeasurementVisibility = { navController.navigate(Routes.SettingsMeasurementVisibility) },
+                onOpenReminders = { navController.navigate(Routes.Reminders) },
+                onOpenExport = { navController.navigate(Routes.Export) },
+                onOpenAbout = { navController.navigate(Routes.About) },
+            )
+        }
+
+        composable(Routes.SettingsMeasurements) {
+            MeasurementSettingsRoute(
+                settingsRepository = settingsRepository,
+                profileRepository = profileRepository,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Routes.SettingsMeasurementVisibility) {
+            MeasurementVisibilitySettingsRoute(
+                settingsRepository = settingsRepository,
+                profileRepository = profileRepository,
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(Routes.About) {
+            AboutRoute(
+                onNavigateBack = { navController.popBackStack() },
+            )
         }
 
         composable(Routes.Reminders) {
@@ -292,10 +319,8 @@ fun BodyTrackerNavHost(
                         launchSingleTop = true
                     }
                 },
-                onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
-                onOpenReminders = { navController.navigate(Routes.Reminders) },
-                onOpenExport = { navController.navigate(Routes.Export) },
+                onOpenAbout = { navController.navigate(Routes.About) },
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
@@ -356,10 +381,8 @@ fun BodyTrackerNavHost(
                         launchSingleTop = true
                     }
                 },
-                onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
-                onOpenReminders = { navController.navigate(Routes.Reminders) },
-                onOpenExport = { navController.navigate(Routes.Export) },
+                onOpenAbout = { navController.navigate(Routes.About) },
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
@@ -384,10 +407,8 @@ fun BodyTrackerNavHost(
                         launchSingleTop = true
                     }
                 },
-                onOpenProfile = { navController.navigate(Routes.Profile) },
                 onOpenSettings = { navController.navigate(Routes.Settings) },
-                onOpenReminders = { navController.navigate(Routes.Reminders) },
-                onOpenExport = { navController.navigate(Routes.Export) },
+                onOpenAbout = { navController.navigate(Routes.About) },
                 onTriggerReminder = onDebugTriggerReminder,
                 onResetApp = onDebugResetApp,
                 onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
