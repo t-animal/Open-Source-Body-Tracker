@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.feature.settings
+package de.t_animal.opensourcebodytracker.feature.settings.visibility
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -33,7 +33,7 @@ data class SettingsUiState(
     val errorMessage: String? = null,
 )
 
-class SettingsViewModel(
+class MeasurementVisibilitySettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
@@ -46,13 +46,12 @@ class SettingsViewModel(
         profileRepository.requiredProfileFlow,
         errorMessage,
     ) { persistedSettings, profile, error ->
-        val editableSettings = persistedSettings
         val requiredMeasurements = dependencyResolver
-            .resolve(editableSettings.enabledAnalysisMethods(), profile)
+            .resolve(persistedSettings.enabledAnalysisMethods(), profile)
             .requiredMeasurements
 
-        val effectiveSettings = editableSettings.copy(
-            enabledMeasurements = editableSettings.enabledMeasurements + requiredMeasurements,
+        val effectiveSettings = persistedSettings.copy(
+            enabledMeasurements = persistedSettings.enabledMeasurements + requiredMeasurements,
         )
 
         SettingsUiState(
@@ -66,46 +65,6 @@ class SettingsViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = SettingsUiState(),
     )
-
-    fun onNavyBodyFatEnabledChanged(enabled: Boolean) {
-        updateAndPersist { it.copy(navyBodyFatEnabled = enabled) }
-    }
-
-    fun onBmiEnabledChanged(enabled: Boolean) {
-        updateAndPersist { it.copy(bmiEnabled = enabled) }
-    }
-
-    fun onSkinfoldBodyFatEnabledChanged(enabled: Boolean) {
-        updateAndPersist { it.copy(skinfoldBodyFatEnabled = enabled) }
-    }
-
-    fun onWaistHipRatioEnabledChanged(enabled: Boolean) {
-        updateAndPersist { it.copy(waistHipRatioEnabled = enabled) }
-    }
-
-    fun onWaistHeightRatioEnabledChanged(enabled: Boolean) {
-        updateAndPersist { it.copy(waistHeightRatioEnabled = enabled) }
-    }
-
-    fun onMeasurementEnabledChanged(
-        measurementType: MeasuredBodyMetric,
-        enabled: Boolean,
-    ) {
-        val required = uiState.value.requiredMeasurements
-        if (measurementType in required && !enabled) {
-            return
-        }
-
-        updateAndPersist { settings ->
-            settings.copy(
-                enabledMeasurements = if (enabled) {
-                    settings.enabledMeasurements + measurementType
-                } else {
-                    settings.enabledMeasurements - measurementType
-                },
-            )
-        }
-    }
 
     fun onDisplayPlacementChanged(
         metricType: BodyMetric,
@@ -155,7 +114,7 @@ class SettingsViewModelFactory(
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return SettingsViewModel(
+        return MeasurementVisibilitySettingsViewModel(
             settingsRepository = settingsRepository,
             profileRepository = profileRepository,
             dependencyResolver = dependencyResolver,

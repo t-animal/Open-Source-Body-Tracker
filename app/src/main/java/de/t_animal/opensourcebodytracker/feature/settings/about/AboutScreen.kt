@@ -1,0 +1,123 @@
+package de.t_animal.opensourcebodytracker.feature.settings.about
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.BuildConfig
+import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
+
+
+@Composable
+fun AboutRoute(
+    onNavigateBack: () -> Unit,
+) {
+    AboutScreen(
+        onNavigateBack = onNavigateBack,
+        projectUrl = BuildConfig.ABOUT_PROJECT_URL,
+        contactEmail = BuildConfig.ABOUT_CONTACT_EMAIL,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AboutScreen(
+    onNavigateBack: () -> Unit,
+    projectUrl: String,
+    contactEmail: String,
+) {
+    val uriHandler = LocalUriHandler.current
+    val normalizedProjectUrl = if (projectUrl.startsWith("http://") || projectUrl.startsWith("https://")) {
+        projectUrl
+    } else {
+        "https://$projectUrl"
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("About") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                },
+            )
+        },
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Open Source Body Tracker",
+                style = MaterialTheme.typography.headlineSmall,
+            )
+            Text(
+                text = "A privacy-focused body measurement tracking app.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+
+            Text(
+                text = "Project",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            OutlinedButton(
+                onClick = { uriHandler.openUri(normalizedProjectUrl) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("GitHub Repository")
+            }
+
+            Text(
+                text = "Contact",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            OutlinedButton(
+                onClick = { uriHandler.openUri("mailto:$contactEmail") },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(contactEmail)
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AboutScreenPreview() {
+    BodyTrackerTheme {
+        AboutScreen(
+            onNavigateBack = {},
+            projectUrl = "example.com",
+            contactEmail = "contact@example.com",
+        )
+    }
+}

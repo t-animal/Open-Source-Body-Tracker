@@ -5,8 +5,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +36,7 @@ fun ProfileRoute(
     settingsRepository: SettingsRepository,
     mode: ProfileMode,
     onFinished: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null,
 ) {
     val vm: ProfileViewModel = viewModel(
         factory = ProfileViewModelFactory(
@@ -53,6 +58,7 @@ fun ProfileRoute(
 
     ProfileScreen(
         state = state,
+        onNavigateBack = onNavigateBack,
         onSexChanged = vm::onSexChanged,
         onDateOfBirthChanged = vm::onDateOfBirthChanged,
         onHeightChanged = vm::onHeightChanged,
@@ -64,6 +70,7 @@ fun ProfileRoute(
 @Composable
 fun ProfileScreen(
     state: ProfileUiState,
+    onNavigateBack: (() -> Unit)? = null,
     onSexChanged: (Sex) -> Unit,
     onDateOfBirthChanged: (String) -> Unit,
     onHeightChanged: (String) -> Unit,
@@ -79,6 +86,16 @@ fun ProfileScreen(
                             ProfileMode.Settings -> "Profile"
                         },
                     )
+                },
+                navigationIcon = {
+                    if (state.mode == ProfileMode.Settings && onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
+                    }
                 },
             )
         },
@@ -129,6 +146,7 @@ private fun ProfileScreenPreview_Onboarding() {
                 dateOfBirthText = "1990-01-02",
                 heightCmText = "180",
             ),
+            onNavigateBack = {},
             onSexChanged = {},
             onDateOfBirthChanged = {},
             onHeightChanged = {},
@@ -149,6 +167,7 @@ private fun ProfileScreenPreview_Error() {
                 heightCmText = "",
                 errorMessage = "Please select a sex",
             ),
+            onNavigateBack = {},
             onSexChanged = {},
             onDateOfBirthChanged = {},
             onHeightChanged = {},

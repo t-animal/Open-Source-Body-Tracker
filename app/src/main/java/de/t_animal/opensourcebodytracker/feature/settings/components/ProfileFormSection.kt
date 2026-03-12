@@ -1,6 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.settings.components
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,16 +65,21 @@ fun SexSelectionSection(
     sex: Sex?,
     onSexChanged: (Sex) -> Unit,
 ) {
-    Column {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
         SexSelectionRow(
             label = "Male",
             selected = sex == Sex.Male,
             onClick = { onSexChanged(Sex.Male) },
+            modifier = Modifier.weight(1f),
         )
         SexSelectionRow(
             label = "Female",
             selected = sex == Sex.Female,
             onClick = { onSexChanged(Sex.Female) },
+            modifier = Modifier.weight(1f),
         )
     }
 }
@@ -84,8 +89,9 @@ private fun SexSelectionRow(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Row(modifier = Modifier.padding(vertical = 4.dp)) {
+    Row(modifier = modifier.padding(vertical = 4.dp)) {
         RadioButton(selected = selected, onClick = onClick)
         Text(
             text = label,

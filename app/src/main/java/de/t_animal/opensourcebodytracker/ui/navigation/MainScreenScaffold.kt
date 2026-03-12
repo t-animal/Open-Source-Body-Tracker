@@ -33,10 +33,8 @@ import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 fun MainScreenScaffold(
     selectedDestination: MainDestination,
     onMainDestinationSelected: (MainDestination) -> Unit,
-    onOpenProfile: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenReminders: () -> Unit,
-    onOpenExport: () -> Unit,
+    onOpenAbout: () -> Unit,
     onTriggerReminder: (() -> Unit)? = null,
     onResetApp: (() -> Unit)? = null,
     onOpenFakeDataGenerator: (() -> Unit)? = null,
@@ -64,13 +62,6 @@ fun MainScreenScaffold(
                         onDismissRequest = { overflowExpanded = false },
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Profile") },
-                            onClick = {
-                                overflowExpanded = false
-                                onOpenProfile()
-                            },
-                        )
-                        DropdownMenuItem(
                             text = { Text("Settings") },
                             onClick = {
                                 overflowExpanded = false
@@ -78,17 +69,10 @@ fun MainScreenScaffold(
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("Reminders") },
+                            text = { Text("About") },
                             onClick = {
                                 overflowExpanded = false
-                                onOpenReminders()
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Export") },
-                            onClick = {
-                                overflowExpanded = false
-                                onOpenExport()
+                                onOpenAbout()
                             },
                         )
                         if (onTriggerReminder != null) {
@@ -154,10 +138,8 @@ private fun MainScreenScaffoldPreview() {
         MainScreenScaffold(
             selectedDestination = MainDestination.Measurements,
             onMainDestinationSelected = {},
-            onOpenProfile = {},
             onOpenSettings = {},
-            onOpenReminders = {},
-            onOpenExport = {},
+            onOpenAbout = {},
         ) { contentPadding ->
             Text(
                 text = "Preview Content",

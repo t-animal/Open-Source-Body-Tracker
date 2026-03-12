@@ -4,6 +4,19 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+val aboutProjectUrl =
+    providers.gradleProperty("aboutProjectUrl")
+        .orElse("example.com")
+        .get()
+        .ifBlank { "example.com" }
+val aboutContactEmail =
+    providers.gradleProperty("aboutContactEmail")
+        .orElse("contact@example.com")
+        .get()
+        .ifBlank { "contact@example.com" }
+
+fun String.toBuildConfigString(): String = "\"${replace("\\", "\\\\").replace("\"", "\\\"")}\""
+
 android {
     namespace = "de.t_animal.opensourcebodytracker"
     compileSdk {
@@ -21,6 +34,8 @@ android {
         versionName = "2026.03-03alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "ABOUT_PROJECT_URL", aboutProjectUrl.toBuildConfigString())
+        buildConfigField("String", "ABOUT_CONTACT_EMAIL", aboutContactEmail.toBuildConfigString())
     }
 
     buildTypes {
@@ -42,6 +57,7 @@ android {
     buildFeatures {
         compose = true
         resValues = true
+        buildConfig = true
     }
 
     compileOptions {

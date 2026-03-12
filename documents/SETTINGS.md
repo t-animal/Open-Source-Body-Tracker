@@ -1,386 +1,349 @@
-# Settings Configuration – Metrics & Analysis Control
+# Unified Settings Architecture
 
-This document defines the structure and behavior of the **Settings** screen related to:
+The current app contains multiple settings screens that are accessed separately through the overflow menu.  
+To improve usability and consistency, all configuration options will be **consolidated into a unified Settings structure**.
 
-1. Configuring which **analyses** are enabled
-2. Configuring which **measurements are collected**
-3. Configuring which values are **displayed in Analysis and Tables**
+The goal is to provide:
 
-The goal is to make the app modular and user-configurable while maintaining logical consistency between required and optional measurements.
+- A **single entry point for all configuration**
+- A **clear hierarchy of settings**
+- Consistent UI patterns across all settings screens
 
----
-
-# 🎯 Purpose of the Settings Screen
-
-The Settings screen allows the user to:
-
-* Enable or disable specific body fat analysis methods
-* Automatically control required measurement inputs
-* Choose which measurements should be displayed in:
-
-  * The Analysis screen (charts)
-  * The “All Measurements” table
-* Hide irrelevant measurement inputs from the Add/Edit Measurement screen
+The **debug options in the overflow menu remain unchanged**.
 
 ---
 
-# 🧱 Settings Structure Overview
+# Overview
 
-```text
+Instead of accessing configuration screens directly from the overflow menu, there will be **one main Settings screen** with submenus.
+
+Existing settings that will be integrated:
+
+- Profile
+- Analysis settings
+- Measurement settings
+- Measurement visibility settings
+- Export settings
+
+Additionally, a new screen will be added:
+
+- About
+
+---
+
+# Settings Entry Point
+
+The overflow menu will now contain:
+
+```
+⋮
 Settings
- ├── Analysis Methods
- ├── Measurement Collection
- └── Display Configuration
+About
+Debug options (unchanged)
 ```
 
----
-
-# 1️⃣ Analysis Methods
-
-This section controls which body fat estimation methods are active.
-
-## Available Analysis Methods
-
-* ☐ BMI
-* ☐ Navy Body Fat %
-* ☐ Skinfold Body Fat %
-* ☐ Waist–Hip Ratio
-* ☐ Waist–Height Ratio
-
-Each method can be enabled or disabled independently.
+Selecting **Settings** opens the **Main Settings Screen**.
 
 ---
 
-## Behavior Rules
+# Main Settings Screen
 
-### If Navy Body Fat is ENABLED:
+The main screen acts as a **navigation hub** for all configuration pages.
 
-Required measurements:
+Example layout:
 
-* Neck circumference
-* Waist circumference
-* (Hip circumference required for females)
+```
+Settings
 
-These measurements:
+Profile
+>
 
-* Must be collected
-* Cannot be disabled in Measurement Collection
-* Must be visible in Add/Edit Measurement screen
-
----
-
-### If Skinfold Body Fat is ENABLED:
-
-Required measurements (depending on sex):
-
-**Male (3-site):**
-
-* Chest skinfold
-* Abdomen skinfold
-* Thigh skinfold
-
-**Female (3-site):**
-
-* Triceps skinfold
-* Suprailiac skinfold
-* Thigh skinfold
-
-These measurements:
-
-* Must be collected
-* Cannot be disabled while Skinfold is active
-
-### If Waist–Hip Ratio is ENABLED:
-
-Required measurements:
-
-* Waist circumference
-* Hip circumference
-
-These measurements:
-
-* Must be collected
-* Cannot be disabled while Waist–Hip Ratio is active
-
-### If Waist–Height Ratio is ENABLED:
-
-Required measurements:
-
-* Waist circumference
-
-These measurements:
-
-* Must be collected
-* Cannot be disabled while Waist–Height Ratio is active
-
----
-
-## UI Example – Analysis Section
-
-```text
 Analysis Methods
+>
 
-[✓] Navy Body Fat %
-[ ] Skinfold Body Fat %
+Measurements
+>
+
+Measurement Visibility
+>
+
+Export
+>
+
+About
+>
 ```
+
+Each item opens a dedicated settings screen.
 
 ---
 
-# 2️⃣ Measurement Collection
+# General Settings Screen Behavior
 
-This section controls which raw measurements are recorded when creating or editing a measurement entry.
+All settings screens follow the same UI structure.
 
-## Adjustable Measurement Types
+### Top Navigation
 
-### Circumferences
+Each screen contains a **top navigation bar** with:
 
-* ☐ Neck
-* ☐ Waist
-* ☐ Abdomen
-* ☐ Hip
-* ☐ Chest
+- Page title
+- Back arrow
 
-### Skinfolds
+```
+←  Screen Title
+```
 
-* ☐ Chest Skinfold
-* ☐ Abdomen Skinfold
-* ☐ Thigh Skinfold
-* ☐ Triceps Skinfold
-* ☐ Suprailiac Skinfold
+Pressing the arrow returns to the previous screen.
+
+### Onboarding Exception
+
+Some screens are reused during onboarding.
+
+In those cases:
+
+- **The back button is not shown**
+- Navigation is handled by the onboarding flow
 
 ---
 
-## Dependency Rules
+# Profile Screen
 
-If a measurement is required for an enabled analysis:
+The profile screen contains the user's basic personal data.
 
-* The toggle is **disabled (locked)**
-* It cannot be turned off
-* It is visually marked as required
+Fields include:
 
-### Example
+- Gender
+- Height
+- Date of Birth
 
-If:
+### Gender Selection
 
-```
-Navy Body Fat = enabled
-```
+Gender options are displayed **horizontally**.
 
-Then:
+Example:
 
 ```
-Neck → locked ON
-Waist → locked ON
-Hip → locked ON (for female)
+Sex
+
+[ Male ]   [ Female ] 
 ```
 
-But:
-
-```
-Chest circumference → freely selectable
-Abdomen circumference → freely selectable
-```
+This improves clarity and reduces vertical space usage.
 
 ---
 
-## UI Behavior Example
+# Analysis Settings Screen
 
-```text
-Measurement Collection
+This screen defines **which body composition analyses are enabled**.
 
-Circumferences
-[✓] Neck        (required for Navy)
-[✓] Waist       (required for Navy)
-[ ] Chest
+Example analyses:
+
+- Navy Body Fat %
+- Skinfold Body Fat %
+
+Enabling an analysis automatically activates the **required measurements**.
+
+### Description Text
+
+At the top of the screen a short explanation is shown:
+
+> Select which body composition analysis methods should be calculated.  
+> Enabling an analysis may automatically activate required measurements.
+
+---
+
+# Measurement Settings Screen
+
+This screen controls **which measurements are recorded**.
+
+Measurements required for enabled analyses **cannot be disabled**.
+
+Optional measurements can be toggled on or off.
+
+### Description Text
+
+At the top of the screen:
+
+> Configure which measurements should be collected when recording a measurement entry.  
+> Some measurements are required for selected analysis methods and cannot be disabled.
+
+---
+
+# Measurement Visibility Screen
+
+Previously, measurement visibility was part of another settings screen.  
+It is now **moved to its own dedicated screen**.
+
+This screen controls **which measurements are visible in tables and analysis views**.
+
+---
+
+## Visible Measurements
+
+Measurements currently being recorded are listed with toggles.
+
+Example:
+
+```
+Visible Measurements
+
+[✓] Weight
+[✓] Waist
 [✓] Hip
-[ ] Abdomen
-
-Skinfolds
-[ ] Chest Skinfold
-[ ] Abdomen Skinfold
-[ ] Thigh Skinfold
-```
-
-If Skinfold analysis is enabled, the corresponding skinfold entries become locked ON.
-
-### If BMI is ENABLED:
-
-Required measurements:
-
-* Weight
-
-Weight is locked ON in Measurement Collection while BMI is enabled.
-
----
-
-# 3️⃣ Display Configuration
-
-This section determines which measurements and metrics appear in:
-
-* 📊 Analysis screen (charts)
-* 📋 “All Measurements” table
-
-This does **not** affect data collection — only visibility.
-
----
-
-## Display Options
-
-Each measurement/metric has one placement selector:
-
-* `In both`
-* `Only in Analysis`
-* `Only in Table`
-* `Hidden`
-
-Example configuration:
-
-```text
-Display Configuration
-
-Neck: Only in Analysis
-Waist: In both
+[ ] Chest
 ```
 
 ---
 
-## Important Rules
+## Measurements Not Currently Recorded
 
-1. If a measurement is required for an enabled analysis:
+Measurements that are **not currently collected** are displayed in a separate section.
 
-   * It must still be collected
-   * But it may be hidden from charts or tables
+Example:
 
-2. Derived metrics (e.g., Navy Body Fat %, Skinfold Body Fat %):
+```
+Measurements Not Currently Collected
 
-   * Can also have visibility toggles
-   * If the analysis method is disabled:
-
-     * Metric automatically hidden
-     * No toggle visible
-
-3. The same visibility configuration is applied consistently to:
-
-   * Analysis chart cards
-   * Latest measurement card
-   * Measurement table preview and full-list table
-
----
-
-# 🔁 Interaction Between Sections
-
-### Example Scenario
-
-User enables:
-
-* Navy Body Fat %
-
-Then:
-
-* Neck and Waist become required
-* They cannot be disabled in Measurement Collection
-* They appear in Add Measurement screen
-* User can still choose whether:
-
-  * Neck is shown in Analysis
-  * Neck is shown in Table
-
----
-
-# 🔁 Interaction With Profile
-
-When the user changes their sex on the profile screen and saves, measurements
-needed for enabled analysis methods are auto-enabled (but none are disabled).
-
-### Example Scenario
-
-User sets sex from male to female and has Navy Body Fat % enabled
-
-Then:
-
-* Neck and Waist stay required
-* Hip becomes required
-
-Implementation detail:
-
-* The additive sync runs on profile save in `ProfileViewModel`.
-* `SettingsViewModel` still enforces required measurements in effective UI state
-   while editing settings.
-
----
-
-
-# 🧠 Add/Edit Measurement Screen Impact
-
-The Measurement input form dynamically adapts based on:
-
-* Enabled analyses
-* Selected measurements
-
-If a measurement is disabled in Settings:
-
-* It does not appear in the Add/Edit screen
-* It is not stored in future measurement entries
-
----
-
-# 🗂 Recommended Data Model Structure
-
-```kotlin
-data class SettingsState(
-      val bmiEnabled: Boolean,
-    val navyBodyFatEnabled: Boolean,
-    val skinfoldBodyFatEnabled: Boolean,
-      val waistHipRatioEnabled: Boolean,
-      val waistHeightRatioEnabled: Boolean,
-
-      val enabledMeasurements: Set<MeasuredBodyMetric>,
-
-      val visibleInAnalysis: Set<BodyMetric>,
-      val visibleInTable: Set<BodyMetric>
-)
+Neck
+Chest
+Thigh
 ```
 
-Persistence:
+A hint text is displayed above this section:
 
-* Settings are stored in `PreferencesSettingsRepository` (DataStore)
-   and include all analysis switches, enabled-measurement set, and both
-   visibility sets.
+> These measurements are currently not recorded.  
+> They may still appear in the app if historical data exists.
 
----
-
-# 🔐 Validation Rules
-
-Before saving Settings:
-
-1. Required measurements must remain enabled
-2. Required derived metrics are only visible when their analysis method is
-   enabled
-
-Note: there is currently no hard validation enforcing a minimum number of
-visible metrics in Analysis/Table.
+This allows users to **hide measurements they do not actively track** while still preserving historical information.
 
 ---
 
-# 🎯 UX Goals
+# Export Settings Screen
 
-* Clear dependency visibility
-* No invalid configurations possible
-* Immediate UI feedback
-* Minimal cognitive overload
-* High flexibility for advanced users
+The export screen manages data backup and transfer.
+
+### Description Text
+
+At the top:
+
+> Configure how your data can be exported for backup or device transfer.
 
 ---
 
-# ✅ Summary of Requirements
+## Password Placement
 
-✔ Enable/Disable Navy Body Fat
-✔ Enable/Disable Skinfold Body Fat
-✔ Enable/Disable Waist–Hip Ratio
-✔ Enable/Disable Waist–Height Ratio
-✔ Automatically lock required measurements
-✔ Allow optional measurements to be toggled freely
-✔ Separate display visibility controls
-✔ Dynamic Add/Edit form behavior
-✔ Prevent invalid configurations
+The **export password field is placed at the top of the screen**.
 
+```
+Export Password
+[ ******** ]
+```
+
+The export feature can only be enabled if a password is provided.
+
+If the password field is empty:
+
+- Export options remain disabled
+- Export cannot be activated
+
+---
+
+## Export Options
+
+Below the password field:
+
+```
+Export Destination
+
+[✓] Export to Device Storage
+[ ] Export to Google Drive (coming later)
+```
+
+---
+
+## Folder Selection
+
+```
+Export Folder
+[ Select Folder ]
+```
+
+The folder selection is enabled only when export is activated.
+
+---
+
+# About Screen
+
+A new **About screen** provides information about the project.
+
+It contains:
+
+- App description
+- Project information
+- Links for support and contribution
+
+Example layout:
+
+```
+About
+
+Body Measurement Tracker
+
+A privacy-focused body measurement tracking app.
+
+Project
+[ GitHub Repository ]
+
+Contact
+support@example.com
+```
+
+---
+
+## GitHub Link
+
+The GitHub link:
+
+- Opens the project repository in the browser
+- Allows users to view the source code or report issues
+
+---
+
+## Contact Email
+
+The contact email is clickable.
+
+When pressed:
+
+- The default **mail client opens**
+- A new email draft is created
+
+---
+
+# Settings Screen UX Principle
+
+Every settings screen follows these principles:
+
+- Clear title
+- Short explanation text at the top
+- Simple toggle-based configuration
+- Consistent back navigation
+
+---
+
+# Summary
+
+This phase introduces a **unified settings architecture**.
+
+Key improvements:
+
+✔ Single Settings entry point  
+✔ Structured settings navigation  
+✔ Dedicated Measurement Visibility screen  
+✔ Improved Export configuration logic  
+✔ Horizontal gender selection  
+✔ Informational text on all settings pages  
+✔ New About screen with GitHub and contact email  
+✔ Consistent back navigation across settings screens  
+
+The debug options in the overflow menu **remain unchanged**.
