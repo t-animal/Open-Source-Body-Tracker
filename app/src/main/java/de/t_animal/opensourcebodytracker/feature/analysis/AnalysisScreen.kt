@@ -25,10 +25,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.components.MetricChartCard
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -41,6 +43,7 @@ fun AnalysisRoute(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
+    uiSettingsRepository: UiSettingsRepository,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     contentPadding: PaddingValues,
 ) {
@@ -49,6 +52,7 @@ fun AnalysisRoute(
             measurementRepository = measurementRepository,
             profileRepository = profileRepository,
             settingsRepository = settingsRepository,
+            uiSettingsRepository = uiSettingsRepository,
             calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
         ),
     )
@@ -58,6 +62,7 @@ fun AnalysisRoute(
         state = state,
         onDurationSelected = vm::onDurationSelected,
         onChartOrderChanged = vm::onChartOrderChanged,
+        onToggleCollapsed = vm::onToggleCollapsed,
         contentPadding = contentPadding,
     )
 }
@@ -68,10 +73,10 @@ fun AnalysisScreen(
     state: AnalysisUiState,
     onDurationSelected: (AnalysisDuration) -> Unit,
     onChartOrderChanged: (List<BodyMetric>) -> Unit,
+    onToggleCollapsed: (String) -> Unit,
     contentPadding: PaddingValues,
 ) {
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
-    var collapsedChartIds by remember { mutableStateOf(emptySet<String>()) }
 
     val lazyListState = rememberLazyListState()
     val headerItemCount = 2
@@ -120,10 +125,8 @@ fun AnalysisScreen(
                     duration = state.selectedDuration,
                     selectedDate = selectedDate,
                     onSelectedDateChange = { selectedDate = it },
-                    isCollapsed = chart.definition.id in collapsedChartIds,
-                    onToggleCollapsed = {
-                        collapsedChartIds = collapsedChartIds.toggle(chart.definition.id)
-                    },
+                    isCollapsed = chart.definition.id in state.collapsedChartIds,
+                    onToggleCollapsed = { onToggleCollapsed(chart.definition.id) },
                     dragHandleModifier = Modifier.draggableHandle(),
                 )
             }
@@ -131,8 +134,6 @@ fun AnalysisScreen(
         }
     }
 }
-
-private fun <T> Set<T>.toggle(item: T) = if (item in this) this - item else this + item
 
 @Preview(showBackground = true)
 @Composable
@@ -162,6 +163,7 @@ private fun AnalysisScreenPreview() {
             ),
             onDurationSelected = {},
             onChartOrderChanged = {},
+            onToggleCollapsed = {},
             contentPadding = PaddingValues(),
         )
     }

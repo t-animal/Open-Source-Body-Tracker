@@ -32,7 +32,7 @@ import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
-import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisDuration
+import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisMetricChartUiModel
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisYAxisRange
 import de.t_animal.opensourcebodytracker.feature.analysis.helpers.suffixWithLeadingSpace

@@ -39,6 +39,7 @@ import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotification
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationResult
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
@@ -68,6 +69,7 @@ import kotlinx.coroutines.flow.StateFlow
 fun BodyTrackerNavHost(
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
+    uiSettingsRepository: UiSettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
     exportToFileSystemUseCase: ExportToFilesystemUseCase,
     automaticExportScheduler: AutomaticExportScheduler,
@@ -360,6 +362,7 @@ fun BodyTrackerNavHost(
                     measurementRepository = measurementRepository,
                     profileRepository = profileRepository,
                     settingsRepository = settingsRepository,
+                    uiSettingsRepository = uiSettingsRepository,
                     calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
                     contentPadding = contentPadding,
                 )

@@ -38,6 +38,7 @@ class MainActivity : ComponentActivity() {
                     BodyTrackerApp(
                         profileRepository = container.profileRepository,
                         settingsRepository = container.settingsRepository,
+                        uiSettingsRepository = container.uiSettingsRepository,
                         exportPasswordRepository = container.exportPasswordRepository,
                         exportToFileSystemUseCase = container.exportToFilesystemUseCase,
                         automaticExportScheduler = container.automaticExportScheduler,
@@ -105,6 +106,7 @@ class MainActivity : ComponentActivity() {
 private fun BodyTrackerApp(
     profileRepository: de.t_animal.opensourcebodytracker.data.profile.ProfileRepository,
     settingsRepository: de.t_animal.opensourcebodytracker.data.settings.SettingsRepository,
+    uiSettingsRepository: de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
     exportToFileSystemUseCase: ExportToFilesystemUseCase,
     automaticExportScheduler: de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler,
@@ -122,6 +124,7 @@ private fun BodyTrackerApp(
     BodyTrackerNavHost(
         profileRepository = profileRepository,
         settingsRepository = settingsRepository,
+        uiSettingsRepository = uiSettingsRepository,
         exportPasswordRepository = exportPasswordRepository,
         exportToFileSystemUseCase = exportToFileSystemUseCase,
         automaticExportScheduler = automaticExportScheduler,

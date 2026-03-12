@@ -20,7 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisDuration
+import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisMetricChartUiModel
 import de.t_animal.opensourcebodytracker.feature.analysis.helpers.analysisTitle
 import java.time.LocalDate
