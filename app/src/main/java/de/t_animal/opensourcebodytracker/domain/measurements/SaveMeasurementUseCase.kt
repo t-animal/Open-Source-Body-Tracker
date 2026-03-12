@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.domain.measurements
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
+import de.t_animal.opensourcebodytracker.domain.export.SetAutomaticExportPendingUseCase
 
 data class SaveMeasurementCommand(
     val measurementId: Long?,
@@ -29,6 +30,7 @@ sealed interface SaveMeasurementResult {
 class SaveMeasurementUseCase(
     private val validator: MeasurementSaveValidator,
     private val saver: MeasurementSaver,
+    private val setAutomaticExportPendingUseCase: SetAutomaticExportPendingUseCase,
 ) {
     suspend operator fun invoke(command: SaveMeasurementCommand): SaveMeasurementResult {
         val validationError = validator.validate(
@@ -46,6 +48,8 @@ class SaveMeasurementUseCase(
             command.enabledMeasurements,
             command.metricValues
         )
+
+        setAutomaticExportPendingUseCase.invoke(true)
 
         return SaveMeasurementResult.Success(
             measurementId = result.id,

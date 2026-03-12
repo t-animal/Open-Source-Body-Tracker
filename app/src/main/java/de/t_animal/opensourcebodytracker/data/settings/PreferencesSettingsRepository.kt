@@ -37,6 +37,9 @@ class PreferencesSettingsRepository(
         val reminderTime = stringPreferencesKey("reminderTime")
         val exportToDeviceStorageEnabled = booleanPreferencesKey("exportToDeviceStorageEnabled")
         val exportFolderUri = stringPreferencesKey("exportFolderUri")
+        val automaticExportEnabled = booleanPreferencesKey("automaticExportEnabled")
+        val automaticExportPending = booleanPreferencesKey("automaticExportPending")
+        val lastAutomaticExportError = stringPreferencesKey("lastAutomaticExportError")
         val enabledMeasurements = stringSetPreferencesKey("enabledMeasurements")
         val visibleInAnalysis = stringSetPreferencesKey("visibleInAnalysis")
         val visibleInTable = stringSetPreferencesKey("visibleInTable")
@@ -65,6 +68,9 @@ class PreferencesSettingsRepository(
             exportToDeviceStorageEnabled =
                 prefs[Keys.exportToDeviceStorageEnabled] ?: defaults.exportToDeviceStorageEnabled,
             exportFolderUri = prefs[Keys.exportFolderUri] ?: defaults.exportFolderUri,
+            automaticExportEnabled = prefs[Keys.automaticExportEnabled] ?: defaults.automaticExportEnabled,
+            automaticExportPending = prefs[Keys.automaticExportPending] ?: defaults.automaticExportPending,
+            lastAutomaticExportError = prefs[Keys.lastAutomaticExportError] ?: defaults.lastAutomaticExportError,
             enabledMeasurements = parseEnumSet(
                 raw = prefs[Keys.enabledMeasurements],
                 values = MeasuredBodyMetric.entries,
@@ -98,6 +104,13 @@ class PreferencesSettingsRepository(
                 prefs.remove(Keys.exportFolderUri)
             } else {
                 prefs[Keys.exportFolderUri] = settings.exportFolderUri
+            }
+            prefs[Keys.automaticExportEnabled] = settings.automaticExportEnabled
+            prefs[Keys.automaticExportPending] = settings.automaticExportPending
+            if (settings.lastAutomaticExportError.isNullOrBlank()) {
+                prefs.remove(Keys.lastAutomaticExportError)
+            } else {
+                prefs[Keys.lastAutomaticExportError] = settings.lastAutomaticExportError
             }
             prefs[Keys.enabledMeasurements] = settings.enabledMeasurements.mapTo(mutableSetOf()) { it.name }
             prefs[Keys.visibleInAnalysis] = settings.visibleInAnalysis.mapTo(mutableSetOf()) { it.storageName() }

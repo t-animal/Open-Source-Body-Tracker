@@ -1,7 +1,11 @@
 package de.t_animal.opensourcebodytracker
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import androidx.room.Room
+import androidx.work.WorkManager
+import de.t_animal.opensourcebodytracker.core.export.AutomaticExportWorker
 import de.t_animal.opensourcebodytracker.data.export.AndroidExportDocumentTreeStorage
 import de.t_animal.opensourcebodytracker.data.export.ExportArchiveWriter
 import de.t_animal.opensourcebodytracker.data.export.ExportDocumentTreeStorage
@@ -24,8 +28,10 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataMeasurementSeriesGenerator
 import de.t_animal.opensourcebodytracker.domain.demodata.DemoDataPhotoSeeder
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportDocumentsCreator
+import de.t_animal.opensourcebodytracker.domain.export.SetAutomaticExportPendingUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaveValidator
 import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementSaver
@@ -35,6 +41,24 @@ import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsCalculator
 
 class AppContainer(appContext: Context) {
     private val applicationContext = appContext.applicationContext
+
+    init {
+        createNotificationChannels()
+    }
+
+    private fun createNotificationChannels() {
+        // TODO: Can this be deferred until the first notification is posted? No need to create channels if user never enables reminders or automatic export.
+        // In any case this implementation and the one from ReminderNotificationPoster should be held in the same file to avoid inconsistencies and duplicate channels.
+        val manager = applicationContext.getSystemService(NotificationManager::class.java)
+            ?: return
+
+        val exportChannel = NotificationChannel(
+            AutomaticExportWorker.EXPORT_NOTIFICATION_CHANNEL_ID,
+            "Automatic Export",
+            NotificationManager.IMPORTANCE_LOW,
+        )
+        manager.createNotificationChannel(exportChannel)
+    }
 
     val profileRepository: ProfileRepository by lazy {
         PreferencesProfileRepository(applicationContext)
@@ -75,6 +99,19 @@ class AppContainer(appContext: Context) {
             exportArchiveWriter = exportArchiveWriter,
             exportDocumentsCreator = exportDocumentsCreator,
             exportPhotoCollector = exportPhotoCollector,
+        )
+    }
+
+    val setAutomaticExportPendingUseCase: SetAutomaticExportPendingUseCase by lazy {
+        SetAutomaticExportPendingUseCase(
+            settingsRepository = settingsRepository,
+        )
+    }
+
+    val automaticExportScheduler: AutomaticExportScheduler by lazy {
+        AutomaticExportScheduler(
+            workManager = WorkManager.getInstance(applicationContext),
+            settingsRepository = settingsRepository,
         )
     }
 
@@ -142,6 +179,7 @@ class AppContainer(appContext: Context) {
         SaveMeasurementUseCase(
             validator = measurementSaveValidator,
             saver = measurementSaver,
+            setAutomaticExportPendingUseCase = setAutomaticExportPendingUseCase,
         )
     }
 
@@ -149,6 +187,7 @@ class AppContainer(appContext: Context) {
         DeleteMeasurementUseCase(
             repository = measurementRepository,
             photoStorage = internalPhotoStorage,
+            setAutomaticExportPendingUseCase = setAutomaticExportPendingUseCase,
         )
     }
 }
