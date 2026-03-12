@@ -350,6 +350,10 @@ It will:
 2. Include all measurements and images
 3. Save the archive in the configured export folder
 
+During the export a notification is shown informing the user that there is an ongoing task.
+It is important that the app can run for a longer period of time, because the export can take
+several minutes to complete.
+
 ---
 
 # Future Extension – Google Drive

@@ -1,0 +1,63 @@
+package de.t_animal.opensourcebodytracker.domain.export
+
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import de.t_animal.opensourcebodytracker.core.export.AutomaticExportWorker
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import java.time.Duration
+import java.time.ZonedDateTime
+import kotlinx.coroutines.flow.first
+
+class AutomaticExportScheduler(
+    private val workManager: WorkManager,
+    private val settingsRepository: SettingsRepository,
+) {
+    suspend fun scheduleNightlyExportAtThreeAm() {
+        val settings = settingsRepository.settingsFlow.first()
+
+        if (!settings.automaticExportEnabled ||
+            !settings.exportToDeviceStorageEnabled ||
+            settings.exportFolderUri.isNullOrBlank()
+        ) {
+            cancelScheduledExport()
+            return
+        }
+
+        val exportWorkRequest = PeriodicWorkRequestBuilder<AutomaticExportWorker>(
+            Duration.ofDays(1),
+        )
+            .setInitialDelay(
+                calculateInitialDelayToThreeAm(),
+            )
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            EXPORT_WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            exportWorkRequest,
+        )
+    }
+
+    fun cancelScheduledExport() {
+        workManager.cancelUniqueWork(EXPORT_WORK_NAME)
+    }
+
+    private fun calculateInitialDelayToThreeAm(): Duration {
+        val now = ZonedDateTime.now()
+        val threeAmToday = now.withHour(3).withMinute(0).withSecond(0).withNano(0)
+
+        val targetTime = if (now.isBefore(threeAmToday) || now.isEqual(threeAmToday)) {
+            threeAmToday
+        } else {
+            threeAmToday.plusDays(1)
+        }
+
+        val delaySeconds = java.time.temporal.ChronoUnit.SECONDS.between(now, targetTime)
+        return Duration.ofSeconds(delaySeconds)
+    }
+
+    companion object {
+        const val EXPORT_WORK_NAME = "automatic_nightly_export"
+    }
+}
