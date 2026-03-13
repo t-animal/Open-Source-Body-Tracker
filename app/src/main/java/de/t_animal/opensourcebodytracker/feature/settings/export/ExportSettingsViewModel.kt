@@ -215,7 +215,7 @@ class ExportSettingsViewModel(
 
         viewModelScope.launch {
             val settings = settingsRepository.settingsFlow.first()
-            val automaticExportEnabled = current.exportToDeviceStorageEnabled && current.automaticExportEnabled
+            val automaticExportEnabled = current.automaticExportEnabled
 
             val updatedSettings = settings.copy(
                 exportToDeviceStorageEnabled = current.exportToDeviceStorageEnabled,

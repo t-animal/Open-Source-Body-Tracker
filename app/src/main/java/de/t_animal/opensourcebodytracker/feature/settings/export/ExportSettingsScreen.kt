@@ -434,7 +434,7 @@ fun PasswordTextField(
     value: String,
     onValueChange: (String) -> Unit,
 ) {
-    val state = remember { TextFieldState() }
+    val state = remember { TextFieldState(initialText = value) }
     var showPassword by remember { mutableStateOf(false) }
 
     LaunchedEffect(state) {
