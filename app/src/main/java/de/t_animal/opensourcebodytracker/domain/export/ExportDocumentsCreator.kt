@@ -52,6 +52,7 @@ class ExportDocumentsCreator {
                         measurement.thighSkinfoldMm.toCsvValue(),
                         measurement.tricepsSkinfoldMm.toCsvValue(),
                         measurement.suprailiacSkinfoldMm.toCsvValue(),
+                        measurement.note.orEmpty(),
                     ).joinToString(separator = ",") { value -> value.toCsvCell() },
                 )
             }
@@ -94,7 +95,7 @@ class ExportDocumentsCreator {
     private fun Double?.toCsvValue(): String = this?.toString().orEmpty()
 
     private fun String.toCsvCell(): String {
-        if (contains(',') || contains('"') || contains('\n')) {
+        if (csvNeedsEscapeRegex.containsMatchIn(this)) {
             return '"' + replace("\"", "\"\"") + '"'
         }
         return this
@@ -122,6 +123,7 @@ class ExportDocumentsCreator {
         const val MEASUREMENTS_FILE_NAME = "measurements.csv"
         const val PROFILE_FILE_NAME = "profile.json"
         const val METADATA_FILE_NAME = "metadata.json"
+        val csvNeedsEscapeRegex = Regex("[,\"\\n\\r]")
 
         val MEASUREMENT_CSV_HEADERS = listOf(
             "id",
@@ -139,6 +141,7 @@ class ExportDocumentsCreator {
             "thighSkinfoldMm",
             "tricepsSkinfoldMm",
             "suprailiacSkinfoldMm",
+            "note",
         )
     }
 }

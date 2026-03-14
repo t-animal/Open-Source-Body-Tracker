@@ -12,6 +12,7 @@ object MeasurementMetricMapper {
         photoFilePath: PersistedPhotoPath?,
         values: Map<MeasuredBodyMetric, Double?>,
         enabledMeasurements: Set<MeasuredBodyMetric>,
+        note: String = "",
     ): BodyMeasurement {
         fun getIfEnabledOrNull(metric: MeasuredBodyMetric): Double? {
             return if (metric in enabledMeasurements) values[metric] else null
@@ -33,6 +34,7 @@ object MeasurementMetricMapper {
             thighSkinfoldMm = getIfEnabledOrNull(MeasuredBodyMetric.ThighSkinfold),
             tricepsSkinfoldMm = getIfEnabledOrNull(MeasuredBodyMetric.TricepsSkinfold),
             suprailiacSkinfoldMm = getIfEnabledOrNull(MeasuredBodyMetric.SuprailiacSkinfold),
+            note = note.takeIf { it.isNotBlank() },
         )
     }
 

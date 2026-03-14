@@ -44,6 +44,8 @@ sealed interface MeasurementEditUiState {
         val initialDateEpochMillis: Long? = null,
         val metricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
         val initialMetricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
+        val note: String = "",
+        val initialNote: String = "",
         val persistedPhotoFilePath: PersistedPhotoPath? = null,
         val initialPersistedPhotoFilePath: PersistedPhotoPath? = null,
         val pendingPhotoAbsolutePath: TemporaryCapturePhotoPath? = null,
@@ -140,6 +142,15 @@ class MeasurementEditViewModel(
         }
     }
 
+    fun onNoteChanged(text: String) {
+        updateUiState {
+            it.copy(
+                note = text,
+                errorMessage = null,
+            )
+        }
+    }
+
     fun onPhotoCaptured(pendingPhotoAbsolutePath: TemporaryCapturePhotoPath?) {
         val current = _uiState.value as? MeasurementEditUiState.Loaded ?: return
         val previousPhotoPath = current.pendingPhotoAbsolutePath
@@ -216,6 +227,7 @@ class MeasurementEditViewModel(
                             existingPhotoPath = current.persistedPhotoFilePath,
                             newPhotoPath = current.pendingPhotoAbsolutePath,
                             deleteExistingPhoto = current.isPhotoMarkedForDeletion,
+                            note = current.note,
                         ),
                     )
                 ) {
@@ -273,6 +285,8 @@ class MeasurementEditViewModel(
                 initialDateEpochMillis = measurement.dateEpochMillis,
                 metricInputs = metricInputs,
                 initialMetricInputs = metricInputs,
+                note = measurement.note.orEmpty(),
+                initialNote = measurement.note.orEmpty(),
                 persistedPhotoFilePath = measurement.photoFilePath,
                 initialPersistedPhotoFilePath = measurement.photoFilePath,
             )
@@ -324,6 +338,7 @@ private fun calculateHasUnsavedChanges(state: MeasurementEditUiState.Loaded): Bo
         state.isPhotoMarkedForDeletion ||
             state.pendingPhotoAbsolutePath != null ||
             state.persistedPhotoFilePath != state.initialPersistedPhotoFilePath
+    val hasNoteChange = state.note != state.initialNote
 
-    return hasDateChange || hasMetricInputChange || hasPhotoChange
+    return hasDateChange || hasMetricInputChange || hasPhotoChange || hasNoteChange
 }

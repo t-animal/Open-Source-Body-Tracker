@@ -19,9 +19,10 @@ class MeasurementSaver(
         deleteOriginalPhoto: Boolean,
         enabledMeasurements: Set<MeasuredBodyMetric>,
         metricValues: Map<MeasuredBodyMetric, Double?>,
+        note: String,
     ): BodyMeasurement {
         if (currentMeasurementId == null) {
-            return saveNewMeasurement(dateEpochMillis, newPhotoPath, enabledMeasurements, metricValues)
+            return saveNewMeasurement(dateEpochMillis, newPhotoPath, enabledMeasurements, metricValues, note)
         } else {
             return updateExistingMeasurement(
                 currentMeasurementId,
@@ -30,7 +31,8 @@ class MeasurementSaver(
                 originalPhotoPath,
                 deleteOriginalPhoto,
                 enabledMeasurements,
-                metricValues
+                metricValues,
+                note,
             )
         }
     }
@@ -40,6 +42,7 @@ class MeasurementSaver(
         newPhotoPath: TemporaryCapturePhotoPath?,
         enabledMeasurements: Set<MeasuredBodyMetric>,
         metricValues: Map<MeasuredBodyMetric, Double?>,
+        note: String,
     ): BodyMeasurement {
         val measurementWithoutPhoto = MeasurementMetricMapper.toBodyMeasurement(
             id = 0,
@@ -47,6 +50,7 @@ class MeasurementSaver(
             photoFilePath = null,
             values = metricValues,
             enabledMeasurements = enabledMeasurements,
+            note = note,
         )
         val insertedId = repository.insert(measurementWithoutPhoto)
         val measurementWithId = measurementWithoutPhoto.copy(id = insertedId)
@@ -73,6 +77,7 @@ class MeasurementSaver(
         deleteOriginalPhoto: Boolean,
         enabledMeasurements: Set<MeasuredBodyMetric>,
         metricValues: Map<MeasuredBodyMetric, Double?>,
+        note: String,
     ): BodyMeasurement {
         val hasNewPhoto = newPhotoPath != null
         val hasOldPhoto = originalPhotoPath != null
@@ -94,6 +99,7 @@ class MeasurementSaver(
             photoFilePath = updatedPhotoPath,
             values = metricValues,
             enabledMeasurements = enabledMeasurements,
+            note = note,
         )
 
         repository.update(updatedMeasurement)
