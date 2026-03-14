@@ -13,6 +13,7 @@ data class SaveMeasurementCommand(
     val existingPhotoPath: PersistedPhotoPath?,
     val newPhotoPath: TemporaryCapturePhotoPath?,
     val deleteExistingPhoto: Boolean,
+    val note: String = "",
 )
 
 
@@ -34,7 +35,11 @@ class SaveMeasurementUseCase(
 ) {
     suspend operator fun invoke(command: SaveMeasurementCommand): SaveMeasurementResult {
         val validationError = validator.validate(
-            command.metricValues, command.newPhotoPath, command.existingPhotoPath, command.deleteExistingPhoto
+            command.metricValues,
+            command.newPhotoPath,
+            command.existingPhotoPath,
+            command.deleteExistingPhoto,
+            command.note,
         )
         if (validationError != null) {
             return SaveMeasurementResult.ValidationError(validationError)
@@ -46,7 +51,8 @@ class SaveMeasurementUseCase(
             command.existingPhotoPath,
             command.deleteExistingPhoto,
             command.enabledMeasurements,
-            command.metricValues
+            command.metricValues,
+            command.note,
         )
 
         setAutomaticExportPendingUseCase.invoke(true)

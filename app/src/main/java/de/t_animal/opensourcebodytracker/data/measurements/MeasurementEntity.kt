@@ -20,4 +20,5 @@ data class MeasurementEntity(
     val thighSkinfoldMm: Double? = null,
     val tricepsSkinfoldMm: Double? = null,
     val suprailiacSkinfoldMm: Double? = null,
+    val note: String? = null,
 )

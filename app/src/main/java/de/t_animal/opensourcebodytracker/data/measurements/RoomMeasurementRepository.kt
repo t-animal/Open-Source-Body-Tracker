@@ -49,6 +49,7 @@ private fun MeasurementEntity.toDomain(): BodyMeasurement = BodyMeasurement(
     thighSkinfoldMm = thighSkinfoldMm,
     tricepsSkinfoldMm = tricepsSkinfoldMm,
     suprailiacSkinfoldMm = suprailiacSkinfoldMm,
+    note = note,
 )
 
 private fun BodyMeasurement.toEntityForInsert(): MeasurementEntity = MeasurementEntity(
@@ -67,6 +68,7 @@ private fun BodyMeasurement.toEntityForInsert(): MeasurementEntity = Measurement
     thighSkinfoldMm = thighSkinfoldMm,
     tricepsSkinfoldMm = tricepsSkinfoldMm,
     suprailiacSkinfoldMm = suprailiacSkinfoldMm,
+    note = note,
 )
 
 private fun BodyMeasurement.toEntityForUpdate(): MeasurementEntity = toEntityForInsert().copy(id = id)
