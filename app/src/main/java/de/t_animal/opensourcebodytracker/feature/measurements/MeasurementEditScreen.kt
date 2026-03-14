@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -133,6 +134,7 @@ fun MeasurementEditRoute(
         state = state,
         onDateChanged = vm::onDateChanged,
         onMetricChanged = vm::onMetricChanged,
+        onNoteChanged = vm::onNoteChanged,
         photoPreviewModel = photoPreviewModel,
         onTakePhotoClicked = {
             val captureTarget = photoStorage.createTemporaryNewPhotoCaptureTarget()
@@ -160,6 +162,7 @@ fun MeasurementEditScreen(
     state: MeasurementEditUiState,
     onDateChanged: (Long) -> Unit,
     onMetricChanged: (MeasuredBodyMetric, String) -> Unit,
+    onNoteChanged: (String) -> Unit,
     photoPreviewModel: File?,
     onTakePhotoClicked: () -> Unit,
     onDeletePhotoClicked: () -> Unit,
@@ -194,6 +197,7 @@ fun MeasurementEditScreen(
         state = loadedState,
         onDateChanged = onDateChanged,
         onMetricChanged = onMetricChanged,
+        onNoteChanged = onNoteChanged,
         photoPreviewModel = photoPreviewModel,
         onTakePhotoClicked = onTakePhotoClicked,
         onDeletePhotoClicked = onDeletePhotoClicked,
@@ -210,6 +214,7 @@ private fun MeasurementEditLoadedScreen(
     state: MeasurementEditUiState.Loaded,
     onDateChanged: (Long) -> Unit,
     onMetricChanged: (MeasuredBodyMetric, String) -> Unit,
+    onNoteChanged: (String) -> Unit,
     photoPreviewModel: File?,
     onTakePhotoClicked: () -> Unit,
     onDeletePhotoClicked: () -> Unit,
@@ -230,7 +235,10 @@ private fun MeasurementEditLoadedScreen(
         )
     }
 
-    val hasEnteredAnyInput = state.metricInputs.values.any { it.isNotBlank() } || photoPreviewModel != null
+    val hasEnteredAnyInput =
+        state.metricInputs.values.any { it.isNotBlank() } ||
+            state.note.isNotBlank() ||
+            photoPreviewModel != null
     val hasUnsavedInput = if (isCreatingNew) hasEnteredAnyInput else state.hasUnsavedChanges
 
     val handleBackClick = {
@@ -291,6 +299,17 @@ private fun MeasurementEditLoadedScreen(
                 onMetricChanged = onMetricChanged,
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = state.note,
+                onValueChange = onNoteChanged,
+                label = { Text("Notes") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 4,
+                maxLines = 8,
+            )
+
             if (photoPreviewModel != null) {
                 Spacer(modifier = Modifier.height(16.dp))
                 PhotoPreviewCard(
@@ -309,7 +328,7 @@ private fun MeasurementEditLoadedScreen(
 
             Text(
                 text = buildAnnotatedString {
-                    append("At least one measurement is required. However ")
+                    append("At least one measurement, photo, or note is required. However ")
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("you don't have to enter all measurements")
                     }
@@ -369,6 +388,7 @@ private fun MeasurementEditScreenPreview_Add() {
             ),
             onDateChanged = {},
             onMetricChanged = { _, _ -> },
+            onNoteChanged = {},
             photoPreviewModel = null,
             onTakePhotoClicked = {},
             onDeletePhotoClicked = {},
@@ -395,6 +415,7 @@ private fun MeasurementEditScreenPreview_Error() {
             ),
             onDateChanged = {},
             onMetricChanged = { _, _ -> },
+            onNoteChanged = {},
             photoPreviewModel = null,
             onTakePhotoClicked = {},
             onDeletePhotoClicked = {},

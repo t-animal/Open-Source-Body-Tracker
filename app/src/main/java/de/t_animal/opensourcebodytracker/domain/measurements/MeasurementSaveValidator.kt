@@ -8,13 +8,14 @@ import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
 class MeasurementSaveValidator {
     private val invalidSkinfoldMessage = "Skinfold values must be greater than 0"
     private val invalidBodyFatMessage = "Body fat must be between 0 and 100"
-    private val missingInputOrNoPhotoMessage = "Enter at least one value or add a photo"
+    private val missingInputOrNoPhotoMessage = "Enter at least one value, add a photo, or enter a note"
 
     fun validate(
         metricValues: Map<MeasuredBodyMetric, Double?>,
         newPhotoPath: TemporaryCapturePhotoPath?,
         oldPhotoPath: PersistedPhotoPath?,
         deleteOldPhoto: Boolean,
+        note: String,
     ): String? {
         val invalidSkinfoldInput = MeasuredBodyMetric.entries
             .filter { it.metricType == BodyMetricType.SkinfoldThickness }
@@ -34,7 +35,8 @@ class MeasurementSaveValidator {
 
         val hasAnyValue = metricValues.values.any { it != null }
         val hasPhoto = newPhotoPath != null || (oldPhotoPath != null && !deleteOldPhoto)
+        val hasNote = note.isNotBlank()
 
-        return if (!hasAnyValue && !hasPhoto) missingInputOrNoPhotoMessage else null
+        return if (!hasAnyValue && !hasPhoto && !hasNote) missingInputOrNoPhotoMessage else null
     }
 }

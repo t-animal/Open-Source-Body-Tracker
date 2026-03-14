@@ -73,11 +73,13 @@ class CreateEncryptedDeviceExportUseCaseTest {
                 photoFilePath = PersistedPhotoPath("measurement_7_2025-03-09.jpg"),
                 weightKg = 81.5,
                 waistCircumferenceCm = 91.2,
+                note = "line one,\nline \"two\"",
             ),
             BodyMeasurement(
                 id = 8,
                 dateEpochMillis = 1_741_651_200_000,
                 bodyFatPercent = 17.4,
+                note = "short note",
             ),
         )
         val useCase = createUseCase(
@@ -108,9 +110,13 @@ class CreateEncryptedDeviceExportUseCaseTest {
         assertTrue(entryNames.contains("images/measurement_7_2025-03-09.jpg"))
 
         val measurementsCsv = readZipEntryText(storage.lastWriteContent, "super-secret", "measurements.csv")
+        val expectedEscapedNote = "\"line one,\nline \"\"two\"\"\""
         assertTrue(measurementsCsv.contains("id,dateEpochMillis,photoFilePath"))
+        assertTrue(measurementsCsv.contains("suprailiacSkinfoldMm,note"))
         assertTrue(measurementsCsv.contains("7,1741564800000,measurement_7_2025-03-09.jpg,81.5"))
-        assertTrue(measurementsCsv.contains("8,1741651200000,,"))
+        assertTrue(measurementsCsv.contains("8,1741651200000"))
+        assertTrue(measurementsCsv.contains(expectedEscapedNote))
+        assertTrue(measurementsCsv.contains(",short note"))
 
         val profileJson = readZipEntryText(storage.lastWriteContent, "super-secret", "profile.json")
         assertTrue(profileJson.contains("\"sex\": \"Male\""))
