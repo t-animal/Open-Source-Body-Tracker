@@ -4,6 +4,7 @@ import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
+import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -55,8 +56,20 @@ class AnalysisTransformTest {
     @Test
     fun calculateYAxisRange_addsPaddingForFlatSeries() {
         val points = listOf(
-            AnalysisChartPoint(epochMillis = 1_736_380_800_000, value = 80.0),
-            AnalysisChartPoint(epochMillis = 1_736_467_200_000, value = 80.0),
+            AnalysisChartPoint(
+                epochMillis = 1_736_380_800_000,
+                value = 80.0,
+                hasNote = false,
+                hasPhoto = false,
+                normalizedNoteText = null,
+            ),
+            AnalysisChartPoint(
+                epochMillis = 1_736_467_200_000,
+                value = 80.0,
+                hasNote = false,
+                hasPhoto = false,
+                normalizedNoteText = null,
+            ),
         )
 
         val range = calculateYAxisRange(points)
@@ -70,8 +83,20 @@ class AnalysisTransformTest {
     @Test
     fun calculateYAxisRange_addsFivePercentPaddingForNonFlatSeries() {
         val points = listOf(
-            AnalysisChartPoint(epochMillis = 1_736_380_800_000, value = 70.0),
-            AnalysisChartPoint(epochMillis = 1_736_467_200_000, value = 90.0),
+            AnalysisChartPoint(
+                epochMillis = 1_736_380_800_000,
+                value = 70.0,
+                hasNote = false,
+                hasPhoto = false,
+                normalizedNoteText = null,
+            ),
+            AnalysisChartPoint(
+                epochMillis = 1_736_467_200_000,
+                value = 90.0,
+                hasNote = false,
+                hasPhoto = false,
+                normalizedNoteText = null,
+            ),
         )
 
         val range = calculateYAxisRange(points)
@@ -94,15 +119,50 @@ class AnalysisTransformTest {
         assertTrue(weightChart.points[0].epochMillis < weightChart.points[1].epochMillis)
     }
 
+    @Test
+    fun buildMetricCharts_propagatesNoteAndPhotoMetadata() {
+        val items = listOf(
+            measurementWithDerived(
+                id = 1,
+                date = "2026-01-10T00:00:00Z",
+                weight = 81.0,
+                note = "  felt great  ",
+                hasPhoto = true,
+            ),
+            measurementWithDerived(
+                id = 2,
+                date = "2026-01-11T00:00:00Z",
+                weight = 80.5,
+                note = "  ",
+                hasPhoto = false,
+            ),
+        )
+
+        val weightChart = buildMetricCharts(items).first { it.definition.id == "weight_kg" }
+
+        assertEquals(2, weightChart.points.size)
+        assertTrue(weightChart.points[0].hasNote)
+        assertTrue(weightChart.points[0].hasPhoto)
+        assertEquals("felt great", weightChart.points[0].normalizedNoteText)
+
+        assertTrue(!weightChart.points[1].hasNote)
+        assertTrue(!weightChart.points[1].hasPhoto)
+        assertEquals(null, weightChart.points[1].normalizedNoteText)
+        assertTrue(weightChart.points[0].epochMillis < weightChart.points[1].epochMillis)
+    }
+
     private fun measurementWithDerived(
         id: Long,
         date: String,
         weight: Double,
         bmi: Double? = null,
+        note: String? = null,
+        hasPhoto: Boolean = false,
     ): MeasurementWithDerived {
         val measurement = BodyMeasurement(
             id = id,
             dateEpochMillis = Instant.parse(date).toEpochMilli(),
+            photoFilePath = if (hasPhoto) PersistedPhotoPath("measurement_$id.jpg") else null,
             weightKg = weight,
             neckCircumferenceCm = 40.0,
             chestCircumferenceCm = 100.0,
@@ -114,6 +174,7 @@ class AnalysisTransformTest {
             thighSkinfoldMm = 16.0,
             tricepsSkinfoldMm = 18.0,
             suprailiacSkinfoldMm = 17.0,
+            note = note,
         )
         val derived = DerivedMetrics(
             bmi = bmi,

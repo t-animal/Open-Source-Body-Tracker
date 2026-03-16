@@ -48,7 +48,16 @@ internal fun buildMetricCharts(
     return definitions.map { definition ->
         val points = sortedItems.mapNotNull { item ->
             val value = definition.valueSelector(item.measurement, item.derivedMetrics) ?: return@mapNotNull null
-            AnalysisChartPoint(epochMillis = item.measurement.dateEpochMillis, value = value)
+            val normalizedNoteText = item.measurement.note
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+            AnalysisChartPoint(
+                epochMillis = item.measurement.dateEpochMillis,
+                value = value,
+                hasNote = normalizedNoteText != null,
+                hasPhoto = item.measurement.photoFilePath != null,
+                normalizedNoteText = normalizedNoteText,
+            )
         }
 
         AnalysisMetricChartUiModel(

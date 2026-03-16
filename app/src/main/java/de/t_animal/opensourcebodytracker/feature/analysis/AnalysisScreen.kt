@@ -146,10 +146,34 @@ private fun AnalysisScreenPreview() {
                     AnalysisMetricChartUiModel(
                         definition = BodyMetric.entries.first(),
                         points = listOf(
-                            AnalysisChartPoint(1_735_689_600_000, 82.1),
-                            AnalysisChartPoint(1_736_467_200_000, 81.8),
-                            AnalysisChartPoint(1_737_158_400_000, 81.2),
-                            AnalysisChartPoint(1_737_936_000_000, 80.9),
+                            AnalysisChartPoint(
+                                epochMillis = 1_735_689_600_000,
+                                value = 82.1,
+                                hasNote = false,
+                                hasPhoto = false,
+                                normalizedNoteText = null,
+                            ),
+                            AnalysisChartPoint(
+                                epochMillis = 1_736_467_200_000,
+                                value = 81.8,
+                                hasNote = true,
+                                hasPhoto = true,
+                                normalizedNoteText = "Gym session",
+                            ),
+                            AnalysisChartPoint(
+                                epochMillis = 1_737_158_400_000,
+                                value = 81.2,
+                                hasNote = true,
+                                hasPhoto = false,
+                                normalizedNoteText = "Ate late dinner",
+                            ),
+                            AnalysisChartPoint(
+                                epochMillis = 1_737_936_000_000,
+                                value = 80.9,
+                                hasNote = false,
+                                hasPhoto = true,
+                                normalizedNoteText = null,
+                            ),
                         ),
                         yAxisRange = AnalysisYAxisRange(80.7, 82.3),
                     ),
