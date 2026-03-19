@@ -3,7 +3,7 @@ package de.t_animal.opensourcebodytracker.feature.settings.measurements
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
@@ -23,6 +23,7 @@ data class MeasurementSettingsUiState(
     val isLoading: Boolean = true,
     val settings: SettingsState = defaultSettingsState(),
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
+    val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>> = emptyMap(),
     val errorMessage: String? = null,
 )
 
@@ -39,9 +40,9 @@ class MeasurementSettingsViewModel(
         profileRepository.requiredProfileFlow,
         errorMessage,
     ) { persistedSettings, profile, error ->
-        val requiredMeasurements = dependencyResolver
+        val dependencies = dependencyResolver
             .resolve(persistedSettings.enabledAnalysisMethods(), profile)
-            .requiredMeasurements
+        val requiredMeasurements = dependencies.requiredMeasurements
 
         val effectiveSettings = persistedSettings.copy(
             enabledMeasurements = persistedSettings.enabledMeasurements + requiredMeasurements,
@@ -51,6 +52,7 @@ class MeasurementSettingsViewModel(
             isLoading = false,
             settings = effectiveSettings,
             requiredMeasurements = requiredMeasurements,
+            measurementToAnalysisMethods = dependencies.measurementToAnalysisMethods,
             errorMessage = error,
         )
     }.stateIn(

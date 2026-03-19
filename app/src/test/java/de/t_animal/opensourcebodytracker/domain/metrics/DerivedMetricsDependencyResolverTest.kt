@@ -23,6 +23,7 @@ class DerivedMetricsDependencyResolverTest {
         )
 
         Assert.assertEquals(emptySet<MeasuredBodyMetric>(), result.requiredMeasurements)
+        Assert.assertEquals(emptyMap<MeasuredBodyMetric, Set<AnalysisMethod>>(), result.measurementToAnalysisMethods)
     }
 
     @Test
@@ -100,6 +101,52 @@ class DerivedMetricsDependencyResolverTest {
         )
 
         Assert.assertEquals(setOf(MeasuredBodyMetric.Weight), result.requiredMeasurements)
+        Assert.assertEquals(
+            mapOf(
+                MeasuredBodyMetric.Weight to setOf(AnalysisMethod.Bmi),
+            ),
+            result.measurementToAnalysisMethods,
+        )
+    }
+
+    @Test
+    fun resolve_waistRequiredByMultipleMethods_mapsAllMethods() {
+        val result = resolver.resolve(
+            enabledAnalysisMethods = setOf(
+                AnalysisMethod.NavyBodyFat,
+                AnalysisMethod.WaistHipRatio,
+                AnalysisMethod.WaistHeightRatio,
+            ),
+            profile = profile(sex = Sex.Female),
+        )
+
+        Assert.assertEquals(
+            setOf(
+                AnalysisMethod.NavyBodyFat,
+                AnalysisMethod.WaistHipRatio,
+                AnalysisMethod.WaistHeightRatio,
+            ),
+            result.measurementToAnalysisMethods[MeasuredBodyMetric.WaistCircumference],
+        )
+    }
+
+    @Test
+    fun resolve_femaleHipRequiredByNavyAndWaistHipRatio_mapsBothMethods() {
+        val result = resolver.resolve(
+            enabledAnalysisMethods = setOf(
+                AnalysisMethod.NavyBodyFat,
+                AnalysisMethod.WaistHipRatio,
+            ),
+            profile = profile(sex = Sex.Female),
+        )
+
+        Assert.assertEquals(
+            setOf(
+                AnalysisMethod.NavyBodyFat,
+                AnalysisMethod.WaistHipRatio,
+            ),
+            result.measurementToAnalysisMethods[MeasuredBodyMetric.HipCircumference],
+        )
     }
 
     @Test
