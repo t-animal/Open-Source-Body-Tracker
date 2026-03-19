@@ -33,6 +33,7 @@ internal fun MetricChartCard(
     duration: AnalysisDuration,
     selectedDate: LocalDate?,
     onSelectedDateChange: (LocalDate?) -> Unit,
+    onNoteSelected: (String?) -> Unit,
     isCollapsed: Boolean,
     onToggleCollapsed: () -> Unit,
     dragHandleModifier: Modifier,
@@ -85,6 +86,7 @@ internal fun MetricChartCard(
                         duration = duration,
                         selectedDate = selectedDate,
                         onSelectedDateChange = onSelectedDateChange,
+                        onNoteSelected = onNoteSelected,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(CHART_HEIGHT),

@@ -13,7 +13,6 @@ import com.patrykandpatrick.vico.compose.cartesian.decoration.Decoration
 internal class NoteMarkerDecoration(
     private val noteEpochDays: Set<Long>,
     private val color: Color,
-    private val onPositionsUpdated: (positions: Map<Long, Float>, layerTop: Float) -> Unit,
 ) : Decoration {
 
     override fun drawOverLayers(context: CartesianDrawingContext) {
@@ -30,8 +29,6 @@ internal class NoteMarkerDecoration(
             val drawingStart = layerBounds.left +
                 layerDimensions.startPadding * layoutDirectionMultiplier
 
-            val positions = mutableMapOf<Long, Float>()
-
             for (epochDay in noteEpochDays) {
                 val canvasX = drawingStart +
                     ((epochDay.toDouble() - ranges.minX) / xStep).toFloat() *
@@ -39,8 +36,6 @@ internal class NoteMarkerDecoration(
                     scroll
 
                 if (canvasX < layerBounds.left || canvasX > layerBounds.right) continue
-
-                positions[epochDay] = canvasX
 
                 val lineTop = layerBounds.top + triangleSizePx
                 val lineBottom = layerBounds.bottom
@@ -79,7 +74,6 @@ internal class NoteMarkerDecoration(
                 )
             }
 
-            onPositionsUpdated(positions, layerBounds.top)
         }
     }
 

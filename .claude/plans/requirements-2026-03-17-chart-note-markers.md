@@ -1,54 +1,60 @@
-# Feature Specification: Chart Note Markers
+# Feature Specification: Chart Note Markers — Bottom Sheet Display
 
 **Platform Context**: Jetpack Compose / Min SDK 26 / Material 3
 
 ## Purpose
 
-Users who attach notes to measurement entries currently can only see those notes in the table view. This feature adds visual indicators on the chart so users can spot which dates have notes and read them without leaving the chart. The design uses a vertical dotted line capped by a downward-pointing triangle, with a Material 3 tooltip to display the full note text on tap.
+When a user taps a data point on an analysis chart that has an associated note, a bottom sheet appears displaying that note text. This replaces the previous tooltip overlay approach (`NoteMarkerTooltipOverlay` using `PlainTooltip`/`TooltipBox`) with a single screen-level Material 3 bottom sheet. The visual markers on the chart (dotted vertical line and triangle rendered by `NoteMarkerDecoration`) remain unchanged and are decorative only.
 
 ## Functional Requirements
 
-- **FR-1**: For every measurement in the chart whose `note` field is non-empty, a vertical dotted line shall be drawn from the bottom of the chart area upward to near the top of the chart area, at the x-coordinate corresponding to that measurement's date.
-- **FR-2**: The dotted line shall be thinner than the 3dp data line (target approximately 1-1.5dp) and drawn in a subdued color (e.g., `MaterialTheme.colorScheme.outlineVariant` or similar) so it does not visually compete with the data line.
-- **FR-3**: At the top of each dotted line, a small downward-pointing triangle with rounded corners shall be drawn. Material Shapes should be used if practical; otherwise a Canvas path with rounded joins is acceptable. The triangle uses the same subdued color as the dotted line.
-- **FR-4**: Tapping the triangle indicator shall display a Material 3 `PlainTooltip` inside a `TooltipBox` showing the full, untruncated note text. This follows the same pattern used by `NoteCell` in the table view (`rememberTooltipState`, `scope.launch { tooltipState.show() }`).
-- **FR-5**: The tooltip shall dismiss when the user taps anywhere outside the tooltip.
-- **FR-6**: If a tooltip for note A is visible and the user taps the triangle for note B, tooltip A shall auto-dismiss. A second tap on triangle B to open its tooltip is acceptable (i.e., the first tap may only dismiss A).
-- **FR-7**: Tapping on the data point circle on the chart line shall continue to show the existing value/date selection label. Tapping the triangle indicator shall show the note tooltip. These are two independent, non-overlapping tap targets.
-- **FR-8**: The triangle tap target shall be large enough for comfortable touch interaction (minimum 48dp effective touch target per Material accessibility guidelines), even if the visible triangle is smaller.
+- **FR-1**: When a user taps a chart data point that has a non-null, non-blank `note` field on its `AnalysisChartPoint`, a bottom sheet shall appear containing only the note text.
+- **FR-2**: When a user taps a chart data point that has no note (null or blank), no bottom sheet shall appear. The existing selected-point behavior (marker label near the point) continues to work as before.
+- **FR-3**: The bottom sheet shall be a single instance owned by `AnalysisScreen`, shared across all `MetricChartCard` composables in the `LazyColumn`.
+- **FR-4**: If a bottom sheet is already showing for a data point on Chart A and the user taps a data point with a note on Chart B, the bottom sheet shall be replaced with the note from Chart B.
+- **FR-5**: If a bottom sheet is showing and the user taps a data point that has no note (on any chart), the bottom sheet shall be dismissed.
+- **FR-6**: The bottom sheet shall be dismissed when the user taps anywhere that is not a data point (including tapping the scrim, swiping down, or tapping empty chart area).
+- **FR-7**: The existing `NoteMarkerTooltipOverlay` composable and all tooltip-related code for note display shall be removed.
+- **FR-8**: The existing selected-point summary display (marker label in `MetricChartCard`) shall not be modified.
+- **FR-9**: The visual `NoteMarkerDecoration` (dotted line and triangle) shall remain unchanged and purely decorative (not a tap target).
 
 ## Non-Functional Requirements
 
-- **NFR-1**: The note markers shall not introduce visible jank. Drawing additional paths on the Canvas must not degrade scroll or render performance for charts with up to 365 data points.
-- **NFR-2**: The visual design of the markers (line + triangle) shall be consistent with Material 3 theming, adapting correctly to light and dark modes via `MaterialTheme.colorScheme` tokens.
-- **NFR-3**: The tooltip text style shall match the existing `NoteCell` tooltip (`MaterialTheme.typography.bodySmall`).
+- **NFR-1**: The bottom sheet shall use standard Material 3 bottom sheet animation (slide up/down).
+- **NFR-2**: The bottom sheet shall be as small as possible to display the note.
+- **NFR-3**: The bottom sheet maximum height shall be at most 30% of the screen height (exact value TBD). If note text exceeds the visible area, the content shall be vertically scrollable.
+- **NFR-4**: The bottom sheet shall appear and dismiss without perceptible lag (under 100ms to begin animation after tap).
 
 ## Android Technical Constraints
 
-- **Lifecycle**: The tooltip state is ephemeral (in-memory via `rememberTooltipState`). On configuration change (rotation, theme toggle), any open tooltip may dismiss and the chart recomposes; this is acceptable since the markers will re-render and can be tapped again. The selected data point index already resets on recomposition in the current chart.
-- **Permissions**: None required. All data is already available in the `Measurement` domain model passed to the chart.
-- **Storage**: The `note` field already exists on the `Measurement` data class (source of truth: Room database). No schema or query changes are needed. The chart composable receives `List<Measurement>` which already contains the note data.
+- **Lifecycle**: The bottom sheet state is ephemeral UI state. On configuration change (rotation), it is acceptable for the bottom sheet to be dismissed. The underlying selected-date state in each `MetricChartCard` already survives recomposition via `remember`/`mutableStateOf`.
+- **Permissions**: No additional permissions required.
+- **Storage**: No storage changes. Notes are already loaded into `AnalysisChartPoint.note` from the existing data layer.
+- **State Flow**: `AnalysisScreen` holds state representing the currently displayed note text (or null if no bottom sheet is shown). Each `MetricChartCard` communicates "a data point with this note was selected" up to `AnalysisScreen` via a callback. The existing `onSelectedDateChange`/`selectedDate` pattern provides a model for this.
 
 ## Edge Cases
 
-- **No notes exist**: No markers are drawn. The chart renders identically to today.
-- **All entries have notes**: Every date position gets a marker line and triangle. No clutter-management or aggregation is required per the user's decision.
-- **Very long note text**: The tooltip displays the full text without truncation. The `PlainTooltip` component handles wrapping and overflow natively.
-- **Single data point**: The chart currently returns early when `measurements.size < 2`, so no markers are drawn in that case.
-- **Data point and note on the same date**: Both the data-point circle tap target and the triangle tap target exist at the same x-coordinate but at different y-positions (triangle is near chart top; data point is at the value's y-position). They must not overlap. If the data value is near the chart top and the targets risk overlapping, the triangle tap target takes precedence in its region (upper area) and the data point tap target takes precedence in its region (at the point).
+- **No notes exist**: No bottom sheet ever appears. Charts render identically to the pre-feature state (except for the decorative markers, which also won't appear if no notes exist).
+- **Very long note text**: Handled by the scrollable content area within the ~30% max-height constraint.
+- **Rapid tapping across charts**: Only the most recent note is displayed (no stacking or queuing).
+- **Blank note**: Empty string or whitespace-only note is treated the same as null — no bottom sheet.
+- **Originating chart scrolled off-screen**: If the LazyColumn scrolls such that the originating chart is no longer visible, the bottom sheet may remain visible until explicitly dismissed or replaced.
+- **Single data point**: The chart currently returns early when fewer than 2 data points exist, so no markers or bottom sheet interaction occurs.
 
 ## Test Scenarios
 
 | ID | Type | Scenario | Expected Result |
 |----|------|----------|-----------------|
-| T-1 | Unit | Given a list of measurements where none have notes, verify that note marker data (line coordinates, triangle positions) is empty. | No marker geometry is produced. |
-| T-2 | Unit | Given a list of measurements where entries at indices 1 and 3 have non-empty notes, verify that exactly 2 marker positions are computed at the correct x-coordinates. | Two marker positions matching the x-coordinates of indices 1 and 3. |
-| T-3 | Instrumented | Display a chart with at least one noted entry. Tap the triangle indicator. | A tooltip appears showing the full note text. |
-| T-4 | Instrumented | Display a chart with two noted entries. Tap triangle A to show tooltip A, then tap triangle B. | Tooltip A dismisses. A second tap on triangle B shows tooltip B. |
-| T-5 | Instrumented | Display a chart with a noted entry. Tap the data point circle at the same date. | The existing value/date selection label appears. No note tooltip is shown. |
+| T-1 | Unit | Tap a data point where `note` is non-null and non-blank | Bottom sheet state is set to the note text; bottom sheet becomes visible |
+| T-2 | Unit | Tap a data point where `note` is null | Bottom sheet state remains null; no bottom sheet shown |
+| T-3 | Unit | Bottom sheet showing for Chart A note; tap a noted data point on Chart B | Bottom sheet updates to Chart B note text |
+| T-4 | Unit | Bottom sheet showing; tap a data point with no note on any chart | Bottom sheet is dismissed |
+| T-5 | Instrumented | Tap a noted data point, verify bottom sheet appears with correct text, then tap outside | Bottom sheet appears with expected note, then dismisses on outside tap |
 
 ## Key Files
 
-- `app/src/main/java/com/nicholasfragiskatos/openbt/ui/chart/MeasurementChart.kt` — the Canvas composable where markers will be added
-- `app/src/main/java/com/nicholasfragiskatos/openbt/ui/table/NoteCell.kt` — reference implementation for the PlainTooltip/TooltipBox pattern
-- `app/src/main/java/com/nicholasfragiskatos/openbt/domain/model/Measurement.kt` — domain model already containing the `note` field
+- `feature/analysis/AnalysisScreen.kt` — screen-level composable that will own the bottom sheet state
+- `feature/analysis/components/MetricChartCard.kt` — card composable, needs callback for note selection
+- `feature/analysis/components/MetricLineChart.kt` — chart composable where tap detection occurs; tooltip overlay to be removed
+- `feature/analysis/components/NoteMarkerDecoration.kt` — decorative markers, no changes needed
+- `feature/analysis/AnalysisModels.kt` — `AnalysisChartPoint` with `note: String?` field
