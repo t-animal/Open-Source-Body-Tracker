@@ -6,6 +6,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 data class AnalysisChartPoint(
     val epochMillis: Long,
     val value: Double,
+    val note: String? = null,
 )
 
 data class AnalysisYAxisRange(

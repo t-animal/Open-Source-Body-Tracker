@@ -1,11 +1,17 @@
 package de.t_animal.opensourcebodytracker.feature.analysis.components
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -53,6 +59,7 @@ internal fun MetricLineChart(
     duration: AnalysisDuration,
     selectedDate: LocalDate?,
     onSelectedDateChange: (LocalDate?) -> Unit,
+    onNoteSelected: (String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val points = chart.points
@@ -62,6 +69,13 @@ internal fun MetricLineChart(
     // between min and max x, so epoch milliseconds would produce trillions of allocations.
     val xValues = remember(points) { points.map { it.epochMillis.toLocalDateInSystemZone().toEpochDay() } }
     val yValues = remember(points) { points.map { it.value } }
+
+    // Note marker data
+    val notesByEpochDay = remember(points) {
+        points.filter { !it.note.isNullOrBlank() }
+            .associate { it.epochMillis.toLocalDateInSystemZone().toEpochDay() to it.note!! }
+    }
+    val noteEpochDays = remember(notesByEpochDay) { notesByEpochDay.keys }
 
     val unitSuffix = remember(chart.definition.unit) {
         chart.definition.unit.suffixWithLeadingSpace()
@@ -93,10 +107,12 @@ internal fun MetricLineChart(
         indicator = { selectedPointIndicator },
         indicatorSize = CHART_SELECTED_POINT_SIZE,
     )
-    val markerController = rememberTapSelectionMarkerController(
+    val markerController = rememberTapAndLongPressMarkerController(
+        notesByEpochDay = notesByEpochDay,
         onSelectedXValueChange = { epochDay ->
             onSelectedDateChange(epochDay?.let { LocalDate.ofEpochDay(it) })
         },
+        onNoteSelected = onNoteSelected,
     )
     val selectedPersistentMarkerX = remember(selectedDate, xValues) {
         selectedDate?.let { xValues.firstOrNull { it == selectedDate.toEpochDay() } }
@@ -124,6 +140,14 @@ internal fun MetricLineChart(
         rangeProvider = rangeProvider,
     )
 
+    val noteMarkerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+    val noteDecoration = remember(noteEpochDays, noteMarkerColor) {
+        NoteMarkerDecoration(
+            noteEpochDays = noteEpochDays,
+            color = noteMarkerColor,
+        )
+    }
+
     val cartesianChart = rememberCartesianChart(
         lineLayer,
         startAxis = VerticalAxis.rememberStart(valueFormatter = yAxisValueFormatter),
@@ -132,6 +156,7 @@ internal fun MetricLineChart(
         persistentMarkers = { _ ->
             selectedPersistentMarkerX?.let { marker at it }
         },
+        decorations = listOf(noteDecoration),
         markerController = markerController,
     )
 
@@ -143,14 +168,16 @@ internal fun MetricLineChart(
         }
     }
 
-    CartesianChartHost(
-        chart = cartesianChart,
-        modelProducer = modelProducer,
-        modifier = modifier,
-        scrollState = scrollState,
-        zoomState = zoomState,
-        animateIn = false,
-    )
+    Box(modifier = modifier) {
+        CartesianChartHost(
+            chart = cartesianChart,
+            modelProducer = modelProducer,
+            modifier = Modifier.matchParentSize(),
+            scrollState = scrollState,
+            zoomState = zoomState,
+            animateIn = false,
+        )
+    }
 }
 
 private fun fixedYRangeProvider(yAxisRange: AnalysisYAxisRange): CartesianLayerRangeProvider =
@@ -161,22 +188,39 @@ private fun fixedYRangeProvider(yAxisRange: AnalysisYAxisRange): CartesianLayerR
     }
 
 @Composable
-private fun rememberTapSelectionMarkerController(
+private fun rememberTapAndLongPressMarkerController(
+    notesByEpochDay: Map<Long, String>,
     onSelectedXValueChange: (Long?) -> Unit,
+    onNoteSelected: (String?) -> Unit,
 ): CartesianMarkerController {
     val latestOnSelectedXValueChange = rememberUpdatedState(onSelectedXValueChange)
+    val latestOnNoteSelected = rememberUpdatedState(onNoteSelected)
+    val latestNotesByEpochDay = rememberUpdatedState(notesByEpochDay)
     return remember {
         object : CartesianMarkerController {
             override fun shouldAcceptInteraction(
                 interaction: Interaction,
                 targets: List<CartesianMarker.Target>,
-            ): Boolean = interaction is Interaction.Tap
+            ): Boolean = interaction is Interaction.Tap || interaction is Interaction.LongPress
 
             override fun shouldShowMarker(
                 interaction: Interaction,
                 targets: List<CartesianMarker.Target>,
             ): Boolean {
-                latestOnSelectedXValueChange.value(targets.firstOrNull()?.x?.roundToLong())
+                val epochDay = targets.firstOrNull()?.x?.roundToLong()
+                when (interaction) {
+                    is Interaction.Tap -> {
+                        latestOnSelectedXValueChange.value(epochDay)
+                        latestOnNoteSelected.value(null)
+                    }
+                    is Interaction.LongPress -> {
+                        latestOnSelectedXValueChange.value(epochDay)
+                        latestOnNoteSelected.value(
+                            epochDay?.let { latestNotesByEpochDay.value[it] },
+                        )
+                    }
+                    else -> {}
+                }
                 return false
             }
         }
