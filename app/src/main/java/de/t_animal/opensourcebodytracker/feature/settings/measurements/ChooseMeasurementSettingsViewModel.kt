@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class MeasurementSettingsUiState(
+data class ChooseMeasurementSettingsUiState(
     val isLoading: Boolean = true,
     val settings: SettingsState = defaultSettingsState(),
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
@@ -27,7 +27,7 @@ data class MeasurementSettingsUiState(
     val errorMessage: String? = null,
 )
 
-class MeasurementSettingsViewModel(
+class ChooseMeasurementSettingsViewModel(
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
@@ -35,7 +35,7 @@ class MeasurementSettingsViewModel(
 
     private val errorMessage = MutableStateFlow<String?>(null)
 
-    val uiState: StateFlow<MeasurementSettingsUiState> = combine(
+    val uiState: StateFlow<ChooseMeasurementSettingsUiState> = combine(
         settingsRepository.settingsFlow,
         profileRepository.requiredProfileFlow,
         errorMessage,
@@ -48,7 +48,7 @@ class MeasurementSettingsViewModel(
             enabledMeasurements = persistedSettings.enabledMeasurements + requiredMeasurements,
         )
 
-        MeasurementSettingsUiState(
+        ChooseMeasurementSettingsUiState(
             isLoading = false,
             settings = effectiveSettings,
             requiredMeasurements = requiredMeasurements,
@@ -58,7 +58,7 @@ class MeasurementSettingsViewModel(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = MeasurementSettingsUiState(),
+        initialValue = ChooseMeasurementSettingsUiState(),
     )
 
     fun onNavyBodyFatEnabledChanged(enabled: Boolean) {
@@ -125,7 +125,7 @@ class MeasurementSettingsViewModelFactory(
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MeasurementSettingsViewModel(
+        return ChooseMeasurementSettingsViewModel(
             settingsRepository = settingsRepository,
             profileRepository = profileRepository,
             dependencyResolver = dependencyResolver,

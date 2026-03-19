@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.NoPhotography
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -47,7 +48,11 @@ fun MeasurementEditFabColumn(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        FloatingActionButton(onClick = onSaveClicked) {
+        FloatingActionButton(
+            onClick = onSaveClicked,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        ) {
             Icon(
                 imageVector = Icons.Filled.Save,
                 contentDescription = "Save"

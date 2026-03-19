@@ -31,8 +31,6 @@ fun PhotosModeFab(
         ) {
             FloatingActionButton(
                 onClick = onEnterCompareModeClicked,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.CompareArrows,
@@ -42,8 +40,6 @@ fun PhotosModeFab(
 
             FloatingActionButton(
                 onClick = onEnterAnimateModeClicked,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
             ) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
@@ -55,8 +51,6 @@ fun PhotosModeFab(
         FloatingActionButton(
             onClick = onExitModeClicked,
             modifier = modifier,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
         ) {
             Icon(
                 imageVector = Icons.Filled.Close,

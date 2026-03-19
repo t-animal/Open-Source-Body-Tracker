@@ -39,7 +39,7 @@ fun MeasurementSettingsRoute(
     profileRepository: ProfileRepository,
     onNavigateBack: () -> Unit,
 ) {
-    val vm: MeasurementSettingsViewModel = viewModel(
+    val vm: ChooseMeasurementSettingsViewModel = viewModel(
         factory = MeasurementSettingsViewModelFactory(
             settingsRepository = settingsRepository,
             profileRepository = profileRepository,
@@ -48,7 +48,7 @@ fun MeasurementSettingsRoute(
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
 
-    MeasurementSettingsScreen(
+    ChooseMeasurementSettingsScreen(
         state = state,
         onNavigateBack = onNavigateBack,
         onMeasurementEnabledChanged = vm::onMeasurementEnabledChanged,
@@ -62,8 +62,8 @@ fun MeasurementSettingsRoute(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MeasurementSettingsScreen(
-    state: MeasurementSettingsUiState,
+fun ChooseMeasurementSettingsScreen(
+    state: ChooseMeasurementSettingsUiState,
     onNavigateBack: () -> Unit,
     onMeasurementEnabledChanged: (MeasuredBodyMetric, Boolean) -> Unit,
     onBmiEnabledChanged: (Boolean) -> Unit,
@@ -171,14 +171,14 @@ fun MeasurementSettingsScreen(
 
 @Preview(showBackground = true)
 @Composable
-private fun MeasurementSettingsScreenPreview() {
+private fun ChooseMeasurementSettingsScreenPreview() {
     val settings = defaultSettingsState().copy(
         enabledMeasurements = MeasuredBodyMetric.entries.toSet() - MeasuredBodyMetric.SuprailiacSkinfold,
     )
 
     BodyTrackerTheme {
-        MeasurementSettingsScreen(
-            state = MeasurementSettingsUiState(
+        ChooseMeasurementSettingsScreen(
+            state = ChooseMeasurementSettingsUiState(
                 isLoading = false,
                 settings = settings,
                 requiredMeasurements = setOf(MeasuredBodyMetric.WaistCircumference),

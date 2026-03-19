@@ -196,5 +196,10 @@ If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
 
 * Allow reordering of measurements for table
 * translation
-* fab button colors (primary/secondary photos screen and measurement edit)
 * lazycolumn (?) ruckler auf measurement list und visibility settings
+* imperial units
+* import
+* Und ich würde mir überlegen, ob du bei Latest Measurements vielleicht nicht nur das 
+  darstellst, was zuletzt recorded wurde, sondern ggfs. das "last known value". 
+  Kannst es ja irgendwie ausgrauen oder so, und bei tap oder long tap anzeigen, wie alt der Wert ist
+
