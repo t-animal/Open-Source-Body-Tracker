@@ -3,11 +3,13 @@ package de.t_animal.opensourcebodytracker.feature.settings.onboarding
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.metrics.DerivedBodyMetricsDependencies
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -28,6 +30,7 @@ data class OnboardingAnalysisUiState(
     val isSaving: Boolean = false,
     val settings: SettingsState = defaultSettingsState(),
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
+    val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>> = emptyMap(),
     val errorMessage: String? = null,
 )
 
@@ -55,11 +58,11 @@ class OnboardingAnalysisViewModel(
         _isSaving,
         _errorMessage,
     ) { settings, profile, isSaving, errorMessage ->
-        val resolvedDependencies = profile?.let {
+        val dependencies = profile?.let {
             dependencyResolver.resolve(settings.enabledAnalysisMethods(), it)
-        }
+        } ?: DerivedBodyMetricsDependencies()
 
-        val requiredMeasurements = resolvedDependencies?.requiredMeasurements.orEmpty()
+        val requiredMeasurements = dependencies.requiredMeasurements
         val effectiveSettings = settings.copy(
             enabledMeasurements = settings.enabledMeasurements + requiredMeasurements,
         )
@@ -69,6 +72,7 @@ class OnboardingAnalysisViewModel(
             isSaving = isSaving,
             settings = effectiveSettings,
             requiredMeasurements = requiredMeasurements,
+            measurementToAnalysisMethods = dependencies.measurementToAnalysisMethods,
             errorMessage = errorMessage,
         )
     }.stateIn(

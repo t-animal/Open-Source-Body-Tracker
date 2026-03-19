@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
@@ -102,7 +103,8 @@ fun MeasurementSettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding),
+                .padding(contentPadding)
+                .padding(horizontal = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
@@ -149,6 +151,7 @@ fun MeasurementSettingsScreen(
                 MeasurementCollectionSection(
                     enabledMeasurements = state.settings.enabledMeasurements,
                     requiredMeasurements = state.requiredMeasurements,
+                    measurementToAnalysisMethods = state.measurementToAnalysisMethods,
                     onMeasurementEnabledChanged = onMeasurementEnabledChanged,
                 )
             }
@@ -179,6 +182,13 @@ private fun MeasurementSettingsScreenPreview() {
                 isLoading = false,
                 settings = settings,
                 requiredMeasurements = setOf(MeasuredBodyMetric.WaistCircumference),
+                measurementToAnalysisMethods = mapOf(
+                    MeasuredBodyMetric.WaistCircumference to setOf(
+                        AnalysisMethod.NavyBodyFat,
+                        AnalysisMethod.WaistHipRatio,
+                        AnalysisMethod.WaistHeightRatio,
+                    ),
+                ),
             ),
             onNavigateBack = {},
             onMeasurementEnabledChanged = { _, _ -> },
