@@ -11,6 +11,7 @@ import java.text.NumberFormat
 
 internal data class MetricDisplayItem(
     val label: String,
+    val fullName: String,
     val value: String,
     val rating: MetricRating? = null,
 )
@@ -22,6 +23,7 @@ internal fun buildLatestMeasurementMetrics(
     return visibleMetrics.map { metric ->
         MetricDisplayItem(
             label = metric.label(),
+            fullName = metric.fullName(),
             value = metric.formattedValue(item),
             rating = (metric as? DerivedBodyMetric)?.let { item.derivedMetricRatings.forMetric(it) },
         )
@@ -55,6 +57,33 @@ internal fun BodyMetric.label(): String = when (this) {
         DerivedBodyMetric.SkinfoldBodyFatPercent -> "Body Fat Skinfold"
         DerivedBodyMetric.WaistHipRatio -> "WHR"
         DerivedBodyMetric.WaistHeightRatio -> "WHtR"
+    }
+
+    else -> id
+}
+
+internal fun BodyMetric.fullName(): String = when (this) {
+    is MeasuredBodyMetric -> when (this) {
+        MeasuredBodyMetric.Weight -> "Weight"
+        MeasuredBodyMetric.BodyFat -> "Body Fat"
+        MeasuredBodyMetric.NeckCircumference -> "Neck Circumference"
+        MeasuredBodyMetric.WaistCircumference -> "Waist Circumference"
+        MeasuredBodyMetric.HipCircumference -> "Hip Circumference"
+        MeasuredBodyMetric.ChestCircumference -> "Chest Circumference"
+        MeasuredBodyMetric.AbdomenCircumference -> "Abdomen Circumference"
+        MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold"
+        MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
+        MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold"
+        MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold"
+        MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+    }
+
+    is DerivedBodyMetric -> when (this) {
+        DerivedBodyMetric.Bmi -> "Body Mass Index"
+        DerivedBodyMetric.NavyBodyFatPercent -> "Navy Method Body Fat Percentage"
+        DerivedBodyMetric.SkinfoldBodyFatPercent -> "3-Site Skinfold Body Fat Percentage"
+        DerivedBodyMetric.WaistHipRatio -> "Waist-Hip Ratio"
+        DerivedBodyMetric.WaistHeightRatio -> "Waist-Height Ratio"
     }
 
     else -> id

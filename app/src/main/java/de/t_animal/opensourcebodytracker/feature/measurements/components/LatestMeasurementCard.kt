@@ -1,5 +1,10 @@
 package de.t_animal.opensourcebodytracker.feature.measurements.components
 
+import android.widget.Toast
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -17,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
@@ -174,6 +181,7 @@ private fun LatestMeasurementGrid(
     val metrics = remember(item, visibleMetrics) {
         buildLatestMeasurementMetrics(item, visibleMetrics)
     }
+    val context = LocalContext.current
 
     FlowRow(
         maxItemsInEachRow = 2,
@@ -195,6 +203,12 @@ private fun LatestMeasurementGrid(
                 Text(
                     text = metric.label,
                     style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                    ) {
+                        Toast.makeText(context, metric.fullName, Toast.LENGTH_SHORT).show()
+                    }
                 )
                 metric.rating?.let { rating ->
                     Text(

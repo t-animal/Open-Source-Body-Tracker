@@ -88,25 +88,25 @@ fun SettingsScreen(
 
             item {
                 SettingsNavigationItem(
-                    title = "Profile",
+                    title = "Edit Profile",
                     onClick = onOpenProfile,
                 )
             }
             item {
                 SettingsNavigationItem(
-                    title = "Measurements & Analysis",
+                    title = "Choose Measurements & Analysis",
                     onClick = onOpenMeasurementsAndAnalysis,
                 )
             }
             item {
                 SettingsNavigationItem(
-                    title = "Measurement Visibility",
+                    title = "Set Measurement Visibility",
                     onClick = onOpenMeasurementVisibility,
                 )
             }
             item {
                 SettingsNavigationItem(
-                    title = "Reminders",
+                    title = "Set Reminders",
                     onClick = onOpenReminders,
                 )
             }
