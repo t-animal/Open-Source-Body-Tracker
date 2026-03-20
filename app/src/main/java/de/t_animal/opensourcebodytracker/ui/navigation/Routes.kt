@@ -5,6 +5,7 @@ object Routes {
     const val OnboardingProfile = "onboarding/profile"
     const val OnboardingAnalysis = "onboarding/analysis"
     const val OnboardingReminders = "onboarding/reminders"
+    const val ImportBackup = "import_backup"
 
     const val Profile = "profile"
     const val Settings = "settings"
