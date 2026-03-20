@@ -17,9 +17,10 @@ Launch the `feature-discovery` agent using the Agent tool (subagent_type: "featu
 
 Once the feature-discovery agent returns its result (containing the Feature Concept Document):
 
-1. Create a timestamped markdown file at `.claude/plans/feature-concept-YYYY-MM-DD-[short-name].md` (create the `.claude/plans/` directory if it doesn't exist).
+1. Create a timestamped markdown file at `documents/plans/YYYY-MM-DD-[short-name]-feature-concept.md` (create the `documents/plans/` directory if it doesn't exist).
 2. Write the full Feature Concept Document to this file.
 3. Tell the user where the concept was saved.
+4. Wait until the user has acknowledged the saved concept and is ready to proceed to requirements engineering before moving on to the next phase. If the user wants to make edits to the concept, allow them to do so by going back to the feature-discovery agent before proceeding.
 
 ## Phase 3: Requirements Engineering
 
@@ -31,5 +32,6 @@ Launch the `requirements-engineer` agent using the Agent tool (subagent_type: "r
 
 Once the requirements-engineer agent returns its result:
 
-1. Save the final Feature Specification to `.claude/plans/requirements-YYYY-MM-DD-[short-name].md`.
+1. Save the final Feature Specification to `documents/plans/YYYY-MM-DD-[short-name]-requirements.md`.
 2. Tell the user where both documents are saved and that the feature is ready for implementation planning.
+3. Wait until the user has acknowledged the saved requirements and is ready to proceed to implementation planning before completing. If the user wants to make edits to the requirements, allow them to do so by going back to the requirements-engineer agent before proceeding.

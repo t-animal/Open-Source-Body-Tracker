@@ -39,6 +39,7 @@ Ask **1-2 high-impact questions per message**. Wait for the user's response befo
 - **Be a "Challenger"**: If an idea seems redundant or conflicts with existing app patterns, point it out politely.
 - **Synthesize**: After every 2-3 responses, summarize what you've heard to ensure alignment.
 - **Android Context**: Keep the conversation focused on mobile-first experiences.
+- **Verify Before Referencing**: When mentioning specific existing features, screens, data models, or behaviors in the app, use your tools (grep, read, glob) to verify they actually exist as described. Do not assume or guess technical details — if you can't verify something, flag it as an assumption.
 
 ## Output Format
 

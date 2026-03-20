@@ -21,6 +21,18 @@ Use your tools to understand:
 - **Architecture**: Identify existing patterns (MVI/MVVM, Hilt, Room).
 - **Style**: Read the project's root `CLAUDE.md` if it exists.
 
+## CRITICAL: Verify All Technical Claims Against the Codebase
+
+**Never assume or guess field names, data schemas, file formats, API signatures, or model properties.** Before referencing any specific technical detail in the requirements (e.g., "the profile contains a `name` field"), you MUST use your tools (grep, read, glob) to find the actual source of truth in the codebase.
+
+This applies to:
+- **Data model fields**: Read the actual entity/model classes — do not invent plausible-sounding property names.
+- **File formats**: Read the actual export/import/serialization code to see what is really written.
+- **Screen names and routes**: Grep for actual navigation routes and composable names.
+- **DAO/Repository methods**: Read the actual interfaces — do not assume method signatures.
+
+If you cannot find the relevant code, explicitly state that you were unable to verify it and flag it as an assumption that needs confirmation. Never silently fill in details you haven't verified.
+
 ## Input
 
 You will receive a **Feature Concept Document** as input. Use it as the starting point for your elicitation — do not re-ask questions that are already answered in the concept document.

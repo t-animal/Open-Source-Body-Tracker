@@ -1,0 +1,1 @@
+Read the content of [AGENTS.md](documents/AGENTS.md)
