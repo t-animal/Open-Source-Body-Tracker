@@ -56,6 +56,7 @@ import de.t_animal.opensourcebodytracker.feature.photos.PhotoCompareRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.about.AboutRoute
+import de.t_animal.opensourcebodytracker.feature.importbackup.ImportBackupRoute
 import de.t_animal.opensourcebodytracker.feature.settings.export.ExportSettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.measurements.MeasurementSettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingAnalysisRoute
@@ -105,6 +106,7 @@ fun BodyTrackerNavHost(
         Routes.OnboardingProfile,
         Routes.OnboardingAnalysis,
         Routes.OnboardingReminders,
+        Routes.ImportBackup,
     )
 
     LaunchedEffect(settings, currentRoute) {
@@ -208,6 +210,11 @@ fun BodyTrackerNavHost(
                         popUpTo(Routes.OnboardingStart) { inclusive = true }
                     }
                 },
+                onImportBackupClicked = {
+                    navController.navigate(Routes.ImportBackup) {
+                        launchSingleTop = true
+                    }
+                },
             )
         }
 
@@ -242,6 +249,17 @@ fun BodyTrackerNavHost(
                 reminderAlarmScheduler = reminderAlarmScheduler,
                 mode = ReminderMode.Onboarding,
                 onNavigateBack = {
+                    navController.navigate(Routes.MeasurementList) {
+                        popUpTo(Routes.OnboardingStart) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(Routes.ImportBackup) {
+            ImportBackupRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onImportCompleted = {
                     navController.navigate(Routes.MeasurementList) {
                         popUpTo(Routes.OnboardingStart) { inclusive = true }
                     }

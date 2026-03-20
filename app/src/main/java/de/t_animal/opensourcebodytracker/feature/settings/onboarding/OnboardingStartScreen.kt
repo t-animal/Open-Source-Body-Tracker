@@ -34,6 +34,7 @@ fun OnboardingStartRoute(
     generateDemoDataUseCase: GenerateDemoDataUseCase,
     onCreateProfileSelected: () -> Unit,
     onDemoModeCompleted: () -> Unit,
+    onImportBackupClicked: () -> Unit,
 ) {
     val vm: OnboardingStartViewModel = viewModel(
         factory = OnboardingStartViewModelFactory(
@@ -56,6 +57,7 @@ fun OnboardingStartRoute(
         state = state,
         onCreateProfileClicked = onCreateProfileSelected,
         onTryDemoDataClicked = vm::onTryDemoDataClicked,
+        onImportBackupClicked = onImportBackupClicked,
     )
 }
 
@@ -65,6 +67,7 @@ fun OnboardingStartScreen(
     state: OnboardingStartUiState,
     onCreateProfileClicked: () -> Unit,
     onTryDemoDataClicked: () -> Unit,
+    onImportBackupClicked: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -85,7 +88,7 @@ fun OnboardingStartScreen(
             )
 
             Text(
-                text = "You can try the app with demo data or create your own profile.",
+                text = "You can try the app with demo data to get a feel for its features, restore a previously exported backup, or create your own profile.",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
             )
@@ -102,6 +105,16 @@ fun OnboardingStartScreen(
                 } else {
                     Text("Try with Demo Data")
                 }
+            }
+
+            OutlinedButton(
+                onClick = onImportBackupClicked,
+                enabled = !state.isBusy,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+            ) {
+                Text("Import Backup")
             }
 
             Button(
@@ -133,6 +146,7 @@ private fun OnboardingStartScreenPreview() {
             state = OnboardingStartUiState(),
             onCreateProfileClicked = {},
             onTryDemoDataClicked = {},
+            onImportBackupClicked = {},
         )
     }
 }
