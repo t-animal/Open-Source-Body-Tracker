@@ -113,7 +113,7 @@ class CreateEncryptedDeviceExportUseCaseTest {
         val expectedEscapedNote = "\"line one,\nline \"\"two\"\"\""
         assertTrue(measurementsCsv.contains("id,dateEpochMillis,photoFilePath"))
         assertTrue(measurementsCsv.contains("suprailiacSkinfoldMm,note"))
-        assertTrue(measurementsCsv.contains("7,1741564800000,measurement_7_2025-03-09.jpg,81.5"))
+        assertTrue(measurementsCsv.contains("7,1741564800000,measurement_photos/measurement_7_2025-03-09.jpg,81.5"))
         assertTrue(measurementsCsv.contains("8,1741651200000"))
         assertTrue(measurementsCsv.contains(expectedEscapedNote))
         assertTrue(measurementsCsv.contains(",short note"))
