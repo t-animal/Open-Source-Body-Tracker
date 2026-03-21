@@ -5,12 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
-import de.t_animal.opensourcebodytracker.core.model.SettingsState
-import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
+import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
-import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,14 +27,14 @@ enum class DisplayPlacement {
 
 data class SettingsUiState(
     val isLoading: Boolean = true,
-    val settings: SettingsState = defaultSettingsState(),
+    val settings: MeasurementSettings = MeasurementSettings(),
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
     val errorMessage: String? = null,
 )
 
 @HiltViewModel
 class MeasurementVisibilitySettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository,
+    private val measurementSettingsRepository: MeasurementSettingsRepository,
     private val profileRepository: ProfileRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
 ) : ViewModel() {
@@ -44,12 +42,12 @@ class MeasurementVisibilitySettingsViewModel @Inject constructor(
     private val errorMessage = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<SettingsUiState> = combine(
-        settingsRepository.settingsFlow,
+        measurementSettingsRepository.settingsFlow,
         profileRepository.requiredProfileFlow,
         errorMessage,
     ) { persistedSettings, profile, error ->
         val requiredMeasurements = dependencyResolver
-            .resolve(persistedSettings.enabledAnalysisMethods(), profile)
+            .resolve(persistedSettings.enabledAnalysisMethods, profile)
             .requiredMeasurements
 
         val effectiveSettings = persistedSettings.copy(
@@ -92,20 +90,19 @@ class MeasurementVisibilitySettingsViewModel @Inject constructor(
         }
     }
 
-    private fun updateAndPersist(transform: (SettingsState) -> SettingsState) {
+    private fun updateAndPersist(transform: (MeasurementSettings) -> MeasurementSettings) {
         val base = uiState.value.settings
         val transformed = transform(base)
 
         viewModelScope.launch {
             val profile = profileRepository.requiredProfileFlow.first()
             val requiredMeasurements = dependencyResolver
-                .resolve(transformed.enabledAnalysisMethods(), profile)
+                .resolve(transformed.enabledAnalysisMethods, profile)
                 .requiredMeasurements
             val effective = transformed.copy(
                 enabledMeasurements = transformed.enabledMeasurements + requiredMeasurements,
             )
-            settingsRepository.saveSettings(effective)
+            measurementSettingsRepository.saveSettings(effective)
         }
     }
 }
-

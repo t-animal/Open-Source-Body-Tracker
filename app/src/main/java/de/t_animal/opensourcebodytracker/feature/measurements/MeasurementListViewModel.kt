@@ -8,11 +8,9 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
-import de.t_animal.opensourcebodytracker.core.model.BodyMetric.Companion.entries
-import de.t_animal.opensourcebodytracker.core.model.visibleInTableOrdered
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +22,7 @@ data class MeasurementListUiState(
     val previewMeasurements: List<MeasurementListItemUiModel> = emptyList(),
     val allMeasurements: List<MeasurementListItemUiModel> = emptyList(),
     val hasMoreMeasurements: Boolean = false,
-    val visibleInTableMetrics: List<BodyMetric> = entries,
+    val visibleInTableMetrics: List<BodyMetric> = BodyMetric.entries,
     val isEmpty: Boolean = true,
     val isLoading: Boolean = true,
 )
@@ -39,13 +37,13 @@ data class MeasurementListItemUiModel(
 class MeasurementListViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
-    settingsRepository: SettingsRepository,
+    measurementSettingsRepository: MeasurementSettingsRepository,
     calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
 ) : ViewModel() {
     val uiState: StateFlow<MeasurementListUiState> = combine(
         measurementRepository.observeAll(),
         profileRepository.requiredProfileFlow,
-        settingsRepository.settingsFlow,
+        measurementSettingsRepository.settingsFlow,
     ) { measurements, profile, settings ->
         val items = measurements.map { measurement ->
             val analysis = calculateMeasurementDerivedMetrics(profile, measurement)
@@ -56,7 +54,7 @@ class MeasurementListViewModel @Inject constructor(
             )
         }
 
-        val orderedVisibleInTableMetrics = settings.visibleInTableOrdered(entries)
+        val orderedVisibleInTableMetrics = settings.visibleInTableOrdered
 
         MeasurementListUiState(
             latestMeasurement = items.firstOrNull(),

@@ -14,9 +14,9 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import de.t_animal.opensourcebodytracker.core.model.SettingsState
+import de.t_animal.opensourcebodytracker.core.model.ExportSettings
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionResult
 import de.t_animal.opensourcebodytracker.domain.export.ExportExecutionCommand
@@ -28,14 +28,14 @@ import kotlinx.coroutines.flow.first
 class AutomaticExportWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
-    private val settingsRepository: SettingsRepository,
+    private val exportExportSettingsRepository: ExportSettingsRepository,
     private val exportPasswordRepository: ExportPasswordRepository,
     private val exportToFilesystemUseCase: ExportToFilesystemUseCase,
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
         return try {
-            val settings = settingsRepository.settingsFlow.first()
+            val settings = exportExportSettingsRepository.settingsFlow.first()
 
             if (!settings.automaticExportEnabled ||
                 !settings.exportToDeviceStorageEnabled ||
@@ -54,14 +54,14 @@ class AutomaticExportWorker @AssistedInject constructor(
         }
     }
 
-    private suspend fun performExport(settings: SettingsState): Result {
+    private suspend fun performExport(settings: ExportSettings): Result {
         return try {
             runCatching {
                 setForeground(createForegroundInfo())
             }
 
             val exportPassword = exportPasswordRepository.getPassword() ?: run {
-                settingsRepository.saveSettings(
+                exportExportSettingsRepository.saveSettings(
                     settings.copy(
                         lastAutomaticExportError = "Export password not configured",
                     ),
@@ -83,7 +83,7 @@ class AutomaticExportWorker @AssistedInject constructor(
 
             when (result) {
                 is ExportActionResult.Success -> {
-                    settingsRepository.saveSettings(
+                    exportExportSettingsRepository.saveSettings(
                         settings.copy(
                             automaticExportPending = false,
                             lastAutomaticExportError = null,
@@ -93,7 +93,7 @@ class AutomaticExportWorker @AssistedInject constructor(
                 }
 
                 is ExportActionResult.Failure -> {
-                    settingsRepository.saveSettings(
+                    exportExportSettingsRepository.saveSettings(
                         settings.copy(
                             lastAutomaticExportError = result.error.toAutomaticExportMessage(),
                         ),
@@ -143,8 +143,8 @@ class AutomaticExportWorker @AssistedInject constructor(
     }
 
     private suspend fun persistAutomaticExportError(message: String) {
-        val settings = settingsRepository.settingsFlow.first()
-        settingsRepository.saveSettings(
+        val settings = exportExportSettingsRepository.settingsFlow.first()
+        exportExportSettingsRepository.saveSettings(
             settings.copy(
                 lastAutomaticExportError = message,
             ),

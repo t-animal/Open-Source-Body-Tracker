@@ -10,7 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationContract
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class MainActivity : ComponentActivity() {
     private val openMeasurementAddSignal = MutableStateFlow(0L)
 
-    @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var generalSettingsRepository: GeneralSettingsRepository
     @Inject lateinit var automaticExportScheduler: AutomaticExportScheduler
     @Inject lateinit var reminderNotificationPoster: ReminderNotificationPoster
 
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
             BodyTrackerTheme {
                 Surface(modifier = Modifier) {
                     BodyTrackerNavHost(
-                        settingsRepository = settingsRepository,
+                        generalSettingsRepository = generalSettingsRepository,
                         automaticExportScheduler = automaticExportScheduler,
                         reminderNotificationPoster = reminderNotificationPoster,
                         openMeasurementAddSignal = openMeasurementAddSignal,

@@ -10,11 +10,10 @@ import de.t_animal.opensourcebodytracker.core.photos.PhotoStorageContract
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.backup.BackupMetadata
 import de.t_animal.opensourcebodytracker.domain.backup.BackupProfile
 import de.t_animal.opensourcebodytracker.domain.backup.toUserProfile
-import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
@@ -24,7 +23,7 @@ import javax.inject.Inject
 class ImportBackupUseCase @Inject constructor(
     private val measurementRepository: MeasurementRepository,
     private val profileRepository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
+    private val generalSettingsRepository: GeneralSettingsRepository,
     private val photoStorage: InternalPhotoStorage,
     private val csvParser: MeasurementCsvParser,
 ) {
@@ -136,13 +135,9 @@ class ImportBackupUseCase @Inject constructor(
             }
 
             try {
-                val currentSettings = settingsRepository.settingsFlow.first()
-                settingsRepository.saveSettings(
-                    currentSettings.copy(
-                        onboardingCompleted = true,
-                        isDemoMode = false,
-                    ),
-                )
+                generalSettingsRepository.updateSettings {
+                    it.copy(onboardingCompleted = true, isDemoMode = false)
+                }
             } catch (e: Exception) {
                 Log.e("ImportBackup", "Failed to save imported settings", e)
                 return ImportResult.CatastrophicFailure.SettingsWriteFailed

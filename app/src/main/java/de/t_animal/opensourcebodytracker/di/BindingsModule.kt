@@ -13,10 +13,16 @@ import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.measurements.RoomMeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.PreferencesProfileRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.PreferencesSettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.PreferencesUiSettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.PreferencesExportSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.PreferencesGeneralSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.PreferencesMeasurementSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.PreferencesReminderSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository
+import de.t_animal.opensourcebodytracker.data.uisettings.PreferencesUiSettingsRepository
+import de.t_animal.opensourcebodytracker.data.uisettings.UiSettingsRepository
 import de.t_animal.opensourcebodytracker.data.export.ExportArchiveWriter
 import de.t_animal.opensourcebodytracker.domain.export.ExportPhotoCollector
 import de.t_animal.opensourcebodytracker.domain.export.InternalStorageExportPhotoCollector
@@ -36,11 +42,31 @@ abstract class BindingsModule {
 
     @Binds
     @Singleton
-    abstract fun bindSettingsRepository(impl: PreferencesSettingsRepository): SettingsRepository
+    abstract fun bindUiSettingsRepository(impl: PreferencesUiSettingsRepository): UiSettingsRepository
 
     @Binds
     @Singleton
-    abstract fun bindUiSettingsRepository(impl: PreferencesUiSettingsRepository): UiSettingsRepository
+    abstract fun bindMeasurementSettingsRepository(
+        impl: PreferencesMeasurementSettingsRepository,
+    ): MeasurementSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindReminderSettingsRepository(
+        impl: PreferencesReminderSettingsRepository,
+    ): ReminderSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindExportSettingsRepository(
+        impl: PreferencesExportSettingsRepository,
+    ): ExportSettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindGeneralSettingsRepository(
+        impl: PreferencesGeneralSettingsRepository,
+    ): GeneralSettingsRepository
 
     @Binds
     @Singleton

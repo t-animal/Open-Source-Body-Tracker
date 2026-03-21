@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.data.settings
+package de.t_animal.opensourcebodytracker.data.uisettings
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -9,9 +9,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
-import de.t_animal.opensourcebodytracker.core.model.BodyMetric
-import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
-import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.data.settings.parseBodyMetricList
+import de.t_animal.opensourcebodytracker.data.settings.parseEnum
+import de.t_animal.opensourcebodytracker.data.settings.storageName
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -60,19 +60,3 @@ class PreferencesUiSettingsRepository @Inject constructor(
         this[Keys.analysisDuration] = settings.analysisDuration.name
     }
 }
-
-private fun parseBodyMetricList(raw: String?): List<BodyMetric> {
-    if (raw.isNullOrBlank()) return emptyList()
-    val measuredByStorageName = MeasuredBodyMetric.entries.associateBy { it.storageName() }
-    val derivedByStorageName = DerivedBodyMetric.entries.associateBy { it.storageName() }
-    return raw.split(",").mapNotNull { token ->
-        measuredByStorageName[token] ?: derivedByStorageName[token]
-    }
-}
-
-private fun <E : Enum<E>> parseEnum(raw: String?, values: List<E>, fallback: E): E {
-    if (raw.isNullOrBlank()) return fallback
-    return values.firstOrNull { it.name == raw } ?: fallback
-}
-
-private fun BodyMetric.storageName(): String = this.javaClass.simpleName + ":$name"

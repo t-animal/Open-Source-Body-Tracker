@@ -5,7 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import de.t_animal.opensourcebodytracker.core.model.SettingsState
+import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
 import de.t_animal.opensourcebodytracker.domain.reminders.ReminderScheduleCalculator
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.ZonedDateTime
@@ -15,7 +15,7 @@ class ReminderAlarmScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
     fun syncWithSettings(
-        settings: SettingsState,
+        settings: ReminderSettings,
         now: ZonedDateTime = ZonedDateTime.now(),
     ) {
         if (!settings.reminderEnabled || settings.reminderWeekdays.isEmpty()) {

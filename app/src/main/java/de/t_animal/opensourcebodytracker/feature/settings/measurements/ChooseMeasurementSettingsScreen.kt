@@ -25,7 +25,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
-import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
+import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
 import de.t_animal.opensourcebodytracker.feature.settings.components.AnalysisMethodsSection
 import de.t_animal.opensourcebodytracker.feature.settings.components.MeasurementCollectionSection
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -161,7 +161,7 @@ fun ChooseMeasurementSettingsScreen(
 @Preview(showBackground = true)
 @Composable
 private fun ChooseMeasurementSettingsScreenPreview() {
-    val settings = defaultSettingsState().copy(
+    val settings = MeasurementSettings(
         enabledMeasurements = MeasuredBodyMetric.entries.toSet() - MeasuredBodyMetric.SuprailiacSkinfold,
     )
 

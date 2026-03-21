@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionResult
@@ -54,7 +54,7 @@ sealed interface ExportSettingsEvent {
 
 @HiltViewModel
 class ExportSettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository,
+    private val exportSettingsRepository: ExportSettingsRepository,
     private val exportPasswordRepository: ExportPasswordRepository,
     private val exportToFileSystemUseCase: ExportToFilesystemUseCase,
     private val automaticExportScheduler: AutomaticExportScheduler,
@@ -67,7 +67,7 @@ class ExportSettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val settings = settingsRepository.settingsFlow.first()
+            val settings = exportSettingsRepository.settingsFlow.first()
             val password = exportPasswordRepository.getPassword().orEmpty()
             val hasPassword = password.isNotBlank()
             _uiState.value = _uiState.value.copy(
@@ -183,8 +183,8 @@ class ExportSettingsViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val settings = settingsRepository.settingsFlow.first()
-            settingsRepository.saveSettings(
+            val settings = exportSettingsRepository.settingsFlow.first()
+            exportSettingsRepository.saveSettings(
                 settings.copy(
                     lastAutomaticExportError = null,
                 ),
@@ -216,7 +216,7 @@ class ExportSettingsViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val settings = settingsRepository.settingsFlow.first()
+            val settings = exportSettingsRepository.settingsFlow.first()
             val automaticExportEnabled = current.automaticExportEnabled
 
             val updatedSettings = settings.copy(
@@ -235,7 +235,7 @@ class ExportSettingsViewModel @Inject constructor(
                 },
             )
             if (updatedSettings != settings) {
-                settingsRepository.saveSettings(updatedSettings)
+                exportSettingsRepository.saveSettings(updatedSettings)
             }
             exportPasswordRepository.savePassword(current.exportPassword)
 
@@ -250,12 +250,12 @@ class ExportSettingsViewModel @Inject constructor(
     }
 
     private suspend fun clearAutomaticExportPendingAndError() {
-        val settings = settingsRepository.settingsFlow.first()
+        val settings = exportSettingsRepository.settingsFlow.first()
         if (!settings.automaticExportPending && settings.lastAutomaticExportError == null) {
             return
         }
 
-        settingsRepository.saveSettings(
+        exportSettingsRepository.saveSettings(
             settings.copy(
                 automaticExportPending = false,
                 lastAutomaticExportError = null,

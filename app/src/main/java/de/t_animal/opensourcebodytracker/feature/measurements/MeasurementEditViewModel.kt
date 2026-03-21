@@ -15,7 +15,7 @@ import de.t_animal.opensourcebodytracker.core.util.parseLocalizedDoubleOrNull
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementCommand
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementResult
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
@@ -24,7 +24,6 @@ import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementComm
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementResult
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
-import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
 import de.t_animal.opensourcebodytracker.ui.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -72,7 +71,7 @@ class MeasurementEditViewModel @Inject constructor(
     private val repository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
     private val profileRepository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
+    private val measurementSettingsRepository: MeasurementSettingsRepository,
     private val deleteMeasurementUseCase: DeleteMeasurementUseCase,
     private val saveMeasurementUseCase: SaveMeasurementUseCase,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
@@ -96,11 +95,11 @@ class MeasurementEditViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 profileRepository.requiredProfileFlow,
-                settingsRepository.settingsFlow,
+                measurementSettingsRepository.settingsFlow,
                 observeExistingMeasurement(),
             ) { profile, settings, measurement ->
                 val requiredMeasurements = dependencyResolver
-                    .resolve(settings.enabledAnalysisMethods(), profile)
+                    .resolve(settings.enabledAnalysisMethods, profile)
                     .requiredMeasurements
                 val effectiveEnabledMeasurements = settings.enabledMeasurements + requiredMeasurements
 
