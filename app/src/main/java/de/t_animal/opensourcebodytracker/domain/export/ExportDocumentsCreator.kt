@@ -2,11 +2,21 @@ package de.t_animal.opensourcebodytracker.domain.export
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
+import de.t_animal.opensourcebodytracker.core.photos.PhotoStorageContract
 import de.t_animal.opensourcebodytracker.data.export.ExportArchiveEntry
+import de.t_animal.opensourcebodytracker.domain.backup.BackupMetadata
+import de.t_animal.opensourcebodytracker.domain.backup.toBackupProfile
+import kotlinx.serialization.json.Json
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVPrinter
+import java.io.StringWriter
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 
 class ExportDocumentsCreator {
+
+    private val json = Json { prettyPrint = true }
+
     fun create(
         measurements: List<BodyMeasurement>,
         profile: UserProfile,
@@ -32,42 +42,39 @@ class ExportDocumentsCreator {
     }
 
     private fun buildMeasurementsCsv(measurements: List<BodyMeasurement>): ByteArray {
-        val rows = buildList {
-            add(MEASUREMENT_CSV_HEADERS.joinToString(separator = ","))
+        val writer = StringWriter()
+        val csvFormat = CSVFormat.DEFAULT.builder()
+            .setHeader(*MEASUREMENT_CSV_HEADERS.toTypedArray())
+            .build()
+        CSVPrinter(writer, csvFormat).use { printer ->
             measurements.forEach { measurement ->
-                add(
-                    listOf(
-                        measurement.id.toString(),
-                        measurement.dateEpochMillis.toString(),
-                        measurement.photoFilePath?.value.orEmpty(),
-                        measurement.weightKg.toCsvValue(),
-                        measurement.bodyFatPercent.toCsvValue(),
-                        measurement.neckCircumferenceCm.toCsvValue(),
-                        measurement.chestCircumferenceCm.toCsvValue(),
-                        measurement.waistCircumferenceCm.toCsvValue(),
-                        measurement.abdomenCircumferenceCm.toCsvValue(),
-                        measurement.hipCircumferenceCm.toCsvValue(),
-                        measurement.chestSkinfoldMm.toCsvValue(),
-                        measurement.abdomenSkinfoldMm.toCsvValue(),
-                        measurement.thighSkinfoldMm.toCsvValue(),
-                        measurement.tricepsSkinfoldMm.toCsvValue(),
-                        measurement.suprailiacSkinfoldMm.toCsvValue(),
-                        measurement.note.orEmpty(),
-                    ).joinToString(separator = ",") { value -> value.toCsvCell() },
+                printer.printRecord(
+                    measurement.id,
+                    measurement.dateEpochMillis,
+                    measurement.photoFilePath?.let {
+                        "${PhotoStorageContract.PERSISTED_PHOTOS_DIRECTORY}/${it.value}"
+                    }.orEmpty(),
+                    measurement.weightKg.orEmpty(),
+                    measurement.bodyFatPercent.orEmpty(),
+                    measurement.neckCircumferenceCm.orEmpty(),
+                    measurement.chestCircumferenceCm.orEmpty(),
+                    measurement.waistCircumferenceCm.orEmpty(),
+                    measurement.abdomenCircumferenceCm.orEmpty(),
+                    measurement.hipCircumferenceCm.orEmpty(),
+                    measurement.chestSkinfoldMm.orEmpty(),
+                    measurement.abdomenSkinfoldMm.orEmpty(),
+                    measurement.thighSkinfoldMm.orEmpty(),
+                    measurement.tricepsSkinfoldMm.orEmpty(),
+                    measurement.suprailiacSkinfoldMm.orEmpty(),
+                    measurement.note.orEmpty(),
                 )
             }
         }
-        return rows.joinToString(separator = "\n", postfix = "\n").toByteArray(Charsets.UTF_8)
+        return writer.toString().toByteArray(Charsets.UTF_8)
     }
 
     private fun buildProfileJson(profile: UserProfile): ByteArray {
-        return buildString {
-            appendLine("{")
-            appendLine("  \"sex\": ${profile.sex.name.toJsonString()},")
-            appendLine("  \"dateOfBirth\": ${profile.dateOfBirth.toString().toJsonString()},")
-            appendLine("  \"heightCm\": ${profile.heightCm}")
-            append('}')
-        }.toByteArray(Charsets.UTF_8)
+        return json.encodeToString(profile.toBackupProfile()).toByteArray(Charsets.UTF_8)
     }
 
     private fun buildMetadataJson(
@@ -77,53 +84,25 @@ class ExportDocumentsCreator {
         imageCount: Int,
         missingImageCount: Int,
     ): ByteArray {
-        return buildString {
-            appendLine("{")
-            appendLine("  \"schemaVersion\": $EXPORT_SCHEMA_VERSION,")
-            appendLine("  \"archiveFileName\": ${exportFileName.toJsonString()},")
-            appendLine("  \"exportedAtEpochMillis\": ${exportInstant.toEpochMilli()},")
-            appendLine(
-                "  \"exportedAtUtc\": ${DateTimeFormatter.ISO_INSTANT.format(exportInstant).toJsonString()},",
-            )
-            appendLine("  \"measurementCount\": $measurementCount,")
-            appendLine("  \"imageCount\": $imageCount,")
-            appendLine("  \"missingImageCount\": $missingImageCount")
-            append('}')
-        }.toByteArray(Charsets.UTF_8)
+        val metadata = BackupMetadata(
+            schemaVersion = EXPORT_SCHEMA_VERSION,
+            archiveFileName = exportFileName,
+            exportedAtEpochMillis = exportInstant.toEpochMilli(),
+            exportedAtUtc = DateTimeFormatter.ISO_INSTANT.format(exportInstant),
+            measurementCount = measurementCount,
+            imageCount = imageCount,
+            missingImageCount = missingImageCount,
+        )
+        return json.encodeToString(metadata).toByteArray(Charsets.UTF_8)
     }
 
-    private fun Double?.toCsvValue(): String = this?.toString().orEmpty()
-
-    private fun String.toCsvCell(): String {
-        if (csvNeedsEscapeRegex.containsMatchIn(this)) {
-            return '"' + replace("\"", "\"\"") + '"'
-        }
-        return this
-    }
-
-    private fun String.toJsonString(): String {
-        return buildString {
-            append('"')
-            this@toJsonString.forEach { character ->
-                when (character) {
-                    '\\' -> append("\\\\")
-                    '"' -> append("\\\"")
-                    '\n' -> append("\\n")
-                    '\r' -> append("\\r")
-                    '\t' -> append("\\t")
-                    else -> append(character)
-                }
-            }
-            append('"')
-        }
-    }
+    private fun Double?.orEmpty(): String = this?.toString() ?: ""
 
     private companion object {
         const val EXPORT_SCHEMA_VERSION = 1
         const val MEASUREMENTS_FILE_NAME = "measurements.csv"
         const val PROFILE_FILE_NAME = "profile.json"
         const val METADATA_FILE_NAME = "metadata.json"
-        val csvNeedsEscapeRegex = Regex("[,\"\\n\\r]")
 
         val MEASUREMENT_CSV_HEADERS = listOf(
             "id",

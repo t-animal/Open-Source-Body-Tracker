@@ -10,9 +10,17 @@ object PhotoStorageContract {
     const val FILE_PROVIDER_AUTHORITY_SUFFIX = ".fileprovider"
 }
 
+/**
+ * A relative filename (e.g. "measurement_7_2025-03-09.jpg") for a permanently stored photo.
+ * Resolved relative to the app's internal files directory under [PhotoStorageContract.PERSISTED_PHOTOS_DIRECTORY].
+ */
 @JvmInline
 value class PersistedPhotoPath(val value: String)
 
+/**
+ * An absolute filesystem path for a temporary photo captured by the camera.
+ * Points into the app's cache directory under [PhotoStorageContract.TEMP_CAPTURE_DIRECTORY].
+ */
 @JvmInline
 value class TemporaryCapturePhotoPath(val value: String)
 
