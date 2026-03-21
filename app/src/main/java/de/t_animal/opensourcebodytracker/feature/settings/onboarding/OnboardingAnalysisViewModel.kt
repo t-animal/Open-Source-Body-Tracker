@@ -9,8 +9,7 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedBodyMetricsDependencies
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.RequiredMeasurementsResolver
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -41,7 +40,7 @@ sealed interface OnboardingAnalysisEvent {
 class OnboardingAnalysisViewModel @Inject constructor(
     private val measurementSettingsRepository: MeasurementSettingsRepository,
     private val profileRepository: ProfileRepository,
-    private val dependencyResolver: DerivedMetricsDependencyResolver,
+    private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
 ) : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
     private val _isSaving = MutableStateFlow(false)
@@ -58,23 +57,19 @@ class OnboardingAnalysisViewModel @Inject constructor(
         _isSaving,
         _errorMessage,
     ) { settings, profile, isSaving, errorMessage ->
-        val dependencies = profile?.let {
-            dependencyResolver.resolve(settings.enabledAnalysisMethods, it)
-        } ?: DerivedBodyMetricsDependencies()
-
-        val requiredMeasurements = dependencies.requiredMeasurements
-        val effectiveSettings = settings.copy(
-            enabledMeasurements = settings.enabledMeasurements + requiredMeasurements,
-        )
-
-        OnboardingAnalysisUiState(
-            isLoading = profile == null,
-            isSaving = isSaving,
-            settings = effectiveSettings,
-            requiredMeasurements = requiredMeasurements,
-            measurementToAnalysisMethods = dependencies.measurementToAnalysisMethods,
-            errorMessage = errorMessage,
-        )
+        if (profile == null) {
+            OnboardingAnalysisUiState(isLoading = true, isSaving = isSaving)
+        } else {
+            val effective = requiredMeasurementsResolver.ensureRequired(settings, profile)
+            OnboardingAnalysisUiState(
+                isLoading = false,
+                isSaving = isSaving,
+                settings = effective.settings,
+                requiredMeasurements = effective.dependencies.requiredMeasurements,
+                measurementToAnalysisMethods = effective.dependencies.measurementToAnalysisMethods,
+                errorMessage = errorMessage,
+            )
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Companion.WhileSubscribed(5_000),
@@ -148,17 +143,11 @@ class OnboardingAnalysisViewModel @Inject constructor(
     private suspend fun updateAndPersist(transform: (MeasurementSettings) -> MeasurementSettings) {
         settingsWriteMutex.withLock {
             runCatching {
-                val profile = profileRepository.requiredProfileFlow.first()
                 val base = measurementSettingsRepository.settingsFlow.first()
                 val transformed = transform(base)
-                val requiredMeasurements = dependencyResolver
-                    .resolve(transformed.enabledAnalysisMethods, profile)
-                    .requiredMeasurements
-                val effective = transformed.copy(
-                    enabledMeasurements = transformed.enabledMeasurements + requiredMeasurements,
-                )
-                if (effective != base) {
-                    measurementSettingsRepository.saveSettings(effective)
+                val effective = requiredMeasurementsResolver.ensureRequiredWithCurrentProfile(transformed)
+                if (effective.settings != base) {
+                    measurementSettingsRepository.saveSettings(effective.settings)
                 }
             }.onFailure { throwable ->
                 _errorMessage.value = throwable.message ?: "Could not save onboarding settings"

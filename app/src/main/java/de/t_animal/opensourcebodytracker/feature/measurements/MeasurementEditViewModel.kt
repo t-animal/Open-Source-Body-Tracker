@@ -8,14 +8,11 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
-import de.t_animal.opensourcebodytracker.data.photos.NewPhotoCaptureTarget
-import java.io.File
 import de.t_animal.opensourcebodytracker.core.util.formatEpochMillisAsIsoDate
 import de.t_animal.opensourcebodytracker.core.util.parseLocalizedDoubleOrNull
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementCommand
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementResult
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
@@ -23,7 +20,7 @@ import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementMetricMa
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementCommand
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementResult
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.RequiredMeasurementsResolver
 import de.t_animal.opensourcebodytracker.ui.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -71,10 +68,9 @@ class MeasurementEditViewModel @Inject constructor(
     private val repository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
     private val profileRepository: ProfileRepository,
-    private val measurementSettingsRepository: MeasurementSettingsRepository,
     private val deleteMeasurementUseCase: DeleteMeasurementUseCase,
     private val saveMeasurementUseCase: SaveMeasurementUseCase,
-    private val dependencyResolver: DerivedMetricsDependencyResolver,
+    private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
 ) : ViewModel() {
     private val measurementId: Long? = Routes.parseMeasurementEditId(savedStateHandle)
     private val _uiState = MutableStateFlow<MeasurementEditUiState>(MeasurementEditUiState.Loading)
@@ -95,15 +91,10 @@ class MeasurementEditViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 profileRepository.requiredProfileFlow,
-                measurementSettingsRepository.settingsFlow,
+                requiredMeasurementsResolver.effectiveMeasurementSettingsFlow,
                 observeExistingMeasurement(),
-            ) { profile, settings, measurement ->
-                val requiredMeasurements = dependencyResolver
-                    .resolve(settings.enabledAnalysisMethods, profile)
-                    .requiredMeasurements
-                val effectiveEnabledMeasurements = settings.enabledMeasurements + requiredMeasurements
-
-                Triple(profile.sex, effectiveEnabledMeasurements, measurement)
+            ) { profile, effective, measurement ->
+                Triple(profile.sex, effective.settings.enabledMeasurements, measurement)
             }.collect { (sex, enabledMeasurements, measurement) ->
 
                 val baseMeasurementId = measurementId

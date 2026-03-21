@@ -6,7 +6,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.core.util.formatDecimalForInput
@@ -14,7 +13,7 @@ import de.t_animal.opensourcebodytracker.core.util.parseLocalizedFloatOrNull
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.RequiredMeasurementsResolver
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +41,7 @@ class ProfileViewModel @AssistedInject constructor(
     private val repository: ProfileRepository,
     private val measurementSettingsRepository: MeasurementSettingsRepository,
     private val generalSettingsRepository: GeneralSettingsRepository,
-    private val dependencyResolver: DerivedMetricsDependencyResolver,
+    private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -119,9 +118,9 @@ class ProfileViewModel @AssistedInject constructor(
             )
 
             val currentMeasurementSettings = measurementSettingsRepository.settingsFlow.first()
-            val requiredAwareMeasurementSettings = ensureRequiredMeasurementsEnabled(currentMeasurementSettings, profile)
-            if (requiredAwareMeasurementSettings != currentMeasurementSettings) {
-                measurementSettingsRepository.saveSettings(requiredAwareMeasurementSettings)
+            val effective = requiredMeasurementsResolver.ensureRequired(currentMeasurementSettings, profile)
+            if (effective.settings != currentMeasurementSettings) {
+                measurementSettingsRepository.saveSettings(effective.settings)
             }
 
             if (mode == ProfileMode.Onboarding) {
@@ -135,23 +134,5 @@ class ProfileViewModel @AssistedInject constructor(
 
             _events.emit(ProfileEvent.Saved)
         }
-    }
-
-    private fun ensureRequiredMeasurementsEnabled(
-        settings: MeasurementSettings,
-        profile: UserProfile,
-    ): MeasurementSettings {
-        val requiredMeasurements = dependencyResolver
-            .resolve(settings.enabledAnalysisMethods, profile)
-            .requiredMeasurements
-
-        val missingRequiredMeasurements = requiredMeasurements - settings.enabledMeasurements
-        if (missingRequiredMeasurements.isEmpty()) {
-            return settings
-        }
-
-        return settings.copy(
-            enabledMeasurements = settings.enabledMeasurements + missingRequiredMeasurements,
-        )
     }
 }

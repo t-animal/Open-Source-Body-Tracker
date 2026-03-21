@@ -6,15 +6,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.RequiredMeasurementsResolver
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -29,30 +27,20 @@ data class ChooseMeasurementSettingsUiState(
 @HiltViewModel
 class ChooseMeasurementSettingsViewModel @Inject constructor(
     private val measurementSettingsRepository: MeasurementSettingsRepository,
-    private val profileRepository: ProfileRepository,
-    private val dependencyResolver: DerivedMetricsDependencyResolver,
+    private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
 ) : ViewModel() {
 
     private val errorMessage = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<ChooseMeasurementSettingsUiState> = combine(
-        measurementSettingsRepository.settingsFlow,
-        profileRepository.requiredProfileFlow,
+        requiredMeasurementsResolver.effectiveMeasurementSettingsFlow,
         errorMessage,
-    ) { persistedSettings, profile, error ->
-        val dependencies = dependencyResolver
-            .resolve(persistedSettings.enabledAnalysisMethods, profile)
-        val requiredMeasurements = dependencies.requiredMeasurements
-
-        val effectiveSettings = persistedSettings.copy(
-            enabledMeasurements = persistedSettings.enabledMeasurements + requiredMeasurements,
-        )
-
+    ) { effective, error ->
         ChooseMeasurementSettingsUiState(
             isLoading = false,
-            settings = effectiveSettings,
-            requiredMeasurements = requiredMeasurements,
-            measurementToAnalysisMethods = dependencies.measurementToAnalysisMethods,
+            settings = effective.settings,
+            requiredMeasurements = effective.dependencies.requiredMeasurements,
+            measurementToAnalysisMethods = effective.dependencies.measurementToAnalysisMethods,
             errorMessage = error,
         )
     }.stateIn(
@@ -106,14 +94,8 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
         val transformed = transform(base)
 
         viewModelScope.launch {
-            val profile = profileRepository.requiredProfileFlow.first()
-            val requiredMeasurements = dependencyResolver
-                .resolve(transformed.enabledAnalysisMethods, profile)
-                .requiredMeasurements
-            val effective = transformed.copy(
-                enabledMeasurements = transformed.enabledMeasurements + requiredMeasurements,
-            )
-            measurementSettingsRepository.saveSettings(effective)
+            val effective = requiredMeasurementsResolver.ensureRequiredWithCurrentProfile(transformed)
+            measurementSettingsRepository.saveSettings(effective.settings)
         }
     }
 }
