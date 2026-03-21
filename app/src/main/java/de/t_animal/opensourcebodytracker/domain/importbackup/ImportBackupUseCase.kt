@@ -33,23 +33,21 @@ class ImportBackupUseCase(
         context: Context,
         fileUri: Uri,
         password: String,
+        onProgress: (ImportProgress) -> Unit = {},
     ): ImportResult {
         val tempFile = copyToTempFile(context, fileUri)
-            ?: return ImportResult.GeneralFailure("Could not read the selected file.")
+            ?: return ImportResult.FileNotReadable
 
         try {
+            onProgress(ImportProgress.ValidatingArchive)
             val zipFile = ZipFile(tempFile, password.toCharArray())
 
             if (!zipFile.isValidZipFile) {
-                return ImportResult.UnsupportedFormat(
-                    "The selected file is not a valid ZIP archive.",
-                )
+                return ImportResult.InvalidArchive
             }
 
             val metadataHeader = zipFile.getFileHeader(METADATA_FILE_NAME)
-                ?: return ImportResult.IncompleteBackup(
-                    "The archive does not contain metadata. It may not be a valid backup.",
-                )
+                ?: return ImportResult.IncompleteBackup
 
             val metadata = try {
                 val metadataText = zipFile.getInputStream(metadataHeader)
@@ -57,42 +55,40 @@ class ImportBackupUseCase(
                     .use { it.readText() }
                 json.decodeFromString<BackupMetadata>(metadataText)
             } catch (_: ZipException) {
-                return ImportResult.WrongPassword("Wrong password. Please try again.")
+                return ImportResult.WrongPassword
             } catch (_: Exception) {
-                return ImportResult.IncompleteBackup("Could not read backup metadata.")
+                return ImportResult.IncompleteBackup
             }
 
             if (metadata.schemaVersion != SUPPORTED_SCHEMA_VERSION) {
-                return ImportResult.UnsupportedFormat(
-                    "Unsupported backup version (${metadata.schemaVersion}). " +
-                        "This app supports version $SUPPORTED_SCHEMA_VERSION.",
+                return ImportResult.UnsupportedVersion(
+                    foundVersion = metadata.schemaVersion,
+                    supportedVersion = SUPPORTED_SCHEMA_VERSION,
                 )
             }
 
+            onProgress(ImportProgress.ReadingProfile)
             val profileHeader = zipFile.getFileHeader(PROFILE_FILE_NAME)
-                ?: return ImportResult.IncompleteBackup(
-                    "The archive does not contain a profile.",
-                )
+                ?: return ImportResult.IncompleteBackup
             val profile = try {
                 val profileText = zipFile.getInputStream(profileHeader)
                     .bufferedReader()
                     .use { it.readText() }
                 json.decodeFromString<BackupProfile>(profileText).toUserProfile()
             } catch (_: Exception) {
-                return ImportResult.IncompleteBackup("Could not read profile data.")
+                return ImportResult.IncompleteBackup
             }
 
+            onProgress(ImportProgress.ReadingMeasurements)
             val measurementsHeader = zipFile.getFileHeader(MEASUREMENTS_FILE_NAME)
-                ?: return ImportResult.IncompleteBackup(
-                    "The archive does not contain measurements.",
-                )
+                ?: return ImportResult.IncompleteBackup
             val parsedMeasurements = try {
                 val csvText = zipFile.getInputStream(measurementsHeader)
                     .bufferedReader()
                     .use { it.readText() }
                 csvParser.parse(csvText)
             } catch (_: Exception) {
-                return ImportResult.IncompleteBackup("Could not read measurement data.")
+                return ImportResult.IncompleteBackup
             }
 
             // Pre-insert validation: null out photo paths missing from ZIP
@@ -114,39 +110,28 @@ class ImportBackupUseCase(
                 }
             }
 
-            val missingFromZipWarning = if (nulledPhotoCount > 0) {
-                "$nulledPhotoCount photo(s) referenced in measurements are missing from " +
-                    "the archive. Those measurements were imported without photos."
-            } else {
-                null
-            }
-
             // --- Point of no return: write to database and filesystem ---
 
+            onProgress(ImportProgress.SavingToDatabase)
             try {
                 profileRepository.saveProfile(profile)
                 measurementRepository.replaceAll(measurements)
             } catch (e: Exception) {
                 Log.e("ImportBackup", "Failed to save imported data to database", e)
-                return ImportResult.CatastrophicFailure(
-                    "Failed to save data to the database. The app may be in an inconsistent state.",
-                )
+                return ImportResult.CatastrophicFailure.DatabaseWriteFailed
             }
 
             try {
-                extractPhotos(zipFile)
+                extractPhotos(zipFile, onProgress)
             } catch (e: Exception) {
                 Log.e("ImportBackup", "Failed to extract photos", e)
-                return ImportResult.CatastrophicFailure(
-                    "Photos could not be restored after data was saved. " +
-                        "The app may be in an inconsistent state.",
-                )
+                return ImportResult.CatastrophicFailure.PhotoExtractionFailed
             }
 
-            val verificationFailure = verifyPhotosOnDisk(measurements)
-            if (verificationFailure != null) {
-                Log.e("ImportBackup", verificationFailure)
-                return ImportResult.CatastrophicFailure(verificationFailure)
+            onProgress(ImportProgress.VerifyingPhotos)
+            if (!verifyPhotosOnDisk(measurements)) {
+                Log.e("ImportBackup", "Photo verification failed after extraction")
+                return ImportResult.CatastrophicFailure.PhotoVerificationFailed
             }
 
             try {
@@ -159,14 +144,11 @@ class ImportBackupUseCase(
                 )
             } catch (e: Exception) {
                 Log.e("ImportBackup", "Failed to save imported settings", e)
-                return ImportResult.CatastrophicFailure(
-                    "Data was imported but settings could not be saved. " +
-                        "The app may be in an inconsistent state. Error: ${e.message}",
-                )
+                return ImportResult.CatastrophicFailure.SettingsWriteFailed
             }
 
-            return if (missingFromZipWarning != null) {
-                ImportResult.SuccessWithWarning(missingFromZipWarning)
+            return if (nulledPhotoCount > 0) {
+                ImportResult.SuccessWithWarning(droppedPhotoCount = nulledPhotoCount)
             } else {
                 ImportResult.Success
             }
@@ -175,27 +157,30 @@ class ImportBackupUseCase(
         }
     }
 
-    private fun verifyPhotosOnDisk(measurements: List<BodyMeasurement>): String? {
-        val missingCount = measurements.count { measurement ->
-            val photoPath = measurement.photoFilePath ?: return@count false
+    private fun verifyPhotosOnDisk(measurements: List<BodyMeasurement>): Boolean {
+        return measurements.none { measurement ->
+            val photoPath = measurement.photoFilePath ?: return@none false
             !photoStorage.resolvePhotoFile(photoPath).exists()
-        }
-        return if (missingCount > 0) {
-            "$missingCount photo(s) referenced by measurements could not be found on disk."
-        } else {
-            null
         }
     }
 
-    private fun extractPhotos(zipFile: ZipFile) {
+    private fun extractPhotos(
+        zipFile: ZipFile,
+        onProgress: (ImportProgress) -> Unit,
+    ) {
         val photoPrefix = "${PhotoStorageContract.PERSISTED_PHOTOS_DIRECTORY}/"
         val photoHeaders = zipFile.fileHeaders.filter {
             it.fileName.startsWith(photoPrefix) && !it.isDirectory
         }
+        val total = photoHeaders.size
 
-        for (header in photoHeaders) {
+        if (total == 0) return
+
+        photoHeaders.forEachIndexed { index, header ->
+            onProgress(ImportProgress.ExtractingPhotos(current = index + 1, total = total))
+
             val fileName = header.fileName.removePrefix(photoPrefix)
-            if (fileName.isEmpty()) continue
+            if (fileName.isEmpty()) return@forEachIndexed
 
             val targetFile = photoStorage.resolvePhotoFile(PersistedPhotoPath(fileName))
             zipFile.getInputStream(header).use { input ->
@@ -231,12 +216,28 @@ class ImportBackupUseCase(
     }
 }
 
+sealed interface ImportProgress {
+    data object ValidatingArchive : ImportProgress
+    data object ReadingProfile : ImportProgress
+    data object ReadingMeasurements : ImportProgress
+    data object SavingToDatabase : ImportProgress
+    data class ExtractingPhotos(val current: Int, val total: Int) : ImportProgress
+    data object VerifyingPhotos : ImportProgress
+}
+
 sealed interface ImportResult {
     data object Success : ImportResult
-    data class SuccessWithWarning(val message: String) : ImportResult
-    data class WrongPassword(val message: String) : ImportResult
-    data class UnsupportedFormat(val message: String) : ImportResult
-    data class IncompleteBackup(val message: String) : ImportResult
-    data class CatastrophicFailure(val message: String) : ImportResult
-    data class GeneralFailure(val message: String) : ImportResult
+    data class SuccessWithWarning(val droppedPhotoCount: Int) : ImportResult
+    data object WrongPassword : ImportResult
+    data class UnsupportedVersion(val foundVersion: Int, val supportedVersion: Int) : ImportResult
+    data object InvalidArchive : ImportResult
+    data object IncompleteBackup : ImportResult
+    data object FileNotReadable : ImportResult
+
+    sealed interface CatastrophicFailure : ImportResult {
+        data object DatabaseWriteFailed : CatastrophicFailure
+        data object PhotoExtractionFailed : CatastrophicFailure
+        data object PhotoVerificationFailed : CatastrophicFailure
+        data object SettingsWriteFailed : CatastrophicFailure
+    }
 }

@@ -180,9 +180,22 @@ fun ImportBackupScreen(
                 }
             }
 
-            if (state.isImporting) {
-                Spacer(modifier = Modifier.height(16.dp))
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            val progress = state.progress
+            if (progress != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = progress.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                if (progress.isDeterminate) {
+                    LinearProgressIndicator(
+                        progress = { progress.progressFraction ?: 0f },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
             }
         }
     }
