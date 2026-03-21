@@ -2,12 +2,10 @@ package de.t_animal.opensourcebodytracker.domain.metrics
 
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
-import de.t_animal.opensourcebodytracker.core.model.SettingsState
+import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
-import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalTime
 import org.junit.Assert
 import org.junit.Test
 
@@ -203,28 +201,18 @@ class DerivedMetricsDependencyResolverTest {
 
     @Test
     fun enabledAnalysisMethods_mapsFromSettingsFlags() {
-        val settings = SettingsState(
+        val settings = MeasurementSettings(
             bmiEnabled = true,
             navyBodyFatEnabled = true,
             skinfoldBodyFatEnabled = false,
             waistHipRatioEnabled = true,
             waistHeightRatioEnabled = false,
-            onboardingCompleted = false,
-            isDemoMode = false,
-            reminderEnabled = false,
-            reminderWeekdays = setOf(DayOfWeek.SUNDAY),
-            reminderTime = LocalTime.of(9, 0),
-            exportToDeviceStorageEnabled = false,
-            exportFolderUri = null,
-            automaticExportEnabled = false,
-            automaticExportPending = false,
-            lastAutomaticExportError = null,
             enabledMeasurements = emptySet(),
             visibleInAnalysis = setOf(MeasuredBodyMetric.Weight),
             visibleInTable = setOf(MeasuredBodyMetric.Weight),
         )
 
-        val methods = settings.enabledAnalysisMethods()
+        val methods = settings.enabledAnalysisMethods
 
         Assert.assertEquals(
             setOf(

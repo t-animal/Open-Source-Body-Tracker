@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataLeanBodyWeightKg
 import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMaxFatBodyWeightKg
 import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMinFatBodyWeightKg
@@ -16,13 +16,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class OnboardingStartViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
+    private val generalSettingsRepository: GeneralSettingsRepository,
     private val generateDemoDataUseCase: GenerateDemoDataUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(OnboardingStartUiState())
@@ -59,13 +58,9 @@ class OnboardingStartViewModel @Inject constructor(
             maxFatBodyWeightKg = DefaultDemoDataMaxFatBodyWeightKg,
         )
 
-        val refreshedSettings = settingsRepository.settingsFlow.first()
-        settingsRepository.saveSettings(
-            refreshedSettings.copy(
-                onboardingCompleted = true,
-                isDemoMode = true,
-            ),
-        )
+        generalSettingsRepository.updateSettings {
+            it.copy(onboardingCompleted = true, isDemoMode = true)
+        }
     }
 }
 

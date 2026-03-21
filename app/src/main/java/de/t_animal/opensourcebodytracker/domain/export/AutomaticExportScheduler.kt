@@ -5,7 +5,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import de.t_animal.opensourcebodytracker.core.export.AutomaticExportWorker
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
@@ -14,10 +14,10 @@ import kotlinx.coroutines.flow.first
 
 class AutomaticExportScheduler @Inject constructor(
     private val workManager: WorkManager,
-    private val settingsRepository: SettingsRepository,
+    private val exportSettingsRepository: ExportSettingsRepository,
 ) {
     suspend fun scheduleNightlyExportAtThreeAm() {
-        val settings = settingsRepository.settingsFlow.first()
+        val settings = exportSettingsRepository.settingsFlow.first()
 
         if (!settings.automaticExportEnabled ||
             !settings.exportToDeviceStorageEnabled ||

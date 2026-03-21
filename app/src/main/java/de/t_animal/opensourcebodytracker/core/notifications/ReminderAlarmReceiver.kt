@@ -9,11 +9,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository
 
 @AndroidEntryPoint
 class ReminderAlarmReceiver : BroadcastReceiver() {
-    @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var reminderSettingsRepository: ReminderSettingsRepository
     @Inject lateinit var reminderAlarmScheduler: ReminderAlarmScheduler
     @Inject lateinit var reminderNotificationPoster: ReminderNotificationPoster
 
@@ -26,7 +26,7 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val settings = settingsRepository.settingsFlow.first()
+                val settings = reminderSettingsRepository.settingsFlow.first()
 
                 if (!settings.reminderEnabled || settings.reminderWeekdays.isEmpty()) {
                     reminderAlarmScheduler.cancelScheduledReminder()

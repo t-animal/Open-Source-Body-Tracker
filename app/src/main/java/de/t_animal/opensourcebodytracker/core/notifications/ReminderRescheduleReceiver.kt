@@ -9,11 +9,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository
 
 @AndroidEntryPoint
 class ReminderRescheduleReceiver : BroadcastReceiver() {
-    @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var reminderSettingsRepository: ReminderSettingsRepository
     @Inject lateinit var reminderAlarmScheduler: ReminderAlarmScheduler
 
     override fun onReceive(context: Context, intent: Intent?) {
@@ -26,7 +26,7 @@ class ReminderRescheduleReceiver : BroadcastReceiver() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val settings = settingsRepository.settingsFlow.first()
+                val settings = reminderSettingsRepository.settingsFlow.first()
                 reminderAlarmScheduler.syncWithSettings(settings)
             } finally {
                 pendingResult.finish()

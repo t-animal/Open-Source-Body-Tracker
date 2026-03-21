@@ -2,7 +2,6 @@ package de.t_animal.opensourcebodytracker.domain.metrics
 
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
-import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import javax.inject.Inject
@@ -103,23 +102,5 @@ class DerivedMetricsDependencyResolver @Inject constructor() {
             measurementToAnalysisMethods = measurementToAnalysisMethods
                 .mapValues { (_, methods) -> methods.toSet() },
         )
-    }
-}
-
-fun SettingsState.enabledAnalysisMethods(): Set<AnalysisMethod> = buildSet {
-    if (bmiEnabled) {
-        add(AnalysisMethod.Bmi)
-    }
-    if (navyBodyFatEnabled) {
-        add(AnalysisMethod.NavyBodyFat)
-    }
-    if (skinfoldBodyFatEnabled) {
-        add(AnalysisMethod.Skinfold3SiteBodyFat)
-    }
-    if (waistHipRatioEnabled) {
-        add(AnalysisMethod.WaistHipRatio)
-    }
-    if (waistHeightRatioEnabled) {
-        add(AnalysisMethod.WaistHeightRatio)
     }
 }

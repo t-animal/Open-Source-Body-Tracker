@@ -30,10 +30,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
+import de.t_animal.opensourcebodytracker.core.model.GeneralSettings
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationResult
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
@@ -60,7 +60,7 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BodyTrackerNavHost(
-    settingsRepository: SettingsRepository,
+    generalSettingsRepository: GeneralSettingsRepository,
     automaticExportScheduler: AutomaticExportScheduler,
     reminderNotificationPoster: ReminderNotificationPoster,
     openMeasurementAddSignal: StateFlow<Long>,
@@ -70,8 +70,8 @@ fun BodyTrackerNavHost(
     val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
     val navController = rememberNavController()
 
-    val settings by settingsRepository.settingsFlow.collectAsStateWithLifecycle(
-        initialValue = defaultSettingsState(),
+    val generalSettings by generalSettingsRepository.settingsFlow.collectAsStateWithLifecycle(
+        initialValue = GeneralSettings(),
     )
     val openMeasurementAddRequest by openMeasurementAddSignal.collectAsStateWithLifecycle(
         initialValue = 0L,
@@ -87,10 +87,10 @@ fun BodyTrackerNavHost(
         Routes.ImportBackup,
     )
 
-    LaunchedEffect(settings, currentRoute) {
+    LaunchedEffect(generalSettings, currentRoute) {
         val route = currentRoute ?: return@LaunchedEffect
 
-        val shouldShowOnboarding = !settings.onboardingCompleted
+        val shouldShowOnboarding = !generalSettings.onboardingCompleted
 
         if (shouldShowOnboarding && route !in onboardingRoutes) {
             while (navController.popBackStack()) {
@@ -106,11 +106,11 @@ fun BodyTrackerNavHost(
         }
     }
 
-    LaunchedEffect(openMeasurementAddRequest, settings.onboardingCompleted, currentRoute) {
+    LaunchedEffect(openMeasurementAddRequest, generalSettings.onboardingCompleted, currentRoute) {
         if (openMeasurementAddRequest <= handledOpenMeasurementAddRequest) {
             return@LaunchedEffect
         }
-        if (!settings.onboardingCompleted) {
+        if (!generalSettings.onboardingCompleted) {
             return@LaunchedEffect
         }
 
@@ -307,7 +307,7 @@ fun BodyTrackerNavHost(
                     onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
                     onAdd = { navController.navigate(Routes.MeasurementAdd) },
                     onOpenMore = { navController.navigate(Routes.MeasurementListAll) },
-                    showDemoBanner = settings.isDemoMode,
+                    showDemoBanner = generalSettings.isDemoMode,
                     onResetApp = onResetApp,
                     contentPadding = contentPadding,
                 )

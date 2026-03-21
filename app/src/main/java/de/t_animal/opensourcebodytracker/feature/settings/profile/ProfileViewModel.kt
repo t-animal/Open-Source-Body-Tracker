@@ -6,15 +6,15 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
 import de.t_animal.opensourcebodytracker.core.model.Sex
-import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.core.util.formatDecimalForInput
 import de.t_animal.opensourcebodytracker.core.util.parseLocalizedFloatOrNull
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
-import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
 import java.time.LocalDate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +40,8 @@ sealed interface ProfileEvent {
 class ProfileViewModel @AssistedInject constructor(
     @Assisted val mode: ProfileMode,
     private val repository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
+    private val measurementSettingsRepository: MeasurementSettingsRepository,
+    private val generalSettingsRepository: GeneralSettingsRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
 ) : ViewModel() {
 
@@ -117,19 +118,19 @@ class ProfileViewModel @AssistedInject constructor(
                 profile,
             )
 
-            val currentSettings = settingsRepository.settingsFlow.first()
-            val requiredAwareSettings = ensureRequiredMeasurementsEnabled(currentSettings, profile)
-            val settingsToSave = if (mode == ProfileMode.Onboarding) {
-                requiredAwareSettings.copy(
-                    onboardingCompleted = false,
-                    isDemoMode = false,
-                )
-            } else {
-                requiredAwareSettings
+            val currentMeasurementSettings = measurementSettingsRepository.settingsFlow.first()
+            val requiredAwareMeasurementSettings = ensureRequiredMeasurementsEnabled(currentMeasurementSettings, profile)
+            if (requiredAwareMeasurementSettings != currentMeasurementSettings) {
+                measurementSettingsRepository.saveSettings(requiredAwareMeasurementSettings)
             }
 
-            if (settingsToSave != currentSettings) {
-                settingsRepository.saveSettings(settingsToSave)
+            if (mode == ProfileMode.Onboarding) {
+                generalSettingsRepository.updateSettings {
+                    it.copy(
+                        onboardingCompleted = false,
+                        isDemoMode = false,
+                    )
+                }
             }
 
             _events.emit(ProfileEvent.Saved)
@@ -137,11 +138,11 @@ class ProfileViewModel @AssistedInject constructor(
     }
 
     private fun ensureRequiredMeasurementsEnabled(
-        settings: SettingsState,
+        settings: MeasurementSettings,
         profile: UserProfile,
-    ): SettingsState {
+    ): MeasurementSettings {
         val requiredMeasurements = dependencyResolver
-            .resolve(settings.enabledAnalysisMethods(), profile)
+            .resolve(settings.enabledAnalysisMethods, profile)
             .requiredMeasurements
 
         val missingRequiredMeasurements = requiredMeasurements - settings.enabledMeasurements
@@ -154,4 +155,3 @@ class ProfileViewModel @AssistedInject constructor(
         )
     }
 }
-

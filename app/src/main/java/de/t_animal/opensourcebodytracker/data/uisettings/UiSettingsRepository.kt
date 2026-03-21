@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.data.settings
+package de.t_animal.opensourcebodytracker.data.uisettings
 
 import kotlinx.coroutines.flow.Flow
 

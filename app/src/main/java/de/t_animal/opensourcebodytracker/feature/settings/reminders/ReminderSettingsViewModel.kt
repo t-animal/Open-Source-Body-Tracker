@@ -7,8 +7,9 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
-import de.t_animal.opensourcebodytracker.core.model.SettingsState
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
+import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository
 import java.time.DayOfWeek
 import java.time.LocalTime
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -35,7 +36,8 @@ sealed interface ReminderSettingsEvent {
 @HiltViewModel(assistedFactory = ReminderSettingsViewModel.Factory::class)
 class ReminderSettingsViewModel @AssistedInject constructor(
     @Assisted val mode: ReminderMode,
-    private val settingsRepository: SettingsRepository,
+    private val reminderSettingsRepository: ReminderSettingsRepository,
+    private val generalSettingsRepository: GeneralSettingsRepository,
     private val reminderAlarmScheduler: ReminderAlarmScheduler,
 ) : ViewModel() {
 
@@ -52,12 +54,12 @@ class ReminderSettingsViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            val settings = settingsRepository.settingsFlow.first()
+            val reminderSettings = reminderSettingsRepository.settingsFlow.first()
             _uiState.value = _uiState.value.copy(
                 isLoading = false,
-                enabled = settings.reminderEnabled,
-                weekdays = settings.reminderWeekdays,
-                time = settings.reminderTime,
+                enabled = reminderSettings.reminderEnabled,
+                weekdays = reminderSettings.reminderWeekdays,
+                time = reminderSettings.reminderTime,
                 errorMessage = null,
             )
         }
@@ -110,15 +112,21 @@ class ReminderSettingsViewModel @AssistedInject constructor(
         }
 
         viewModelScope.launch {
-            val settings = settingsRepository.settingsFlow.first()
-            val updatedSettings = settings.copy(
+            val currentSettings = reminderSettingsRepository.settingsFlow.first()
+            val updatedSettings = ReminderSettings(
                 reminderEnabled = current.enabled,
                 reminderWeekdays = current.weekdays,
                 reminderTime = current.time,
-            ).finalizeForMode(mode = mode)
+            )
 
-            if (updatedSettings != settings) {
-                settingsRepository.saveSettings(updatedSettings)
+            if (updatedSettings != currentSettings) {
+                reminderSettingsRepository.saveSettings(updatedSettings)
+            }
+
+            if (mode == ReminderMode.Onboarding) {
+                generalSettingsRepository.updateSettings {
+                    it.copy(onboardingCompleted = true, isDemoMode = false)
+                }
             }
 
             reminderAlarmScheduler.syncWithSettings(updatedSettings)
@@ -127,15 +135,3 @@ class ReminderSettingsViewModel @AssistedInject constructor(
         }
     }
 }
-
-private fun SettingsState.finalizeForMode(mode: ReminderMode): SettingsState {
-    return when (mode) {
-        ReminderMode.Onboarding -> copy(
-            onboardingCompleted = true,
-            isDemoMode = false,
-        )
-
-        ReminderMode.Settings -> this
-    }
-}
-

@@ -42,7 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
-import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
+import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -277,12 +277,12 @@ private fun BodyMetric.label(): String = when (this) {
 @Preview(showBackground = true)
 @Composable
 private fun MeasurementVisibilitySettingsScreenPreview() {
-    val settings = defaultSettingsState().copy(
+    val settings = MeasurementSettings(
         enabledMeasurements = MeasuredBodyMetric.entries.toSet() - setOf(
             MeasuredBodyMetric.ChestSkinfold,
             MeasuredBodyMetric.AbdomenSkinfold,
         ),
-        visibleInAnalysis = defaultSettingsState().visibleInAnalysis - MeasuredBodyMetric.BodyFat,
+        visibleInAnalysis = MeasurementSettings().visibleInAnalysis - MeasuredBodyMetric.BodyFat,
     )
 
     BodyTrackerTheme {

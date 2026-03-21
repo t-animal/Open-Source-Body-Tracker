@@ -8,12 +8,10 @@ import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
-import de.t_animal.opensourcebodytracker.core.model.visibleInAnalysisOrdered
+import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
+import de.t_animal.opensourcebodytracker.data.uisettings.UiSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +27,7 @@ import java.time.Clock
 class AnalysisViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
-    settingsRepository: SettingsRepository,
+    measurementSettingsRepository: MeasurementSettingsRepository,
     private val uiSettingsRepository: UiSettingsRepository,
     private val calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     private val clock: Clock,
@@ -49,7 +47,7 @@ class AnalysisViewModel @Inject constructor(
     val uiState: StateFlow<AnalysisUiState> = combine(
         measurementRepository.observeAll(),
         profileRepository.requiredProfileFlow,
-        settingsRepository.settingsFlow,
+        measurementSettingsRepository.settingsFlow,
         uiSettingsRepository.settingsFlow,
         customChartOrderOverride,
     ) { measurements, profile, settings, uiSettings, customChartOrderUntilSaved->
@@ -60,7 +58,7 @@ class AnalysisViewModel @Inject constructor(
             )
         }
 
-        val baseOrder = settings.visibleInAnalysisOrdered()
+        val baseOrder = settings.visibleInAnalysisOrdered
         val chartOrder = customChartOrderUntilSaved ?: uiSettings.analysisChartOrder
         val orderedMetrics = if (chartOrder.isEmpty()) {
             baseOrder
