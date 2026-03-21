@@ -6,28 +6,28 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import javax.inject.Inject
 
-data class DerivedMeasurementAnalysis(
+data class DerivedMetricsAnalysis(
     val metrics: DerivedMetrics,
     val ratings: DerivedMetricRatings,
 )
 
-class CalculateMeasurementDerivedMetricsUseCase @Inject constructor(
+class CalculateAndRateDerivedMetricsUseCase @Inject constructor(
     private val calculator: DerivedMetricsCalculator,
     private val rater: DerivedMetricsRater,
 ) {
     operator fun invoke(
         profile: UserProfile?,
         measurement: BodyMeasurement,
-    ): DerivedMeasurementAnalysis {
+    ): DerivedMetricsAnalysis {
         if (profile == null) {
-            return DerivedMeasurementAnalysis(
+            return DerivedMetricsAnalysis(
                 metrics = DerivedMetrics(),
                 ratings = DerivedMetricRatings(),
             )
         }
 
         val metrics = calculator.calculate(profile = profile, measurement = measurement)
-        return DerivedMeasurementAnalysis(
+        return DerivedMetricsAnalysis(
             metrics = metrics,
             ratings = rater.rate(sex = profile.sex, metrics = metrics),
         )

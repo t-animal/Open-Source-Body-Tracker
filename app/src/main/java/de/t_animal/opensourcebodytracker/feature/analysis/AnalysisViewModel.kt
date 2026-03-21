@@ -10,7 +10,7 @@ import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.data.uisettings.UiSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
+import de.t_animal.opensourcebodytracker.domain.metrics.CalculateAndRateDerivedMetricsUseCase
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,7 +29,7 @@ class AnalysisViewModel @Inject constructor(
     profileRepository: ProfileRepository,
     measurementSettingsRepository: MeasurementSettingsRepository,
     private val uiSettingsRepository: UiSettingsRepository,
-    private val calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
+    private val calculateMeasurementDerivedMetrics: CalculateAndRateDerivedMetricsUseCase,
     private val clock: Clock,
 ) : ViewModel() {
 

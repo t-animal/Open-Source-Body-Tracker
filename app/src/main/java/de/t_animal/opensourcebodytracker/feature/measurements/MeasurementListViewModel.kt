@@ -11,7 +11,7 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
+import de.t_animal.opensourcebodytracker.domain.metrics.CalculateAndRateDerivedMetricsUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -38,7 +38,7 @@ class MeasurementListViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
     measurementSettingsRepository: MeasurementSettingsRepository,
-    calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
+    calculateMeasurementDerivedMetrics: CalculateAndRateDerivedMetricsUseCase,
 ) : ViewModel() {
     val uiState: StateFlow<MeasurementListUiState> = combine(
         measurementRepository.observeAll(),
