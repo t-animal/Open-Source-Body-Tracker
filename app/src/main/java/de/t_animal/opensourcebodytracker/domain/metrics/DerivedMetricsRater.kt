@@ -5,8 +5,9 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
 import de.t_animal.opensourcebodytracker.core.model.RatingSeverity
 import de.t_animal.opensourcebodytracker.core.model.Sex
+import javax.inject.Inject
 
-class DerivedMetricsRater {
+class DerivedMetricsRater @Inject constructor() {
     fun rate(sex: Sex, metrics: DerivedMetrics): DerivedMetricRatings =
         DerivedMetricRatings(
             bmi = metrics.bmi?.let { rateBmi(it) },

@@ -105,7 +105,7 @@ The app enables users to record key anthropometric data, monitor changes, and ca
 It is translated into English and German.
 
 The project is built using **MVVM architecture**, **Jetpack Compose** for the UI layer,
-**Room** for measurement storage and **DataStore** for profile/settings persistence.
+**Hilt** for dependency injection, **Room** for measurement storage and **DataStore** for profile/settings persistence.
 
 This is also a test for AI-driven development, so don't expect much. It might kill your cat or whatever.
 
@@ -164,6 +164,7 @@ like cm and kg. In the future there may be a switch for the user to display impe
 * Kotlin
 * Android SDK
 * Jetpack Compose
+* Hilt (dependency injection)
 * ViewModel
 * StateFlow / LiveData
 * Vico (Compose charts)

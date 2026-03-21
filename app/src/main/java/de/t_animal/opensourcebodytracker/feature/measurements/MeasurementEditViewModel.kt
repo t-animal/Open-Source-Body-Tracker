@@ -1,13 +1,15 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
+import de.t_animal.opensourcebodytracker.data.photos.NewPhotoCaptureTarget
+import java.io.File
 import de.t_animal.opensourcebodytracker.core.util.formatEpochMillisAsIsoDate
 import de.t_animal.opensourcebodytracker.core.util.parseLocalizedDoubleOrNull
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
@@ -23,6 +25,9 @@ import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementResu
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
+import de.t_animal.opensourcebodytracker.ui.navigation.Routes
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,7 +66,9 @@ sealed interface MeasurementEditEvent {
     data object Deleted : MeasurementEditEvent
 }
 
-class MeasurementEditViewModel(
+@HiltViewModel
+class MeasurementEditViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val repository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
     private val profileRepository: ProfileRepository,
@@ -69,13 +76,21 @@ class MeasurementEditViewModel(
     private val deleteMeasurementUseCase: DeleteMeasurementUseCase,
     private val saveMeasurementUseCase: SaveMeasurementUseCase,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
-    private val measurementId: Long?,
 ) : ViewModel() {
+    private val measurementId: Long? = Routes.parseMeasurementEditId(savedStateHandle)
     private val _uiState = MutableStateFlow<MeasurementEditUiState>(MeasurementEditUiState.Loading)
     val uiState: StateFlow<MeasurementEditUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<MeasurementEditEvent>()
     val events = _events.asSharedFlow()
+
+    fun createPhotoCaptureTarget() = photoStorage.createTemporaryNewPhotoCaptureTarget()
+
+    suspend fun clearTemporaryCapturePhotos() = photoStorage.clearTemporaryCapturePhotos()
+
+    fun resolveTemporaryCapturePhotoFile(path: TemporaryCapturePhotoPath) = photoStorage.resolveTemporaryCapturePhotoFile(path)
+
+    fun resolvePhotoFile(path: PersistedPhotoPath) = photoStorage.resolvePhotoFile(path)
 
     init {
         viewModelScope.launch {
@@ -298,30 +313,6 @@ private fun defaultMetricInputs(): Map<MeasuredBodyMetric, String> {
     return MeasuredBodyMetric.entries.associateWith { "" }
 }
 
-class MeasurementEditViewModelFactory(
-    private val repository: MeasurementRepository,
-    private val photoStorage: InternalPhotoStorage,
-    private val profileRepository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
-    private val deleteMeasurementUseCase: DeleteMeasurementUseCase,
-    private val saveMeasurementUseCase: SaveMeasurementUseCase,
-    private val dependencyResolver: DerivedMetricsDependencyResolver,
-    private val measurementId: Long?,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MeasurementEditViewModel(
-            repository = repository,
-            photoStorage = photoStorage,
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            deleteMeasurementUseCase = deleteMeasurementUseCase,
-            saveMeasurementUseCase = saveMeasurementUseCase,
-            dependencyResolver = dependencyResolver,
-            measurementId = measurementId,
-        ) as T
-    }
-}
 
 private fun calculateHasUnsavedChanges(state: MeasurementEditUiState.Loaded): Boolean {
     if (state.measurementId == null) {

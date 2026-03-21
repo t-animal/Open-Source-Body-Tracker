@@ -13,9 +13,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import de.t_animal.opensourcebodytracker.MainActivity
 import de.t_animal.opensourcebodytracker.R
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class ReminderNotificationPoster(
-    private val context: Context,
+class ReminderNotificationPoster @Inject constructor(
+    @ApplicationContext private val context: Context,
 ) {
     fun showReminderNotification(): ReminderNotificationResult {
         if (!areNotificationsEnabled()) {

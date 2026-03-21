@@ -2,8 +2,9 @@ package de.t_animal.opensourcebodytracker.domain.demodata
 
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
+import javax.inject.Inject
 
-class GenerateDemoDataUseCase(
+class GenerateDemoDataUseCase @Inject constructor(
     private val measurementRepository: MeasurementRepository,
     private val demoDataMeasurementSeriesGenerator: DemoDataMeasurementSeriesGenerator,
     private val demoDataPhotoSeeder: DemoDataPhotoSeeder,

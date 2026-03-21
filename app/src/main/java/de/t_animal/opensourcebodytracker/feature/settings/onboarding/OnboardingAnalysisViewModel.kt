@@ -1,8 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.settings.onboarding
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
@@ -38,7 +39,8 @@ sealed interface OnboardingAnalysisEvent {
     data object Completed : OnboardingAnalysisEvent
 }
 
-class OnboardingAnalysisViewModel(
+@HiltViewModel
+class OnboardingAnalysisViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
@@ -164,20 +166,5 @@ class OnboardingAnalysisViewModel(
                 _errorMessage.value = throwable.message ?: "Could not save onboarding settings"
             }
         }
-    }
-}
-
-class OnboardingAnalysisViewModelFactory(
-    private val settingsRepository: SettingsRepository,
-    private val profileRepository: ProfileRepository,
-    private val dependencyResolver: DerivedMetricsDependencyResolver,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return OnboardingAnalysisViewModel(
-            settingsRepository = settingsRepository,
-            profileRepository = profileRepository,
-            dependencyResolver = dependencyResolver,
-        ) as T
     }
 }

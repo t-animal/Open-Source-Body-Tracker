@@ -34,14 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
-import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.components.MetricChartCard
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.LocalDate
@@ -50,22 +45,9 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun AnalysisRoute(
-    measurementRepository: MeasurementRepository,
-    profileRepository: ProfileRepository,
-    settingsRepository: SettingsRepository,
-    uiSettingsRepository: UiSettingsRepository,
-    calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     contentPadding: PaddingValues,
 ) {
-    val vm: AnalysisViewModel = viewModel(
-        factory = AnalysisViewModelFactory(
-            measurementRepository = measurementRepository,
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            uiSettingsRepository = uiSettingsRepository,
-            calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-        ),
-    )
+    val vm: AnalysisViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     AnalysisScreen(

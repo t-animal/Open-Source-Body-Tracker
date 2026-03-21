@@ -2,6 +2,7 @@ package de.t_animal.opensourcebodytracker.domain.demodata
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.Sex
+import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -14,10 +15,11 @@ import org.junit.Test
 class DemoDataMeasurementSeriesGeneratorTest {
     private val now = Instant.parse("2026-02-24T12:00:00Z")
     private val zoneId = ZoneId.systemDefault()
+    private val clock = Clock.fixed(now, zoneId)
 
     @Test
     fun generateMeasurements_hasExpectedCountSpacingAndAnchors() {
-        val generator = DemoDataMeasurementSeriesGenerator(nowProvider = { now })
+        val generator = DemoDataMeasurementSeriesGenerator(clock)
 
         val measurements = generator.generateMeasurements(
             sex = Sex.Male,
@@ -48,7 +50,7 @@ class DemoDataMeasurementSeriesGeneratorTest {
 
     @Test
     fun generateMeasurements_firstCycleLosesThenRegains() {
-        val generator = DemoDataMeasurementSeriesGenerator(nowProvider = { now })
+        val generator = DemoDataMeasurementSeriesGenerator(clock)
 
         val measurements = generator.generateMeasurements(
             sex = Sex.Male,
@@ -70,7 +72,7 @@ class DemoDataMeasurementSeriesGeneratorTest {
 
     @Test
     fun generateMeasurements_isDeterministicForSameSeedAndNow() {
-        val generator = DemoDataMeasurementSeriesGenerator(nowProvider = { now })
+        val generator = DemoDataMeasurementSeriesGenerator(clock)
 
         val first = generator.generateMeasurements(
             sex = Sex.Female,

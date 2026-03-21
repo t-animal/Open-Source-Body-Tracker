@@ -1,14 +1,17 @@
 package de.t_animal.opensourcebodytracker.feature.photos
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.ui.navigation.Routes
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,11 +27,13 @@ sealed interface PhotoAnimationUiState {
     ) : PhotoAnimationUiState
 }
 
-class PhotoAnimationViewModel(
+@HiltViewModel
+class PhotoAnimationViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val measurementRepository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
-    private val selectedMeasurementIds: List<Long>,
 ) : ViewModel() {
+    private val selectedMeasurementIds: List<Long> = Routes.parsePhotoAnimateIds(savedStateHandle)
 
     private val mutableUiState = MutableStateFlow<PhotoAnimationUiState>(PhotoAnimationUiState.Loading)
     val uiState: StateFlow<PhotoAnimationUiState> = mutableUiState.asStateFlow()
@@ -89,17 +94,3 @@ internal fun buildAnimationFrameItems(
     }
 }
 
-class PhotoAnimationViewModelFactory(
-    private val measurementRepository: MeasurementRepository,
-    private val photoStorage: InternalPhotoStorage,
-    private val selectedMeasurementIds: List<Long>,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return PhotoAnimationViewModel(
-            measurementRepository = measurementRepository,
-            photoStorage = photoStorage,
-            selectedMeasurementIds = selectedMeasurementIds,
-        ) as T
-    }
-}

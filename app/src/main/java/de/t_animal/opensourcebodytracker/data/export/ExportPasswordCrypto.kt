@@ -6,9 +6,11 @@ import com.google.crypto.tink.Aead
 import com.google.crypto.tink.KeyTemplates
 import com.google.crypto.tink.aead.AeadConfig
 import com.google.crypto.tink.integration.android.AndroidKeysetManager
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class ExportPasswordCrypto(
-    private val context: Context,
+class ExportPasswordCrypto @Inject constructor(
+    @ApplicationContext private val context: Context,
 ) {
     private val aead: Aead by lazy {
         AeadConfig.register()

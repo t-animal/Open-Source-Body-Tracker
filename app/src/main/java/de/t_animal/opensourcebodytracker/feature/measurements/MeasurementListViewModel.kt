@@ -1,8 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.measurements
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
@@ -34,7 +35,8 @@ data class MeasurementListItemUiModel(
     val derivedMetricRatings: DerivedMetricRatings = DerivedMetricRatings(),
 )
 
-class MeasurementListViewModel(
+@HiltViewModel
+class MeasurementListViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
@@ -74,22 +76,5 @@ class MeasurementListViewModel(
 
     companion object {
         private const val PREVIEW_LIMIT = 20
-    }
-}
-
-class MeasurementListViewModelFactory(
-    private val measurementRepository: MeasurementRepository,
-    private val profileRepository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
-    private val calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MeasurementListViewModel(
-            measurementRepository = measurementRepository,
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-        ) as T
     }
 }

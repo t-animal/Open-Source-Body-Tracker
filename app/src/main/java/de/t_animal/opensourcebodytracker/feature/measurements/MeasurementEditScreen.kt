@@ -36,17 +36,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
-import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
-import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.photos.NewPhotoCaptureTarget
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
-import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DeleteMeasurementDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DiscardChangesDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditFabColumn
@@ -62,29 +55,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MeasurementEditRoute(
-    repository: MeasurementRepository,
-    photoStorage: InternalPhotoStorage,
-    profileRepository: ProfileRepository,
-    settingsRepository: SettingsRepository,
-    deleteMeasurementUseCase: DeleteMeasurementUseCase,
-    saveMeasurementUseCase: SaveMeasurementUseCase,
-    measurementId: Long?,
     onFinished: () -> Unit,
     onCancel: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val vm: MeasurementEditViewModel = viewModel(
-        factory = MeasurementEditViewModelFactory(
-            repository = repository,
-            photoStorage = photoStorage,
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            deleteMeasurementUseCase = deleteMeasurementUseCase,
-            saveMeasurementUseCase = saveMeasurementUseCase,
-            dependencyResolver = DerivedMetricsDependencyResolver(),
-            measurementId = measurementId,
-        ),
-    )
+    val vm: MeasurementEditViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
     var newPhotoCaptureTarget by remember { mutableStateOf<NewPhotoCaptureTarget?>(null) }
     val takePictureLauncher = rememberLauncherForActivityResult(
@@ -108,11 +83,11 @@ fun MeasurementEditRoute(
         loadedState?.persistedPhotoFilePath != null && loadedState?.isPhotoMarkedForDeletion == false
     val photoPreviewModel: File? = when {
         newPhotoTaken -> {
-            loadedState?.pendingPhotoAbsolutePath?.let(photoStorage::resolveTemporaryCapturePhotoFile)
+            loadedState?.pendingPhotoAbsolutePath?.let(vm::resolveTemporaryCapturePhotoFile)
         }
 
         oldPhotoExistsAndNotDeleted -> {
-            loadedState?.persistedPhotoFilePath?.let(photoStorage::resolvePhotoFile)
+            loadedState?.persistedPhotoFilePath?.let(vm::resolvePhotoFile)
         }
 
         else -> null
@@ -123,7 +98,7 @@ fun MeasurementEditRoute(
             when (event) {
                 MeasurementEditEvent.Saved,
                 MeasurementEditEvent.Deleted -> {
-                    photoStorage.clearTemporaryCapturePhotos()
+                    vm.clearTemporaryCapturePhotos()
                     onFinished()
                 }
             }
@@ -137,7 +112,7 @@ fun MeasurementEditRoute(
         onNoteChanged = vm::onNoteChanged,
         photoPreviewModel = photoPreviewModel,
         onTakePhotoClicked = {
-            val captureTarget = photoStorage.createTemporaryNewPhotoCaptureTarget()
+            val captureTarget = vm.createPhotoCaptureTarget()
             if (captureTarget != null) {
                 newPhotoCaptureTarget = captureTarget
                 takePictureLauncher.launch(captureTarget.uri)
@@ -149,7 +124,7 @@ fun MeasurementEditRoute(
         onSaveClicked = vm::onSaveClicked,
         onBackClicked = {
             coroutineScope.launch {
-                photoStorage.clearTemporaryCapturePhotos()
+                vm.clearTemporaryCapturePhotos()
                 onCancel()
             }
         },

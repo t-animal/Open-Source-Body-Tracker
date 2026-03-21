@@ -22,30 +22,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.Sex
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.feature.settings.components.ProfileFormSection
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun ProfileRoute(
-    repository: ProfileRepository,
-    settingsRepository: SettingsRepository,
     mode: ProfileMode,
     onFinished: () -> Unit,
     onNavigateBack: (() -> Unit)? = null,
 ) {
-    val vm: ProfileViewModel = viewModel(
-        factory = ProfileViewModelFactory(
-            repository = repository,
-            settingsRepository = settingsRepository,
-            dependencyResolver = DerivedMetricsDependencyResolver(),
-            mode = mode,
-        ),
-    )
+    val vm = hiltViewModel<ProfileViewModel, ProfileViewModel.Factory> { it.create(mode) }
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {

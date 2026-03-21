@@ -1,14 +1,14 @@
 package de.t_animal.opensourcebodytracker.feature.analysis
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.UiSettings
 import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
 import de.t_animal.opensourcebodytracker.core.model.visibleInAnalysisOrdered
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
@@ -22,18 +22,17 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.ZoneId
+import java.time.Clock
 
 @OptIn(FlowPreview::class)
-class AnalysisViewModel(
+@HiltViewModel
+class AnalysisViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
     private val uiSettingsRepository: UiSettingsRepository,
     private val calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
-    private val nowProvider: () -> Instant = { Instant.now() },
-    private val zoneIdProvider: () -> ZoneId = { ZoneId.systemDefault() },
+    private val clock: Clock,
 ) : ViewModel() {
 
     // Null means "no in-progress drag; use stored order".
@@ -73,8 +72,8 @@ class AnalysisViewModel(
         val filteredItems = filterByDuration(
             items = withDerived,
             duration = uiSettings.analysisDuration,
-            now = nowProvider(),
-            zoneId = zoneIdProvider(),
+            now = clock.instant(),
+            zoneId = clock.zone,
         )
 
         AnalysisUiState(
@@ -110,22 +109,3 @@ class AnalysisViewModel(
 }
 
 private fun <T> Set<T>.toggle(item: T) = if (item in this) this - item else this + item
-
-class AnalysisViewModelFactory(
-    private val measurementRepository: MeasurementRepository,
-    private val profileRepository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
-    private val uiSettingsRepository: UiSettingsRepository,
-    private val calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return AnalysisViewModel(
-            measurementRepository = measurementRepository,
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            uiSettingsRepository = uiSettingsRepository,
-            calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-        ) as T
-    }
-}

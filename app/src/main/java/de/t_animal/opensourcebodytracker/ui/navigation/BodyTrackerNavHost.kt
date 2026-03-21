@@ -31,22 +31,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
-import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
-import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationResult
-import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
-import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
-import de.t_animal.opensourcebodytracker.domain.importbackup.ImportBackupUseCase
-import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
-import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
-import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRoute
@@ -72,21 +60,9 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BodyTrackerNavHost(
-    profileRepository: ProfileRepository,
     settingsRepository: SettingsRepository,
-    uiSettingsRepository: UiSettingsRepository,
-    exportPasswordRepository: ExportPasswordRepository,
-    exportToFileSystemUseCase: ExportToFilesystemUseCase,
-    importBackupUseCase: ImportBackupUseCase,
     automaticExportScheduler: AutomaticExportScheduler,
-    measurementRepository: MeasurementRepository,
-    internalPhotoStorage: InternalPhotoStorage,
-    calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
-    generateDemoDataUseCase: GenerateDemoDataUseCase,
-    deleteMeasurementUseCase: DeleteMeasurementUseCase,
-    saveMeasurementUseCase: SaveMeasurementUseCase,
     reminderNotificationPoster: ReminderNotificationPoster,
-    reminderAlarmScheduler: ReminderAlarmScheduler,
     openMeasurementAddSignal: StateFlow<Long>,
     onResetApp: () -> Unit,
 ) {
@@ -199,9 +175,6 @@ fun BodyTrackerNavHost(
     ) {
         composable(Routes.OnboardingStart) {
             OnboardingStartRoute(
-                profileRepository = profileRepository,
-                settingsRepository = settingsRepository,
-                generateDemoDataUseCase = generateDemoDataUseCase,
                 onCreateProfileSelected = {
                     navController.navigate(Routes.OnboardingProfile) {
                         launchSingleTop = true
@@ -222,8 +195,6 @@ fun BodyTrackerNavHost(
 
         composable(Routes.OnboardingProfile) {
             ProfileRoute(
-                repository = profileRepository,
-                settingsRepository = settingsRepository,
                 mode = ProfileMode.Onboarding,
                 onFinished = {
                     navController.navigate(Routes.OnboardingAnalysis) {
@@ -235,8 +206,6 @@ fun BodyTrackerNavHost(
 
         composable(Routes.OnboardingAnalysis) {
             OnboardingAnalysisRoute(
-                settingsRepository = settingsRepository,
-                profileRepository = profileRepository,
                 onFinished = {
                     navController.navigate(Routes.OnboardingReminders) {
                         launchSingleTop = true
@@ -247,8 +216,6 @@ fun BodyTrackerNavHost(
 
         composable(Routes.OnboardingReminders) {
             ReminderSettingsRoute(
-                settingsRepository = settingsRepository,
-                reminderAlarmScheduler = reminderAlarmScheduler,
                 mode = ReminderMode.Onboarding,
                 onNavigateBack = {
                     navController.navigate(Routes.MeasurementList) {
@@ -260,7 +227,6 @@ fun BodyTrackerNavHost(
 
         composable(Routes.ImportBackup) {
             ImportBackupRoute(
-                importBackupUseCase = importBackupUseCase,
                 onNavigateBack = { navController.popBackStack() },
                 onImportCompleted = {
                     navController.navigate(Routes.MeasurementList) {
@@ -273,8 +239,6 @@ fun BodyTrackerNavHost(
 
         composable(Routes.Profile) {
             ProfileRoute(
-                repository = profileRepository,
-                settingsRepository = settingsRepository,
                 mode = ProfileMode.Settings,
                 onFinished = { navController.popBackStack() },
                 onNavigateBack = { navController.popBackStack() },
@@ -295,16 +259,12 @@ fun BodyTrackerNavHost(
 
         composable(Routes.SettingsMeasurements) {
             MeasurementSettingsRoute(
-                settingsRepository = settingsRepository,
-                profileRepository = profileRepository,
                 onNavigateBack = { navController.popBackStack() },
             )
         }
 
         composable(Routes.SettingsMeasurementVisibility) {
             MeasurementVisibilitySettingsRoute(
-                settingsRepository = settingsRepository,
-                profileRepository = profileRepository,
                 onNavigateBack = { navController.popBackStack() },
             )
         }
@@ -317,18 +277,13 @@ fun BodyTrackerNavHost(
 
         composable(Routes.Reminders) {
             ReminderSettingsRoute(
-                settingsRepository = settingsRepository,
-                reminderAlarmScheduler = reminderAlarmScheduler,
+                mode = ReminderMode.Settings,
                 onNavigateBack = { navController.popBackStack() },
             )
         }
 
         composable(Routes.Export) {
             ExportSettingsRoute(
-                settingsRepository = settingsRepository,
-                exportPasswordRepository = exportPasswordRepository,
-                exportToFileSystemUseCase = exportToFileSystemUseCase,
-                automaticExportScheduler = automaticExportScheduler,
                 onNavigateBack = { navController.popBackStack() },
             )
         }
@@ -349,10 +304,6 @@ fun BodyTrackerNavHost(
                 onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
             ) { contentPadding ->
                 MeasurementListRoute(
-                    measurementRepository = measurementRepository,
-                    profileRepository = profileRepository,
-                    settingsRepository = settingsRepository,
-                    calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
                     onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
                     onAdd = { navController.navigate(Routes.MeasurementAdd) },
                     onOpenMore = { navController.navigate(Routes.MeasurementListAll) },
@@ -385,10 +336,6 @@ fun BodyTrackerNavHost(
                         .padding(contentPadding),
                 ) {
                     MeasurementListFullRoute(
-                        measurementRepository = measurementRepository,
-                        profileRepository = profileRepository,
-                        settingsRepository = settingsRepository,
-                        calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
                         onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
                     )
                 }
@@ -411,11 +358,6 @@ fun BodyTrackerNavHost(
                 onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
             ) { contentPadding ->
                 AnalysisRoute(
-                    measurementRepository = measurementRepository,
-                    profileRepository = profileRepository,
-                    settingsRepository = settingsRepository,
-                    uiSettingsRepository = uiSettingsRepository,
-                    calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
                     contentPadding = contentPadding,
                 )
             }
@@ -442,8 +384,6 @@ fun BodyTrackerNavHost(
                         .padding(contentPadding),
                 ) {
                     PhotosRoute(
-                        measurementRepository = measurementRepository,
-                        photoStorage = internalPhotoStorage,
                         onOpenCompare = { leftMeasurementId, rightMeasurementId ->
                             navController.navigate(
                                 Routes.photoCompareRoute(
@@ -453,13 +393,7 @@ fun BodyTrackerNavHost(
                             )
                         },
                         onOpenAnimate = { selectedMeasurementIds ->
-                            navController.currentBackStackEntry
-                                ?.savedStateHandle
-                                ?.set(
-                                    Routes.PhotoAnimateSelectionIdsKey,
-                                    selectedMeasurementIds.toLongArray(),
-                                )
-                            navController.navigate(Routes.PhotoAnimate)
+                            navController.navigate(Routes.photoAnimateRoute(selectedMeasurementIds))
                         },
                     )
                 }
@@ -472,17 +406,7 @@ fun BodyTrackerNavHost(
                 navArgument(Routes.PhotoCompareLeftIdArg) { type = NavType.LongType },
                 navArgument(Routes.PhotoCompareRightIdArg) { type = NavType.LongType },
             ),
-        ) { backStackEntry ->
-            val leftMeasurementId = backStackEntry.arguments?.getLong(Routes.PhotoCompareLeftIdArg)
-            val rightMeasurementId = backStackEntry.arguments?.getLong(Routes.PhotoCompareRightIdArg)
-
-            if (leftMeasurementId == null || rightMeasurementId == null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-                return@composable
-            }
-
+        ) {
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -503,23 +427,17 @@ fun BodyTrackerNavHost(
                         .fillMaxSize()
                         .padding(contentPadding),
                 ) {
-                    PhotoCompareRoute(
-                        measurementRepository = measurementRepository,
-                        photoStorage = internalPhotoStorage,
-                        leftMeasurementId = leftMeasurementId,
-                        rightMeasurementId = rightMeasurementId,
-                    )
+                    PhotoCompareRoute()
                 }
             }
         }
 
-        composable(Routes.PhotoAnimate) {
-            val selectedMeasurementIds = navController.previousBackStackEntry
-                ?.savedStateHandle
-                ?.get<LongArray>(Routes.PhotoAnimateSelectionIdsKey)
-                ?.toList()
-                .orEmpty()
-
+        composable(
+            route = Routes.PhotoAnimate,
+            arguments = listOf(
+                navArgument(Routes.PhotoAnimateIdsArg) { type = NavType.StringType },
+            ),
+        ) {
             Scaffold(
                 topBar = {
                     TopAppBar(
@@ -540,11 +458,7 @@ fun BodyTrackerNavHost(
                         .fillMaxSize()
                         .padding(contentPadding),
                 ) {
-                    PhotoAnimationRoute(
-                        measurementRepository = measurementRepository,
-                        photoStorage = internalPhotoStorage,
-                        selectedMeasurementIds = selectedMeasurementIds,
-                    )
+                    PhotoAnimationRoute()
                 }
             }
         }
@@ -571,10 +485,7 @@ fun BodyTrackerNavHost(
                             .fillMaxSize()
                             .padding(contentPadding),
                     ) {
-                        FakeDataGeneratorRoute(
-                            profileRepository = profileRepository,
-                            generateDemoDataUseCase = generateDemoDataUseCase,
-                        )
+                        FakeDataGeneratorRoute()
                     }
                 }
             }
@@ -582,13 +493,6 @@ fun BodyTrackerNavHost(
 
         composable(Routes.MeasurementAdd) {
             MeasurementEditRoute(
-                repository = measurementRepository,
-                photoStorage = internalPhotoStorage,
-                profileRepository = profileRepository,
-                settingsRepository = settingsRepository,
-                deleteMeasurementUseCase = deleteMeasurementUseCase,
-                saveMeasurementUseCase = saveMeasurementUseCase,
-                measurementId = null,
                 onFinished = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() },
             )
@@ -599,23 +503,8 @@ fun BodyTrackerNavHost(
             arguments = listOf(
                 navArgument(Routes.MeasurementEditIdArg) { type = NavType.LongType },
             ),
-        ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getLong(Routes.MeasurementEditIdArg)
-            if (id == null) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-                return@composable
-            }
-
+        ) {
             MeasurementEditRoute(
-                repository = measurementRepository,
-                photoStorage = internalPhotoStorage,
-                profileRepository = profileRepository,
-                settingsRepository = settingsRepository,
-                deleteMeasurementUseCase = deleteMeasurementUseCase,
-                saveMeasurementUseCase = saveMeasurementUseCase,
-                measurementId = id,
                 onFinished = { navController.popBackStack() },
                 onCancel = { navController.popBackStack() },
             )

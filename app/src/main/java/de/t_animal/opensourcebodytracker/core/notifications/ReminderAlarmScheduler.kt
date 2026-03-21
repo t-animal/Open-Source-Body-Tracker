@@ -7,10 +7,12 @@ import android.content.Intent
 import android.os.Build
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.domain.reminders.ReminderScheduleCalculator
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.ZonedDateTime
+import javax.inject.Inject
 
-class ReminderAlarmScheduler(
-    private val context: Context,
+class ReminderAlarmScheduler @Inject constructor(
+    @ApplicationContext private val context: Context,
 ) {
     fun syncWithSettings(
         settings: SettingsState,

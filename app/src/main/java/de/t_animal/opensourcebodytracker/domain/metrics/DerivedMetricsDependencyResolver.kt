@@ -5,13 +5,14 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
+import javax.inject.Inject
 
 data class DerivedBodyMetricsDependencies(
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
     val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>> = emptyMap(),
 )
 
-class DerivedMetricsDependencyResolver {
+class DerivedMetricsDependencyResolver @Inject constructor() {
 
     fun resolve(
         enabledAnalysisMethods: Set<AnalysisMethod>,

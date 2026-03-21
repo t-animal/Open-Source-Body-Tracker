@@ -22,30 +22,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.feature.settings.components.AnalysisMethodsSection
 import de.t_animal.opensourcebodytracker.feature.settings.components.MeasurementCollectionSection
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun MeasurementSettingsRoute(
-    settingsRepository: SettingsRepository,
-    profileRepository: ProfileRepository,
     onNavigateBack: () -> Unit,
 ) {
-    val vm: ChooseMeasurementSettingsViewModel = viewModel(
-        factory = MeasurementSettingsViewModelFactory(
-            settingsRepository = settingsRepository,
-            profileRepository = profileRepository,
-            dependencyResolver = DerivedMetricsDependencyResolver(),
-        ),
-    )
+    val vm: ChooseMeasurementSettingsViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     ChooseMeasurementSettingsScreen(

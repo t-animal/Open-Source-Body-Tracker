@@ -11,10 +11,12 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.Dispatchers
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.withContext
 
-class InternalPhotoStorage(
-    context: Context,
+class InternalPhotoStorage @Inject constructor(
+    @ApplicationContext context: Context,
 ) {
     private val appContext = context.applicationContext
     private val photosDir: File = File(

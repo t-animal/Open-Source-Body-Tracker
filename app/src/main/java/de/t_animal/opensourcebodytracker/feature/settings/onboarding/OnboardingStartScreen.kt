@@ -21,28 +21,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun OnboardingStartRoute(
-    profileRepository: ProfileRepository,
-    settingsRepository: SettingsRepository,
-    generateDemoDataUseCase: GenerateDemoDataUseCase,
     onCreateProfileSelected: () -> Unit,
     onDemoModeCompleted: () -> Unit,
     onImportBackupClicked: () -> Unit,
 ) {
-    val vm: OnboardingStartViewModel = viewModel(
-        factory = OnboardingStartViewModelFactory(
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            generateDemoDataUseCase = generateDemoDataUseCase,
-        ),
-    )
+    val vm: OnboardingStartViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(vm) {

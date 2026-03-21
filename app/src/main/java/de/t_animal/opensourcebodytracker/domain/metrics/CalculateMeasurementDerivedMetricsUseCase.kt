@@ -4,13 +4,14 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
+import javax.inject.Inject
 
 data class DerivedMeasurementAnalysis(
     val metrics: DerivedMetrics,
     val ratings: DerivedMetricRatings,
 )
 
-class CalculateMeasurementDerivedMetricsUseCase(
+class CalculateMeasurementDerivedMetricsUseCase @Inject constructor(
     private val calculator: DerivedMetricsCalculator,
     private val rater: DerivedMetricsRater,
 ) {

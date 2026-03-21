@@ -4,6 +4,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.photos.PhotoStorageContract
 import de.t_animal.opensourcebodytracker.data.export.ExportArchiveEntry
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import javax.inject.Inject
 
 data class CollectedExportPhotos(
     val entries: List<ExportArchiveEntry.FileEntry>,
@@ -25,7 +26,7 @@ interface ExportPhotoCollector {
     ): CollectedExportPhotos
 }
 
-class InternalStorageExportPhotoCollector(
+class InternalStorageExportPhotoCollector @Inject constructor(
     private val photoStorage: InternalPhotoStorage,
 ) : ExportPhotoCollector {
     override fun collect(

@@ -15,13 +15,15 @@ import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
 import java.time.DayOfWeek
 import java.time.LocalTime
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-class PreferencesSettingsRepository(
-    private val context: Context,
+class PreferencesSettingsRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
 ) : SettingsRepository {
 
     private object Keys {

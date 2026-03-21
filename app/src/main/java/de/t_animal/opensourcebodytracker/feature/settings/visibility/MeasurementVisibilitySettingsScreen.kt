@@ -38,29 +38,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.defaultSettingsState
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun MeasurementVisibilitySettingsRoute(
-    settingsRepository: SettingsRepository,
-    profileRepository: ProfileRepository,
     onNavigateBack: () -> Unit,
 ) {
-    val vm: MeasurementVisibilitySettingsViewModel = viewModel(
-        factory = SettingsViewModelFactory(
-            settingsRepository = settingsRepository,
-            profileRepository = profileRepository,
-            dependencyResolver = DerivedMetricsDependencyResolver(),
-        ),
-    )
+    val vm: MeasurementVisibilitySettingsViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     MeasurementVisibilitySettingsScreen(

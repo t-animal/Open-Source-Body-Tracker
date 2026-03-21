@@ -9,9 +9,10 @@ import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
-class AutomaticExportScheduler(
+class AutomaticExportScheduler @Inject constructor(
     private val workManager: WorkManager,
     private val settingsRepository: SettingsRepository,
 ) {

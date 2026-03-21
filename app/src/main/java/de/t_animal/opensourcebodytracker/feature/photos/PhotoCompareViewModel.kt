@@ -1,12 +1,15 @@
 package de.t_animal.opensourcebodytracker.feature.photos
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.ui.navigation.Routes
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,17 +26,22 @@ sealed interface PhotoCompareUiState {
     ) : PhotoCompareUiState
 }
 
-class PhotoCompareViewModel(
+@HiltViewModel
+class PhotoCompareViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val measurementRepository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
-    private val leftMeasurementId: Long,
-    private val rightMeasurementId: Long,
 ) : ViewModel() {
+    private val leftMeasurementId: Long
+    private val rightMeasurementId: Long
 
     private val mutableUiState = MutableStateFlow<PhotoCompareUiState>(PhotoCompareUiState.Loading)
     val uiState: StateFlow<PhotoCompareUiState> = mutableUiState.asStateFlow()
 
     init {
+        val (left, right) = Routes.parsePhotoCompareIds(savedStateHandle)
+        leftMeasurementId = left
+        rightMeasurementId = right
         loadComparePhotos()
     }
 
@@ -79,19 +87,3 @@ class PhotoCompareViewModel(
     }
 }
 
-class PhotoCompareViewModelFactory(
-    private val measurementRepository: MeasurementRepository,
-    private val photoStorage: InternalPhotoStorage,
-    private val leftMeasurementId: Long,
-    private val rightMeasurementId: Long,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return PhotoCompareViewModel(
-            measurementRepository = measurementRepository,
-            photoStorage = photoStorage,
-            leftMeasurementId = leftMeasurementId,
-            rightMeasurementId = rightMeasurementId,
-        ) as T
-    }
-}

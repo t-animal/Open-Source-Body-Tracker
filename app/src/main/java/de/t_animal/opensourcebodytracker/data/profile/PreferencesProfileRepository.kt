@@ -11,12 +11,14 @@ import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import java.time.LocalDate
 import kotlinx.coroutines.flow.Flow
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.flow.map
 
 private val Context.profileDataStore: DataStore<Preferences> by preferencesDataStore(name = "profile")
 
-class PreferencesProfileRepository(
-    private val context: Context,
+class PreferencesProfileRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
 ) : ProfileRepository {
     private object Keys {
         val sex = stringPreferencesKey("sex")

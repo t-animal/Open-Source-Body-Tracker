@@ -10,6 +10,7 @@ Maintain and extend the Android app safely and quickly with consistent architect
 ## Tech Stack
 
 - Kotlin + Jetpack Compose + MVVM
+- Hilt for dependency injection
 - Room for measurement persistence
 - DataStore for profile/settings persistence
 - Domain layer for derived metrics (computed at runtime, not stored)
@@ -18,7 +19,7 @@ Maintain and extend the Android app safely and quickly with consistent architect
 
 ## Source of Truth (Code Areas)
 
-- App/DI: `app/src/main/java/de/t_animal/opensourcebodytracker/AppContainer.kt`
+- DI modules: `app/src/main/java/de/t_animal/opensourcebodytracker/di/` (DatabaseModule, BindingsModule, AppModule)
 - Entry/UI host: `app/src/main/java/de/t_animal/opensourcebodytracker/MainActivity.kt`
 - Navigation: `app/src/main/java/de/t_animal/opensourcebodytracker/ui/navigation/BodyTrackerNavHost.kt`
 - Routes: `app/src/main/java/de/t_animal/opensourcebodytracker/ui/navigation/Routes.kt`
@@ -53,7 +54,7 @@ Test must succeed and may only be changed if they fail because the tested behavi
 ## Known Toolchain Constraints
 
 - AGP 9 built-in Kotlin setup is expected; do not assume Kotlin plugin wiring from older templates.
-- KSP + Room generation is required for DB layer; keep KSP configuration intact.
+- KSP processes both Room and Hilt annotations; keep KSP configuration intact.
 - `android.disallowKotlinSourceSets=false` warning is expected in this project.
 - Native library strip warnings may appear during packaging and are currently non-fatal.
 
