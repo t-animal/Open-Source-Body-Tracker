@@ -43,6 +43,7 @@ import de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
+import de.t_animal.opensourcebodytracker.domain.importbackup.ImportBackupUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
@@ -76,6 +77,7 @@ fun BodyTrackerNavHost(
     uiSettingsRepository: UiSettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
     exportToFileSystemUseCase: ExportToFilesystemUseCase,
+    importBackupUseCase: ImportBackupUseCase,
     automaticExportScheduler: AutomaticExportScheduler,
     measurementRepository: MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
@@ -258,12 +260,14 @@ fun BodyTrackerNavHost(
 
         composable(Routes.ImportBackup) {
             ImportBackupRoute(
+                importBackupUseCase = importBackupUseCase,
                 onNavigateBack = { navController.popBackStack() },
                 onImportCompleted = {
                     navController.navigate(Routes.MeasurementList) {
                         popUpTo(Routes.OnboardingStart) { inclusive = true }
                     }
                 },
+                onResetApp = onResetApp,
             )
         }
 

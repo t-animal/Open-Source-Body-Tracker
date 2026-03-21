@@ -16,6 +16,7 @@ import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotification
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
+import de.t_animal.opensourcebodytracker.domain.importbackup.ImportBackupUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
                         uiSettingsRepository = container.uiSettingsRepository,
                         exportPasswordRepository = container.exportPasswordRepository,
                         exportToFileSystemUseCase = container.exportToFilesystemUseCase,
+                        importBackupUseCase = container.importBackupUseCase,
                         automaticExportScheduler = container.automaticExportScheduler,
                         measurementRepository = container.measurementRepository,
                         internalPhotoStorage = container.internalPhotoStorage,
@@ -109,6 +111,7 @@ private fun BodyTrackerApp(
     uiSettingsRepository: de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository,
     exportPasswordRepository: ExportPasswordRepository,
     exportToFileSystemUseCase: ExportToFilesystemUseCase,
+    importBackupUseCase: ImportBackupUseCase,
     automaticExportScheduler: de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler,
     measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
     internalPhotoStorage: InternalPhotoStorage,
@@ -127,6 +130,7 @@ private fun BodyTrackerApp(
         uiSettingsRepository = uiSettingsRepository,
         exportPasswordRepository = exportPasswordRepository,
         exportToFileSystemUseCase = exportToFileSystemUseCase,
+        importBackupUseCase = importBackupUseCase,
         automaticExportScheduler = automaticExportScheduler,
         measurementRepository = measurementRepository,
         internalPhotoStorage = internalPhotoStorage,

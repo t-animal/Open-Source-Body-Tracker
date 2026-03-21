@@ -2,6 +2,7 @@ package de.t_animal.opensourcebodytracker.feature.importbackup
 
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -33,28 +34,36 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import de.t_animal.opensourcebodytracker.domain.importbackup.ImportBackupUseCase
 import de.t_animal.opensourcebodytracker.ui.components.PasswordTextField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun ImportBackupRoute(
+    importBackupUseCase: ImportBackupUseCase,
     onNavigateBack: () -> Unit,
     onImportCompleted: () -> Unit,
+    onResetApp: () -> Unit,
 ) {
     val vm: ImportBackupViewModel = viewModel(
-        factory = ImportBackupViewModelFactory(),
+        factory = ImportBackupViewModelFactory(importBackupUseCase),
     )
     val state by vm.uiState.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
                 ImportBackupEvent.ImportCompleted -> onImportCompleted()
+                is ImportBackupEvent.CatastrophicFailure -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+                    onResetApp()
+                }
             }
         }
     }
 
-    val context = LocalContext.current
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument(),
     ) { uri: Uri? ->
@@ -68,7 +77,7 @@ fun ImportBackupRoute(
         state = state,
         onSelectFileClicked = { filePickerLauncher.launch(arrayOf("application/zip")) },
         onPasswordChanged = vm::onPasswordChanged,
-        onImportClicked = vm::onImportClicked,
+        onImportClicked = { vm.onImportClicked(context) },
         onCancelClicked = onNavigateBack,
     )
 }
