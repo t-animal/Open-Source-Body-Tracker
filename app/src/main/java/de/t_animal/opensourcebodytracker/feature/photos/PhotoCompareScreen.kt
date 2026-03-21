@@ -35,30 +35,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
-import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
 import de.t_animal.opensourcebodytracker.ui.components.formatEpochMillisToLocalizedNumericDate
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.io.File
 
 @Composable
-fun PhotoCompareRoute(
-    measurementRepository: MeasurementRepository,
-    photoStorage: InternalPhotoStorage,
-    leftMeasurementId: Long,
-    rightMeasurementId: Long,
-) {
-    val viewModel: PhotoCompareViewModel = viewModel(
-        factory = PhotoCompareViewModelFactory(
-            measurementRepository = measurementRepository,
-            photoStorage = photoStorage,
-            leftMeasurementId = leftMeasurementId,
-            rightMeasurementId = rightMeasurementId,
-        ),
-    )
+fun PhotoCompareRoute() {
+    val viewModel: PhotoCompareViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     PhotoCompareScreen(state = state)

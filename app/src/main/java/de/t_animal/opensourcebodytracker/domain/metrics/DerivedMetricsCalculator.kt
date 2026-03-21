@@ -8,9 +8,10 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
 import java.time.ZoneId
+import javax.inject.Inject
 import kotlin.math.log10
 
-class DerivedMetricsCalculator {
+class DerivedMetricsCalculator @Inject constructor() {
     fun calculate(
         profile: UserProfile,
         measurement: BodyMeasurement,

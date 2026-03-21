@@ -48,9 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -68,18 +66,10 @@ private val weekdayDisplayOrder = listOf(
 
 @Composable
 fun ReminderSettingsRoute(
-    settingsRepository: SettingsRepository,
-    reminderAlarmScheduler: ReminderAlarmScheduler,
-    mode: ReminderMode = ReminderMode.Settings,
+    mode: ReminderMode,
     onNavigateBack: () -> Unit,
 ) {
-    val vm: ReminderSettingsViewModel = viewModel(
-        factory = ReminderSettingsViewModelFactory(
-            settingsRepository = settingsRepository,
-            reminderAlarmScheduler = reminderAlarmScheduler,
-            mode = mode,
-        ),
-    )
+    val vm = hiltViewModel<ReminderSettingsViewModel, ReminderSettingsViewModel.Factory> { it.create(mode) }
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val latestOnSaveClicked by rememberUpdatedState(vm::onSaveClicked)

@@ -12,13 +12,15 @@ import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 private val Context.uiSettingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "ui_settings")
 
-class PreferencesUiSettingsRepository(
-    private val context: Context,
+class PreferencesUiSettingsRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
 ) : UiSettingsRepository {
 
     private object Keys {

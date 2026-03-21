@@ -1,8 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.debug
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import de.t_animal.opensourcebodytracker.core.util.parseLocalizedDoubleOrNull
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataLeanBodyWeightKg
@@ -23,7 +24,8 @@ data class FakeDataGeneratorUiState(
     val inputError: String? = null,
 )
 
-class FakeDataGeneratorViewModel(
+@HiltViewModel
+class FakeDataGeneratorViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val generateDemoDataUseCase: GenerateDemoDataUseCase,
 ) : ViewModel() {
@@ -73,18 +75,5 @@ class FakeDataGeneratorViewModel(
                 _uiState.value = _uiState.value.copy(isGenerating = false)
             }
         }
-    }
-}
-
-class FakeDataGeneratorViewModelFactory(
-    private val profileRepository: ProfileRepository,
-    private val generateDemoDataUseCase: GenerateDemoDataUseCase,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return FakeDataGeneratorViewModel(
-            profileRepository = profileRepository,
-            generateDemoDataUseCase = generateDemoDataUseCase,
-        ) as T
     }
 }

@@ -1,8 +1,11 @@
 package de.t_animal.opensourcebodytracker.feature.settings.profile
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
@@ -33,12 +36,19 @@ sealed interface ProfileEvent {
     data object Saved : ProfileEvent
 }
 
-class ProfileViewModel(
+@HiltViewModel(assistedFactory = ProfileViewModel.Factory::class)
+class ProfileViewModel @AssistedInject constructor(
+    @Assisted val mode: ProfileMode,
     private val repository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
-    private val mode: ProfileMode,
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(mode: ProfileMode): ProfileViewModel
+    }
+
     private val _uiState = MutableStateFlow(ProfileUiState(mode = mode))
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
@@ -145,19 +155,3 @@ class ProfileViewModel(
     }
 }
 
-class ProfileViewModelFactory(
-    private val repository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
-    private val dependencyResolver: DerivedMetricsDependencyResolver,
-    private val mode: ProfileMode,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ProfileViewModel(
-            repository = repository,
-            settingsRepository = settingsRepository,
-            dependencyResolver = dependencyResolver,
-            mode = mode,
-        ) as T
-    }
-}

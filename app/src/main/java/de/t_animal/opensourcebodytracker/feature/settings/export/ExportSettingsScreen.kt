@@ -51,30 +51,15 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
-import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.ui.components.PasswordTextField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 fun ExportSettingsRoute(
-    settingsRepository: SettingsRepository,
-    exportPasswordRepository: ExportPasswordRepository,
-    exportToFileSystemUseCase: ExportToFilesystemUseCase,
-    automaticExportScheduler: AutomaticExportScheduler,
     onNavigateBack: () -> Unit,
 ) {
-    val vm: ExportSettingsViewModel = viewModel(
-        factory = ExportSettingsViewModelFactory(
-            settingsRepository = settingsRepository,
-            exportPasswordRepository = exportPasswordRepository,
-            exportToFileSystemUseCase = exportToFileSystemUseCase,
-            automaticExportScheduler = automaticExportScheduler,
-        ),
-    )
+    val vm: ExportSettingsViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var showNotificationPermissionDialog by remember { mutableStateOf(false) }

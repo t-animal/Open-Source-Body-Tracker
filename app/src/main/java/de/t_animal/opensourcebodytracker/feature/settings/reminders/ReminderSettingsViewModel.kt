@@ -1,8 +1,11 @@
 package de.t_animal.opensourcebodytracker.feature.settings.reminders
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
@@ -17,7 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class ReminderSettingsUiState(
-    val mode: ReminderMode = ReminderMode.Settings,
+    val mode: ReminderMode,
     val isLoading: Boolean = true,
     val enabled: Boolean = false,
     val weekdays: Set<DayOfWeek> = setOf(DayOfWeek.SUNDAY),
@@ -29,14 +32,19 @@ sealed interface ReminderSettingsEvent {
     data object Saved : ReminderSettingsEvent
 }
 
-class ReminderSettingsViewModel(
+@HiltViewModel(assistedFactory = ReminderSettingsViewModel.Factory::class)
+class ReminderSettingsViewModel @AssistedInject constructor(
+    @Assisted val mode: ReminderMode,
     private val settingsRepository: SettingsRepository,
     private val reminderAlarmScheduler: ReminderAlarmScheduler,
-    private val mode: ReminderMode,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(
-        ReminderSettingsUiState(mode = mode),
-    )
+
+    @AssistedFactory
+    interface Factory {
+        fun create(mode: ReminderMode): ReminderSettingsViewModel
+    }
+
+    private val _uiState = MutableStateFlow(ReminderSettingsUiState(mode = mode))
     val uiState: StateFlow<ReminderSettingsUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<ReminderSettingsEvent>()
@@ -131,17 +139,3 @@ private fun SettingsState.finalizeForMode(mode: ReminderMode): SettingsState {
     }
 }
 
-class ReminderSettingsViewModelFactory(
-    private val settingsRepository: SettingsRepository,
-    private val reminderAlarmScheduler: ReminderAlarmScheduler,
-    private val mode: ReminderMode,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ReminderSettingsViewModel(
-            settingsRepository = settingsRepository,
-            reminderAlarmScheduler = reminderAlarmScheduler,
-            mode = mode,
-        ) as T
-    }
-}

@@ -7,6 +7,8 @@ import android.provider.DocumentsContract
 import java.io.IOException
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.withContext
 
 data class ExportTreeFile(
@@ -62,8 +64,8 @@ interface ExportDocumentTreeStorage {
     ): ExportStorageResult<Unit>
 }
 
-class AndroidExportDocumentTreeStorage(
-    context: Context,
+class AndroidExportDocumentTreeStorage @Inject constructor(
+    @ApplicationContext context: Context,
 ) : ExportDocumentTreeStorage {
     private val contentResolver: ContentResolver = context.applicationContext.contentResolver
 

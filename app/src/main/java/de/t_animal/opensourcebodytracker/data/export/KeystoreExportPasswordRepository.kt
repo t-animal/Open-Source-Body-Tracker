@@ -6,14 +6,16 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
 private val Context.exportSecretsDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "export_secrets",
 )
 
-class KeystoreExportPasswordRepository(
-    private val context: Context,
+class KeystoreExportPasswordRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val crypto: ExportPasswordCrypto,
 ) : ExportPasswordRepository {
 

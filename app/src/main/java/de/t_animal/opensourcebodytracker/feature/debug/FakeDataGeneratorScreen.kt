@@ -16,22 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
 
 @Composable
-fun FakeDataGeneratorRoute(
-    profileRepository: ProfileRepository,
-    generateDemoDataUseCase: GenerateDemoDataUseCase,
-) {
-    val vm: FakeDataGeneratorViewModel = viewModel(
-        factory = FakeDataGeneratorViewModelFactory(
-            profileRepository = profileRepository,
-            generateDemoDataUseCase = generateDemoDataUseCase,
-        ),
-    )
+fun FakeDataGeneratorRoute() {
+    val vm: FakeDataGeneratorViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     FakeDataGeneratorScreen(

@@ -1,8 +1,8 @@
 package de.t_animal.opensourcebodytracker.feature.settings.visibility
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.SettingsState
@@ -11,6 +11,7 @@ import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.DerivedMetricsDependencyResolver
 import de.t_animal.opensourcebodytracker.domain.metrics.enabledAnalysisMethods
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +34,8 @@ data class SettingsUiState(
     val errorMessage: String? = null,
 )
 
-class MeasurementVisibilitySettingsViewModel(
+@HiltViewModel
+class MeasurementVisibilitySettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val profileRepository: ProfileRepository,
     private val dependencyResolver: DerivedMetricsDependencyResolver,
@@ -107,17 +109,3 @@ class MeasurementVisibilitySettingsViewModel(
     }
 }
 
-class SettingsViewModelFactory(
-    private val settingsRepository: SettingsRepository,
-    private val profileRepository: ProfileRepository,
-    private val dependencyResolver: DerivedMetricsDependencyResolver,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return MeasurementVisibilitySettingsViewModel(
-            settingsRepository = settingsRepository,
-            profileRepository = profileRepository,
-            dependencyResolver = dependencyResolver,
-        ) as T
-    }
-}

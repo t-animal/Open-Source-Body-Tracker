@@ -1,8 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.settings.export
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
@@ -51,7 +52,8 @@ sealed interface ExportSettingsEvent {
     data object Saved : ExportSettingsEvent
 }
 
-class ExportSettingsViewModel(
+@HiltViewModel
+class ExportSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val exportPasswordRepository: ExportPasswordRepository,
     private val exportToFileSystemUseCase: ExportToFilesystemUseCase,
@@ -311,22 +313,5 @@ class ExportSettingsViewModel(
         ExportProgress.CleaningUpOldExports -> ExportUiProgress(
             message = "Cleaning up old exports",
         )
-    }
-}
-
-class ExportSettingsViewModelFactory(
-    private val settingsRepository: SettingsRepository,
-    private val exportPasswordRepository: ExportPasswordRepository,
-    private val exportToFileSystemUseCase: ExportToFilesystemUseCase,
-    private val automaticExportScheduler: AutomaticExportScheduler,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ExportSettingsViewModel(
-            settingsRepository = settingsRepository,
-            exportPasswordRepository = exportPasswordRepository,
-            exportToFileSystemUseCase = exportToFileSystemUseCase,
-            automaticExportScheduler = automaticExportScheduler,
-        ) as T
     }
 }

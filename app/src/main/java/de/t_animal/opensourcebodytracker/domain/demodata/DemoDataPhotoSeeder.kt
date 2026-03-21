@@ -9,9 +9,10 @@ import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import kotlin.math.abs
 import kotlin.math.log10
 import kotlin.math.max
+import javax.inject.Inject
 import kotlin.math.min
 
-class DemoDataPhotoSeeder(
+class DemoDataPhotoSeeder @Inject constructor(
     private val measurementRepository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
     private val assetManager: AssetManager,

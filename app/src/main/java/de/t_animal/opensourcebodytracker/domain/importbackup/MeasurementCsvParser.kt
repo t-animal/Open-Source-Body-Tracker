@@ -6,8 +6,9 @@ import de.t_animal.opensourcebodytracker.core.photos.toPersistedPhotoPathOrNull
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import java.io.StringReader
+import javax.inject.Inject
 
-class MeasurementCsvParser {
+class MeasurementCsvParser @Inject constructor() {
 
     fun parse(csvContent: String): List<BodyMeasurement> {
         val format = CSVFormat.DEFAULT.builder()

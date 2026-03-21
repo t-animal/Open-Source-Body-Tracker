@@ -7,6 +7,7 @@ import net.lingala.zip4j.model.ZipParameters
 import net.lingala.zip4j.model.enums.AesKeyStrength
 import net.lingala.zip4j.model.enums.CompressionMethod
 import net.lingala.zip4j.model.enums.EncryptionMethod
+import javax.inject.Inject
 
 sealed interface ExportArchiveEntry {
     val path: String
@@ -36,7 +37,7 @@ interface ExportArchiveWriter {
     )
 }
 
-class Zip4jExportArchiveWriter : ExportArchiveWriter {
+class Zip4jExportArchiveWriter @Inject constructor() : ExportArchiveWriter {
     override fun writeEncryptedZip(
         entries: Sequence<ExportArchiveEntry>,
         password: String,

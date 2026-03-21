@@ -1,8 +1,8 @@
 package de.t_animal.opensourcebodytracker.feature.settings.onboarding
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
@@ -11,6 +11,7 @@ import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMaxFatBo
 import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMinFatBodyWeightKg
 import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
 import de.t_animal.opensourcebodytracker.domain.demodata.defaultDemoDataProfile
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -18,7 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class OnboardingStartViewModel(
+@HiltViewModel
+class OnboardingStartViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
     private val generateDemoDataUseCase: GenerateDemoDataUseCase,
@@ -76,17 +78,3 @@ sealed interface OnboardingStartEvent {
     data object DemoModeInitializationCompleted : OnboardingStartEvent
 }
 
-class OnboardingStartViewModelFactory(
-    private val profileRepository: ProfileRepository,
-    private val settingsRepository: SettingsRepository,
-    private val generateDemoDataUseCase: GenerateDemoDataUseCase,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return OnboardingStartViewModel(
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            generateDemoDataUseCase = generateDemoDataUseCase,
-        ) as T
-    }
-}

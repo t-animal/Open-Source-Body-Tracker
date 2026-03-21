@@ -3,11 +3,12 @@ package de.t_animal.opensourcebodytracker.feature.importbackup
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.domain.importbackup.ImportBackupUseCase
 import de.t_animal.opensourcebodytracker.domain.importbackup.ImportProgress
 import de.t_animal.opensourcebodytracker.domain.importbackup.ImportResult
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class ImportBackupViewModel(
+@HiltViewModel
+class ImportBackupViewModel @Inject constructor(
     private val importBackupUseCase: ImportBackupUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ImportBackupUiState())
@@ -165,11 +167,3 @@ sealed interface ImportBackupEvent {
     data class CatastrophicFailure(val message: String) : ImportBackupEvent
 }
 
-class ImportBackupViewModelFactory(
-    private val importBackupUseCase: ImportBackupUseCase,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return ImportBackupViewModel(importBackupUseCase) as T
-    }
-}

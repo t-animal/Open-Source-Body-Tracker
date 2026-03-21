@@ -19,13 +19,14 @@ import kotlinx.serialization.json.Json
 import net.lingala.zip4j.ZipFile
 import net.lingala.zip4j.exception.ZipException
 import java.io.File
+import javax.inject.Inject
 
-class ImportBackupUseCase(
+class ImportBackupUseCase @Inject constructor(
     private val measurementRepository: MeasurementRepository,
     private val profileRepository: ProfileRepository,
     private val settingsRepository: SettingsRepository,
     private val photoStorage: InternalPhotoStorage,
-    private val csvParser: MeasurementCsvParser = MeasurementCsvParser(),
+    private val csvParser: MeasurementCsvParser,
 ) {
     private val json = Json { ignoreUnknownKeys = true }
 

@@ -5,6 +5,7 @@ import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.domain.export.SetAutomaticExportPendingUseCase
+import javax.inject.Inject
 
 data class DeleteMeasurementCommand(
     val measurementId: Long,
@@ -16,7 +17,7 @@ sealed interface DeleteMeasurementResult {
     data object Success : DeleteMeasurementResult
 }
 
-class DeleteMeasurementUseCase(
+class DeleteMeasurementUseCase @Inject constructor(
     private val repository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
     private val setAutomaticExportPendingUseCase: SetAutomaticExportPendingUseCase,

@@ -32,13 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
-import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
-import de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DemoModeBanner
 import de.t_animal.opensourcebodytracker.feature.measurements.components.LatestMeasurementCard
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementTable
@@ -49,10 +45,6 @@ private val MEASUREMENT_LIST_FAB_CLEARANCE = 96.dp
 
 @Composable
 fun MeasurementListRoute(
-    measurementRepository: MeasurementRepository,
-    profileRepository: ProfileRepository,
-    settingsRepository: SettingsRepository,
-    calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     onEdit: (Long) -> Unit,
     onAdd: () -> Unit,
     onOpenMore: () -> Unit,
@@ -60,14 +52,7 @@ fun MeasurementListRoute(
     onResetApp: () -> Unit,
     contentPadding: PaddingValues,
 ) {
-    val vm: MeasurementListViewModel = viewModel(
-        factory = MeasurementListViewModelFactory(
-            measurementRepository = measurementRepository,
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-        ),
-    )
+    val vm: MeasurementListViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     MeasurementListScreen(
@@ -83,20 +68,9 @@ fun MeasurementListRoute(
 
 @Composable
 fun MeasurementListFullRoute(
-    measurementRepository: MeasurementRepository,
-    profileRepository: ProfileRepository,
-    settingsRepository: SettingsRepository,
-    calculateMeasurementDerivedMetrics: CalculateMeasurementDerivedMetricsUseCase,
     onEdit: (Long) -> Unit,
 ) {
-    val vm: MeasurementListViewModel = viewModel(
-        factory = MeasurementListViewModelFactory(
-            measurementRepository = measurementRepository,
-            profileRepository = profileRepository,
-            settingsRepository = settingsRepository,
-            calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-        ),
-    )
+    val vm: MeasurementListViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     MeasurementFullListScreen(

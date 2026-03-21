@@ -3,9 +3,10 @@ package de.t_animal.opensourcebodytracker.data.measurements
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.photos.toPersistedPhotoPathOrNull
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 import kotlinx.coroutines.flow.map
 
-class RoomMeasurementRepository(
+class RoomMeasurementRepository @Inject constructor(
     private val dao: MeasurementDao,
 ) : MeasurementRepository {
     override fun observeAll(): Flow<List<BodyMeasurement>> = dao.observeAll().map { entities ->

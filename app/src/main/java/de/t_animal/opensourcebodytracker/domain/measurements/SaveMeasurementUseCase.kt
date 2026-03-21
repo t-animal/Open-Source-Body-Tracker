@@ -4,6 +4,7 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
 import de.t_animal.opensourcebodytracker.domain.export.SetAutomaticExportPendingUseCase
+import javax.inject.Inject
 
 data class SaveMeasurementCommand(
     val measurementId: Long?,
@@ -28,7 +29,7 @@ sealed interface SaveMeasurementResult {
     ) : SaveMeasurementResult
 }
 
-class SaveMeasurementUseCase(
+class SaveMeasurementUseCase @Inject constructor(
     private val validator: MeasurementSaveValidator,
     private val saver: MeasurementSaver,
     private val setAutomaticExportPendingUseCase: SetAutomaticExportPendingUseCase,

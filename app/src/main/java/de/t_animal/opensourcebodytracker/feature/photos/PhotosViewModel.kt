@@ -1,8 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.photos
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotoMode
@@ -25,7 +26,8 @@ private data class PhotosSelectionState(
     val snackbarMessage: String? = null,
 )
 
-class PhotosViewModel(
+@HiltViewModel
+class PhotosViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
     photoStorage: InternalPhotoStorage,
 ) : ViewModel() {
@@ -161,18 +163,5 @@ class PhotosViewModel(
         }
 
         return null
-    }
-}
-
-class PhotosViewModelFactory(
-    private val measurementRepository: MeasurementRepository,
-    private val photoStorage: InternalPhotoStorage,
-) : ViewModelProvider.Factory {
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return PhotosViewModel(
-            measurementRepository = measurementRepository,
-            photoStorage = photoStorage,
-        ) as T
     }
 }

@@ -6,8 +6,9 @@ import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import javax.inject.Inject
 
-class MeasurementSaver(
+class MeasurementSaver @Inject constructor(
     private val repository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
 ) {

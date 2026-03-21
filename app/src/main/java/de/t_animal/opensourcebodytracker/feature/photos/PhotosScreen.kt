@@ -15,9 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
-import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.ui.components.PhotoPreviewDialog
 import de.t_animal.opensourcebodytracker.feature.photos.components.AnimateSelectionBottomBar
 import de.t_animal.opensourcebodytracker.feature.photos.components.CompareSelectionBottomBar
@@ -32,17 +30,10 @@ import java.io.File
 
 @Composable
 fun PhotosRoute(
-    measurementRepository: MeasurementRepository,
-    photoStorage: InternalPhotoStorage,
     onOpenCompare: (leftMeasurementId: Long, rightMeasurementId: Long) -> Unit,
     onOpenAnimate: (selectedMeasurementIds: List<Long>) -> Unit,
 ) {
-    val vm: PhotosViewModel = viewModel(
-        factory = PhotosViewModelFactory(
-            measurementRepository = measurementRepository,
-            photoStorage = photoStorage,
-        ),
-    )
+    val vm: PhotosViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 

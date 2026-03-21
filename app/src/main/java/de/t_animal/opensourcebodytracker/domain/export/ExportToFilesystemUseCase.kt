@@ -12,17 +12,18 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
-open class ExportToFilesystemUseCase(
+open class ExportToFilesystemUseCase @Inject constructor(
     private val measurementRepository: MeasurementRepository,
     private val profileRepository: ProfileRepository,
     private val exportStorage: ExportDocumentTreeStorage,
     private val exportArchiveWriter: ExportArchiveWriter,
     private val exportDocumentsCreator: ExportDocumentsCreator,
     private val exportPhotoCollector: ExportPhotoCollector,
-    private val clock: Clock = Clock.systemDefaultZone(),
-)  {
+    private val clock: Clock,
+) {
     suspend operator fun invoke(
         command: ExportExecutionCommand,
         onProgress: ((ExportProgress) -> Unit)?,

@@ -4,8 +4,9 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
+import javax.inject.Inject
 
-class MeasurementSaveValidator {
+class MeasurementSaveValidator @Inject constructor() {
     private val invalidSkinfoldMessage = "Skinfold values must be greater than 0"
     private val invalidBodyFatMessage = "Body fat must be between 0 and 100"
     private val missingInputOrNoPhotoMessage = "Enter at least one value, add a photo, or enter a note"

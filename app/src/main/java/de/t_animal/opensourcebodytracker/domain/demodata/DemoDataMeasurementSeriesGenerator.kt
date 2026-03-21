@@ -2,12 +2,13 @@ package de.t_animal.opensourcebodytracker.domain.demodata
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.Sex
-import java.time.Instant
+import java.time.Clock
 import java.time.LocalDate
 import java.time.Period
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Random
+import javax.inject.Inject
 import kotlin.math.log10
 import kotlin.math.max
 import kotlin.math.min
@@ -15,8 +16,8 @@ import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sqrt
 
-class DemoDataMeasurementSeriesGenerator(
-    private val nowProvider: () -> Instant = { Instant.now() },
+class DemoDataMeasurementSeriesGenerator @Inject constructor(
+    private val clock: Clock,
 ) {
     fun generateMeasurements(
         sex: Sex?,
@@ -36,8 +37,8 @@ class DemoDataMeasurementSeriesGenerator(
         val random = Random(seed)
         val effectiveSex = sex ?: Sex.Male
         val effectiveHeightCm = (heightCm ?: 175.0).coerceAtLeast(120.0)
-        val zoneId = ZoneId.systemDefault()
-        val today = nowProvider().atZone(zoneId).toLocalDate()
+        val zoneId = clock.zone
+        val today = clock.instant().atZone(zoneId).toLocalDate()
         val minFatKg = min(minFatBodyWeightKg, maxFatBodyWeightKg)
         val maxFatKg = max(minFatBodyWeightKg, maxFatBodyWeightKg)
 

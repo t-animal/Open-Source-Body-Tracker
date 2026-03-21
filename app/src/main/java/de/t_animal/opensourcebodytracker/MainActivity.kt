@@ -7,51 +7,37 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationContract
-import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
-import de.t_animal.opensourcebodytracker.core.notifications.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
-import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
-import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
-import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
-import de.t_animal.opensourcebodytracker.domain.importbackup.ImportBackupUseCase
-import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
-import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
+import de.t_animal.opensourcebodytracker.data.settings.SettingsRepository
+import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val openMeasurementAddSignal = MutableStateFlow(0L)
+
+    @Inject lateinit var settingsRepository: SettingsRepository
+    @Inject lateinit var automaticExportScheduler: AutomaticExportScheduler
+    @Inject lateinit var reminderNotificationPoster: ReminderNotificationPoster
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val container = (application as BodyTrackerApplication).container
         handleNotificationIntent(intent)
 
         setContent {
             BodyTrackerTheme {
                 Surface(modifier = Modifier) {
-                    BodyTrackerApp(
-                        profileRepository = container.profileRepository,
-                        settingsRepository = container.settingsRepository,
-                        uiSettingsRepository = container.uiSettingsRepository,
-                        exportPasswordRepository = container.exportPasswordRepository,
-                        exportToFileSystemUseCase = container.exportToFilesystemUseCase,
-                        importBackupUseCase = container.importBackupUseCase,
-                        automaticExportScheduler = container.automaticExportScheduler,
-                        measurementRepository = container.measurementRepository,
-                        internalPhotoStorage = container.internalPhotoStorage,
-                        calculateMeasurementDerivedMetrics = container.calculateMeasurementDerivedMetricsUseCase,
-                        generateDemoDataUseCase = container.generateDemoDataUseCase,
-                        deleteMeasurementUseCase = container.deleteMeasurementUseCase,
-                        saveMeasurementUseCase = container.saveMeasurementUseCase,
-                        reminderNotificationPoster = container.reminderNotificationPoster,
-                        reminderAlarmScheduler = container.reminderAlarmScheduler,
+                    BodyTrackerNavHost(
+                        settingsRepository = settingsRepository,
+                        automaticExportScheduler = automaticExportScheduler,
+                        reminderNotificationPoster = reminderNotificationPoster,
                         openMeasurementAddSignal = openMeasurementAddSignal,
                         onResetApp = ::resetApp,
                     )
@@ -102,45 +88,4 @@ class MainActivity : ComponentActivity() {
             ).show()
         }
     }
-}
-
-@Composable
-private fun BodyTrackerApp(
-    profileRepository: de.t_animal.opensourcebodytracker.data.profile.ProfileRepository,
-    settingsRepository: de.t_animal.opensourcebodytracker.data.settings.SettingsRepository,
-    uiSettingsRepository: de.t_animal.opensourcebodytracker.data.settings.UiSettingsRepository,
-    exportPasswordRepository: ExportPasswordRepository,
-    exportToFileSystemUseCase: ExportToFilesystemUseCase,
-    importBackupUseCase: ImportBackupUseCase,
-    automaticExportScheduler: de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler,
-    measurementRepository: de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository,
-    internalPhotoStorage: InternalPhotoStorage,
-    calculateMeasurementDerivedMetrics: de.t_animal.opensourcebodytracker.domain.metrics.CalculateMeasurementDerivedMetricsUseCase,
-    generateDemoDataUseCase: GenerateDemoDataUseCase,
-    deleteMeasurementUseCase: DeleteMeasurementUseCase,
-    saveMeasurementUseCase: SaveMeasurementUseCase,
-    reminderNotificationPoster: ReminderNotificationPoster,
-    reminderAlarmScheduler: ReminderAlarmScheduler,
-    openMeasurementAddSignal: StateFlow<Long>,
-    onResetApp: () -> Unit,
-) {
-    BodyTrackerNavHost(
-        profileRepository = profileRepository,
-        settingsRepository = settingsRepository,
-        uiSettingsRepository = uiSettingsRepository,
-        exportPasswordRepository = exportPasswordRepository,
-        exportToFileSystemUseCase = exportToFileSystemUseCase,
-        importBackupUseCase = importBackupUseCase,
-        automaticExportScheduler = automaticExportScheduler,
-        measurementRepository = measurementRepository,
-        internalPhotoStorage = internalPhotoStorage,
-        calculateMeasurementDerivedMetrics = calculateMeasurementDerivedMetrics,
-        generateDemoDataUseCase = generateDemoDataUseCase,
-        deleteMeasurementUseCase = deleteMeasurementUseCase,
-        saveMeasurementUseCase = saveMeasurementUseCase,
-        reminderNotificationPoster = reminderNotificationPoster,
-        reminderAlarmScheduler = reminderAlarmScheduler,
-        openMeasurementAddSignal = openMeasurementAddSignal,
-        onResetApp = onResetApp,
-    )
 }

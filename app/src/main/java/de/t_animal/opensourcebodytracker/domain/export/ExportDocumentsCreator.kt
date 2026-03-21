@@ -12,8 +12,9 @@ import org.apache.commons.csv.CSVPrinter
 import java.io.StringWriter
 import java.time.Instant
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class ExportDocumentsCreator {
+class ExportDocumentsCreator @Inject constructor() {
 
     private val json = Json { prettyPrint = true }
 
