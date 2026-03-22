@@ -68,7 +68,7 @@ Test must succeed and may only be changed if they fail because the tested behavi
 
 ## Documents Index
 
-- [AI-DEVEL.md](AI-DEVEL.md): Minimal AI-agent handoff and operating constraints.
+- [ARCHITECTURE.md](ARCHITECTURE.md): Package layout, layer responsibilities, dependency direction, and design trade-offs.
 - [ANALYSIS.md](ANALYSIS.md): Analysis tab behavior, data flow, chart rules, and transforms.
 - [ANALYSIS_RATING.md](ANALYSIS_RATING.md): Health rating thresholds and severity levels for derived metrics (BMI, body fat %, WHR, WHtR).
 - [EXPORT.md](EXPORT.md): Data export for backup and synchronization.

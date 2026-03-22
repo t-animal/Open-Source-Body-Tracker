@@ -5,7 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import de.t_animal.opensourcebodytracker.core.export.AutomaticExportWorker
+import de.t_animal.opensourcebodytracker.data.export.AutomaticExportWorker
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 

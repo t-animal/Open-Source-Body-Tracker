@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.core.notifications
+package de.t_animal.opensourcebodytracker.data.reminders
 
 import android.app.AlarmManager
 import android.app.PendingIntent

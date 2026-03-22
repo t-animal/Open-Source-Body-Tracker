@@ -31,8 +31,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.t_animal.opensourcebodytracker.core.model.GeneralSettings
-import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationPoster
-import de.t_animal.opensourcebodytracker.core.notifications.ReminderNotificationResult
+import de.t_animal.opensourcebodytracker.data.reminders.ReminderNotificationPoster
+import de.t_animal.opensourcebodytracker.data.reminders.ReminderNotificationResult
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
