@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import de.t_animal.opensourcebodytracker.core.model.AutomaticExportErrorKey
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
@@ -23,8 +24,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+sealed interface ExportProgressStep {
+    data object CollectingData : ExportProgressStep
+    data class WritingArchiveData(val current: Int, val total: Int) : ExportProgressStep
+    data class WritingPhoto(val current: Int, val total: Int) : ExportProgressStep
+    data object CleaningUp : ExportProgressStep
+}
+
 data class ExportUiProgress(
-    val message: String,
+    val step: ExportProgressStep,
     val current: Int? = null,
     val total: Int? = null,
 ) {
@@ -35,6 +43,11 @@ data class ExportUiProgress(
         get() = if (isDeterminate) current!!.toFloat() / total!!.toFloat() else null
 }
 
+sealed interface ExportSettingsError {
+    data class Validation(val error: ExportValidationError) : ExportSettingsError
+    data class Action(val error: ExportActionError) : ExportSettingsError
+}
+
 data class ExportSettingsUiState(
     val isLoading: Boolean = true,
     val isExporting: Boolean = false,
@@ -43,9 +56,9 @@ data class ExportSettingsUiState(
     val exportPassword: String = "",
     val automaticExportEnabled: Boolean = false,
     val exportProgress: ExportUiProgress? = null,
-    val statusMessage: String? = null,
-    val errorMessage: String? = null,
-    val lastAutomaticExportError: String? = null,
+    val exportedFileName: String? = null,
+    val exportError: ExportSettingsError? = null,
+    val lastAutomaticExportError: AutomaticExportErrorKey? = null,
 )
 
 sealed interface ExportSettingsEvent {
@@ -78,8 +91,8 @@ class ExportSettingsViewModel @Inject constructor(
                 exportPassword = password,
                 automaticExportEnabled = settings.automaticExportEnabled && settings.exportToDeviceStorageEnabled && hasPassword,
                 exportProgress = null,
-                statusMessage = null,
-                errorMessage = null,
+                exportedFileName = null,
+                exportError = null,
                 lastAutomaticExportError = settings.lastAutomaticExportError,
             )
         }
@@ -92,8 +105,8 @@ class ExportSettingsViewModel @Inject constructor(
             exportFolderUri = if (canEnable) _uiState.value.exportFolderUri else null,
             automaticExportEnabled = if (canEnable) _uiState.value.automaticExportEnabled else false,
             exportProgress = null,
-            statusMessage = null,
-            errorMessage = null,
+            exportedFileName = null,
+            exportError = null,
         )
     }
 
@@ -103,8 +116,8 @@ class ExportSettingsViewModel @Inject constructor(
             _uiState.value.exportPassword.isNotBlank()
         _uiState.value = _uiState.value.copy(
             automaticExportEnabled = canEnableAutomatic,
-            statusMessage = null,
-            errorMessage = null,
+            exportedFileName = null,
+            exportError = null,
         )
     }
 
@@ -112,8 +125,8 @@ class ExportSettingsViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             exportFolderUri = uri,
             exportProgress = null,
-            statusMessage = null,
-            errorMessage = null,
+            exportedFileName = null,
+            exportError = null,
         )
     }
 
@@ -124,8 +137,8 @@ class ExportSettingsViewModel @Inject constructor(
             exportToDeviceStorageEnabled = _uiState.value.exportToDeviceStorageEnabled && hasPassword,
             automaticExportEnabled = _uiState.value.automaticExportEnabled && hasPassword,
             exportProgress = null,
-            statusMessage = null,
-            errorMessage = null,
+            exportedFileName = null,
+            exportError = null,
         )
     }
 
@@ -140,8 +153,8 @@ class ExportSettingsViewModel @Inject constructor(
         _uiState.value = current.copy(
             isExporting = true,
             exportProgress = null,
-            statusMessage = null,
-            errorMessage = null,
+            exportedFileName = null,
+            exportError = null,
         )
 
         viewModelScope.launch {
@@ -149,8 +162,8 @@ class ExportSettingsViewModel @Inject constructor(
                 _uiState.update { state ->
                     state.copy(
                         exportProgress = progress.toUiProgress(),
-                        statusMessage = null,
-                        errorMessage = null,
+                        exportedFileName = null,
+                        exportError = null,
                     )
                 }
             }
@@ -160,8 +173,8 @@ class ExportSettingsViewModel @Inject constructor(
                     _uiState.value.copy(
                         isExporting = false,
                         exportProgress = null,
-                        statusMessage = "Export archive created: ${result.exportedFileName}",
-                        errorMessage = null,
+                        exportedFileName = result.exportedFileName,
+                        exportError = null,
                         lastAutomaticExportError = null,
                     )
                 }
@@ -169,8 +182,8 @@ class ExportSettingsViewModel @Inject constructor(
                 is ExportActionResult.Failure -> _uiState.value.copy(
                     isExporting = false,
                     exportProgress = null,
-                    statusMessage = null,
-                    errorMessage = result.error.toUserMessage(),
+                    exportedFileName = null,
+                    exportError = ExportSettingsError.Action(result.error),
                 )
             }
         }
@@ -178,7 +191,7 @@ class ExportSettingsViewModel @Inject constructor(
 
     fun onDismissAutomaticExportError() {
         val current = _uiState.value
-        if (current.lastAutomaticExportError.isNullOrBlank()) {
+        if (current.lastAutomaticExportError == null) {
             return
         }
 
@@ -209,8 +222,8 @@ class ExportSettingsViewModel @Inject constructor(
         if (validationError != null) {
             _uiState.value = current.copy(
                 exportProgress = null,
-                statusMessage = null,
-                errorMessage = validationError.toUserMessage(),
+                exportedFileName = null,
+                exportError = ExportSettingsError.Validation(validationError),
             )
             return
         }
@@ -271,47 +284,39 @@ class ExportSettingsViewModel @Inject constructor(
         )
     }
 
-    private fun ExportValidationError.toUserMessage(): String = when (this) {
-        ExportValidationError.EnableDeviceStorage -> "Enable export to device storage"
-        ExportValidationError.SelectFolder -> "Select an export folder"
-        ExportValidationError.EnterPassword -> "Enter an export password"
-    }
-
-    private fun ExportActionError.toUserMessage(): String = when (this) {
-        is ExportActionError.Validation -> error.toUserMessage()
-        ExportActionError.InvalidFolder -> "Export folder is invalid. Select folder again"
-        ExportActionError.PermissionDenied -> "Export folder permission was lost. Select folder again"
-        ExportActionError.WriteFailed -> "Could not create export archive"
-        ExportActionError.Unknown -> "Export failed"
-    }
-
     private fun ExportProgress.toUiProgress(): ExportUiProgress = when (this) {
         ExportProgress.Validating,
         ExportProgress.LoadingProfile,
         ExportProgress.LoadingMeasurements -> ExportUiProgress(
-            message = "Collecting data",
+            step = ExportProgressStep.CollectingData,
         )
 
         is ExportProgress.CollectingPhotos -> ExportUiProgress(
-            message = "Collecting data",
+            step = ExportProgressStep.CollectingData,
             current = processedMeasurementCount,
             total = totalMeasurementCount.takeIf { it > 0 },
         )
 
         is ExportProgress.WritingArchiveData -> ExportUiProgress(
-            message = "Writing archive data",
+            step = ExportProgressStep.WritingArchiveData(
+                current = currentDocumentIndex,
+                total = totalDocumentCount,
+            ),
             current = currentDocumentIndex,
             total = totalDocumentCount,
         )
 
         is ExportProgress.WritingPhoto -> ExportUiProgress(
-            message = "Writing photo $currentPhotoIndex of $totalPhotoCount",
+            step = ExportProgressStep.WritingPhoto(
+                current = currentPhotoIndex,
+                total = totalPhotoCount,
+            ),
             current = currentPhotoIndex,
             total = totalPhotoCount,
         )
 
         ExportProgress.CleaningUpOldExports -> ExportUiProgress(
-            message = "Cleaning up old exports",
+            step = ExportProgressStep.CleaningUp,
         )
     }
 }

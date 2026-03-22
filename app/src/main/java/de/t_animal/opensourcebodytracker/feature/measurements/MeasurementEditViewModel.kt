@@ -17,6 +17,7 @@ import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementCo
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementResult
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
 import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementMetricMapper
+import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementValidationError
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementCommand
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementResult
 import de.t_animal.opensourcebodytracker.domain.measurements.SaveMeasurementUseCase
@@ -32,6 +33,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+
+sealed interface MeasurementEditError {
+    data class Validation(val error: MeasurementValidationError) : MeasurementEditError
+    data object DeleteFailed : MeasurementEditError
+    data object SavePhotoFailed : MeasurementEditError
+}
 
 sealed interface MeasurementEditUiState {
     data object Loading : MeasurementEditUiState
@@ -53,7 +60,7 @@ sealed interface MeasurementEditUiState {
         val isPhotoMarkedForDeletion: Boolean = false,
         val hasUnsavedChanges: Boolean = false,
         val isPhotoPreviewDialogVisible: Boolean = false,
-        val errorMessage: String? = null,
+        val error: MeasurementEditError? = null,
     ) : MeasurementEditUiState
 }
 
@@ -132,7 +139,7 @@ class MeasurementEditViewModel @Inject constructor(
         updateUiState {
             it.copy(
                 metricInputs = it.metricInputs + (metric to text),
-                errorMessage = null,
+                error = null,
             )
         }
     }
@@ -142,7 +149,7 @@ class MeasurementEditViewModel @Inject constructor(
             it.copy(
                 dateEpochMillis = epochMillis,
                 dateText = formatEpochMillisAsIsoDate(epochMillis),
-                errorMessage = null,
+                error = null,
             )
         }
     }
@@ -151,7 +158,7 @@ class MeasurementEditViewModel @Inject constructor(
         updateUiState {
             it.copy(
                 note = text,
-                errorMessage = null,
+                error = null,
             )
         }
     }
@@ -210,7 +217,7 @@ class MeasurementEditViewModel @Inject constructor(
                 }
             } catch (_: Throwable) {
                 updateUiState {
-                    it.copy(errorMessage = "Unable to delete measurement")
+                    it.copy(error = MeasurementEditError.DeleteFailed)
                 }
             }
         }
@@ -238,12 +245,14 @@ class MeasurementEditViewModel @Inject constructor(
                 ) {
                     is SaveMeasurementResult.Success -> _events.emit(MeasurementEditEvent.Saved)
                     is SaveMeasurementResult.ValidationError -> {
-                        _uiState.value = current.copy(errorMessage = result.message)
+                        _uiState.value = current.copy(
+                            error = MeasurementEditError.Validation(result.error),
+                        )
                     }
                 }
             } catch (_: Throwable) {
                 updateUiState {
-                    it.copy(errorMessage = "Unable to save measurement photo")
+                    it.copy(error = MeasurementEditError.SavePhotoFailed)
                 }
             }
         }

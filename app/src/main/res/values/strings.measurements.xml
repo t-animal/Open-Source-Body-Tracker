@@ -1,0 +1,87 @@
+<resources>
+    <!-- Validation Errors -->
+    <string name="validation_skinfold_must_be_positive">Skinfold values must be greater than 0</string>
+    <string name="validation_body_fat_range">Body fat must be between 0 and 100</string>
+    <string name="validation_missing_input">Enter at least one value, add a photo, or enter a note</string>
+
+    <!-- Edit Errors -->
+    <string name="measurement_error_delete_failed">Unable to delete measurement</string>
+    <string name="measurement_error_save_photo_failed">Unable to save measurement photo</string>
+
+    <!-- Metric Section Titles -->
+    <string name="metric_section_weight">Weight</string>
+    <string name="metric_section_circumference">Circumference</string>
+    <string name="metric_section_skinfold">Skinfold Thickness</string>
+    <string name="metric_section_analysis">Analysis</string>
+
+    <!-- Edit Screen -->
+    <string name="measurement_edit_title_add">Add Measurement</string>
+    <string name="measurement_edit_title_edit">Edit Measurement</string>
+    <string name="measurement_edit_label_date">Date</string>
+    <string name="measurement_edit_label_notes">Notes</string>
+    <string name="measurement_edit_hint_before_bold">At least one measurement, photo, or note is required. However </string>
+    <string name="measurement_edit_hint_bold">you don\'t have to enter all measurements</string>
+    <string name="measurement_edit_hint_after_bold">. In this case though, the analysis that require missing measurements will not be performed.</string>
+
+    <!-- List -->
+    <string name="measurement_list_title">All Measurements</string>
+    <string name="measurement_latest_title">Latest Measurement</string>
+    <string name="measurement_latest_empty">No measurements yet – create your first measurement</string>
+    <string name="measurement_latest_section_analyses">Analyses</string>
+    <string name="measurement_latest_section_measurements">Measurements</string>
+
+    <!-- Delete Dialog -->
+    <string name="measurement_delete_dialog_title">Delete measurement?</string>
+    <string name="measurement_delete_dialog_body">This will permanently delete this measurement and its photo.</string>
+
+    <!-- Discard Changes Dialog -->
+    <string name="measurement_discard_dialog_title">Discard input?</string>
+    <string name="measurement_discard_dialog_body">You have entered values. Discard them and go back?</string>
+    <string name="measurement_discard_dialog_confirm">Discard</string>
+    <string name="measurement_discard_dialog_dismiss">Keep editing</string>
+
+    <!-- Demo Mode -->
+    <string name="demo_banner_title">You are currently using demo data.</string>
+    <string name="demo_banner_body">Reset the app to create your own profile.</string>
+    <string name="demo_reset_button">Reset App</string>
+    <string name="demo_reset_dialog_title">Reset App?</string>
+    <string name="demo_reset_dialog_body_before_bold">This will delete all app data and close the app. </string>
+    <string name="demo_reset_dialog_body_bold">You will have to restart it manually.</string>
+
+    <!-- Rating Labels -->
+    <string name="rating_severe_underweight">Severe underweight</string>
+    <string name="rating_underweight">Underweight</string>
+    <string name="rating_normal">Normal</string>
+    <string name="rating_overweight">Overweight</string>
+    <string name="rating_obese_class_i">Obese Class I</string>
+    <string name="rating_obese_class_ii">Obese Class II</string>
+    <string name="rating_obese_class_iii">Obese Class III</string>
+    <string name="rating_dangerously_low">Dangerously low</string>
+    <string name="rating_essential_fat">Essential fat</string>
+    <string name="rating_athletic">Athletic</string>
+    <string name="rating_fit">Fit</string>
+    <string name="rating_acceptable">Acceptable</string>
+    <string name="rating_obese">Obese</string>
+    <string name="rating_low_risk">Low risk</string>
+    <string name="rating_moderate_risk">Moderate risk</string>
+    <string name="rating_high_risk">High risk</string>
+    <string name="rating_very_high_risk">Very high risk</string>
+    <string name="rating_underweight_risk">Underweight risk</string>
+    <string name="rating_healthy">Healthy</string>
+    <string name="rating_increased_risk">Increased risk</string>
+
+    <!-- Table -->
+    <string name="table_header_date">Date</string>
+    <string name="table_header_note">Note</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_save">Save</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_delete_photo">Delete photo</string>
+    <string name="cd_take_photo">Take photo</string>
+    <string name="cd_edit_measurement">Edit measurement</string>
+    <string name="cd_add_measurement">Add measurement</string>
+    <string name="cd_hide_note">Hide note</string>
+    <string name="cd_show_full_note">Show full note</string>
+    <string name="cd_photo_preview">Captured photo preview</string>
+</resources>

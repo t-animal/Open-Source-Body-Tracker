@@ -24,8 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,7 +48,7 @@ fun MainScreenScaffold(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(selectedDestination.title) },
+                title = { Text(stringResource(selectedDestination.titleResId)) },
                 modifier = Modifier.shadow(4.dp),
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -55,21 +57,21 @@ fun MainScreenScaffold(
                 ),
                 actions = {
                     IconButton(onClick = { overflowExpanded = true }) {
-                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "More")
+                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = stringResource(R.string.cd_more))
                     }
                     DropdownMenu(
                         expanded = overflowExpanded,
                         onDismissRequest = { overflowExpanded = false },
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Settings") },
+                            text = { Text(stringResource(R.string.menu_settings)) },
                             onClick = {
                                 overflowExpanded = false
                                 onOpenSettings()
                             },
                         )
                         DropdownMenuItem(
-                            text = { Text("About") },
+                            text = { Text(stringResource(R.string.menu_about)) },
                             onClick = {
                                 overflowExpanded = false
                                 onOpenAbout()
@@ -77,7 +79,7 @@ fun MainScreenScaffold(
                         )
                         if (onTriggerReminder != null) {
                             DropdownMenuItem(
-                                text = { Text("Trigger Reminder") },
+                                text = { Text(stringResource(R.string.menu_trigger_reminder)) },
                                 onClick = {
                                     overflowExpanded = false
                                     onTriggerReminder()
@@ -86,7 +88,7 @@ fun MainScreenScaffold(
                         }
                         if (onOpenFakeDataGenerator != null) {
                             DropdownMenuItem(
-                                text = { Text("Fake data generator") },
+                                text = { Text(stringResource(R.string.menu_fake_data)) },
                                 onClick = {
                                     overflowExpanded = false
                                     onOpenFakeDataGenerator()
@@ -95,7 +97,7 @@ fun MainScreenScaffold(
                         }
                         if (onResetApp != null) {
                             DropdownMenuItem(
-                                text = { Text("Reset App Data") },
+                                text = { Text(stringResource(R.string.menu_reset_app)) },
                                 onClick = {
                                     overflowExpanded = false
                                     onResetApp()
@@ -104,7 +106,7 @@ fun MainScreenScaffold(
                         }
                         if (onScheduleExportIn2Minutes != null) {
                             DropdownMenuItem(
-                                text = { Text("Schedule Export in 2 min") },
+                                text = { Text(stringResource(R.string.menu_schedule_export)) },
                                 onClick = {
                                     overflowExpanded = false
                                     onScheduleExportIn2Minutes()
@@ -122,7 +124,7 @@ fun MainScreenScaffold(
                         selected = selectedDestination == destination,
                         onClick = { onMainDestinationSelected(destination) },
                         icon = {},
-                        label = { Icon(imageVector = destination.icon, contentDescription = destination.title) },
+                        label = { Icon(imageVector = destination.icon, contentDescription = stringResource(destination.titleResId)) },
                     )
                 }
             }

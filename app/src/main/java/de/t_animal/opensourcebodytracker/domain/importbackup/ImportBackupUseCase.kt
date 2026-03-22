@@ -36,18 +36,18 @@ class ImportBackupUseCase @Inject constructor(
         onProgress: (ImportProgress) -> Unit = {},
     ): ImportResult {
         val tempFile = copyToTempFile(context, fileUri)
-            ?: return ImportResult.FileNotReadable
+            ?: return ImportResult.RecoverableError.FileNotReadable
 
         try {
             onProgress(ImportProgress.ValidatingArchive)
             val zipFile = ZipFile(tempFile, password.toCharArray())
 
             if (!zipFile.isValidZipFile) {
-                return ImportResult.InvalidArchive
+                return ImportResult.RecoverableError.InvalidArchive
             }
 
             val metadataHeader = zipFile.getFileHeader(METADATA_FILE_NAME)
-                ?: return ImportResult.IncompleteBackup
+                ?: return ImportResult.RecoverableError.IncompleteBackup
 
             val metadata = try {
                 val metadataText = zipFile.getInputStream(metadataHeader)
@@ -55,13 +55,13 @@ class ImportBackupUseCase @Inject constructor(
                     .use { it.readText() }
                 json.decodeFromString<BackupMetadata>(metadataText)
             } catch (_: ZipException) {
-                return ImportResult.WrongPassword
+                return ImportResult.RecoverableError.WrongPassword
             } catch (_: Exception) {
-                return ImportResult.IncompleteBackup
+                return ImportResult.RecoverableError.IncompleteBackup
             }
 
             if (metadata.schemaVersion != SUPPORTED_SCHEMA_VERSION) {
-                return ImportResult.UnsupportedVersion(
+                return ImportResult.RecoverableError.UnsupportedVersion(
                     foundVersion = metadata.schemaVersion,
                     supportedVersion = SUPPORTED_SCHEMA_VERSION,
                 )
@@ -69,26 +69,26 @@ class ImportBackupUseCase @Inject constructor(
 
             onProgress(ImportProgress.ReadingProfile)
             val profileHeader = zipFile.getFileHeader(PROFILE_FILE_NAME)
-                ?: return ImportResult.IncompleteBackup
+                ?: return ImportResult.RecoverableError.IncompleteBackup
             val profile = try {
                 val profileText = zipFile.getInputStream(profileHeader)
                     .bufferedReader()
                     .use { it.readText() }
                 json.decodeFromString<BackupProfile>(profileText).toUserProfile()
             } catch (_: Exception) {
-                return ImportResult.IncompleteBackup
+                return ImportResult.RecoverableError.IncompleteBackup
             }
 
             onProgress(ImportProgress.ReadingMeasurements)
             val measurementsHeader = zipFile.getFileHeader(MEASUREMENTS_FILE_NAME)
-                ?: return ImportResult.IncompleteBackup
+                ?: return ImportResult.RecoverableError.IncompleteBackup
             val parsedMeasurements = try {
                 val csvText = zipFile.getInputStream(measurementsHeader)
                     .bufferedReader()
                     .use { it.readText() }
                 csvParser.parse(csvText)
             } catch (_: Exception) {
-                return ImportResult.IncompleteBackup
+                return ImportResult.RecoverableError.IncompleteBackup
             }
 
             // Pre-insert validation: null out photo paths missing from ZIP
@@ -224,11 +224,14 @@ sealed interface ImportProgress {
 sealed interface ImportResult {
     data object Success : ImportResult
     data class SuccessWithWarning(val droppedPhotoCount: Int) : ImportResult
-    data object WrongPassword : ImportResult
-    data class UnsupportedVersion(val foundVersion: Int, val supportedVersion: Int) : ImportResult
-    data object InvalidArchive : ImportResult
-    data object IncompleteBackup : ImportResult
-    data object FileNotReadable : ImportResult
+
+    sealed interface RecoverableError : ImportResult {
+        data object WrongPassword : RecoverableError
+        data class UnsupportedVersion(val foundVersion: Int, val supportedVersion: Int) : RecoverableError
+        data object InvalidArchive : RecoverableError
+        data object IncompleteBackup : RecoverableError
+        data object FileNotReadable : RecoverableError
+    }
 
     sealed interface CatastrophicFailure : ImportResult {
         data object DatabaseWriteFailed : CatastrophicFailure

@@ -1,5 +1,6 @@
 package de.t_animal.opensourcebodytracker.domain.export
 
+import de.t_animal.opensourcebodytracker.core.model.AutomaticExportErrorKey
 import de.t_animal.opensourcebodytracker.core.model.ExportSettings
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
@@ -26,10 +27,10 @@ class AutomaticExportUseCase @Inject constructor(
 
         return try {
             performExport(onProgress, settings)
-        } catch (e: Exception) {
-            val message = e.message ?: "Automatic export failed"
-            persistError(message, settings)
-            AutomaticExportResult.Failed(message)
+        } catch (_: Exception) {
+            val error = AutomaticExportErrorKey.Unknown
+            persistError(error, settings)
+            AutomaticExportResult.Failed(error)
         }
     }
 
@@ -38,9 +39,9 @@ class AutomaticExportUseCase @Inject constructor(
         settings: ExportSettings
     ): AutomaticExportResult {
         val exportPassword = exportPasswordRepository.getPassword() ?: run {
-            val message = "Export password not configured"
-            persistError(message, settings)
-            return AutomaticExportResult.Failed(message)
+            val error = AutomaticExportErrorKey.EnterPassword
+            persistError(error, settings)
+            return AutomaticExportResult.Failed(error)
         }
 
         val exportCommand = ExportExecutionCommand(
@@ -63,38 +64,38 @@ class AutomaticExportUseCase @Inject constructor(
             }
 
             is ExportActionResult.Failure -> {
-                val message = result.error.toAutomaticExportMessage()
+                val error = result.error.toErrorKey()
                 exportSettingsRepository.saveSettings(
                     settings.copy(
-                        lastAutomaticExportError = message,
+                        lastAutomaticExportError = error,
                     ),
                 )
-                AutomaticExportResult.Failed(message)
+                AutomaticExportResult.Failed(error)
             }
         }
     }
 
-    private suspend fun persistError(message: String, settings: ExportSettings) {
+    private suspend fun persistError(error: AutomaticExportErrorKey, settings: ExportSettings) {
         exportSettingsRepository.saveSettings(
-            settings.copy(lastAutomaticExportError = message),
+            settings.copy(lastAutomaticExportError = error),
         )
     }
 
-    private fun ExportActionError.toAutomaticExportMessage(): String = when (this) {
+    private fun ExportActionError.toErrorKey(): AutomaticExportErrorKey = when (this) {
         is ExportActionError.Validation -> when (error) {
-            ExportValidationError.EnableDeviceStorage -> "Automatic export is disabled"
-            ExportValidationError.SelectFolder -> "Export folder not configured"
-            ExportValidationError.EnterPassword -> "Export password not configured"
+            ExportValidationError.EnableDeviceStorage -> AutomaticExportErrorKey.EnableDeviceStorage
+            ExportValidationError.SelectFolder -> AutomaticExportErrorKey.SelectFolder
+            ExportValidationError.EnterPassword -> AutomaticExportErrorKey.EnterPassword
         }
-        ExportActionError.InvalidFolder -> "Export folder is invalid"
-        ExportActionError.PermissionDenied -> "Export folder permission was lost"
-        ExportActionError.WriteFailed -> "Could not create export archive"
-        ExportActionError.Unknown -> "Automatic export failed"
+        ExportActionError.InvalidFolder -> AutomaticExportErrorKey.InvalidFolder
+        ExportActionError.PermissionDenied -> AutomaticExportErrorKey.PermissionDenied
+        ExportActionError.WriteFailed -> AutomaticExportErrorKey.WriteFailed
+        ExportActionError.Unknown -> AutomaticExportErrorKey.Unknown
     }
 }
 
 sealed interface AutomaticExportResult {
     data object Skipped : AutomaticExportResult
     data object Success : AutomaticExportResult
-    data class Failed(val message: String) : AutomaticExportResult
+    data class Failed(val error: AutomaticExportErrorKey) : AutomaticExportResult
 }

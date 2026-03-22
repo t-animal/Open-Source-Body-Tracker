@@ -30,10 +30,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
+import de.t_animal.opensourcebodytracker.domain.importbackup.ImportResult
 import de.t_animal.opensourcebodytracker.ui.components.PasswordTextField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
@@ -47,13 +50,24 @@ fun ImportBackupRoute(
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
+    val msgDatabase = stringResource(R.string.import_catastrophic_database)
+    val msgPhotos = stringResource(R.string.import_catastrophic_photos)
+    val msgPhotoVerification = stringResource(R.string.import_catastrophic_photo_verification)
+    val msgSettings = stringResource(R.string.import_catastrophic_settings)
+    val defaultFileName = stringResource(R.string.common_selected_file)
 
     LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
                 ImportBackupEvent.ImportCompleted -> onImportCompleted()
                 is ImportBackupEvent.CatastrophicFailure -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+                    val message = when (event.result) {
+                        ImportResult.CatastrophicFailure.DatabaseWriteFailed -> msgDatabase
+                        ImportResult.CatastrophicFailure.PhotoExtractionFailed -> msgPhotos
+                        ImportResult.CatastrophicFailure.PhotoVerificationFailed -> msgPhotoVerification
+                        ImportResult.CatastrophicFailure.SettingsWriteFailed -> msgSettings
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                     onResetApp()
                 }
             }
@@ -64,7 +78,7 @@ fun ImportBackupRoute(
         contract = ActivityResultContracts.OpenDocument(),
     ) { uri: Uri? ->
         if (uri != null) {
-            val fileName = resolveFileName(context, uri) ?: "Selected file"
+            val fileName = resolveFileName(context, uri) ?: defaultFileName
             vm.onFileSelected(uri, fileName)
         }
     }
@@ -101,12 +115,12 @@ fun ImportBackupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Import Backup") },
+                title = { Text(stringResource(R.string.import_title)) },
                 navigationIcon = {
                     IconButton(onClick = onCancelClicked, enabled = !state.isImporting) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.cd_back),
                         )
                     }
                 },
@@ -120,8 +134,7 @@ fun ImportBackupScreen(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Restore your data from a previously exported backup. " +
-                    "Select the encrypted ZIP file and enter the password you used during export.",
+                text = stringResource(R.string.import_description),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 16.dp),
             )
@@ -130,7 +143,7 @@ fun ImportBackupScreen(
                 value = state.password,
                 onValueChange = onPasswordChanged,
                 enabled = !state.isImporting,
-                label = { Text("Backup Password") },
+                label = { Text(stringResource(R.string.import_label_password)) },
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -141,12 +154,20 @@ fun ImportBackupScreen(
                 enabled = !state.isImporting,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(state.selectedFileName ?: "Select File")
+                Text(state.selectedFileName ?: stringResource(R.string.common_selected_file))
             }
 
-            if (!state.errorMessage.isNullOrBlank()) {
+            val errorMessage = when (val error = state.errorResult) {
+                ImportResult.RecoverableError.WrongPassword -> stringResource(R.string.import_error_wrong_password)
+                is ImportResult.RecoverableError.UnsupportedVersion -> stringResource(R.string.import_error_unsupported_version, error.foundVersion, error.supportedVersion)
+                ImportResult.RecoverableError.InvalidArchive -> stringResource(R.string.import_error_invalid_archive)
+                ImportResult.RecoverableError.IncompleteBackup -> stringResource(R.string.import_error_incomplete)
+                ImportResult.RecoverableError.FileNotReadable -> stringResource(R.string.import_error_file_not_readable)
+                null -> null
+            }
+            if (!errorMessage.isNullOrBlank()) {
                 Text(
-                    text = state.errorMessage,
+                    text = errorMessage,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 12.dp),
@@ -164,7 +185,7 @@ fun ImportBackupScreen(
                     enabled = !state.isImporting,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
 
                 Button(
@@ -172,15 +193,24 @@ fun ImportBackupScreen(
                     enabled = state.isImportEnabled,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Import")
+                    Text(stringResource(R.string.import_button_import))
                 }
             }
 
             val progress = state.progress
             if (progress != null) {
+                val progressMessage = when (progress.step) {
+                    ImportProgressStep.ReadingBackup -> stringResource(R.string.import_progress_reading)
+                    ImportProgressStep.ValidatingArchive -> stringResource(R.string.import_progress_validating)
+                    ImportProgressStep.ReadingProfile -> stringResource(R.string.import_progress_reading_profile)
+                    ImportProgressStep.ReadingMeasurements -> stringResource(R.string.import_progress_reading_measurements)
+                    ImportProgressStep.SavingToDatabase -> stringResource(R.string.import_progress_saving)
+                    is ImportProgressStep.ExtractingPhotos -> stringResource(R.string.import_progress_extracting_photos)
+                    ImportProgressStep.VerifyingPhotos -> stringResource(R.string.import_progress_verifying_photos)
+                }
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = progress.message,
+                    text = progressMessage,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(modifier = Modifier.height(8.dp))

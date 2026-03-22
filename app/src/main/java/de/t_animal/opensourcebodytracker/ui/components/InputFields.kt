@@ -21,8 +21,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import de.t_animal.opensourcebodytracker.R
 import java.text.DecimalFormatSymbols
 import java.time.Instant
 import java.time.LocalDate
@@ -39,7 +41,7 @@ fun DateInputField(
     selectedDateMillis: Long?,
     onDateSelected: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    pickButtonText: String = "Pick",
+    pickButtonText: String? = null,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -89,7 +91,7 @@ fun DateInputField(
         },
         trailingIcon = {
             TextButton(onClick = { showDatePicker = true }) {
-                Text(pickButtonText)
+                Text(pickButtonText ?: stringResource(R.string.common_pick))
             }
         },
     )
@@ -114,12 +116,12 @@ fun DateInputField(
                         showDatePicker = false
                     },
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.common_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
             },
         ) {

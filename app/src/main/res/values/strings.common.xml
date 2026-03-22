@@ -1,0 +1,97 @@
+<resources>
+    <!-- Common -->
+    <string name="common_ok">OK</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_continue">Continue</string>
+    <string name="common_dismiss">Dismiss</string>
+    <string name="common_loading">Loading</string>
+    <string name="common_loading_ellipsis">Loading…</string>
+    <string name="common_more">More</string>
+    <string name="common_back">Back</string>
+    <string name="common_finish">Finish</string>
+    <string name="common_add">Add</string>
+    <string name="common_selected_file">Select File</string>
+    <string name="common_pick">Pick</string>
+
+    <!-- App Reset -->
+    <string name="app_reset_cleaning">Cleaning all app data. Please restart app manually.</string>
+    <string name="app_reset_failed">Could not reset app automatically. Please clear app storage in system settings.</string>
+
+    <!-- Navigation -->
+    <string name="nav_measurements">Measurements</string>
+    <string name="nav_analysis">Analysis</string>
+    <string name="nav_photos">Photos</string>
+
+    <!-- Main Menu -->
+    <string name="menu_settings">Settings</string>
+    <string name="menu_about">About</string>
+    <string name="menu_trigger_reminder">Trigger Reminder</string>
+    <string name="menu_fake_data">Fake data generator</string>
+    <string name="menu_reset_app">Reset App Data</string>
+    <string name="menu_schedule_export">Schedule Export in 2 min</string>
+
+    <!-- Common Content Descriptions -->
+    <string name="cd_back">Back</string>
+    <string name="cd_more">More</string>
+    <string name="cd_toggle_password_visibility">Toggle password visibility</string>
+
+    <!-- Format: label (unit), e.g. "Weight (kg)" -->
+    <string name="metric_input_label_with_unit">%1$s (%2$s)</string>
+
+    <!-- Analysis Methods (used in settings + onboarding) -->
+    <string name="analysis_method_bmi_label">BMI</string>
+    <string name="analysis_method_bmi_description">Puts body weight into relation to height. Not a good health indicator, but can be a useful first approximation for many people.</string>
+    <string name="analysis_method_waist_hip_ratio_label">Waist–Hip Ratio</string>
+    <string name="analysis_method_waist_hip_ratio_description">Accounts for fat distribution. Higher values are associated with increased risk of cardiovascular and metabolic diseases.</string>
+    <string name="analysis_method_waist_height_ratio_label">Waist–Height Ratio</string>
+    <string name="analysis_method_waist_height_ratio_description">Strong predictor of cardiovascular and metabolic risk, often more informative than BMI.</string>
+    <string name="analysis_method_navy_body_fat_label">Navy Body Fat %</string>
+    <string name="analysis_method_navy_body_fat_description">Estimates body fat percentage based on circumference measurements. Rough approximation and very quick to measure.</string>
+    <string name="analysis_method_skinfold_body_fat_label">Skinfold Body Fat %</string>
+    <string name="analysis_method_skinfold_body_fat_description">Estimates body fat percentage based on skinfold measurements. Quite accurate when done right, but requires some skill and practice.</string>
+
+    <!-- Measured Body Metric Labels (used in measurements + settings) -->
+    <string name="metric_label_weight">Weight</string>
+    <string name="metric_label_body_fat">Body Fat</string>
+    <string name="metric_label_neck">Neck</string>
+    <string name="metric_label_waist">Waist</string>
+    <string name="metric_label_hip">Hip</string>
+    <string name="metric_label_chest">Chest</string>
+    <string name="metric_label_abdomen">Abdomen</string>
+    <string name="metric_label_chest_skinfold">Chest Skinfold</string>
+    <string name="metric_label_abdomen_skinfold">Abdomen Skinfold</string>
+    <string name="metric_label_thigh_skinfold">Thigh Skinfold</string>
+    <string name="metric_label_triceps_skinfold">Triceps Skinfold</string>
+    <string name="metric_label_suprailiac_skinfold">Suprailiac Skinfold</string>
+    <string name="metric_label_bmi">BMI</string>
+    <string name="metric_label_navy_body_fat">Body Fat Navy</string>
+    <string name="metric_label_skinfold_body_fat">Body Fat Skinfold</string>
+    <string name="metric_label_whr">WHR</string>
+    <string name="metric_label_whtr">WHtR</string>
+
+    <!-- Body Metric Full Names (used in measurements + settings) -->
+    <string name="metric_fullname_weight">Weight</string>
+    <string name="metric_fullname_body_fat">Body Fat</string>
+    <string name="metric_fullname_neck">Neck Circumference</string>
+    <string name="metric_fullname_waist">Waist Circumference</string>
+    <string name="metric_fullname_hip">Hip Circumference</string>
+    <string name="metric_fullname_chest">Chest Circumference</string>
+    <string name="metric_fullname_abdomen">Abdomen Circumference</string>
+    <string name="metric_fullname_chest_skinfold">Chest Skinfold</string>
+    <string name="metric_fullname_abdomen_skinfold">Abdomen Skinfold</string>
+    <string name="metric_fullname_thigh_skinfold">Thigh Skinfold</string>
+    <string name="metric_fullname_triceps_skinfold">Triceps Skinfold</string>
+    <string name="metric_fullname_suprailiac_skinfold">Suprailiac Skinfold</string>
+    <string name="metric_fullname_bmi">Body Mass Index</string>
+    <string name="metric_fullname_navy_body_fat">Navy Method Body Fat Percentage</string>
+    <string name="metric_fullname_skinfold_body_fat">3-Site Skinfold Body Fat Percentage</string>
+    <string name="metric_fullname_whr">Waist-Hip Ratio</string>
+    <string name="metric_fullname_whtr">Waist-Height Ratio</string>
+
+    <!-- Measurement Required/Optional Labels (used in settings + onboarding) -->
+    <string name="measurement_required_for">(required for %s)</string>
+    <string name="measurement_required">(required)</string>
+    <string name="measurement_optional">(optional)</string>
+</resources>

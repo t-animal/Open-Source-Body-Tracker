@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import de.t_animal.opensourcebodytracker.core.model.AutomaticExportErrorKey
 import de.t_animal.opensourcebodytracker.core.model.ExportSettings
 import de.t_animal.opensourcebodytracker.di.SettingsDataStore
 import javax.inject.Inject
@@ -43,7 +44,7 @@ class PreferencesExportSettingsRepository @Inject constructor(
             automaticExportEnabled = this[SettingsKeys.automaticExportEnabled] ?: defaults.automaticExportEnabled,
             automaticExportPending = this[SettingsKeys.automaticExportPending] ?: defaults.automaticExportPending,
             lastAutomaticExportError =
-                this[SettingsKeys.lastAutomaticExportError] ?: defaults.lastAutomaticExportError,
+                this[SettingsKeys.lastAutomaticExportErrorKey]?.let { AutomaticExportErrorKey.fromName(it) },
         )
     }
 
@@ -56,10 +57,11 @@ class PreferencesExportSettingsRepository @Inject constructor(
         }
         this[SettingsKeys.automaticExportEnabled] = settings.automaticExportEnabled
         this[SettingsKeys.automaticExportPending] = settings.automaticExportPending
-        if (settings.lastAutomaticExportError.isNullOrBlank()) {
-            this.remove(SettingsKeys.lastAutomaticExportError)
+        val errorKey = settings.lastAutomaticExportError
+        if (errorKey == null) {
+            this.remove(SettingsKeys.lastAutomaticExportErrorKey)
         } else {
-            this[SettingsKeys.lastAutomaticExportError] = settings.lastAutomaticExportError
+            this[SettingsKeys.lastAutomaticExportErrorKey] = errorKey.name
         }
     }
 }

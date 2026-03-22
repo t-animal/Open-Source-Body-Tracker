@@ -1,0 +1,14 @@
+<resources>
+    <string name="profile_title_onboarding">Profile Setup</string>
+    <string name="profile_title_settings">Profile</string>
+    <string name="profile_label_sex">Sex</string>
+    <string name="profile_sex_male">Male</string>
+    <string name="profile_sex_female">Female</string>
+    <string name="profile_label_dob">Date of birth</string>
+    <string name="profile_label_height">Height (cm)</string>
+
+    <!-- Validation Errors -->
+    <string name="profile_error_missing_sex">Please select a sex</string>
+    <string name="profile_error_invalid_dob">Date of birth must be YYYY-MM-DD</string>
+    <string name="profile_error_invalid_height">Height must be a positive number</string>
+</resources>

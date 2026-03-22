@@ -12,8 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
 import de.t_animal.opensourcebodytracker.ui.components.DecimalNumberInputField
@@ -30,7 +32,7 @@ fun ProfileFormSection(
     onDateOfBirthChanged: (String) -> Unit,
     onHeightChanged: (String) -> Unit,
 ) {
-    Text(text = "Sex", style = MaterialTheme.typography.titleMedium)
+    Text(text = stringResource(R.string.profile_label_sex), style = MaterialTheme.typography.titleMedium)
     Spacer(modifier = Modifier.height(8.dp))
 
     SexSelectionSection(
@@ -42,7 +44,7 @@ fun ProfileFormSection(
 
     val initialDobMillis = localDateTextToEpochMillisOrNull(dateOfBirthText)
     DateInputField(
-        label = "Date of birth",
+        label = stringResource(R.string.profile_label_dob),
         valueText = dateOfBirthText,
         selectedDateMillis = initialDobMillis,
         onDateSelected = { onDateOfBirthChanged(epochMillisToIsoLocalDate(it)) },
@@ -52,7 +54,7 @@ fun ProfileFormSection(
     Spacer(modifier = Modifier.height(16.dp))
 
     DecimalNumberInputField(
-        label = "Height (cm)",
+        label = stringResource(R.string.profile_label_height),
         value = heightCmText,
         onValueChange = onHeightChanged,
         modifier = Modifier.fillMaxWidth(),
@@ -70,13 +72,13 @@ fun SexSelectionSection(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         SexSelectionRow(
-            label = "Male",
+            label = stringResource(R.string.profile_sex_male),
             selected = sex == Sex.Male,
             onClick = { onSexChanged(Sex.Male) },
             modifier = Modifier.weight(1f),
         )
         SexSelectionRow(
-            label = "Female",
+            label = stringResource(R.string.profile_sex_female),
             selected = sex == Sex.Female,
             onClick = { onSexChanged(Sex.Female) },
             modifier = Modifier.weight(1f),

@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 import coil.size.Precision
 import coil.size.Scale
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.DEFAULT_ANIMATION_SPEED_FPS
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.canDecreaseSpeed
@@ -214,7 +216,7 @@ fun AnimatedPhotos(
                 else -> {
                     Image(
                         bitmap = currentFrame.imageBitmap,
-                        contentDescription = "Animation frame",
+                        contentDescription = stringResource(R.string.cd_animation_frame),
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -232,7 +234,7 @@ fun AnimatedPhotos(
         controls(playbackState, playbackActions)
 
         Text(
-            text = "Frame Rate: ${formatSpeedFps(playbackState.speedFps)} fps",
+            text = stringResource(R.string.photos_frame_rate, formatSpeedFps(playbackState.speedFps)),
             style = MaterialTheme.typography.bodyMedium,
         )
     }
@@ -263,6 +265,8 @@ private fun rememberDecodedAnimationState(
     targetSizePx: IntSize,
 ): State<DecodedAnimationState> {
     val context = LocalContext.current
+    val errorTooManyFormat = stringResource(R.string.photos_animation_error_too_many)
+    val errorDecodeFailed = stringResource(R.string.photos_animation_error_decode_failed)
 
     return produceState<DecodedAnimationState>(
         initialValue = DecodedAnimationState.WaitingForSize,
@@ -286,10 +290,7 @@ private fun rememberDecodedAnimationState(
             val estimatedMiB = bytesToMiBString(estimatedDecodedBytes)
             val budgetMiB = bytesToMiBString(maxPreloadBudgetBytes(maxHeapBytes))
             value = DecodedAnimationState.Error(
-                message = "Too many images selected for this app's RAM. " +
-                    "Decoded memory estimate ($estimatedMiB MiB) exceeds " +
-                    "the 50% heap budget ($budgetMiB MiB) of the RAM" +
-                    "that Android made available to this app.",
+                message = String.format(errorTooManyFormat, estimatedMiB, budgetMiB),
             )
             return@produceState
         }
@@ -313,7 +314,7 @@ private fun rememberDecodedAnimationState(
 
         value = if (decodedFrames.size < 2) {
             DecodedAnimationState.Error(
-                message = "Unable to decode at least 2 photos for animation",
+                message = errorDecodeFailed,
             )
         } else {
             DecodedAnimationState.Ready(decodedFrames)

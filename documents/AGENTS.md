@@ -65,6 +65,7 @@ Test must succeed and may only be changed if they fail because the tested behavi
 - Update tests when changing domain logic or selection/state behavior.
 - Do not edit generated outputs (`build/`, `app/build/`, generated sources).
 - Keep this file focused on stable execution guidance (no phase/progress history).
+- **When adding, removing, or changing UI strings**, read [TRANSLATIONS.md](TRANSLATIONS.md) first and follow its rules to keep all locale files in sync.
 
 ## Documents Index
 
@@ -80,3 +81,4 @@ Test must succeed and may only be changed if they fail because the tested behavi
 - [PHOTOS.md](PHOTOS.md): Photo capture/storage/gallery/compare/animate feature specification.
 - [REMINDER.md](REMINDER.md): Reminder phases and implementation spec (settings UI, manual trigger, scheduling).
 - [SETTINGS.md](SETTINGS.md): Settings model, method toggles, required measurement dependencies, and display config.
+- [TRANSLATIONS.md](TRANSLATIONS.md): Rules for adding, removing, and syncing string resources across all locale files.

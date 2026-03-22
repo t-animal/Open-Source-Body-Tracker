@@ -18,8 +18,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -52,7 +54,7 @@ fun PhotoAnimationControls(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Remove,
-                    contentDescription = "Slower",
+                    contentDescription = stringResource(R.string.cd_animation_slower),
                 )
             }
 
@@ -62,14 +64,14 @@ fun PhotoAnimationControls(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Previous frame",
+                    contentDescription = stringResource(R.string.cd_animation_previous),
                 )
             }
 
             IconButton(onClick = onPlayPauseToggle) {
                 Icon(
                     imageVector = if (isPlaying) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                    contentDescription = if (isPlaying) "Pause" else "Play",
+                    contentDescription = if (isPlaying) stringResource(R.string.cd_animation_pause) else stringResource(R.string.cd_animation_play),
                 )
             }
 
@@ -79,7 +81,7 @@ fun PhotoAnimationControls(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next frame",
+                    contentDescription = stringResource(R.string.cd_animation_next),
                 )
             }
 
@@ -89,7 +91,7 @@ fun PhotoAnimationControls(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Faster",
+                    contentDescription = stringResource(R.string.cd_animation_faster),
                 )
             }
         }

@@ -29,7 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
 import de.t_animal.opensourcebodytracker.ui.components.formatEpochMillisToLocalizedNumericDate
 
@@ -43,7 +45,7 @@ fun PhotosFeed(
 ) {
     if (items.isEmpty()) {
         Text(
-            text = "No photos yet",
+            text = stringResource(R.string.photos_empty),
             modifier = Modifier.padding(24.dp),
             style = MaterialTheme.typography.bodyLarge,
         )
@@ -99,7 +101,7 @@ private fun PhotoTile(
     ) {
         AsyncImage(
             model = item.photoFile,
-            contentDescription = "Progress photo",
+            contentDescription = stringResource(R.string.cd_progress_photo),
             contentScale = ContentScale.FillWidth,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -131,7 +133,7 @@ private fun PhotoTile(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Check,
-                    contentDescription = "Selected",
+                    contentDescription = stringResource(R.string.cd_selected),
                     tint = MaterialTheme.colorScheme.onPrimary,
                 )
             }

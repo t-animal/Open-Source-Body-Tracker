@@ -1,5 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.settings.visibility
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,14 +36,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
-import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -69,12 +72,12 @@ fun MeasurementVisibilitySettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Measurement Visibility") },
+                title = { Text(stringResource(R.string.settings_visibility_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.cd_back),
                         )
                     }
                 },
@@ -108,7 +111,7 @@ fun MeasurementVisibilitySettingsScreen(
         ) {
             item {
                 Text(
-                    text = "Choose which recorded measurements are visible in tables and analysis views.",
+                    text = stringResource(R.string.settings_visibility_description),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp),
                 )
@@ -125,7 +128,7 @@ fun MeasurementVisibilitySettingsScreen(
             if (notRecordedMeasurements.isNotEmpty()) {
                 item {
                     Text(
-                        text = "These measurements are currently disabled. It might still make sense to display them, e.g. if you have recorded them in the past.",
+                        text = stringResource(R.string.settings_visibility_disabled_hint),
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
@@ -207,9 +210,9 @@ private fun DisplayPlacementRow(
             onExpandedChange = { expanded = !expanded },
         ) {
             OutlinedTextField(
-                state = TextFieldState(placement.label()),
+                state = TextFieldState(stringResource(placement.labelResourceId)),
                 readOnly = true,
-                label = { Text("Visibility") },
+                label = { Text(stringResource(R.string.settings_visibility_label)) },
                 shape = RoundedCornerShape(8.dp),
                 colors = TextFieldDefaults.colors(),
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
@@ -227,7 +230,7 @@ private fun DisplayPlacementRow(
             ) {
                 DisplayPlacement.entries.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(option.label()) },
+                        text = { Text(stringResource(option.labelResourceId)) },
                         onClick = {
                             expanded = false
                             onPlacementSelected(option)
@@ -239,40 +242,13 @@ private fun DisplayPlacementRow(
     }
 }
 
-private fun DisplayPlacement.label(): String = when (this) {
-    DisplayPlacement.InBoth -> "In both"
-    DisplayPlacement.OnlyInTable -> "Only in Table"
-    DisplayPlacement.OnlyInAnalysis -> "Only in Analysis"
-    DisplayPlacement.Hidden -> "Hidden"
-}
-
-private fun BodyMetric.label(): String = when (this) {
-    is MeasuredBodyMetric -> when (this) {
-        MeasuredBodyMetric.Weight -> "Weight"
-        MeasuredBodyMetric.BodyFat -> "Body Fat"
-        MeasuredBodyMetric.NeckCircumference -> "Neck"
-        MeasuredBodyMetric.WaistCircumference -> "Waist"
-        MeasuredBodyMetric.HipCircumference -> "Hip"
-        MeasuredBodyMetric.ChestCircumference -> "Chest"
-        MeasuredBodyMetric.AbdomenCircumference -> "Abdomen"
-        MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold"
-        MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
-        MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold"
-        MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold"
-        MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+private val DisplayPlacement.labelResourceId: Int
+    @StringRes get() = when (this) {
+        DisplayPlacement.InBoth -> R.string.settings_visibility_in_both
+        DisplayPlacement.OnlyInTable -> R.string.settings_visibility_only_table
+        DisplayPlacement.OnlyInAnalysis -> R.string.settings_visibility_only_analysis
+        DisplayPlacement.Hidden -> R.string.settings_visibility_hidden
     }
-
-    is DerivedBodyMetric -> when (this) {
-        DerivedBodyMetric.Bmi -> "BMI"
-        DerivedBodyMetric.NavyBodyFatPercent -> "Navy Body Fat %"
-        DerivedBodyMetric.SkinfoldBodyFatPercent -> "Skinfold Body Fat %"
-        DerivedBodyMetric.WaistHipRatio -> "Waist–Hip Ratio"
-        DerivedBodyMetric.WaistHeightRatio -> "Waist–Height Ratio"
-    }
-
-    else -> id
-}
-
 
 @Preview(showBackground = true)
 @Composable

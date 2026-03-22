@@ -14,6 +14,7 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportProgress
 
@@ -73,7 +74,7 @@ class AutomaticExportWorker @AssistedInject constructor(
                 applicationContext,
                 EXPORT_NOTIFICATION_CHANNEL_ID,
             )
-                .setContentTitle("Automatic Backup")
+                .setContentTitle(applicationContext.getString(R.string.notification_export_title))
                 .setContentText(notificationState.message)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setOnlyAlertOnce(true)
@@ -89,32 +90,37 @@ class AutomaticExportWorker @AssistedInject constructor(
 
     private fun ExportProgress?.toNotificationState(): NotificationState = when (this) {
         is ExportProgress.WritingPhoto -> NotificationState(
-            message = "Exporting photos $currentPhotoIndex of $totalPhotoCount",
+            message = applicationContext.resources.getQuantityString(
+                R.plurals.notification_export_photos,
+                totalPhotoCount,
+                currentPhotoIndex,
+                totalPhotoCount,
+            ),
             current = currentPhotoIndex,
             total = totalPhotoCount,
             isIndeterminate = totalPhotoCount <= 0,
         )
 
         is ExportProgress.CollectingPhotos -> NotificationState(
-            message = "Preparing photos",
+            message = applicationContext.getString(R.string.notification_export_preparing),
             current = processedMeasurementCount,
             total = totalMeasurementCount,
             isIndeterminate = totalMeasurementCount <= 0,
         )
 
         ExportProgress.CleaningUpOldExports -> NotificationState(
-            message = "Cleaning up old backups",
+            message = applicationContext.getString(R.string.notification_export_cleaning),
         )
 
         is ExportProgress.WritingArchiveData -> NotificationState(
-            message = "Writing backup archive",
+            message = applicationContext.getString(R.string.notification_export_writing),
         )
 
         ExportProgress.Validating,
         ExportProgress.LoadingMeasurements,
         ExportProgress.LoadingProfile,
         null -> NotificationState(
-            message = "Backing up your data...",
+            message = applicationContext.getString(R.string.notification_export_default),
         )
     }
 

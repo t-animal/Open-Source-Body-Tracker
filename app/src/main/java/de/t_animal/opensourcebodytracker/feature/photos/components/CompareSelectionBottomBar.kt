@@ -14,8 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
 
 @Composable
@@ -46,7 +48,7 @@ fun CompareSelectionBottomBar(
                     }
                     AsyncImage(
                         model = item.photoFile,
-                        contentDescription = "Selected thumbnail",
+                        contentDescription = stringResource(R.string.cd_selected_thumbnail),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(52.dp)
@@ -59,7 +61,7 @@ fun CompareSelectionBottomBar(
                 onClick = onCompareClicked,
                 enabled = compareEnabled,
             ) {
-                Text("Compare")
+                Text(stringResource(R.string.photos_button_compare))
             }
         }
     }

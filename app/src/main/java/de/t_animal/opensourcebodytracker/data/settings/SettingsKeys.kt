@@ -25,7 +25,7 @@ object SettingsKeys {
     val exportFolderUri = stringPreferencesKey("export.exportFolderUri")
     val automaticExportEnabled = booleanPreferencesKey("export.automaticExportEnabled")
     val automaticExportPending = booleanPreferencesKey("export.automaticExportPending")
-    val lastAutomaticExportError = stringPreferencesKey("export.lastAutomaticExportError")
+    val lastAutomaticExportErrorKey = stringPreferencesKey("export.lastAutomaticExportError")
 
     // General settings
     val onboardingCompleted = booleanPreferencesKey("general.onboardingCompleted")

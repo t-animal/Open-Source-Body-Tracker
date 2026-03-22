@@ -21,7 +21,7 @@ data class ChooseMeasurementSettingsUiState(
     val settings: MeasurementSettings = MeasurementSettings(),
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
     val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>> = emptyMap(),
-    val errorMessage: String? = null,
+    val hasError: Boolean = false,
 )
 
 @HiltViewModel
@@ -30,18 +30,18 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
     private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
 ) : ViewModel() {
 
-    private val errorMessage = MutableStateFlow<String?>(null)
+    private val hasError = MutableStateFlow(false)
 
     val uiState: StateFlow<ChooseMeasurementSettingsUiState> = combine(
         requiredMeasurementsResolver.effectiveMeasurementSettingsFlow,
-        errorMessage,
+        hasError,
     ) { effective, error ->
         ChooseMeasurementSettingsUiState(
             isLoading = false,
             settings = effective.settings,
             requiredMeasurements = effective.dependencies.requiredMeasurements,
             measurementToAnalysisMethods = effective.dependencies.measurementToAnalysisMethods,
-            errorMessage = error,
+            hasError = error,
         )
     }.stateIn(
         scope = viewModelScope,

@@ -15,6 +15,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.feature.photos.components.AnimatedPhotos
 import de.t_animal.opensourcebodytracker.feature.photos.components.PhotoAnimationControls
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
@@ -43,7 +45,7 @@ fun PhotoAnimationScreen(
         }
 
         is PhotoAnimationUiState.Loaded -> {
-            if (state.errorMessage != null) {
+            if (state.hasError) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -51,7 +53,7 @@ fun PhotoAnimationScreen(
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = state.errorMessage,
+                        text = stringResource(R.string.photos_error_animation_load),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
                     )
@@ -117,7 +119,7 @@ private fun PhotoAnimationErrorPreview() {
     BodyTrackerTheme {
         PhotoAnimationScreen(
             state = PhotoAnimationUiState.Loaded(
-                errorMessage = "Unable to load at least 2 photos for animation",
+                hasError = true,
             ),
         )
     }

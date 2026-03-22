@@ -1,0 +1,15 @@
+<resources>
+    <string name="onboarding_title">Initial Configuration</string>
+    <string name="onboarding_question">How do you want to start?</string>
+    <string name="onboarding_description">You can try the app with demo data to get a feel for its features, restore a previously exported backup, or create your own profile.</string>
+    <string name="onboarding_button_demo">Try with Demo Data</string>
+    <string name="onboarding_button_import">Import Backup</string>
+    <string name="onboarding_button_create_profile">Create Profile</string>
+    <string name="onboarding_analysis_title">Select Analysis Methods</string>
+    <string name="onboarding_analysis_description">Choose the analysis methods you want to use.</string>
+    <string name="onboarding_analysis_hint">Additional measurements can be enabled later in settings.</string>
+    <string name="onboarding_analysis_methods_header">Analysis Methods</string>
+    <string name="onboarding_measurements_header">Measurements</string>
+    <string name="onboarding_error_save_failed">Could not save settings. Please try again.</string>
+    <string name="onboarding_error_demo_failed">Could not generate demo data. Please try again.</string>
+</resources>

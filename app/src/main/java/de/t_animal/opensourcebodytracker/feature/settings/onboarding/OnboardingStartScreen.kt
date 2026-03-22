@@ -18,10 +18,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -59,7 +61,7 @@ fun OnboardingStartScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Initial Configuration") })
+            TopAppBar(title = { Text(stringResource(R.string.onboarding_title)) })
         },
     ) { contentPadding ->
         Column(
@@ -71,12 +73,12 @@ fun OnboardingStartScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "How do you want to start?",
+                text = stringResource(R.string.onboarding_question),
                 style = MaterialTheme.typography.titleLarge,
             )
 
             Text(
-                text = "You can try the app with demo data to get a feel for its features, restore a previously exported backup, or create your own profile.",
+                text = stringResource(R.string.onboarding_description),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
             )
@@ -91,7 +93,7 @@ fun OnboardingStartScreen(
                         modifier = Modifier.padding(vertical = 2.dp),
                     )
                 } else {
-                    Text("Try with Demo Data")
+                    Text(stringResource(R.string.onboarding_button_demo))
                 }
             }
 
@@ -102,7 +104,7 @@ fun OnboardingStartScreen(
                     .fillMaxWidth()
                     .padding(top = 12.dp),
             ) {
-                Text("Import Backup")
+                Text(stringResource(R.string.onboarding_button_import))
             }
 
             Button(
@@ -112,12 +114,12 @@ fun OnboardingStartScreen(
                     .fillMaxWidth()
                     .padding(top = 12.dp),
             ) {
-                Text("Create Profile")
+                Text(stringResource(R.string.onboarding_button_create_profile))
             }
 
-            if (!state.errorMessage.isNullOrBlank()) {
+            if (state.hasError) {
                 Text(
-                    text = state.errorMessage,
+                    text = stringResource(R.string.onboarding_error_demo_failed),
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = 12.dp),
                 )

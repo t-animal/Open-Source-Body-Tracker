@@ -29,7 +29,7 @@ data class OnboardingAnalysisUiState(
     val settings: MeasurementSettings = MeasurementSettings(),
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
     val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>> = emptyMap(),
-    val errorMessage: String? = null,
+    val hasError: Boolean = false,
 )
 
 sealed interface OnboardingAnalysisEvent {
@@ -42,7 +42,7 @@ class OnboardingAnalysisViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
 ) : ViewModel() {
-    private val _errorMessage = MutableStateFlow<String?>(null)
+    private val _hasError = MutableStateFlow(false)
     private val _isSaving = MutableStateFlow(false)
 
     private val _events = MutableSharedFlow<OnboardingAnalysisEvent>()
@@ -55,8 +55,8 @@ class OnboardingAnalysisViewModel @Inject constructor(
         measurementSettingsRepository.settingsFlow,
         profileRepository.profileFlow,
         _isSaving,
-        _errorMessage,
-    ) { settings, profile, isSaving, errorMessage ->
+        _hasError,
+    ) { settings, profile, isSaving, hasError ->
         if (profile == null) {
             OnboardingAnalysisUiState(isLoading = true, isSaving = isSaving)
         } else {
@@ -67,7 +67,7 @@ class OnboardingAnalysisViewModel @Inject constructor(
                 settings = effective.settings,
                 requiredMeasurements = effective.dependencies.requiredMeasurements,
                 measurementToAnalysisMethods = effective.dependencies.measurementToAnalysisMethods,
-                errorMessage = errorMessage,
+                hasError = hasError,
             )
         }
     }.stateIn(
@@ -121,13 +121,13 @@ class OnboardingAnalysisViewModel @Inject constructor(
 
         viewModelScope.launch {
             _isSaving.value = true
-            _errorMessage.value = null
+            _hasError.value = false
 
             runCatching {
                 lastPersistJob?.join()
                 _events.emit(OnboardingAnalysisEvent.Completed)
             }.onFailure { throwable ->
-                _errorMessage.value = throwable.message ?: "Could not continue onboarding"
+                _hasError.value = true
             }
 
             _isSaving.value = false
@@ -150,7 +150,7 @@ class OnboardingAnalysisViewModel @Inject constructor(
                     measurementSettingsRepository.saveSettings(effective.settings)
                 }
             }.onFailure { throwable ->
-                _errorMessage.value = throwable.message ?: "Could not save onboarding settings"
+                _hasError.value = true
             }
         }
     }

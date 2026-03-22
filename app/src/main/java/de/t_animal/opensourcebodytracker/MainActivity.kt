@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
     private fun resetApp() {
         Toast.makeText(
             this,
-            "Cleaning all app data. Please restart app manually.",
+            getString(R.string.app_reset_cleaning),
             Toast.LENGTH_LONG,
         ).show()
 
@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
         if (!clearAccepted) {
             Toast.makeText(
                 this,
-                "Could not reset app automatically. Please clear app storage in system settings.",
+                getString(R.string.app_reset_failed),
                 Toast.LENGTH_LONG,
             ).show()
         }

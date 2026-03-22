@@ -16,6 +16,16 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+sealed interface ImportProgressStep {
+    data object ReadingBackup : ImportProgressStep
+    data object ValidatingArchive : ImportProgressStep
+    data object ReadingProfile : ImportProgressStep
+    data object ReadingMeasurements : ImportProgressStep
+    data object SavingToDatabase : ImportProgressStep
+    data class ExtractingPhotos(val current: Int, val total: Int) : ImportProgressStep
+    data object VerifyingPhotos : ImportProgressStep
+}
+
 @HiltViewModel
 class ImportBackupViewModel @Inject constructor(
     private val importBackupUseCase: ImportBackupUseCase,
@@ -30,14 +40,14 @@ class ImportBackupViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             selectedFileUri = uri,
             selectedFileName = fileName,
-            errorMessage = null,
+            errorResult = null,
         )
     }
 
     fun onPasswordChanged(password: String) {
         _uiState.value = _uiState.value.copy(
             password = password,
-            errorMessage = null,
+            errorResult = null,
         )
     }
 
@@ -48,8 +58,8 @@ class ImportBackupViewModel @Inject constructor(
 
         _uiState.value = state.copy(
             isImporting = true,
-            errorMessage = null,
-            progress = ImportUiProgress("Reading backup file…"),
+            errorResult = null,
+            progress = ImportUiProgress(step = ImportProgressStep.ReadingBackup),
         )
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -75,71 +85,37 @@ class ImportBackupViewModel @Inject constructor(
 
                 is ImportResult.CatastrophicFailure -> {
                     _events.emit(
-                        ImportBackupEvent.CatastrophicFailure(
-                            catastrophicFailureMessage(result),
-                        ),
+                        ImportBackupEvent.CatastrophicFailure(result),
                     )
                 }
 
-                ImportResult.WrongPassword,
-                is ImportResult.UnsupportedVersion,
-                ImportResult.IncompleteBackup,
-                ImportResult.InvalidArchive,
-                ImportResult.FileNotReadable -> {
+                is ImportResult.RecoverableError -> {
                     _uiState.value = _uiState.value.copy(
                         isImporting = false,
                         progress = null,
-                        errorMessage = recoverableErrorMessage(result),
+                        errorResult = result,
                     )
                 }
             }
         }
     }
 
-    private fun recoverableErrorMessage(result: ImportResult): String = when (result) {
-        ImportResult.WrongPassword -> "Wrong password. Please try again."
-        is ImportResult.UnsupportedVersion ->
-            "Unsupported backup version (${result.foundVersion}). " +
-                "This app supports version ${result.supportedVersion}."
-        ImportResult.InvalidArchive -> "The selected file is not a valid ZIP archive."
-        ImportResult.IncompleteBackup ->
-            "The backup is incomplete or corrupted. It may not be a valid backup."
-        ImportResult.FileNotReadable -> "Could not read the selected file."
-        else -> "An unexpected error occurred."
-    }
-
-    private fun catastrophicFailureMessage(
-        result: ImportResult.CatastrophicFailure,
-    ): String = when (result) {
-        ImportResult.CatastrophicFailure.DatabaseWriteFailed ->
-            "Failed to save data to the database. The app may be in an inconsistent state."
-        ImportResult.CatastrophicFailure.PhotoExtractionFailed ->
-            "Photos could not be restored after data was saved. " +
-                "The app may be in an inconsistent state."
-        ImportResult.CatastrophicFailure.PhotoVerificationFailed ->
-            "Some photos could not be verified after extraction. " +
-                "The app may be in an inconsistent state."
-        ImportResult.CatastrophicFailure.SettingsWriteFailed ->
-            "Data was imported but settings could not be saved. " +
-                "The app may be in an inconsistent state."
-    }
-
     private fun ImportProgress.toUiProgress(): ImportUiProgress = when (this) {
-        ImportProgress.ValidatingArchive -> ImportUiProgress("Validating archive…")
-        ImportProgress.ReadingProfile -> ImportUiProgress("Reading profile…")
-        ImportProgress.ReadingMeasurements -> ImportUiProgress("Reading measurements…")
-        ImportProgress.SavingToDatabase -> ImportUiProgress("Saving to database…")
+        ImportProgress.ValidatingArchive -> ImportUiProgress(step = ImportProgressStep.ValidatingArchive)
+        ImportProgress.ReadingProfile -> ImportUiProgress(step = ImportProgressStep.ReadingProfile)
+        ImportProgress.ReadingMeasurements -> ImportUiProgress(step = ImportProgressStep.ReadingMeasurements)
+        ImportProgress.SavingToDatabase -> ImportUiProgress(step = ImportProgressStep.SavingToDatabase)
         is ImportProgress.ExtractingPhotos -> ImportUiProgress(
-            message = "Restoring photos…",
+            step = ImportProgressStep.ExtractingPhotos(current = current, total = total),
             current = current,
             total = total,
         )
-        ImportProgress.VerifyingPhotos -> ImportUiProgress("Verifying photos…")
+        ImportProgress.VerifyingPhotos -> ImportUiProgress(step = ImportProgressStep.VerifyingPhotos)
     }
 }
 
 data class ImportUiProgress(
-    val message: String,
+    val step: ImportProgressStep,
     val current: Int? = null,
     val total: Int? = null,
 ) {
@@ -156,7 +132,7 @@ data class ImportBackupUiState(
     val password: String = "",
     val isImporting: Boolean = false,
     val progress: ImportUiProgress? = null,
-    val errorMessage: String? = null,
+    val errorResult: ImportResult.RecoverableError? = null,
 ) {
     val isImportEnabled: Boolean
         get() = selectedFileUri != null && password.isNotEmpty() && !isImporting
@@ -164,6 +140,6 @@ data class ImportBackupUiState(
 
 sealed interface ImportBackupEvent {
     data object ImportCompleted : ImportBackupEvent
-    data class CatastrophicFailure(val message: String) : ImportBackupEvent
+    data class CatastrophicFailure(val result: ImportResult.CatastrophicFailure) : ImportBackupEvent
 }
 

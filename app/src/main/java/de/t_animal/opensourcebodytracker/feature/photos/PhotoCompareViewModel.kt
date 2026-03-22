@@ -22,7 +22,7 @@ sealed interface PhotoCompareUiState {
     data class Loaded(
         val left: PhotosItemUiModel? = null,
         val right: PhotosItemUiModel? = null,
-        val errorMessage: String? = null,
+        val hasError: Boolean = false,
     ) : PhotoCompareUiState
 }
 
@@ -70,7 +70,7 @@ class PhotoCompareViewModel @Inject constructor(
             if (missingPhoto) {
                 mutableUiState.update {
                     PhotoCompareUiState.Loaded(
-                        errorMessage = "Unable to load one or both selected photos",
+                        hasError = true,
                     )
                 }
                 return@launch
@@ -80,7 +80,7 @@ class PhotoCompareViewModel @Inject constructor(
                 PhotoCompareUiState.Loaded(
                     left = leftItem,
                     right = rightItem,
-                    errorMessage = null,
+                    hasError = false,
                 )
             }
         }

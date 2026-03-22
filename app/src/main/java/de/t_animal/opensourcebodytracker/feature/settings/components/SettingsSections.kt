@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -16,11 +15,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onVisibilityChangedNode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 
@@ -40,8 +39,8 @@ fun AnalysisMethodsSection(
     Card {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsCheckRow(
-                label = "BMI",
-                secondaryLabel = "Puts body weight into relation to height. Not a good health indicator, but can be a useful first approximation for many people.",
+                label = stringResource(R.string.analysis_method_bmi_label),
+                secondaryLabel = stringResource(R.string.analysis_method_bmi_description),
                 checked = bmiEnabled,
                 enabled = true,
                 onCheckedChange = onBmiEnabledChanged,
@@ -49,8 +48,8 @@ fun AnalysisMethodsSection(
             Spacer(modifier = Modifier.height(8.dp))
 
             SettingsCheckRow(
-                label = "Waist–Hip Ratio",
-                secondaryLabel = "Accounts for fat distribution. Higher values are associated with increased risk of cardiovascular and metabolic diseases.",
+                label = stringResource(R.string.analysis_method_waist_hip_ratio_label),
+                secondaryLabel = stringResource(R.string.analysis_method_waist_hip_ratio_description),
                 checked = waistHipRatioEnabled,
                 enabled = true,
                 onCheckedChange = onWaistHipRatioEnabledChanged,
@@ -58,8 +57,8 @@ fun AnalysisMethodsSection(
             Spacer(modifier = Modifier.height(8.dp))
 
             SettingsCheckRow(
-                label = "Waist–Height Ratio",
-                secondaryLabel = "Strong predictor of cardiovascular and metabolic risk, often more informative than BMI.",
+                label = stringResource(R.string.analysis_method_waist_height_ratio_label),
+                secondaryLabel = stringResource(R.string.analysis_method_waist_height_ratio_description),
                 checked = waistHeightRatioEnabled,
                 enabled = true,
                 onCheckedChange = onWaistHeightRatioEnabledChanged,
@@ -67,8 +66,8 @@ fun AnalysisMethodsSection(
             Spacer(modifier = Modifier.height(8.dp))
 
             SettingsCheckRow(
-                label = "Navy Body Fat %",
-                secondaryLabel = "Estimates body fat percentage based on circumference measurements. Rough approximation and very quick to measure.",
+                label = stringResource(R.string.analysis_method_navy_body_fat_label),
+                secondaryLabel = stringResource(R.string.analysis_method_navy_body_fat_description),
                 checked = navyBodyFatEnabled,
                 enabled = true,
                 onCheckedChange = onNavyBodyFatEnabledChanged,
@@ -76,8 +75,8 @@ fun AnalysisMethodsSection(
             Spacer(modifier = Modifier.height(8.dp))
 
             SettingsCheckRow(
-                label = "Skinfold Body Fat %",
-                secondaryLabel = "Estimates body fat percentage based on skinfold measurements. Quite accurate when done right, but requires some skill and practice.",
+                label = stringResource(R.string.analysis_method_skinfold_body_fat_label),
+                secondaryLabel = stringResource(R.string.analysis_method_skinfold_body_fat_description),
                 checked = skinfoldBodyFatEnabled,
                 enabled = true,
                 onCheckedChange = onSkinfoldBodyFatEnabledChanged,
@@ -100,14 +99,14 @@ fun MeasurementCollectionSection(
                 val requiredByMethods = measurementToAnalysisMethods[measurement].orEmpty()
                 val secondaryLabel = when {
                     requiredByMethods.isNotEmpty() ->
-                        "(required for ${requiredByMethods.toAnalysisMethodLabelList()})"
+                        stringResource(R.string.measurement_required_for, requiredByMethods.toAnalysisMethodLabelList())
 
-                    required -> "(required)"
-                    else -> "(optional)"
+                    required -> stringResource(R.string.measurement_required)
+                    else -> stringResource(R.string.measurement_optional)
                 }
 
                 SettingsCheckRow(
-                    label = measurement.label(),
+                    label = measurement.getLabel(),
                     secondaryLabel = secondaryLabel,
                     checked = measurement in enabledMeasurements,
                     enabled = !required,
@@ -160,31 +159,37 @@ private fun SettingsCheckRow(
     }
 }
 
-private fun Set<AnalysisMethod>.toAnalysisMethodLabelList(): String = AnalysisMethod.entries
-    .filter { it in this }
-    .joinToString(", ") { it.label() }
-
-private fun AnalysisMethod.label(): String = when (this) {
-    AnalysisMethod.Bmi -> "BMI"
-    AnalysisMethod.NavyBodyFat -> "Navy Body Fat %"
-    AnalysisMethod.Skinfold3SiteBodyFat -> "Skinfold Body Fat %"
-    AnalysisMethod.WaistHipRatio -> "Waist–Hip Ratio"
-    AnalysisMethod.WaistHeightRatio -> "Waist–Height Ratio"
+@Composable
+private fun Set<AnalysisMethod>.toAnalysisMethodLabelList(): String {
+    val labels = AnalysisMethod.entries
+        .filter { it in this }
+        .map { it.getLabel() }
+    return labels.joinToString(", ")
 }
 
-private fun MeasuredBodyMetric.label(): String = when (this) {
-    MeasuredBodyMetric.Weight -> "Weight"
-    MeasuredBodyMetric.BodyFat -> "Body Fat"
-    MeasuredBodyMetric.NeckCircumference -> "Neck"
-    MeasuredBodyMetric.WaistCircumference -> "Waist"
-    MeasuredBodyMetric.HipCircumference -> "Hip"
-    MeasuredBodyMetric.ChestCircumference -> "Chest"
-    MeasuredBodyMetric.AbdomenCircumference -> "Abdomen"
-    MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold"
-    MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
-    MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold"
-    MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold"
-    MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+@Composable
+private fun AnalysisMethod.getLabel(): String = when (this) {
+    AnalysisMethod.Bmi -> stringResource(R.string.analysis_method_bmi_label)
+    AnalysisMethod.NavyBodyFat -> stringResource(R.string.analysis_method_navy_body_fat_label)
+    AnalysisMethod.Skinfold3SiteBodyFat -> stringResource(R.string.analysis_method_skinfold_body_fat_label)
+    AnalysisMethod.WaistHipRatio -> stringResource(R.string.analysis_method_waist_hip_ratio_label)
+    AnalysisMethod.WaistHeightRatio -> stringResource(R.string.analysis_method_waist_height_ratio_label)
+}
+
+@Composable
+private fun MeasuredBodyMetric.getLabel(): String = when (this) {
+    MeasuredBodyMetric.Weight -> stringResource(R.string.metric_label_weight)
+    MeasuredBodyMetric.BodyFat -> stringResource(R.string.metric_label_body_fat)
+    MeasuredBodyMetric.NeckCircumference -> stringResource(R.string.metric_label_neck)
+    MeasuredBodyMetric.WaistCircumference -> stringResource(R.string.metric_label_waist)
+    MeasuredBodyMetric.HipCircumference -> stringResource(R.string.metric_label_hip)
+    MeasuredBodyMetric.ChestCircumference -> stringResource(R.string.metric_label_chest)
+    MeasuredBodyMetric.AbdomenCircumference -> stringResource(R.string.metric_label_abdomen)
+    MeasuredBodyMetric.ChestSkinfold -> stringResource(R.string.metric_label_chest_skinfold)
+    MeasuredBodyMetric.AbdomenSkinfold -> stringResource(R.string.metric_label_abdomen_skinfold)
+    MeasuredBodyMetric.ThighSkinfold -> stringResource(R.string.metric_label_thigh_skinfold)
+    MeasuredBodyMetric.TricepsSkinfold -> stringResource(R.string.metric_label_triceps_skinfold)
+    MeasuredBodyMetric.SuprailiacSkinfold -> stringResource(R.string.metric_label_suprailiac_skinfold)
 }
 
 

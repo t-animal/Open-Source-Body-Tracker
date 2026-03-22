@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
+import de.t_animal.opensourcebodytracker.R
 import java.io.File
 
 @Composable
@@ -64,7 +66,7 @@ fun PhotoPreviewDialog(
         ) {
             AsyncImage(
                 model = previewPhoto,
-                contentDescription = "Captured photo",
+                contentDescription = stringResource(R.string.cd_captured_photo),
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight()
@@ -87,7 +89,7 @@ fun PhotoPreviewDialog(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.cd_close),
                 )
             }
         }

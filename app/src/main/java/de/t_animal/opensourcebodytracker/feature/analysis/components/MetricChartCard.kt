@@ -18,8 +18,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisMetricChartUiModel
 import de.t_animal.opensourcebodytracker.feature.analysis.helpers.analysisTitle
@@ -56,12 +58,12 @@ internal fun MetricChartCard(
                 IconButton(onClick = onToggleCollapsed) {
                     Icon(
                         imageVector = if (isCollapsed) Icons.Default.ExpandMore else Icons.Default.ExpandLess,
-                        contentDescription = if (isCollapsed) "Expand" else "Collapse",
+                        contentDescription = stringResource(if (isCollapsed) R.string.cd_expand else R.string.cd_collapse),
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.DragHandle,
-                    contentDescription = "Drag to reorder",
+                    contentDescription = stringResource(R.string.cd_drag_to_reorder),
                     modifier = dragHandleModifier,
                 )
             }
@@ -75,7 +77,7 @@ internal fun MetricChartCard(
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
-                            text = "no data yet",
+                            text = stringResource(R.string.analysis_chart_no_data),
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                         )

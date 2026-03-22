@@ -1,0 +1,23 @@
+<resources>
+    <string name="analysis_hint">Tap a point to show value, long tap to show note</string>
+    <string name="analysis_chart_no_data">No data yet</string>
+
+    <!-- Duration Filter -->
+    <string name="analysis_duration_1m">1M</string>
+    <string name="analysis_duration_3m">3M</string>
+    <string name="analysis_duration_6m">6M</string>
+    <string name="analysis_duration_1y">1Y</string>
+    <string name="analysis_duration_all">All</string>
+
+    <!-- Chart Titles (derived metrics only; measured metrics reuse metric_label_*) -->
+    <string name="analysis_chart_title_bmi">BMI</string>
+    <string name="analysis_chart_title_navy_body_fat">Navy Body Fat %</string>
+    <string name="analysis_chart_title_skinfold_body_fat">Skinfold Body Fat %</string>
+    <string name="analysis_chart_title_whr">Waist–Hip Ratio</string>
+    <string name="analysis_chart_title_whtr">Waist–Height Ratio</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_drag_to_reorder">Drag to reorder</string>
+    <string name="cd_expand">Expand</string>
+    <string name="cd_collapse">Collapse</string>
+</resources>

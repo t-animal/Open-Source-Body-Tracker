@@ -19,7 +19,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 
 @Composable
 fun PasswordTextField(
@@ -59,7 +61,7 @@ fun PasswordTextField(
         trailingIcon = {
             Icon(
                 imageVector = if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                contentDescription = "Toggle password visibility",
+                contentDescription = stringResource(R.string.cd_toggle_password_visibility),
                 modifier = Modifier.Companion
                     .requiredSize(40.dp)
                     .padding(8.dp)

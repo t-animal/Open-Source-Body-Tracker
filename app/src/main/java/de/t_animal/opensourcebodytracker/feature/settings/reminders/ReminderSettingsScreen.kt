@@ -43,12 +43,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -125,17 +127,13 @@ private fun PermissionDeniedAlert(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Notification Permission Required") },
+        title = { Text(stringResource(R.string.reminder_permission_denied_title)) },
         text = {
-            Text(
-                "Notification permission is required to keep reminders enabled." +
-                    "Reminders have been disabled for now." + 
-                    "To enable reminders, please grant notification permission in the app settings.",
-            )
+            Text(stringResource(R.string.reminder_permission_denied_body))
         },
         confirmButton = {
             Button(onClick = onDismiss) {
-                Text("OK")
+                Text(stringResource(R.string.common_ok))
             }
         },
     )
@@ -195,9 +193,8 @@ fun ReminderSettingsScreen(
                 .padding(16.dp),
         ) {
             Text(
-                "Set up reminders to log your measurements regularly " +
-                    "and stay on track with your goals. You will receive a notification " +
-                    "at the selected time on the chosen weekdays.", style = MaterialTheme.typography.bodyMedium
+                stringResource(R.string.reminder_description),
+                style = MaterialTheme.typography.bodyMedium,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -208,7 +205,7 @@ fun ReminderSettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Enable Reminders",
+                    text = stringResource(R.string.reminder_label_enable),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Switch(
@@ -220,7 +217,7 @@ fun ReminderSettingsScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Weekdays",
+                text = stringResource(R.string.reminder_label_weekdays),
                 style = MaterialTheme.typography.titleMedium,
             )
 
@@ -251,7 +248,7 @@ fun ReminderSettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Time",
+                text = stringResource(R.string.reminder_label_time),
                 style = MaterialTheme.typography.titleMedium,
             )
 
@@ -274,11 +271,14 @@ fun ReminderSettingsScreen(
                 Text(formatReminderTime(state.time))
             }
 
-            val error = state.errorMessage
-            if (!error.isNullOrBlank()) {
+            val errorMessage = when (state.validationError) {
+                ReminderValidationError.NoWeekdaySelected -> stringResource(R.string.reminder_error_no_weekday)
+                null -> null
+            }
+            if (!errorMessage.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = error,
+                    text = errorMessage,
                     color = MaterialTheme.colorScheme.error,
                 )
             }
@@ -301,13 +301,13 @@ private fun ReminderSettingsTopAppBar(
     onBackClicked: () -> Unit,
 ) {
     TopAppBar(
-        title = { Text(mode.titleText()) },
+        title = { Text(stringResource(mode.titleResourceId)) },
         navigationIcon = {
             if (mode.showsBackNavigation()) {
                 IconButton(onClick = onBackClicked) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.cd_back),
                     )
                 }
             }
@@ -324,7 +324,7 @@ private fun ReminderSettingsActionButtons(
     when (mode) {
         ReminderMode.Onboarding -> {
             ReminderSaveButton(
-                label = mode.primaryButtonText(),
+                label = stringResource(mode.primaryButtonResourceId),
                 onSaveClicked = onSaveClicked,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -339,10 +339,10 @@ private fun ReminderSettingsActionButtons(
                     onClick = onBackClicked,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
                 ReminderSaveButton(
-                    label = mode.primaryButtonText(),
+                    label = stringResource(mode.primaryButtonResourceId),
                     onSaveClicked = onSaveClicked,
                     modifier = Modifier.weight(1f),
                 )
@@ -367,15 +367,6 @@ private fun ReminderSaveButton(
 
 private fun ReminderMode.showsBackNavigation(): Boolean = this == ReminderMode.Settings
 
-private fun ReminderMode.titleText(): String = when (this) {
-    ReminderMode.Onboarding -> "Reminder Setup"
-    ReminderMode.Settings -> "Reminder Settings"
-}
-
-private fun ReminderMode.primaryButtonText(): String = when (this) {
-    ReminderMode.Onboarding -> "Finish"
-    ReminderMode.Settings -> "Save"
-}
 
 private fun formatReminderTime(time: LocalTime): String {
     return time.format(DateTimeFormatter.ofPattern("HH:mm"))

@@ -12,10 +12,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.ui.components.PhotoPreviewDialog
 import de.t_animal.opensourcebodytracker.feature.photos.components.AnimateSelectionBottomBar
 import de.t_animal.opensourcebodytracker.feature.photos.components.CompareSelectionBottomBar
@@ -24,6 +26,7 @@ import de.t_animal.opensourcebodytracker.feature.photos.components.PhotosModeFab
 import de.t_animal.opensourcebodytracker.feature.photos.components.PhotosScreenSnackbarHost
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotoMode
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosSnackbarMessage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosUiState
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.io.File
@@ -37,8 +40,14 @@ fun PhotosRoute(
     val state by vm.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val snackbarMessage = when (state.snackbarMessage) {
+        PhotosSnackbarMessage.SelectionLimitReached -> stringResource(R.string.photos_snackbar_selection_limit)
+        PhotosSnackbarMessage.MinimumSelectionRequired -> stringResource(R.string.photos_snackbar_minimum_selection)
+        null -> null
+    }
+
     LaunchedEffect(state.snackbarMessage) {
-        val message = state.snackbarMessage ?: return@LaunchedEffect
+        val message = snackbarMessage ?: return@LaunchedEffect
         snackbarHostState.showSnackbar(message = message)
         vm.onSnackbarShown()
     }

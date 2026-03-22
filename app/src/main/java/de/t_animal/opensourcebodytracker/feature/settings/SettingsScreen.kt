@@ -20,8 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -59,12 +61,12 @@ fun SettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.cd_back),
                         )
                     }
                 },
@@ -80,7 +82,7 @@ fun SettingsScreen(
         ) {
             item {
                 Text(
-                    text = "Configure your profile, measurements, analysis, export, and app information.",
+                    text = stringResource(R.string.settings_description),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 12.dp),
                 )
@@ -88,37 +90,37 @@ fun SettingsScreen(
 
             item {
                 SettingsNavigationItem(
-                    title = "Edit Profile",
+                    title = stringResource(R.string.settings_item_profile),
                     onClick = onOpenProfile,
                 )
             }
             item {
                 SettingsNavigationItem(
-                    title = "Choose Measurements & Analysis",
+                    title = stringResource(R.string.settings_item_measurements_analysis),
                     onClick = onOpenMeasurementsAndAnalysis,
                 )
             }
             item {
                 SettingsNavigationItem(
-                    title = "Set Measurement Visibility",
+                    title = stringResource(R.string.settings_item_visibility),
                     onClick = onOpenMeasurementVisibility,
                 )
             }
             item {
                 SettingsNavigationItem(
-                    title = "Set Reminders",
+                    title = stringResource(R.string.settings_item_reminders),
                     onClick = onOpenReminders,
                 )
             }
             item {
                 SettingsNavigationItem(
-                    title = "Export",
+                    title = stringResource(R.string.settings_item_export),
                     onClick = onOpenExport,
                 )
             }
             item {
                 SettingsNavigationItem(
-                    title = "About",
+                    title = stringResource(R.string.settings_item_about),
                     onClick = onOpenAbout,
                 )
             }

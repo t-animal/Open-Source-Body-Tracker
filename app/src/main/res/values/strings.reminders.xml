@@ -1,0 +1,20 @@
+<resources>
+    <string name="reminder_title_onboarding">Reminder Setup</string>
+    <string name="reminder_title_settings">Reminder Settings</string>
+    <string name="reminder_description">Set up reminders to log your measurements regularly and stay on track with your goals. You will receive a notification at the selected time on the chosen weekdays.</string>
+    <string name="reminder_label_enable">Enable Reminders</string>
+    <string name="reminder_label_weekdays">Weekdays</string>
+    <string name="reminder_label_time">Time</string>
+    <string name="reminder_error_no_weekday">Select at least one weekday</string>
+    <string name="reminder_permission_denied_title">Notification Permission Required</string>
+    <string name="reminder_permission_denied_body">Notification permission is required to keep reminders enabled. Reminders have been disabled for now. To enable reminders, please grant notification permission in the app settings.</string>
+
+    <!-- Debug Toasts -->
+    <string name="reminder_toast_notifications_disabled">Notifications are disabled for this app.</string>
+    <string name="reminder_toast_failed">Could not show reminder notification.</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_title">Measurement Reminder</string>
+    <string name="notification_reminder_body">Don\'t forget to record your measurements.</string>
+    <string name="notification_channel_reminders">Measurement Reminders</string>
+</resources>

@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_description">Configure your profile, measurements, analysis, export, and app information.</string>
+    <string name="settings_item_profile">Edit Profile</string>
+    <string name="settings_item_measurements_analysis">Choose Measurements &amp; Analysis</string>
+    <string name="settings_item_visibility">Set Measurement Visibility</string>
+    <string name="settings_item_reminders">Set Reminders</string>
+    <string name="settings_item_export">Export</string>
+    <string name="settings_item_about">About</string>
+    <string name="settings_measurements_analysis_title">Measurements &amp; Analysis</string>
+    <string name="settings_measurements_description">Configure measurement collection and analysis methods in one place. Required measurements stay enabled when selected analyses depend on them.</string>
+    <string name="settings_measurements_analysis_methods_header">Analysis Methods</string>
+    <string name="settings_measurements_header">Measurements</string>
+    <string name="settings_measurements_error_save_failed">Could not save settings. Please try again.</string>
+
+    <!-- Visibility -->
+    <string name="settings_visibility_title">Measurement Visibility</string>
+    <string name="settings_visibility_description">Choose which recorded measurements are visible in tables and analysis views.</string>
+    <string name="settings_visibility_disabled_hint">These measurements are currently disabled. It might still make sense to display them, e.g. if you have recorded them in the past.</string>
+    <string name="settings_visibility_label">Visibility</string>
+    <string name="settings_visibility_in_both">In both</string>
+    <string name="settings_visibility_only_table">Only in Table</string>
+    <string name="settings_visibility_only_analysis">Only in Analysis</string>
+    <string name="settings_visibility_hidden">Hidden</string>
+</resources>

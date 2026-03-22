@@ -8,6 +8,7 @@ import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotoMode
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosSnackbarMessage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosUiState
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedAnimationSelection
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedCompareSelection
@@ -23,7 +24,7 @@ import kotlinx.coroutines.flow.update
 private data class PhotosSelectionState(
     val mode: PhotoMode = PhotoMode.NORMAL,
     val selectedMeasurementIds: List<Long> = emptyList(),
-    val snackbarMessage: String? = null,
+    val snackbarMessage: PhotosSnackbarMessage? = null,
 )
 
 @HiltViewModel
@@ -119,7 +120,7 @@ class PhotosViewModel @Inject constructor(
             )
 
             if (selectionResult.selectionLimitReached) {
-                currentState.copy(snackbarMessage = "You can select at most 2 photos")
+                currentState.copy(snackbarMessage = PhotosSnackbarMessage.SelectionLimitReached)
             } else {
                 currentState.copy(
                     selectedMeasurementIds = selectionResult.selectedMeasurementIds,
@@ -158,7 +159,7 @@ class PhotosViewModel @Inject constructor(
             }
 
             currentState.copy(
-                snackbarMessage = "Select at least 2 photos to animate",
+                snackbarMessage = PhotosSnackbarMessage.MinimumSelectionRequired,
             )
         }
 

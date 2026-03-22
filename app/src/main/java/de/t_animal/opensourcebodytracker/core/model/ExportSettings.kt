@@ -5,5 +5,5 @@ data class ExportSettings(
     val exportFolderUri: String? = null,
     val automaticExportEnabled: Boolean = false,
     val automaticExportPending: Boolean = false,
-    val lastAutomaticExportError: String? = null,
+    val lastAutomaticExportError: AutomaticExportErrorKey? = null,
 )
