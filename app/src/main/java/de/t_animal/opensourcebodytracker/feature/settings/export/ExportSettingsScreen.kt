@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.feature.settings.export
 
 import android.Manifest
+import androidx.annotation.StringRes
 import android.content.Intent
 import android.content.Context
 import android.content.pm.PackageManager
@@ -42,6 +43,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -52,6 +55,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
+import de.t_animal.opensourcebodytracker.core.model.AutomaticExportErrorKey
+import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
+import de.t_animal.opensourcebodytracker.domain.export.ExportValidationError
 import de.t_animal.opensourcebodytracker.ui.components.PasswordTextField
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
@@ -141,12 +148,12 @@ fun ExportSettingsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Export Settings") },
+                title = { Text(stringResource(R.string.export_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClicked) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.cd_back),
                         )
                     }
                 },
@@ -175,23 +182,19 @@ fun ExportSettingsScreen(
         ) {
             val hasPassword = state.exportPassword.isNotBlank()
 
-            if (!state.lastAutomaticExportError.isNullOrBlank()) {
+            val autoExportError = state.lastAutomaticExportError?.let { error ->
+                stringResource(error.stringResourceId)
+            }
+            if (autoExportError != null) {
                 ExportErrorBanner(
-                    errorMessage = state.lastAutomaticExportError,
+                    errorMessage = autoExportError,
                     onDismiss = onDismissAutomaticExportError,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
             Text(
-                text = buildAnnotatedString {
-                    append(
-                        "Your measurements, profile and photos are exported into an encrypted " +
-                            "ZIP archive in the folder you choose. Nightly automatic exports " +
-                            "use the same destination and require notification permission so " +
-                            "Android can keep the background export alive."
-                    )
-                },
+                text = stringResource(R.string.export_description),
                 modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Light),
             )
@@ -202,13 +205,11 @@ fun ExportSettingsScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         text = buildAnnotatedString {
-                            append("Set a password to encrypt your exported data.  ")
+                            append(stringResource(R.string.export_password_description_prefix))
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("You need this password to import your data later, so make sure to keep it safe! ")
+                                append(stringResource(R.string.export_password_description_bold))
                             }
-                            append(
-                                "All usual password security rules apply here: No reuse, long and complex passwords are best.",
-                            )
+                            append(stringResource(R.string.export_password_description_suffix))
                         },
                         modifier = Modifier.fillMaxWidth(),
                         style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Light),
@@ -219,7 +220,7 @@ fun ExportSettingsScreen(
                     PasswordTextField(
                         value = state.exportPassword,
                         onValueChange = onExportPasswordChanged,
-                        label = { Text("Encryption Password") },
+                        label = { Text(stringResource(R.string.export_label_password)) },
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -235,7 +236,7 @@ fun ExportSettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Export to Device Storage",
+                            text = stringResource(R.string.export_label_device_storage),
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Switch(
@@ -247,7 +248,7 @@ fun ExportSettingsScreen(
 
                     if (!hasPassword) {
                         Text(
-                            text = "Enter an export password to enable export destinations.",
+                            text = stringResource(R.string.export_enable_password_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -257,7 +258,7 @@ fun ExportSettingsScreen(
                     Text(
                         text = buildAnnotatedString {
                             withStyle(style = SpanStyle(fontWeight = FontWeight.SemiBold)) {
-                                append("Export folder: ")
+                                append(stringResource(R.string.export_label_folder_prefix))
                             }
                             val folderUri = state.exportFolderUri
                             if (!folderUri.isNullOrBlank()) {
@@ -266,7 +267,7 @@ fun ExportSettingsScreen(
                                         .replace("%3A", "/")
                                 )
                             } else {
-                                append("Not set")
+                                append(stringResource(R.string.export_folder_not_set))
                             }
                         },
                         style = MaterialTheme.typography.bodyMedium,
@@ -277,7 +278,7 @@ fun ExportSettingsScreen(
                         onClick = onSelectFolderClicked,
                         enabled = state.exportToDeviceStorageEnabled,
                     ) {
-                        Text("Select Folder")
+                        Text(stringResource(R.string.export_button_select_folder))
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -291,12 +292,12 @@ fun ExportSettingsScreen(
                             modifier = Modifier.weight(1f),
                         ) {
                             Text(
-                                text = "Nightly Automatic Backup",
+                                text = stringResource(R.string.export_label_automatic),
                                 style = MaterialTheme.typography.titleMedium,
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Runs around 3:00 AM when measurements changed.",
+                                text = stringResource(R.string.export_automatic_description),
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }
@@ -319,7 +320,7 @@ fun ExportSettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Export to Google Drive (coming later)",
+                            text = stringResource(R.string.export_label_google_drive),
                             style = MaterialTheme.typography.bodyLarge,
                         )
                         Switch(
@@ -337,14 +338,20 @@ fun ExportSettingsScreen(
                 onClick = onExportNowClicked,
                 enabled = state.exportToDeviceStorageEnabled && hasPassword && !state.isExporting,
             ) {
-                Text(if (state.isExporting) "Exporting..." else "Export Now")
+                Text(stringResource(if (state.isExporting) R.string.export_button_exporting else R.string.export_button_export_now))
             }
 
             val progress = state.exportProgress
             if (progress != null) {
+                val progressMessage = when (val step = progress.step) {
+                    ExportProgressStep.CollectingData -> stringResource(R.string.export_progress_collecting)
+                    is ExportProgressStep.WritingArchiveData -> stringResource(R.string.export_progress_writing_archive)
+                    is ExportProgressStep.WritingPhoto -> pluralStringResource(R.plurals.export_progress_writing_photo, step.total, step.current, step.total)
+                    ExportProgressStep.CleaningUp -> stringResource(R.string.export_progress_cleaning)
+                }
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = progress.message,
+                    text = progressMessage,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -360,20 +367,38 @@ fun ExportSettingsScreen(
                 }
             }
 
-            val status = state.statusMessage
-            if (!status.isNullOrBlank()) {
+            val statusMessage = state.exportedFileName?.let { stringResource(R.string.export_success_message, it) }
+            if (!statusMessage.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = status,
+                    text = statusMessage,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
 
-            val error = state.errorMessage
-            if (!error.isNullOrBlank()) {
+            val errorMessage = when (val error = state.exportError) {
+                is ExportSettingsError.Validation -> when (error.error) {
+                    ExportValidationError.EnableDeviceStorage -> stringResource(R.string.export_error_enable_storage)
+                    ExportValidationError.SelectFolder -> stringResource(R.string.export_error_select_folder)
+                    ExportValidationError.EnterPassword -> stringResource(R.string.export_error_enter_password)
+                }
+                is ExportSettingsError.Action -> when (error.error) {
+                    is ExportActionError.Validation -> when (error.error.error) {
+                        ExportValidationError.EnableDeviceStorage -> stringResource(R.string.export_error_enable_storage)
+                        ExportValidationError.SelectFolder -> stringResource(R.string.export_error_select_folder)
+                        ExportValidationError.EnterPassword -> stringResource(R.string.export_error_enter_password)
+                    }
+                    ExportActionError.InvalidFolder -> stringResource(R.string.export_error_invalid_folder)
+                    ExportActionError.PermissionDenied -> stringResource(R.string.export_error_permission_denied)
+                    ExportActionError.WriteFailed -> stringResource(R.string.export_error_write_failed)
+                    ExportActionError.Unknown -> stringResource(R.string.export_error_unknown)
+                }
+                null -> null
+            }
+            if (!errorMessage.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = error,
+                    text = errorMessage,
                     color = MaterialTheme.colorScheme.error,
                 )
             }
@@ -389,14 +414,14 @@ fun ExportSettingsScreen(
                     enabled = !state.isExporting,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.common_cancel))
                 }
                 Button(
                     onClick = onSaveClicked,
                     enabled = !state.isExporting,
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.common_save))
                 }
             }
         }
@@ -415,7 +440,7 @@ private fun ExportErrorBanner(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Automatic Backup Failed",
+                text = stringResource(R.string.export_error_banner_title),
                 style = MaterialTheme.typography.titleSmall,
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -425,7 +450,7 @@ private fun ExportErrorBanner(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Button(onClick = onDismiss) {
-                Text("Dismiss")
+                Text(stringResource(R.string.common_dismiss))
             }
         }
     }
@@ -438,25 +463,33 @@ private fun AutomaticExportPermissionDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Allow Notifications for Nightly Backups") },
+        title = { Text(stringResource(R.string.export_permission_dialog_title)) },
         text = {
-            Text(
-                "Android requires a notification for the nightly background export. " +
-                    "We use it to show progress while photos are being written so the backup can finish reliably.",
-            )
+            Text(stringResource(R.string.export_permission_dialog_body))
         },
         confirmButton = {
             Button(onClick = onContinue) {
-                Text("Continue")
+                Text(stringResource(R.string.common_continue))
             }
         },
         dismissButton = {
             OutlinedButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.common_cancel))
             }
         },
     )
 }
+
+private val AutomaticExportErrorKey.stringResourceId: Int
+    @StringRes get() = when (this) {
+        AutomaticExportErrorKey.EnableDeviceStorage -> R.string.auto_export_error_EnableDeviceStorage
+        AutomaticExportErrorKey.SelectFolder -> R.string.auto_export_error_SelectFolder
+        AutomaticExportErrorKey.EnterPassword -> R.string.auto_export_error_EnterPassword
+        AutomaticExportErrorKey.InvalidFolder -> R.string.auto_export_error_InvalidFolder
+        AutomaticExportErrorKey.PermissionDenied -> R.string.auto_export_error_PermissionDenied
+        AutomaticExportErrorKey.WriteFailed -> R.string.auto_export_error_WriteFailed
+        AutomaticExportErrorKey.Unknown -> R.string.auto_export_error_Unknown
+    }
 
 private fun shouldRequestNotificationPermission(
     context: Context,

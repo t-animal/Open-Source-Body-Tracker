@@ -23,7 +23,7 @@ sealed interface PhotoAnimationUiState {
 
     data class Loaded(
         val frames: List<PhotosItemUiModel> = emptyList(),
-        val errorMessage: String? = null,
+        val hasError: Boolean = false,
     ) : PhotoAnimationUiState
 }
 
@@ -57,7 +57,7 @@ class PhotoAnimationViewModel @Inject constructor(
             if (frames.size < 2) {
                 mutableUiState.update {
                     PhotoAnimationUiState.Loaded(
-                        errorMessage = "Unable to load at least 2 photos for animation",
+                        hasError = true,
                     )
                 }
                 return@launch
@@ -66,7 +66,7 @@ class PhotoAnimationViewModel @Inject constructor(
             mutableUiState.update {
                 PhotoAnimationUiState.Loaded(
                     frames = frames,
-                    errorMessage = null,
+                    hasError = false,
                 )
             }
         }

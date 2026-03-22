@@ -19,10 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.feature.settings.components.ProfileFormSection
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -69,10 +71,10 @@ fun ProfileScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = when (state.mode) {
-                            ProfileMode.Onboarding -> "Profile Setup"
-                            ProfileMode.Settings -> "Profile"
-                        },
+                        text = stringResource(
+                            if (state.mode == ProfileMode.Onboarding) R.string.profile_title_onboarding
+                            else R.string.profile_title_settings,
+                        ),
                     )
                 },
                 navigationIcon = {
@@ -80,7 +82,7 @@ fun ProfileScreen(
                         IconButton(onClick = onNavigateBack) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
+                                contentDescription = stringResource(R.string.cd_back),
                             )
                         }
                     }
@@ -105,18 +107,23 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val error = state.errorMessage
-            if (!error.isNullOrBlank()) {
-                Text(text = error, color = MaterialTheme.colorScheme.error)
+            val errorMessage = when (state.validationError) {
+                ProfileValidationError.MissingSex -> stringResource(R.string.profile_error_missing_sex)
+                ProfileValidationError.InvalidDateOfBirth -> stringResource(R.string.profile_error_invalid_dob)
+                ProfileValidationError.InvalidHeight -> stringResource(R.string.profile_error_invalid_height)
+                null -> null
+            }
+            if (!errorMessage.isNullOrBlank()) {
+                Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
             Button(onClick = onSaveClicked) {
                 Text(
-                    text = when (state.mode) {
-                        ProfileMode.Onboarding -> "Continue"
-                        ProfileMode.Settings -> "Save"
-                    },
+                    text = stringResource(
+                        if (state.mode == ProfileMode.Onboarding) R.string.common_continue
+                        else R.string.common_save,
+                    ),
                 )
             }
         }
@@ -153,7 +160,7 @@ private fun ProfileScreenPreview_Error() {
                 sex = null,
                 dateOfBirthText = "",
                 heightCmText = "",
-                errorMessage = "Please select a sex",
+                validationError = ProfileValidationError.MissingSex,
             ),
             onNavigateBack = {},
             onSexChanged = {},

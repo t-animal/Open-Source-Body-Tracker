@@ -11,7 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import coil.compose.AsyncImage
 import java.io.File
 
@@ -28,7 +30,7 @@ fun PhotoPreviewCard(
     ) {
         AsyncImage(
             model = photoPreviewModel,
-            contentDescription = "Captured photo preview",
+            contentDescription = stringResource(R.string.cd_photo_preview),
             modifier = Modifier
                 .fillMaxWidth(0.6f)
                 .heightIn(max = 500.dp)

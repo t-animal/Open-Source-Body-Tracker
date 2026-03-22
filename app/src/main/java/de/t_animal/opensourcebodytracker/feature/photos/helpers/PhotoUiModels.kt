@@ -8,11 +8,16 @@ data class PhotosItemUiModel(
     val photoFile: File,
 )
 
+sealed interface PhotosSnackbarMessage {
+    data object SelectionLimitReached : PhotosSnackbarMessage
+    data object MinimumSelectionRequired : PhotosSnackbarMessage
+}
+
 data class PhotosUiState(
     val items: List<PhotosItemUiModel> = emptyList(),
     val mode: PhotoMode = PhotoMode.NORMAL,
     val selectedMeasurementIds: List<Long> = emptyList(),
-    val snackbarMessage: String? = null,
+    val snackbarMessage: PhotosSnackbarMessage? = null,
 )
 
 enum class PhotoMode {

@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.feature.settings.components.AnalysisMethodsSection
@@ -69,7 +71,7 @@ fun OnboardingAnalysisScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Select Analysis Methods") },
+                title = { Text(stringResource(R.string.onboarding_analysis_title)) },
             )
         },
     ) { contentPadding ->
@@ -82,11 +84,11 @@ fun OnboardingAnalysisScreen(
         ) {
             item {
                 Text(
-                    text = "Choose the analysis methods you want to use.",
+                    text = stringResource(R.string.onboarding_analysis_description),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    text = "Additional measurements can be enabled later in settings.",
+                    text = stringResource(R.string.onboarding_analysis_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 4.dp),
@@ -95,7 +97,7 @@ fun OnboardingAnalysisScreen(
 
             item {
                 Text(
-                    text = "Analysis Methods",
+                    text = stringResource(R.string.onboarding_analysis_methods_header),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
@@ -118,7 +120,7 @@ fun OnboardingAnalysisScreen(
 
             item {
                 Text(
-                    text = "Measurements",
+                    text = stringResource(R.string.onboarding_measurements_header),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
@@ -133,10 +135,10 @@ fun OnboardingAnalysisScreen(
                 )
             }
 
-            if (!state.errorMessage.isNullOrBlank()) {
+            if (state.hasError) {
                 item {
                     Text(
-                        text = state.errorMessage,
+                        text = stringResource(R.string.onboarding_error_save_failed),
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
@@ -153,7 +155,7 @@ fun OnboardingAnalysisScreen(
                                 modifier = Modifier.padding(vertical = 2.dp),
                             )
                         } else {
-                            Text("Continue")
+                            Text(stringResource(R.string.common_continue))
                         }
                     }
                 }

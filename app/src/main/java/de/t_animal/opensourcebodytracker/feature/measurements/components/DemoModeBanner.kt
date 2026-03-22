@@ -13,11 +13,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 
 @Composable
 internal fun DemoModeBanner(
@@ -32,17 +34,17 @@ internal fun DemoModeBanner(
                 .padding(16.dp),
         ) {
             Text(
-                text = "You are currently using demo data.",
+                text = stringResource(R.string.demo_banner_title),
                 style = MaterialTheme.typography.titleSmall,
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = "Reset the app to create your own profile.",
+                text = stringResource(R.string.demo_banner_body),
                 style = MaterialTheme.typography.bodyMedium,
             )
             Spacer(modifier = Modifier.height(12.dp))
             Button(onClick = onResetApp) {
-                Text("Reset App")
+                Text(stringResource(R.string.demo_reset_button))
             }
         }
     }
@@ -55,25 +57,25 @@ internal fun ResetAppConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Reset App?") },
+        title = { Text(stringResource(R.string.demo_reset_dialog_title)) },
         text = {
             Text(
                 text = buildAnnotatedString {
-                    append("This will delete all app data and close the app.")
+                    append(stringResource(R.string.demo_reset_dialog_body_before_bold))
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("You will have to restart it manually.")
+                        append(stringResource(R.string.demo_reset_dialog_body_bold))
                     }
                 },
             )
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text("Reset App")
+                Text(stringResource(R.string.demo_reset_button))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.common_cancel))
             }
         },
     )

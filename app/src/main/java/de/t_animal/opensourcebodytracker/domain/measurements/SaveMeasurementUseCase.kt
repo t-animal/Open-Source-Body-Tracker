@@ -25,7 +25,7 @@ sealed interface SaveMeasurementResult {
     ) : SaveMeasurementResult
 
     data class ValidationError(
-        val message: String,
+        val error: MeasurementValidationError,
     ) : SaveMeasurementResult
 }
 

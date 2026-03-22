@@ -1,0 +1,8 @@
+<resources>
+    <string name="about_title">About</string>
+    <string name="about_app_name">Open Source Body Tracker</string>
+    <string name="about_tagline">A privacy-focused body measurement tracking app.</string>
+    <string name="about_section_project">Project</string>
+    <string name="about_button_github">GitHub Repository</string>
+    <string name="about_section_contact">Contact</string>
+</resources>

@@ -1,0 +1,30 @@
+<resources>
+    <string name="import_title">Import Backup</string>
+    <string name="import_description">Restore your data from a previously exported backup. Select the encrypted ZIP file and enter the password you used during export.</string>
+    <string name="import_label_password">Backup Password</string>
+    <string name="import_default_file_name">Selected file</string>
+    <string name="import_button_import">Import</string>
+
+    <!-- Progress -->
+    <string name="import_progress_reading">Reading backup file…</string>
+    <string name="import_progress_validating">Validating archive…</string>
+    <string name="import_progress_reading_profile">Reading profile…</string>
+    <string name="import_progress_reading_measurements">Reading measurements…</string>
+    <string name="import_progress_saving">Saving to database…</string>
+    <string name="import_progress_extracting_photos">Restoring photos…</string>
+    <string name="import_progress_verifying_photos">Verifying photos…</string>
+
+    <!-- Errors -->
+    <string name="import_error_wrong_password">Wrong password. Please try again.</string>
+    <string name="import_error_unsupported_version">Unsupported backup version (%1$d). This app supports version %2$d.</string>
+    <string name="import_error_invalid_archive">The selected file is not a valid ZIP archive.</string>
+    <string name="import_error_incomplete">The backup is incomplete or corrupted. It may not be a valid backup.</string>
+    <string name="import_error_file_not_readable">Could not read the selected file.</string>
+    <string name="import_error_unexpected">An unexpected error occurred.</string>
+
+    <!-- Catastrophic Errors -->
+    <string name="import_catastrophic_database">Failed to save data to the database. The app may be in an inconsistent state.</string>
+    <string name="import_catastrophic_photos">Photos could not be restored after data was saved. The app may be in an inconsistent state.</string>
+    <string name="import_catastrophic_photo_verification">Some photos could not be verified after extraction. The app may be in an inconsistent state.</string>
+    <string name="import_catastrophic_settings">Data was imported but settings could not be saved. The app may be in an inconsistent state.</string>
+</resources>

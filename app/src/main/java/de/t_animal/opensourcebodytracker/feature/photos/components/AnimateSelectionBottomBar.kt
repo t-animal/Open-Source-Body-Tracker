@@ -11,7 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 
 @Composable
 fun AnimateSelectionBottomBar(
@@ -36,14 +39,14 @@ fun AnimateSelectionBottomBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "$selectedCount selected",
+                text = pluralStringResource(R.plurals.photos_selected_count, selectedCount, selectedCount),
                 style = MaterialTheme.typography.bodyLarge,
             )
             Button(
                 onClick = onPlayClicked,
                 enabled = playEnabled,
             ) {
-                Text("Play")
+                Text(stringResource(R.string.photos_button_play))
             }
         }
     }

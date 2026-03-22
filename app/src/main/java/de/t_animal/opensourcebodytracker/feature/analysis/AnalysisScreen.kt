@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.feature.analysis
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -30,11 +31,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.feature.analysis.components.MetricChartCard
@@ -102,7 +105,7 @@ fun AnalysisScreen(
                                 ),
                                 onClick = { onDurationSelected(duration) },
                                 selected = duration == state.selectedDuration,
-                                label = { Text(duration.label) },
+                                label = { Text(stringResource(duration.labelResourceId)) },
                             )
                         }
                     }
@@ -112,7 +115,7 @@ fun AnalysisScreen(
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Tap a point to show value, long tap to show note",
+                    text = stringResource(R.string.analysis_hint),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -219,3 +222,12 @@ private fun AnalysisScreenPreview() {
         )
     }
 }
+
+private val AnalysisDuration.labelResourceId: Int
+    @StringRes get() = when (this) {
+        AnalysisDuration.OneMonth -> R.string.analysis_duration_1m
+        AnalysisDuration.ThreeMonths -> R.string.analysis_duration_3m
+        AnalysisDuration.SixMonths -> R.string.analysis_duration_6m
+        AnalysisDuration.OneYear -> R.string.analysis_duration_1y
+        AnalysisDuration.All -> R.string.analysis_duration_all
+    }

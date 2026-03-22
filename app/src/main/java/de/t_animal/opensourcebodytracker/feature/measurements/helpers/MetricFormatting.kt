@@ -1,5 +1,8 @@
 package de.t_animal.opensourcebodytracker.feature.measurements.helpers
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
@@ -16,6 +19,7 @@ internal data class MetricDisplayItem(
     val rating: MetricRating? = null,
 )
 
+@Composable
 internal fun buildLatestMeasurementMetrics(
     item: MeasurementListItemUiModel,
     visibleMetrics: List<BodyMetric>,
@@ -35,55 +39,57 @@ internal fun BodyMetric.formattedValue(item: MeasurementListItemUiModel): String
     return valueWithUnit(value, unit)
 }
 
+@Composable
 internal fun BodyMetric.label(): String = when (this) {
     is MeasuredBodyMetric -> when (this) {
-        MeasuredBodyMetric.Weight -> "Weight"
-        MeasuredBodyMetric.BodyFat -> "Body Fat"
-        MeasuredBodyMetric.NeckCircumference -> "Neck"
-        MeasuredBodyMetric.WaistCircumference -> "Waist"
-        MeasuredBodyMetric.HipCircumference -> "Hip"
-        MeasuredBodyMetric.ChestCircumference -> "Chest"
-        MeasuredBodyMetric.AbdomenCircumference -> "Abdomen"
-        MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold"
-        MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
-        MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold"
-        MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold"
-        MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+        MeasuredBodyMetric.Weight -> stringResource(R.string.metric_label_weight)
+        MeasuredBodyMetric.BodyFat -> stringResource(R.string.metric_label_body_fat)
+        MeasuredBodyMetric.NeckCircumference -> stringResource(R.string.metric_label_neck)
+        MeasuredBodyMetric.WaistCircumference -> stringResource(R.string.metric_label_waist)
+        MeasuredBodyMetric.HipCircumference -> stringResource(R.string.metric_label_hip)
+        MeasuredBodyMetric.ChestCircumference -> stringResource(R.string.metric_label_chest)
+        MeasuredBodyMetric.AbdomenCircumference -> stringResource(R.string.metric_label_abdomen)
+        MeasuredBodyMetric.ChestSkinfold -> stringResource(R.string.metric_label_chest_skinfold)
+        MeasuredBodyMetric.AbdomenSkinfold -> stringResource(R.string.metric_label_abdomen_skinfold)
+        MeasuredBodyMetric.ThighSkinfold -> stringResource(R.string.metric_label_thigh_skinfold)
+        MeasuredBodyMetric.TricepsSkinfold -> stringResource(R.string.metric_label_triceps_skinfold)
+        MeasuredBodyMetric.SuprailiacSkinfold -> stringResource(R.string.metric_label_suprailiac_skinfold)
     }
 
     is DerivedBodyMetric -> when (this) {
-        DerivedBodyMetric.Bmi -> "BMI"
-        DerivedBodyMetric.NavyBodyFatPercent -> "Body Fat Navy"
-        DerivedBodyMetric.SkinfoldBodyFatPercent -> "Body Fat Skinfold"
-        DerivedBodyMetric.WaistHipRatio -> "WHR"
-        DerivedBodyMetric.WaistHeightRatio -> "WHtR"
+        DerivedBodyMetric.Bmi -> stringResource(R.string.metric_label_bmi)
+        DerivedBodyMetric.NavyBodyFatPercent -> stringResource(R.string.metric_label_navy_body_fat)
+        DerivedBodyMetric.SkinfoldBodyFatPercent -> stringResource(R.string.metric_label_skinfold_body_fat)
+        DerivedBodyMetric.WaistHipRatio -> stringResource(R.string.metric_label_whr)
+        DerivedBodyMetric.WaistHeightRatio -> stringResource(R.string.metric_label_whtr)
     }
 
     else -> id
 }
 
+@Composable
 internal fun BodyMetric.fullName(): String = when (this) {
     is MeasuredBodyMetric -> when (this) {
-        MeasuredBodyMetric.Weight -> "Weight"
-        MeasuredBodyMetric.BodyFat -> "Body Fat"
-        MeasuredBodyMetric.NeckCircumference -> "Neck Circumference"
-        MeasuredBodyMetric.WaistCircumference -> "Waist Circumference"
-        MeasuredBodyMetric.HipCircumference -> "Hip Circumference"
-        MeasuredBodyMetric.ChestCircumference -> "Chest Circumference"
-        MeasuredBodyMetric.AbdomenCircumference -> "Abdomen Circumference"
-        MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold"
-        MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold"
-        MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold"
-        MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold"
-        MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold"
+        MeasuredBodyMetric.Weight -> stringResource(R.string.metric_fullname_weight)
+        MeasuredBodyMetric.BodyFat -> stringResource(R.string.metric_fullname_body_fat)
+        MeasuredBodyMetric.NeckCircumference -> stringResource(R.string.metric_fullname_neck)
+        MeasuredBodyMetric.WaistCircumference -> stringResource(R.string.metric_fullname_waist)
+        MeasuredBodyMetric.HipCircumference -> stringResource(R.string.metric_fullname_hip)
+        MeasuredBodyMetric.ChestCircumference -> stringResource(R.string.metric_fullname_chest)
+        MeasuredBodyMetric.AbdomenCircumference -> stringResource(R.string.metric_fullname_abdomen)
+        MeasuredBodyMetric.ChestSkinfold -> stringResource(R.string.metric_fullname_chest_skinfold)
+        MeasuredBodyMetric.AbdomenSkinfold -> stringResource(R.string.metric_fullname_abdomen_skinfold)
+        MeasuredBodyMetric.ThighSkinfold -> stringResource(R.string.metric_fullname_thigh_skinfold)
+        MeasuredBodyMetric.TricepsSkinfold -> stringResource(R.string.metric_fullname_triceps_skinfold)
+        MeasuredBodyMetric.SuprailiacSkinfold -> stringResource(R.string.metric_fullname_suprailiac_skinfold)
     }
 
     is DerivedBodyMetric -> when (this) {
-        DerivedBodyMetric.Bmi -> "Body Mass Index"
-        DerivedBodyMetric.NavyBodyFatPercent -> "Navy Method Body Fat Percentage"
-        DerivedBodyMetric.SkinfoldBodyFatPercent -> "3-Site Skinfold Body Fat Percentage"
-        DerivedBodyMetric.WaistHipRatio -> "Waist-Hip Ratio"
-        DerivedBodyMetric.WaistHeightRatio -> "Waist-Height Ratio"
+        DerivedBodyMetric.Bmi -> stringResource(R.string.metric_fullname_bmi)
+        DerivedBodyMetric.NavyBodyFatPercent -> stringResource(R.string.metric_fullname_navy_body_fat)
+        DerivedBodyMetric.SkinfoldBodyFatPercent -> stringResource(R.string.metric_fullname_skinfold_body_fat)
+        DerivedBodyMetric.WaistHipRatio -> stringResource(R.string.metric_fullname_whr)
+        DerivedBodyMetric.WaistHeightRatio -> stringResource(R.string.metric_fullname_whtr)
     }
 
     else -> id

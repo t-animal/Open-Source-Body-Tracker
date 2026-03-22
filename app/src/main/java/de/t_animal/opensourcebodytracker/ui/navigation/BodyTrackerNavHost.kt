@@ -30,6 +30,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.compose.ui.res.stringResource
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.GeneralSettings
 import de.t_animal.opensourcebodytracker.data.reminders.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.data.reminders.ReminderNotificationResult
@@ -135,13 +137,15 @@ fun BodyTrackerNavHost(
         }
     }
 
+    val reminderDisabledMessage = stringResource(R.string.reminder_toast_notifications_disabled)
+    val reminderFailedMessage = stringResource(R.string.reminder_toast_failed)
     val onTriggerReminder = {
         when (reminderNotificationPoster.showReminderNotification()) {
             ReminderNotificationResult.Shown -> Unit
             ReminderNotificationResult.NotificationsDisabled -> {
                 Toast.makeText(
                     context,
-                    "Notifications are disabled for this app.",
+                    reminderDisabledMessage,
                     Toast.LENGTH_LONG,
                 ).show()
             }
@@ -149,7 +153,7 @@ fun BodyTrackerNavHost(
             ReminderNotificationResult.Failed -> {
                 Toast.makeText(
                     context,
-                    "Could not show reminder notification.",
+                    reminderFailedMessage,
                     Toast.LENGTH_LONG,
                 ).show()
             }
@@ -318,12 +322,12 @@ fun BodyTrackerNavHost(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("All Measurements") },
+                        title = { Text(stringResource(R.string.measurement_list_title)) },
                         navigationIcon = {
                             IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back",
+                                    contentDescription = stringResource(R.string.cd_back),
                                 )
                             }
                         },
@@ -410,12 +414,12 @@ fun BodyTrackerNavHost(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("Compare") },
+                        title = { Text(stringResource(R.string.photos_title_compare)) },
                         navigationIcon = {
                             IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back",
+                                    contentDescription = stringResource(R.string.cd_back),
                                 )
                             }
                         },
@@ -441,12 +445,12 @@ fun BodyTrackerNavHost(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("Animation") },
+                        title = { Text(stringResource(R.string.photos_title_animation)) },
                         navigationIcon = {
                             IconButton(onClick = { navController.popBackStack() }) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back",
+                                    contentDescription = stringResource(R.string.cd_back),
                                 )
                             }
                         },

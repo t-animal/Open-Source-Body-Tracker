@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.feature.measurements.components
 
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Indication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
@@ -33,6 +36,7 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
+import de.t_animal.opensourcebodytracker.core.model.RatingLabel
 import de.t_animal.opensourcebodytracker.core.model.RatingSeverity
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListUiState
@@ -53,24 +57,24 @@ internal fun LatestMeasurementCard(
                 .padding(16.dp),
         ) {
             Text(
-                text = "Latest Measurement",
+                text = stringResource(R.string.measurement_latest_title),
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(modifier = Modifier.height(12.dp))
 
             when {
                 state.isLoading -> {
-                    Text("Loading…")
+                    Text(stringResource(R.string.common_loading_ellipsis))
                 }
 
                 state.isEmpty -> {
                     Text(
-                        text = "No measurements yet – create your first measurement",
+                        text = stringResource(R.string.measurement_latest_empty),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(onClick = onAdd) {
-                        Text("Add")
+                        Text(stringResource(R.string.common_add))
                     }
                 }
 
@@ -82,7 +86,7 @@ internal fun LatestMeasurementCard(
 
                         if (analysisMetrics.isNotEmpty()) {
                             Text(
-                                text = "Analyses",
+                                text = stringResource(R.string.measurement_latest_section_analyses),
                                 style = MaterialTheme.typography.labelMedium,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -97,7 +101,7 @@ internal fun LatestMeasurementCard(
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
                             Text(
-                                text = "Measurements",
+                                text = stringResource(R.string.measurement_latest_section_measurements),
                                 style = MaterialTheme.typography.labelMedium,
                             )
                             Spacer(modifier = Modifier.height(8.dp))
@@ -142,11 +146,11 @@ private fun LatestMeasurementCardPreview() {
                         waistHeightRatio = 0.5,
                     ),
                     derivedMetricRatings = DerivedMetricRatings(
-                        bmi = MetricRating("Normal", RatingSeverity.Good),
-                        navyBodyFatPercent = MetricRating("Fit", RatingSeverity.Good),
-                        skinfold3SiteBodyFatPercent = MetricRating("Fit", RatingSeverity.Good),
-                        waistHipRatio = MetricRating("Moderate risk", RatingSeverity.Fair),
-                        waistHeightRatio = MetricRating("Increased risk", RatingSeverity.Fair),
+                        bmi = MetricRating(RatingLabel.Normal, RatingSeverity.Good),
+                        navyBodyFatPercent = MetricRating(RatingLabel.Fit, RatingSeverity.Good),
+                        skinfold3SiteBodyFatPercent = MetricRating(RatingLabel.Fit, RatingSeverity.Good),
+                        waistHipRatio = MetricRating(RatingLabel.ModerateRisk, RatingSeverity.Fair),
+                        waistHeightRatio = MetricRating(RatingLabel.IncreasedRisk, RatingSeverity.Fair),
                     ),
                 ),
                 visibleInTableMetrics = MeasuredBodyMetric.entries + DerivedBodyMetric.entries,
@@ -178,9 +182,7 @@ private fun LatestMeasurementGrid(
     item: MeasurementListItemUiModel,
     visibleMetrics: List<BodyMetric>,
 ) {
-    val metrics = remember(item, visibleMetrics) {
-        buildLatestMeasurementMetrics(item, visibleMetrics)
-    }
+    val metrics = buildLatestMeasurementMetrics(item, visibleMetrics)
     val context = LocalContext.current
 
     FlowRow(
@@ -212,7 +214,7 @@ private fun LatestMeasurementGrid(
                 )
                 metric.rating?.let { rating ->
                     Text(
-                        text = rating.label,
+                        text = stringResource(rating.label.labelResourceId),
                         style = MaterialTheme.typography.labelSmall,
                         color = when (rating.severity) {
                             RatingSeverity.Good -> MaterialTheme.colorScheme.tertiary
@@ -226,3 +228,28 @@ private fun LatestMeasurementGrid(
         }
     }
 }
+
+private val RatingLabel.labelResourceId: Int
+    @StringRes get() = when (this) {
+        RatingLabel.SevereUnderweight -> R.string.rating_severe_underweight
+        RatingLabel.Underweight -> R.string.rating_underweight
+        RatingLabel.Normal -> R.string.rating_normal
+        RatingLabel.Overweight -> R.string.rating_overweight
+        RatingLabel.ObeseClassI -> R.string.rating_obese_class_i
+        RatingLabel.ObeseClassII -> R.string.rating_obese_class_ii
+        RatingLabel.ObeseClassIII -> R.string.rating_obese_class_iii
+        RatingLabel.DangerouslyLow -> R.string.rating_dangerously_low
+        RatingLabel.EssentialFat -> R.string.rating_essential_fat
+        RatingLabel.Athletic -> R.string.rating_athletic
+        RatingLabel.Fit -> R.string.rating_fit
+        RatingLabel.Acceptable -> R.string.rating_acceptable
+        RatingLabel.Obese -> R.string.rating_obese
+        RatingLabel.LowRisk -> R.string.rating_low_risk
+        RatingLabel.ModerateRisk -> R.string.rating_moderate_risk
+        RatingLabel.HighRisk -> R.string.rating_high_risk
+        RatingLabel.VeryHighRisk -> R.string.rating_very_high_risk
+        RatingLabel.UnderweightRisk -> R.string.rating_underweight_risk
+        RatingLabel.Healthy -> R.string.rating_healthy
+        RatingLabel.IncreasedRisk -> R.string.rating_increased_risk
+    }
+

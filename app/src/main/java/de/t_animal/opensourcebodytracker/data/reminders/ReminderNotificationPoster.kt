@@ -40,8 +40,8 @@ class ReminderNotificationPoster @Inject constructor(
 
         val notification = NotificationCompat.Builder(context, ReminderNotificationContract.ReminderChannelId)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Measurement Reminder")
-            .setContentText("Don't forget to record your measurements.")
+            .setContentTitle(context.getString(R.string.notification_reminder_title))
+            .setContentText(context.getString(R.string.notification_reminder_body))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .setContentIntent(contentIntent)
@@ -83,7 +83,7 @@ class ReminderNotificationPoster @Inject constructor(
 
         val channel = NotificationChannel(
             ReminderNotificationContract.ReminderChannelId,
-            "Measurement Reminders",
+            context.getString(R.string.notification_channel_reminders),
             NotificationManager.IMPORTANCE_DEFAULT,
         )
         manager.createNotificationChannel(channel)

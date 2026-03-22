@@ -203,4 +203,6 @@ If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
 * Und ich würde mir überlegen, ob du bei Latest Measurements vielleicht nicht nur das 
   darstellst, was zuletzt recorded wurde, sondern ggfs. das "last known value". 
   Kannst es ja irgendwie ausgrauen oder so, und bei tap oder long tap anzeigen, wie alt der Wert ist
-
+* onboarding sets demomode in profile & reminder settings?
+* demo data use case statt aussteuern im viewmodel onboardtingstartviewmodel
+* nightly export broken?

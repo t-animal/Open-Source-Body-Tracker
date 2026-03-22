@@ -14,7 +14,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 
 @Composable
 fun MeasurementEditFabColumn(
@@ -30,7 +32,7 @@ fun MeasurementEditFabColumn(
             FloatingActionButton(onClick = onDeleteMeasurementClicked) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
-                    contentDescription = "Delete"
+                    contentDescription = stringResource(R.string.cd_delete)
                 )
             }
 
@@ -42,7 +44,7 @@ fun MeasurementEditFabColumn(
         ) {
             Icon(
                 imageVector = if (hasPhoto) Icons.Filled.NoPhotography else Icons.Filled.CameraAlt,
-                contentDescription = if (hasPhoto) "Delete photo" else "Take photo",
+                contentDescription = stringResource(if (hasPhoto) R.string.cd_delete_photo else R.string.cd_take_photo),
             )
         }
 
@@ -55,7 +57,7 @@ fun MeasurementEditFabColumn(
         ) {
             Icon(
                 imageVector = Icons.Filled.Save,
-                contentDescription = "Save"
+                contentDescription = stringResource(R.string.cd_save)
             )
         }
     }

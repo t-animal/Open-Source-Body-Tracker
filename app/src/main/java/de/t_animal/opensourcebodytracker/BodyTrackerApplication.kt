@@ -29,7 +29,7 @@ class BodyTrackerApplication : Application(), Configuration.Provider {
         val manager = getSystemService(NotificationManager::class.java) ?: return
         val exportChannel = NotificationChannel(
             AutomaticExportWorker.EXPORT_NOTIFICATION_CHANNEL_ID,
-            "Automatic Export",
+            getString(R.string.notification_channel_export),
             NotificationManager.IMPORTANCE_LOW,
         )
         manager.createNotificationChannel(exportChannel)

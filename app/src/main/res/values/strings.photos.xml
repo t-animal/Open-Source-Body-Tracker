@@ -1,0 +1,41 @@
+<resources>
+    <string name="photos_empty">No photos yet</string>
+    <string name="photos_snackbar_selection_limit">You can select at most 2 photos</string>
+    <string name="photos_snackbar_minimum_selection">Select at least 2 photos to animate</string>
+    <string name="photos_button_compare">Compare</string>
+    <string name="photos_button_play">Play</string>
+    <plurals name="photos_selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <string name="photos_frame_rate">Frame Rate: %s fps</string>
+    <string name="photos_animation_error_too_many">Too many images selected for this app\'s RAM. Decoded memory estimate (%1$s MiB) exceeds the 50%% heap budget (%2$s MiB) of the RAM that Android made available to this app.</string>
+    <string name="photos_animation_error_decode_failed">Unable to decode at least 2 photos for animation</string>
+
+    <!-- Errors -->
+    <string name="photos_error_compare_load">Unable to load one or both selected photos</string>
+    <string name="photos_error_animation_load">Unable to load at least 2 photos for animation</string>
+
+    <!-- Screen Titles -->
+    <string name="photos_title_compare">Compare</string>
+    <string name="photos_title_animation">Animation</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_close">Close</string>
+    <string name="cd_captured_photo">Captured photo</string>
+    <string name="cd_enter_compare_mode">Enter compare mode</string>
+    <string name="cd_enter_animate_mode">Enter animate mode</string>
+    <string name="cd_exit_mode">Exit mode</string>
+    <string name="cd_selected_thumbnail">Selected thumbnail</string>
+    <string name="cd_animation_slower">Slower</string>
+    <string name="cd_animation_previous">Previous frame</string>
+    <string name="cd_animation_play">Play</string>
+    <string name="cd_animation_pause">Pause</string>
+    <string name="cd_animation_next">Next frame</string>
+    <string name="cd_animation_faster">Faster</string>
+    <string name="cd_animation_frame">Animation frame</string>
+    <string name="cd_progress_photo">Progress photo</string>
+    <string name="cd_selected">Selected</string>
+    <string name="cd_right_photo">Right photo</string>
+    <string name="cd_left_photo">Left photo</string>
+</resources>

@@ -12,7 +12,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotoMode
 
 @Composable
@@ -34,7 +36,7 @@ fun PhotosModeFab(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.CompareArrows,
-                    contentDescription = "Enter compare mode",
+                    contentDescription = stringResource(R.string.cd_enter_compare_mode),
                 )
             }
 
@@ -43,7 +45,7 @@ fun PhotosModeFab(
             ) {
                 Icon(
                     imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = "Enter animate mode",
+                    contentDescription = stringResource(R.string.cd_enter_animate_mode),
                 )
             }
         }
@@ -54,7 +56,7 @@ fun PhotosModeFab(
         ) {
             Icon(
                 imageVector = Icons.Filled.Close,
-                contentDescription = "Exit mode",
+                contentDescription = stringResource(R.string.cd_exit_mode),
             )
         }
     }

@@ -31,10 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
@@ -85,7 +87,7 @@ internal fun MeasurementTable(
                 .padding(vertical = 8.dp),
         ) {
             Text(
-                text = "Date",
+                text = stringResource(R.string.table_header_date),
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier
                     .width(TABLE_DATE_CELL_WIDTH)
@@ -101,7 +103,7 @@ internal fun MeasurementTable(
                 )
             }
             Text(
-                text = "Note",
+                text = stringResource(R.string.table_header_note),
                 style = MaterialTheme.typography.labelMedium,
                 modifier = Modifier
                     .width(TABLE_NOTE_CELL_WIDTH)
@@ -208,7 +210,9 @@ private fun NoteCell(
         ) {
             Icon(
                 imageVector = Icons.Filled.Description,
-                contentDescription = if (tooltipState.isVisible) "Hide note" else "Show full note",
+                contentDescription = stringResource(
+                    if (tooltipState.isVisible) R.string.cd_hide_note else R.string.cd_show_full_note
+                ),
                 modifier = Modifier
                     .size(18.dp)
             )

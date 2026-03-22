@@ -20,13 +20,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+sealed interface ReminderValidationError {
+    data object NoWeekdaySelected : ReminderValidationError
+}
+
 data class ReminderSettingsUiState(
     val mode: ReminderMode,
     val isLoading: Boolean = true,
     val enabled: Boolean = false,
     val weekdays: Set<DayOfWeek> = setOf(DayOfWeek.SUNDAY),
     val time: LocalTime = LocalTime.of(9, 0),
-    val errorMessage: String? = null,
+    val validationError: ReminderValidationError? = null,
 )
 
 sealed interface ReminderSettingsEvent {
@@ -60,7 +64,7 @@ class ReminderSettingsViewModel @AssistedInject constructor(
                 enabled = reminderSettings.reminderEnabled,
                 weekdays = reminderSettings.reminderWeekdays,
                 time = reminderSettings.reminderTime,
-                errorMessage = null,
+                validationError = null,
             )
         }
     }
@@ -68,7 +72,7 @@ class ReminderSettingsViewModel @AssistedInject constructor(
     fun onEnabledChanged(enabled: Boolean) {
         _uiState.value = _uiState.value.copy(
             enabled = enabled,
-            errorMessage = null,
+            validationError = null,
         )
     }
 
@@ -82,21 +86,21 @@ class ReminderSettingsViewModel @AssistedInject constructor(
 
         _uiState.value = _uiState.value.copy(
             weekdays = updatedWeekdays,
-            errorMessage = null,
+            validationError = null,
         )
     }
 
     fun onTimeChanged(time: LocalTime) {
         _uiState.value = _uiState.value.copy(
             time = time,
-            errorMessage = null,
+            validationError = null,
         )
     }
 
     fun onPermissionDeniedWhileSaving() {
         _uiState.value = _uiState.value.copy(
             enabled = false,
-            errorMessage = null,
+            validationError = null,
         )
     }
 
@@ -107,7 +111,7 @@ class ReminderSettingsViewModel @AssistedInject constructor(
         }
 
         if (current.enabled && current.weekdays.isEmpty()) {
-            _uiState.value = current.copy(errorMessage = "Select at least one weekday")
+            _uiState.value = current.copy(validationError = ReminderValidationError.NoWeekdaySelected)
             return
         }
 

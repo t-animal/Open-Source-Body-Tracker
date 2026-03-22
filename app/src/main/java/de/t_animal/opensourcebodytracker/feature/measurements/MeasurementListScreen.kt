@@ -29,8 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
@@ -128,7 +130,7 @@ fun MeasurementListScreen(
 
             item {
                 Text(
-                    text = "All Measurements",
+                    text = stringResource(R.string.measurement_list_title),
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -157,7 +159,7 @@ fun MeasurementListScreen(
                         horizontalArrangement = Arrangement.Center,
                     ) {
                         TextButton(onClick = onOpenMore) {
-                            Text("More")
+                            Text(stringResource(R.string.common_more))
                         }
                     }
                 }
@@ -182,7 +184,7 @@ fun MeasurementListScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
-                        contentDescription = "Edit measurement",
+                        contentDescription = stringResource(R.string.cd_edit_measurement),
                     )
                 }
             }
@@ -194,7 +196,7 @@ fun MeasurementListScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.AddBox,
-                    contentDescription = "Add measurement",
+                    contentDescription = stringResource(R.string.cd_add_measurement),
                 )
             }
         }
@@ -216,7 +218,7 @@ fun MeasurementFullListScreen(
                 .padding(horizontal = 16.dp, vertical = 8.dp),
         ) {
             Text(
-                text = "All Measurements",
+                text = stringResource(R.string.measurement_list_title),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 8.dp),
             )
@@ -246,7 +248,7 @@ fun MeasurementFullListScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Edit,
-                    contentDescription = "Edit measurement",
+                    contentDescription = stringResource(R.string.cd_edit_measurement),
                 )
             }
         }

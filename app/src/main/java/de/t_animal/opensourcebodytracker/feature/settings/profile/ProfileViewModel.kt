@@ -23,12 +23,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+sealed interface ProfileValidationError {
+    data object MissingSex : ProfileValidationError
+    data object InvalidDateOfBirth : ProfileValidationError
+    data object InvalidHeight : ProfileValidationError
+}
+
 data class ProfileUiState(
     val mode: ProfileMode,
     val sex: Sex? = null,
     val dateOfBirthText: String = "",
     val heightCmText: String = "",
-    val errorMessage: String? = null,
+    val validationError: ProfileValidationError? = null,
 )
 
 sealed interface ProfileEvent {
@@ -67,7 +73,7 @@ class ProfileViewModel @AssistedInject constructor(
                             sex = profile.sex,
                             dateOfBirthText = profile.dateOfBirth.toString(),
                             heightCmText = formatDecimalForInput(profile.heightCm.toDouble()),
-                            errorMessage = null,
+                            validationError = null,
                         )
                     }
                 }
@@ -76,33 +82,33 @@ class ProfileViewModel @AssistedInject constructor(
     }
 
     fun onSexChanged(sex: Sex) {
-        _uiState.value = _uiState.value.copy(sex = sex, errorMessage = null)
+        _uiState.value = _uiState.value.copy(sex = sex, validationError = null)
     }
 
     fun onDateOfBirthChanged(text: String) {
-        _uiState.value = _uiState.value.copy(dateOfBirthText = text, errorMessage = null)
+        _uiState.value = _uiState.value.copy(dateOfBirthText = text, validationError = null)
     }
 
     fun onHeightChanged(text: String) {
-        _uiState.value = _uiState.value.copy(heightCmText = text, errorMessage = null)
+        _uiState.value = _uiState.value.copy(heightCmText = text, validationError = null)
     }
 
     fun onSaveClicked() {
         val current = _uiState.value
         val sex = current.sex ?: run {
-            _uiState.value = current.copy(errorMessage = "Please select a sex")
+            _uiState.value = current.copy(validationError = ProfileValidationError.MissingSex)
             return
         }
 
         val date = runCatching { LocalDate.parse(current.dateOfBirthText.trim()) }.getOrNull()
         if (date == null) {
-            _uiState.value = current.copy(errorMessage = "Date of birth must be YYYY-MM-DD")
+            _uiState.value = current.copy(validationError = ProfileValidationError.InvalidDateOfBirth)
             return
         }
 
         val height = parseLocalizedFloatOrNull(current.heightCmText)
         if (height == null || height <= 0f) {
-            _uiState.value = current.copy(errorMessage = "Height must be a positive number")
+            _uiState.value = current.copy(validationError = ProfileValidationError.InvalidHeight)
             return
         }
 

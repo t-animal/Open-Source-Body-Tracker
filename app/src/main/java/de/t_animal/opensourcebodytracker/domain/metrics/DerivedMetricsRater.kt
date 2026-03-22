@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.domain.metrics
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
+import de.t_animal.opensourcebodytracker.core.model.RatingLabel
 import de.t_animal.opensourcebodytracker.core.model.RatingSeverity
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import javax.inject.Inject
@@ -20,13 +21,13 @@ class DerivedMetricsRater @Inject constructor() {
     private fun rateBmi(bmi: Double): MetricRating? {
         if (bmi < 10 || bmi > 80) return null
         return when {
-            bmi < 16.0 -> MetricRating("Severe underweight", RatingSeverity.Severe)
-            bmi < 18.5 -> MetricRating("Underweight", RatingSeverity.Poor)
-            bmi < 25.0 -> MetricRating("Normal", RatingSeverity.Good)
-            bmi < 30.0 -> MetricRating("Overweight", RatingSeverity.Fair)
-            bmi < 35.0 -> MetricRating("Obese Class I", RatingSeverity.Poor)
-            bmi < 40.0 -> MetricRating("Obese Class II", RatingSeverity.Poor)
-            else -> MetricRating("Obese Class III", RatingSeverity.Severe)
+            bmi < 16.0 -> MetricRating(RatingLabel.SevereUnderweight, RatingSeverity.Severe)
+            bmi < 18.5 -> MetricRating(RatingLabel.Underweight, RatingSeverity.Poor)
+            bmi < 25.0 -> MetricRating(RatingLabel.Normal, RatingSeverity.Good)
+            bmi < 30.0 -> MetricRating(RatingLabel.Overweight, RatingSeverity.Fair)
+            bmi < 35.0 -> MetricRating(RatingLabel.ObeseClassI, RatingSeverity.Poor)
+            bmi < 40.0 -> MetricRating(RatingLabel.ObeseClassII, RatingSeverity.Poor)
+            else -> MetricRating(RatingLabel.ObeseClassIII, RatingSeverity.Severe)
         }
     }
 
@@ -34,20 +35,20 @@ class DerivedMetricsRater @Inject constructor() {
         if (percent < 1 || percent > 70) return null
         return when (sex) {
             Sex.Male -> when {
-                percent < 3.0 -> MetricRating("Dangerously low", RatingSeverity.Severe)
-                percent < 6.0 -> MetricRating("Essential fat", RatingSeverity.Poor)
-                percent < 14.0 -> MetricRating("Athletic", RatingSeverity.Good)
-                percent < 18.0 -> MetricRating("Fit", RatingSeverity.Good)
-                percent < 25.0 -> MetricRating("Acceptable", RatingSeverity.Fair)
-                else -> MetricRating("Obese", RatingSeverity.Poor)
+                percent < 3.0 -> MetricRating(RatingLabel.DangerouslyLow, RatingSeverity.Severe)
+                percent < 6.0 -> MetricRating(RatingLabel.EssentialFat, RatingSeverity.Poor)
+                percent < 14.0 -> MetricRating(RatingLabel.Athletic, RatingSeverity.Good)
+                percent < 18.0 -> MetricRating(RatingLabel.Fit, RatingSeverity.Good)
+                percent < 25.0 -> MetricRating(RatingLabel.Acceptable, RatingSeverity.Fair)
+                else -> MetricRating(RatingLabel.Obese, RatingSeverity.Poor)
             }
             Sex.Female -> when {
-                percent < 10.0 -> MetricRating("Dangerously low", RatingSeverity.Severe)
-                percent < 14.0 -> MetricRating("Essential fat", RatingSeverity.Poor)
-                percent < 21.0 -> MetricRating("Athletic", RatingSeverity.Good)
-                percent < 25.0 -> MetricRating("Fit", RatingSeverity.Good)
-                percent < 32.0 -> MetricRating("Acceptable", RatingSeverity.Fair)
-                else -> MetricRating("Obese", RatingSeverity.Poor)
+                percent < 10.0 -> MetricRating(RatingLabel.DangerouslyLow, RatingSeverity.Severe)
+                percent < 14.0 -> MetricRating(RatingLabel.EssentialFat, RatingSeverity.Poor)
+                percent < 21.0 -> MetricRating(RatingLabel.Athletic, RatingSeverity.Good)
+                percent < 25.0 -> MetricRating(RatingLabel.Fit, RatingSeverity.Good)
+                percent < 32.0 -> MetricRating(RatingLabel.Acceptable, RatingSeverity.Fair)
+                else -> MetricRating(RatingLabel.Obese, RatingSeverity.Poor)
             }
         }
     }
@@ -56,16 +57,16 @@ class DerivedMetricsRater @Inject constructor() {
         if (ratio < 0.4 || ratio > 2) return null
         return when (sex) {
             Sex.Male -> when {
-                ratio < 0.90 -> MetricRating("Low risk", RatingSeverity.Good)
-                ratio < 1.00 -> MetricRating("Moderate risk", RatingSeverity.Fair)
-                ratio < 1.10 -> MetricRating("High risk", RatingSeverity.Poor)
-                else -> MetricRating("Very high risk", RatingSeverity.Severe)
+                ratio < 0.90 -> MetricRating(RatingLabel.LowRisk, RatingSeverity.Good)
+                ratio < 1.00 -> MetricRating(RatingLabel.ModerateRisk, RatingSeverity.Fair)
+                ratio < 1.10 -> MetricRating(RatingLabel.HighRisk, RatingSeverity.Poor)
+                else -> MetricRating(RatingLabel.VeryHighRisk, RatingSeverity.Severe)
             }
             Sex.Female -> when {
-                ratio < 0.80 -> MetricRating("Low risk", RatingSeverity.Good)
-                ratio < 0.86 -> MetricRating("Moderate risk", RatingSeverity.Fair)
-                ratio < 0.95 -> MetricRating("High risk", RatingSeverity.Poor)
-                else -> MetricRating("Very high risk", RatingSeverity.Severe)
+                ratio < 0.80 -> MetricRating(RatingLabel.LowRisk, RatingSeverity.Good)
+                ratio < 0.86 -> MetricRating(RatingLabel.ModerateRisk, RatingSeverity.Fair)
+                ratio < 0.95 -> MetricRating(RatingLabel.HighRisk, RatingSeverity.Poor)
+                else -> MetricRating(RatingLabel.VeryHighRisk, RatingSeverity.Severe)
             }
         }
     }
@@ -73,11 +74,11 @@ class DerivedMetricsRater @Inject constructor() {
     private fun rateWaistHeightRatio(ratio: Double): MetricRating? {
         if (ratio < 0.2 || ratio > 1) return null
         return when {
-            ratio < 0.40 -> MetricRating("Underweight risk", RatingSeverity.Fair)
-            ratio < 0.50 -> MetricRating("Healthy", RatingSeverity.Good)
-            ratio < 0.60 -> MetricRating("Increased risk", RatingSeverity.Fair)
-            ratio < 0.70 -> MetricRating("High risk", RatingSeverity.Poor)
-            else -> MetricRating("Very high risk", RatingSeverity.Severe)
+            ratio < 0.40 -> MetricRating(RatingLabel.UnderweightRisk, RatingSeverity.Fair)
+            ratio < 0.50 -> MetricRating(RatingLabel.Healthy, RatingSeverity.Good)
+            ratio < 0.60 -> MetricRating(RatingLabel.IncreasedRisk, RatingSeverity.Fair)
+            ratio < 0.70 -> MetricRating(RatingLabel.HighRisk, RatingSeverity.Poor)
+            else -> MetricRating(RatingLabel.VeryHighRisk, RatingSeverity.Severe)
         }
     }
 }

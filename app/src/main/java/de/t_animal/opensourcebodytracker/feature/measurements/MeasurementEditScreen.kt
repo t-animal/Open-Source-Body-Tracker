@@ -31,14 +31,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
+import de.t_animal.opensourcebodytracker.domain.measurements.MeasurementValidationError
 import de.t_animal.opensourcebodytracker.data.photos.NewPhotoCaptureTarget
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DeleteMeasurementDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DiscardChangesDialog
@@ -150,7 +153,7 @@ fun MeasurementEditScreen(
         Scaffold(
             topBar = {
                 MeasurementEditTopBar(
-                    title = "Loading",
+                    title = stringResource(R.string.common_loading),
                     onBackClicked = onBackClicked,
                 )
             },
@@ -200,7 +203,7 @@ private fun MeasurementEditLoadedScreen(
 ) {
     val enabledMeasurements = state.enabledMeasurements
     val isCreatingNew = state.measurementId == null
-    val title = if (isCreatingNew) "Add Measurement" else "Edit Measurement"
+    val title = stringResource(if (isCreatingNew) R.string.measurement_edit_title_add else R.string.measurement_edit_title_edit)
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showDeleteMeasurementDialog by remember { mutableStateOf(false) }
     val visibleMetrics = remember(enabledMeasurements, state.sex) {
@@ -259,7 +262,7 @@ private fun MeasurementEditLoadedScreen(
                 .padding(16.dp),
         ) {
             DateInputField(
-                label = "Date",
+                label = stringResource(R.string.measurement_edit_label_date),
                 valueText = state.dateText,
                 selectedDateMillis = state.dateEpochMillis,
                 onDateSelected = onDateChanged,
@@ -279,7 +282,7 @@ private fun MeasurementEditLoadedScreen(
             OutlinedTextField(
                 value = state.note,
                 onValueChange = onNoteChanged,
-                label = { Text("Notes") },
+                label = { Text(stringResource(R.string.measurement_edit_label_notes)) },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 4,
                 maxLines = 8,
@@ -295,22 +298,28 @@ private fun MeasurementEditLoadedScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val error = state.errorMessage
-            if (!error.isNullOrBlank()) {
-                Text(text = error, color = MaterialTheme.colorScheme.error)
+            val errorMessage = when (val error = state.error) {
+                is MeasurementEditError.Validation -> when (error.error) {
+                    MeasurementValidationError.InvalidSkinfoldValues -> stringResource(R.string.validation_skinfold_must_be_positive)
+                    MeasurementValidationError.InvalidBodyFat -> stringResource(R.string.validation_body_fat_range)
+                    MeasurementValidationError.MissingInput -> stringResource(R.string.validation_missing_input)
+                }
+                MeasurementEditError.DeleteFailed -> stringResource(R.string.measurement_error_delete_failed)
+                MeasurementEditError.SavePhotoFailed -> stringResource(R.string.measurement_error_save_photo_failed)
+                null -> null
+            }
+            if (!errorMessage.isNullOrBlank()) {
+                Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
             Text(
                 text = buildAnnotatedString {
-                    append("At least one measurement, photo, or note is required. However ")
+                    append(stringResource(R.string.measurement_edit_hint_before_bold))
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("you don't have to enter all measurements")
+                        append(stringResource(R.string.measurement_edit_hint_bold))
                     }
-                    append(
-                        ". In this case though, the analysis that require missing " +
-                            "measurements will not be performed.",
-                    )
+                    append(stringResource(R.string.measurement_edit_hint_after_bold))
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -386,7 +395,7 @@ private fun MeasurementEditScreenPreview_Error() {
                 enabledMeasurements = MeasuredBodyMetric.entries.toSet(),
                 dateEpochMillis = 1_700_000_000_000,
                 dateText = "2024-01-01",
-                errorMessage = "Enter at least one value",
+                error = MeasurementEditError.Validation(MeasurementValidationError.MissingInput),
             ),
             onDateChanged = {},
             onMetricChanged = { _, _ -> },

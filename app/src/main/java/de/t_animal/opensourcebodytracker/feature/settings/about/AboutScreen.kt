@@ -20,9 +20,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.t_animal.opensourcebodytracker.BuildConfig
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 
@@ -54,12 +56,12 @@ fun AboutScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("About") },
+                title = { Text(stringResource(R.string.about_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.cd_back),
                         )
                     }
                 },
@@ -75,16 +77,16 @@ fun AboutScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Open Source Body Tracker",
+                text = stringResource(R.string.about_app_name),
                 style = MaterialTheme.typography.headlineSmall,
             )
             Text(
-                text = "A privacy-focused body measurement tracking app.",
+                text = stringResource(R.string.about_tagline),
                 style = MaterialTheme.typography.bodyMedium,
             )
 
             Text(
-                text = "Project",
+                text = stringResource(R.string.about_section_project),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top = 4.dp),
             )
@@ -92,11 +94,11 @@ fun AboutScreen(
                 onClick = { uriHandler.openUri(normalizedProjectUrl) },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("GitHub Repository")
+                Text(stringResource(R.string.about_button_github))
             }
 
             Text(
-                text = "Contact",
+                text = stringResource(R.string.about_section_contact),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(top = 4.dp),
             )

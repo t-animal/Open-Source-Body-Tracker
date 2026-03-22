@@ -6,10 +6,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
+import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
 
 @Composable
 fun MetricSections(
@@ -58,28 +62,22 @@ fun MetricSections(
     }
 }
 
+@Composable
 private fun metricSectionTitle(metricType: BodyMetricType): String {
     return when (metricType) {
-        BodyMetricType.Weight -> "Weight"
-        BodyMetricType.Circumference -> "Circumference"
-        BodyMetricType.SkinfoldThickness -> "Skinfold Thickness"
-        BodyMetricType.AnalysisResult -> "Analysis"
+        BodyMetricType.Weight -> stringResource(R.string.metric_section_weight)
+        BodyMetricType.Circumference -> stringResource(R.string.metric_section_circumference)
+        BodyMetricType.SkinfoldThickness -> stringResource(R.string.metric_section_skinfold)
+        BodyMetricType.AnalysisResult -> stringResource(R.string.metric_section_analysis)
     }
 }
 
+@Composable
 private fun metricInputLabel(metric: MeasuredBodyMetric): String {
-    return when (metric) {
-        MeasuredBodyMetric.Weight -> "Weight (kg)"
-        MeasuredBodyMetric.BodyFat -> "Body Fat (%)"
-        MeasuredBodyMetric.NeckCircumference -> "Neck (cm)"
-        MeasuredBodyMetric.ChestCircumference -> "Chest (cm)"
-        MeasuredBodyMetric.WaistCircumference -> "Waist (cm)"
-        MeasuredBodyMetric.AbdomenCircumference -> "Abdomen (cm)"
-        MeasuredBodyMetric.HipCircumference -> "Hip (cm)"
-        MeasuredBodyMetric.ChestSkinfold -> "Chest Skinfold (mm)"
-        MeasuredBodyMetric.AbdomenSkinfold -> "Abdomen Skinfold (mm)"
-        MeasuredBodyMetric.ThighSkinfold -> "Thigh Skinfold (mm)"
-        MeasuredBodyMetric.TricepsSkinfold -> "Triceps Skinfold (mm)"
-        MeasuredBodyMetric.SuprailiacSkinfold -> "Suprailiac Skinfold (mm)"
+    val label = metric.label()
+    return if (metric.unit == BodyMetricUnit.Unitless) {
+        label
+    } else {
+        stringResource(R.string.metric_input_label_with_unit, label, metric.unit.symbol)
     }
 }

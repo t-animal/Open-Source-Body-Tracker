@@ -1,0 +1,63 @@
+<resources>
+    <string name="export_title">Export Settings</string>
+    <string name="export_description">Your measurements, profile and photos are exported into an encrypted ZIP archive in the folder you choose. Nightly automatic exports use the same destination and require notification permission so Android can keep the background export alive.</string>
+    <string name="export_password_description_prefix">Set a password to encrypt your exported data.  </string>
+    <string name="export_password_description_bold">You need this password to import your data later, so make sure to keep it safe! </string>
+    <string name="export_password_description_suffix">All usual password security rules apply here: No reuse, long and complex passwords are best.</string>
+    <string name="export_label_password">Encryption Password</string>
+    <string name="export_label_device_storage">Export to Device Storage</string>
+    <string name="export_enable_password_hint">Enter an export password to enable export destinations.</string>
+    <string name="export_label_folder_prefix">Export folder: </string>
+    <string name="export_folder_not_set">Not set</string>
+    <string name="export_button_select_folder">Select Folder</string>
+    <string name="export_label_automatic">Nightly Automatic Backup</string>
+    <string name="export_automatic_description">Runs around 3:00 AM when measurements changed.</string>
+    <string name="export_label_google_drive">Export to Google Drive (coming later)</string>
+    <string name="export_button_export_now">Export Now</string>
+    <string name="export_button_exporting">Exporting…</string>
+    <string name="export_success_message">Export archive created: %s</string>
+    <string name="export_error_banner_title">Automatic Backup Failed</string>
+
+    <!-- Validation Errors -->
+    <string name="export_error_enable_storage">Enable export to device storage</string>
+    <string name="export_error_select_folder">Select an export folder</string>
+    <string name="export_error_enter_password">Enter an export password</string>
+    <string name="export_error_invalid_folder">Export folder is invalid. Select folder again</string>
+    <string name="export_error_permission_denied">Export folder permission was lost. Select folder again</string>
+    <string name="export_error_write_failed">Could not create export archive</string>
+    <string name="export_error_unknown">Export failed</string>
+
+    <!-- Progress -->
+    <string name="export_progress_collecting">Collecting data</string>
+    <string name="export_progress_writing_archive">Writing archive data</string>
+    <plurals name="export_progress_writing_photo">
+        <item quantity="one">Writing photo %1$d of %2$d</item>
+        <item quantity="other">Writing photo %1$d of %2$d</item>
+    </plurals>
+    <string name="export_progress_cleaning">Cleaning up old exports</string>
+
+    <!-- Permission Dialog -->
+    <string name="export_permission_dialog_title">Allow Notifications for Nightly Backups</string>
+    <string name="export_permission_dialog_body">Android requires a notification for the nightly background export. We use it to show progress while photos are being written so the backup can finish reliably.</string>
+
+    <!-- Automatic Export Errors -->
+    <string name="auto_export_error_EnableDeviceStorage">Automatic export is disabled</string>
+    <string name="auto_export_error_SelectFolder">Export folder not configured</string>
+    <string name="auto_export_error_EnterPassword">Export password not configured</string>
+    <string name="auto_export_error_InvalidFolder">Export folder is invalid</string>
+    <string name="auto_export_error_PermissionDenied">Export folder permission was lost</string>
+    <string name="auto_export_error_WriteFailed">Could not create export archive</string>
+    <string name="auto_export_error_Unknown">Automatic export failed</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_export">Automatic Export</string>
+    <string name="notification_export_title">Automatic Backup</string>
+    <plurals name="notification_export_photos">
+        <item quantity="one">Exporting photo %1$d of %2$d</item>
+        <item quantity="other">Exporting photos %1$d of %2$d</item>
+    </plurals>
+    <string name="notification_export_preparing">Preparing photos</string>
+    <string name="notification_export_cleaning">Cleaning up old backups</string>
+    <string name="notification_export_writing">Writing backup archive</string>
+    <string name="notification_export_default">Backing up your data…</string>
+</resources>

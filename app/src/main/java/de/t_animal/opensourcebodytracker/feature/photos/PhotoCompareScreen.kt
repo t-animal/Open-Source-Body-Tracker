@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.res.stringResource
+import de.t_animal.opensourcebodytracker.R
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -63,7 +65,7 @@ fun PhotoCompareScreen(state: PhotoCompareUiState) {
         }
 
         is PhotoCompareUiState.Loaded -> {
-            if (state.errorMessage != null) {
+            if (state.hasError) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -71,7 +73,7 @@ fun PhotoCompareScreen(state: PhotoCompareUiState) {
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = state.errorMessage,
+                        text = stringResource(R.string.photos_error_compare_load),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
                     )
@@ -114,14 +116,14 @@ private fun PhotoCompareContent(
         ) {
             AsyncImage(
                 model = right.photoFile,
-                contentDescription = "Right photo",
+                contentDescription = stringResource(R.string.cd_right_photo),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
 
             AsyncImage(
                 model = left.photoFile,
-                contentDescription = "Left photo",
+                contentDescription = stringResource(R.string.cd_left_photo),
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxSize()

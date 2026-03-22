@@ -34,16 +34,14 @@ class OnboardingStartViewModel @Inject constructor(
         if (_uiState.value.isBusy) return
 
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isBusy = true, errorMessage = null)
+            _uiState.value = _uiState.value.copy(isBusy = true, hasError = false)
             runCatching {
                 seedDemoData(
                     profile = defaultDemoDataProfile(),
                 )
                 _events.emit(OnboardingStartEvent.DemoModeInitializationCompleted)
             }.onFailure { throwable ->
-                _uiState.value = _uiState.value.copy(
-                    errorMessage = throwable.message ?: "Could not generate demo data",
-                )
+                _uiState.value = _uiState.value.copy(hasError = true)
             }
             _uiState.value = _uiState.value.copy(isBusy = false)
         }
@@ -66,7 +64,7 @@ class OnboardingStartViewModel @Inject constructor(
 
 data class OnboardingStartUiState(
     val isBusy: Boolean = false,
-    val errorMessage: String? = null,
+    val hasError: Boolean = false,
 )
 
 sealed interface OnboardingStartEvent {
