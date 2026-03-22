@@ -4,7 +4,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import de.t_animal.opensourcebodytracker.core.export.AutomaticExportWorker
+import de.t_animal.opensourcebodytracker.data.export.AutomaticExportWorker
 import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
 import java.time.Duration
 import java.time.ZonedDateTime

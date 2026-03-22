@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.core.notifications
+package de.t_animal.opensourcebodytracker.data.reminders
 
 import android.Manifest
 import android.app.NotificationChannel

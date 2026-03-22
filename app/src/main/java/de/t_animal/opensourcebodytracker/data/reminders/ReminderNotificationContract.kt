@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.core.notifications
+package de.t_animal.opensourcebodytracker.data.reminders
 
 object ReminderNotificationContract {
     const val ReminderChannelId = "measurement_reminders"
