@@ -1,0 +1,14 @@
+<resources>
+    <string name="profile_title_onboarding">Profil einrichten</string>
+    <string name="profile_title_settings">Profil</string>
+    <string name="profile_label_sex">Geschlecht</string>
+    <string name="profile_sex_male">Männlich</string>
+    <string name="profile_sex_female">Weiblich</string>
+    <string name="profile_label_dob">Geburtsdatum</string>
+    <string name="profile_label_height">Größe (cm)</string>
+
+    <!-- Validation Errors -->
+    <string name="profile_error_missing_sex">Bitte wähle ein Geschlecht aus</string>
+    <string name="profile_error_invalid_dob">Geburtsdatum muss im Format JJJJ-MM-TT sein</string>
+    <string name="profile_error_invalid_height">Körpergröße muss eine positive Zahl sein</string>
+</resources>

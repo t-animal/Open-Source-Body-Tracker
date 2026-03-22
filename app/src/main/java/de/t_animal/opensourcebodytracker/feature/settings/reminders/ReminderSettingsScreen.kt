@@ -235,7 +235,7 @@ fun ReminderSettingsScreen(
                         onClick = { onWeekdayToggled(day) },
                         label = {
                             Text(
-                                day.name.substring(0, 2),
+                                day.getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.getDefault()),
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.fillMaxWidth()
                             )

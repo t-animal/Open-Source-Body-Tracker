@@ -1,0 +1,25 @@
+<resources>
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_description">Konfiguriere dein Profil, Messungen, Analysen, Export und App-Informationen.</string>
+    <string name="settings_item_profile">Profil bearbeiten</string>
+    <string name="settings_item_measurements_analysis">Messungen &amp; Analysen auswählen</string>
+    <string name="settings_item_visibility">Sichtbarkeit der Messungen festlegen</string>
+    <string name="settings_item_reminders">Erinnerungen einstellen</string>
+    <string name="settings_item_export">Export</string>
+    <string name="settings_item_about">Über</string>
+    <string name="settings_measurements_analysis_title">Messungen &amp; Analysen</string>
+    <string name="settings_measurements_description">Konfiguriere Messungserfassung und Analysemethoden an einem Ort. Erforderliche Messungen bleiben aktiviert, wenn ausgewählte Analysen davon abhängen.</string>
+    <string name="settings_measurements_analysis_methods_header">Analysemethoden</string>
+    <string name="settings_measurements_header">Messungen</string>
+    <string name="settings_measurements_error_save_failed">Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.</string>
+
+    <!-- Visibility -->
+    <string name="settings_visibility_title">Sichtbarkeit der Messungen</string>
+    <string name="settings_visibility_description">Wähle, welche aufgezeichneten Messungen in Tabellen und Analyseansichten sichtbar sind.</string>
+    <string name="settings_visibility_disabled_hint">Diese Messungen sind derzeit deaktiviert. Es kann trotzdem sinnvoll sein, sie anzuzeigen, z.B. wenn du sie in der Vergangenheit aufgezeichnet hast.</string>
+    <string name="settings_visibility_label">Sichtbarkeit</string>
+    <string name="settings_visibility_in_both">In beiden</string>
+    <string name="settings_visibility_only_table">Nur in Tabelle</string>
+    <string name="settings_visibility_only_analysis">Nur in Analyse</string>
+    <string name="settings_visibility_hidden">Ausgeblendet</string>
+</resources>

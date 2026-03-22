@@ -1,0 +1,97 @@
+<resources>
+    <!-- Common -->
+    <string name="common_ok">OK</string>
+    <string name="common_cancel">Abbrechen</string>
+    <string name="common_save">Speichern</string>
+    <string name="common_delete">Löschen</string>
+    <string name="common_continue">Weiter</string>
+    <string name="common_dismiss">Schließen</string>
+    <string name="common_loading">Laden</string>
+    <string name="common_loading_ellipsis">Laden…</string>
+    <string name="common_more">Mehr</string>
+    <string name="common_back">Zurück</string>
+    <string name="common_finish">Fertig</string>
+    <string name="common_add">Hinzufügen</string>
+    <string name="common_selected_file">Datei auswählen</string>
+    <string name="common_pick">Wählen</string>
+
+    <!-- App Reset -->
+    <string name="app_reset_cleaning">Alle App-Daten werden gelöscht. Bitte starte die App manuell neu.</string>
+    <string name="app_reset_failed">App konnte nicht automatisch zurückgesetzt werden. Bitte lösche den App-Speicher in den Systemeinstellungen.</string>
+
+    <!-- Navigation -->
+    <string name="nav_measurements">Messungen</string>
+    <string name="nav_analysis">Analyse</string>
+    <string name="nav_photos">Fotos</string>
+
+    <!-- Main Menu -->
+    <string name="menu_settings">Einstellungen</string>
+    <string name="menu_about">Über</string>
+    <string name="menu_trigger_reminder">Erinnerung auslösen</string>
+    <string name="menu_fake_data">Testdaten erzeugen</string>
+    <string name="menu_reset_app">App-Daten zurücksetzen</string>
+    <string name="menu_schedule_export">Export in 2 Min. einplanen</string>
+
+    <!-- Common Content Descriptions -->
+    <string name="cd_back">Zurück</string>
+    <string name="cd_more">Mehr</string>
+    <string name="cd_toggle_password_visibility">Passwortsichtbarkeit umschalten</string>
+
+    <!-- Format: label (unit), e.g. "Gewicht (kg)" -->
+    <string name="metric_input_label_with_unit">%1$s (%2$s)</string>
+
+    <!-- Analysis Methods (used in settings + onboarding) -->
+    <string name="analysis_method_bmi_label">BMI</string>
+    <string name="analysis_method_bmi_description">Setzt das Körpergewicht ins Verhältnis zur Körpergröße. Kein guter Indikator für Gesundheit, aber für viele Menschen eine nützliche erste Annäherung.</string>
+    <string name="analysis_method_waist_hip_ratio_label">Taille-Hüft-Verhältnis</string>
+    <string name="analysis_method_waist_hip_ratio_description">Berücksichtigt die Fettverteilung. Höhere Werte stehen mit einem erhöhten Risiko für Herz-Kreislauf- und Stoffwechselerkrankungen in Verbindung.</string>
+    <string name="analysis_method_waist_height_ratio_label">Taille-Größe-Verhältnis</string>
+    <string name="analysis_method_waist_height_ratio_description">Guter Indikator für kardiovaskuläre und metabolische Risiken, oft aussagekräftiger als der BMI.</string>
+    <string name="analysis_method_navy_body_fat_label">Navy-Körperfett %</string>
+    <string name="analysis_method_navy_body_fat_description">Schätzt den Körperfettanteil anhand von Messungen von Umfängen. Grobe Annäherung, aber sehr schnell zu messen.</string>
+    <string name="analysis_method_skinfold_body_fat_label">Hautfalten-Körperfett %</string>
+    <string name="analysis_method_skinfold_body_fat_description">Schätzt den Körperfettanteil anhand von Hautfaltenmessungen. Recht genau bei korrekter Durchführung, erfordert aber etwas Übung.</string>
+
+    <!-- Measured Body Metric Labels (used in measurements + settings) -->
+    <string name="metric_label_weight">Gewicht</string>
+    <string name="metric_label_body_fat">Körperfett</string>
+    <string name="metric_label_neck">Hals</string>
+    <string name="metric_label_waist">Taille</string>
+    <string name="metric_label_hip">Hüfte</string>
+    <string name="metric_label_chest">Brust</string>
+    <string name="metric_label_abdomen">Bauch</string>
+    <string name="metric_label_chest_skinfold">Brust-Hautfalte</string>
+    <string name="metric_label_abdomen_skinfold">Bauch-Hautfalte</string>
+    <string name="metric_label_thigh_skinfold">Oberschenkel-Hautfalte</string>
+    <string name="metric_label_triceps_skinfold">Trizeps-Hautfalte</string>
+    <string name="metric_label_suprailiac_skinfold">Hüft-Hautfalte</string>
+    <string name="metric_label_bmi">BMI</string>
+    <string name="metric_label_navy_body_fat">Körperfett Navy</string>
+    <string name="metric_label_skinfold_body_fat">Körperfett Hautfalten</string>
+    <string name="metric_label_whr">THV</string>
+    <string name="metric_label_whtr">TGV</string>
+
+    <!-- Body Metric Full Names (used in measurements + settings) -->
+    <string name="metric_fullname_weight">Gewicht</string>
+    <string name="metric_fullname_body_fat">Körperfett</string>
+    <string name="metric_fullname_neck">Halsumfang</string>
+    <string name="metric_fullname_waist">Taillenumfang</string>
+    <string name="metric_fullname_hip">Hüftumfang</string>
+    <string name="metric_fullname_chest">Brustumfang</string>
+    <string name="metric_fullname_abdomen">Bauchumfang</string>
+    <string name="metric_fullname_chest_skinfold">Brust-Hautfalte</string>
+    <string name="metric_fullname_abdomen_skinfold">Bauch-Hautfalte</string>
+    <string name="metric_fullname_thigh_skinfold">Oberschenkel-Hautfalte</string>
+    <string name="metric_fullname_triceps_skinfold">Trizeps-Hautfalte</string>
+    <string name="metric_fullname_suprailiac_skinfold">Hüft-Hautfalte</string>
+    <string name="metric_fullname_bmi">Body-Mass-Index</string>
+    <string name="metric_fullname_navy_body_fat">Navy-Methode Körperfettanteil</string>
+    <string name="metric_fullname_skinfold_body_fat">3-Punkt-Hautfalten Körperfettanteil</string>
+    <string name="metric_fullname_whr">Taille-Hüft-Verhältnis</string>
+    <string name="metric_fullname_whtr">Taille-Größe-Verhältnis</string>
+
+    <!-- Measurement Required/Optional Labels (used in settings + onboarding) -->
+    <string name="measurement_required_for">(benötigt für %s)</string>
+    <string name="measurement_required">(benötigt)</string>
+    <string name="measurement_optional">(optional)</string>
+</resources>

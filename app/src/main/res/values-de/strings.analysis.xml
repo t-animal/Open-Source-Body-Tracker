@@ -1,0 +1,23 @@
+<resources>
+    <string name="analysis_hint">Tippe auf einen Punkt, um den Wert anzuzeigen, lange tippen für die Notiz</string>
+    <string name="analysis_chart_no_data">Noch keine Daten</string>
+
+    <!-- Duration Filter -->
+    <string name="analysis_duration_1m">1M</string>
+    <string name="analysis_duration_3m">3M</string>
+    <string name="analysis_duration_6m">6M</string>
+    <string name="analysis_duration_1y">1J</string>
+    <string name="analysis_duration_all">Alle</string>
+
+    <!-- Chart Titles (derived metrics only; measured metrics reuse metric_label_*) -->
+    <string name="analysis_chart_title_bmi">BMI</string>
+    <string name="analysis_chart_title_navy_body_fat">Navy-Körperfett %</string>
+    <string name="analysis_chart_title_skinfold_body_fat">Hautfalten-Körperfett %</string>
+    <string name="analysis_chart_title_whr">Taille–Hüft-Verhältnis</string>
+    <string name="analysis_chart_title_whtr">Taille–Größe-Verhältnis</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_drag_to_reorder">Ziehen zum Umordnen</string>
+    <string name="cd_expand">Aufklappen</string>
+    <string name="cd_collapse">Zuklappen</string>
+</resources>
