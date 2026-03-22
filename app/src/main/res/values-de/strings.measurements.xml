@@ -1,0 +1,87 @@
+<resources>
+    <!-- Validation Errors -->
+    <string name="validation_skinfold_must_be_positive">Hautfaltenwerte müssen größer als 0 sein</string>
+    <string name="validation_body_fat_range">Körperfett muss zwischen 0 und 100 liegen</string>
+    <string name="validation_missing_input">Gib mindestens einen Wert ein, füge ein Foto hinzu oder schreibe eine Notiz</string>
+
+    <!-- Edit Errors -->
+    <string name="measurement_error_delete_failed">Messung konnte nicht gelöscht werden</string>
+    <string name="measurement_error_save_photo_failed">Foto der Messung konnte nicht gespeichert werden</string>
+
+    <!-- Metric Section Titles -->
+    <string name="metric_section_weight">Gewicht</string>
+    <string name="metric_section_circumference">Umfänge</string>
+    <string name="metric_section_skinfold">Hautfaltendicke</string>
+    <string name="metric_section_analysis">Analyse</string>
+
+    <!-- Edit Screen -->
+    <string name="measurement_edit_title_add">Messung hinzufügen</string>
+    <string name="measurement_edit_title_edit">Messung bearbeiten</string>
+    <string name="measurement_edit_label_date">Datum</string>
+    <string name="measurement_edit_label_notes">Notizen</string>
+    <string name="measurement_edit_hint_before_bold">Mindestens eine Messung, ein Foto oder eine Notiz ist erforderlich.</string>
+    <string name="measurement_edit_hint_bold">Du musst aber nicht alle Messungen eingeben</string>
+    <string name="measurement_edit_hint_after_bold">. In diesem Fall werden die Analysen, die fehlende Messungen benötigen, jedoch nicht durchgeführt.</string>
+
+    <!-- List -->
+    <string name="measurement_list_title">Alle Messungen</string>
+    <string name="measurement_latest_title">Letzte Messung</string>
+    <string name="measurement_latest_empty">Noch keine Messungen – erstelle deine erste Messung</string>
+    <string name="measurement_latest_section_analyses">Analysen</string>
+    <string name="measurement_latest_section_measurements">Messungen</string>
+
+    <!-- Delete Dialog -->
+    <string name="measurement_delete_dialog_title">Messung löschen?</string>
+    <string name="measurement_delete_dialog_body">Diese Messung und ihr Foto werden unwiderruflich gelöscht.</string>
+
+    <!-- Discard Changes Dialog -->
+    <string name="measurement_discard_dialog_title">Eingabe verwerfen?</string>
+    <string name="measurement_discard_dialog_body">Du hast Werte eingegeben. Verwerfen und abbrechen?</string>
+    <string name="measurement_discard_dialog_confirm">Verwerfen</string>
+    <string name="measurement_discard_dialog_dismiss">Weiter bearbeiten</string>
+
+    <!-- Demo Mode -->
+    <string name="demo_banner_title">Du verwendest Demo-Daten.</string>
+    <string name="demo_banner_body">Setze die App zurück, um dein eigenes Profil zu erstellen.</string>
+    <string name="demo_reset_button">App zurücksetzen</string>
+    <string name="demo_reset_dialog_title">App zurücksetzen?</string>
+    <string name="demo_reset_dialog_body_before_bold">Alle App-Daten werden gelöscht und die App wird geschlossen. </string>
+    <string name="demo_reset_dialog_body_bold">Du musst sie danach manuell neu starten.</string>
+
+    <!-- Rating Labels -->
+    <string name="rating_severe_underweight">Schweres Untergewicht</string>
+    <string name="rating_underweight">Untergewicht</string>
+    <string name="rating_normal">Normal</string>
+    <string name="rating_overweight">Übergewicht</string>
+    <string name="rating_obese_class_i">Adipositas Grad I</string>
+    <string name="rating_obese_class_ii">Adipositas Grad II</string>
+    <string name="rating_obese_class_iii">Adipositas Grad III</string>
+    <string name="rating_dangerously_low">Gefährlich niedrig</string>
+    <string name="rating_essential_fat">Essentielles Fett</string>
+    <string name="rating_athletic">Athletisch</string>
+    <string name="rating_fit">Fit</string>
+    <string name="rating_acceptable">Akzeptabel</string>
+    <string name="rating_obese">Adipös</string>
+    <string name="rating_low_risk">Niedriges Risiko</string>
+    <string name="rating_moderate_risk">Mäßiges Risiko</string>
+    <string name="rating_high_risk">Hohes Risiko</string>
+    <string name="rating_very_high_risk">Sehr hohes Risiko</string>
+    <string name="rating_underweight_risk">Untergewichtsrisiko</string>
+    <string name="rating_healthy">Gesund</string>
+    <string name="rating_increased_risk">Erhöhtes Risiko</string>
+
+    <!-- Table -->
+    <string name="table_header_date">Datum</string>
+    <string name="table_header_note">Notiz</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_save">Speichern</string>
+    <string name="cd_delete">Löschen</string>
+    <string name="cd_delete_photo">Foto löschen</string>
+    <string name="cd_take_photo">Foto aufnehmen</string>
+    <string name="cd_edit_measurement">Messung bearbeiten</string>
+    <string name="cd_add_measurement">Messung hinzufügen</string>
+    <string name="cd_hide_note">Notiz ausblenden</string>
+    <string name="cd_show_full_note">Vollständige Notiz anzeigen</string>
+    <string name="cd_photo_preview">Vorschau des aufgenommenen Fotos</string>
+</resources>

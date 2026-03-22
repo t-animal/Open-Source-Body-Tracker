@@ -1,0 +1,41 @@
+<resources>
+    <string name="photos_empty">Noch keine Fotos</string>
+    <string name="photos_snackbar_selection_limit">Du kannst maximal 2 Fotos auswählen</string>
+    <string name="photos_snackbar_minimum_selection">Wähle mindestens 2 Fotos für die Animation aus</string>
+    <string name="photos_button_compare">Vergleichen</string>
+    <string name="photos_button_play">Abspielen</string>
+    <plurals name="photos_selected_count">
+        <item quantity="one">%d ausgewählt</item>
+        <item quantity="other">%d ausgewählt</item>
+    </plurals>
+    <string name="photos_frame_rate">Bildrate: %s fps</string>
+    <string name="photos_animation_error_too_many">Zu viele Bilder für den verfügbaren Arbeitsspeicher dieser App ausgewählt. Der geschätzte Speicherverbrauch (%1$s MiB) überschreitet das 50%%-Heap-Budget (%2$s MiB) des von Android bereitgestellten Arbeitsspeichers.</string>
+    <string name="photos_animation_error_decode_failed">Mindestens 2 Fotos konnten nicht für die Animation dekodiert werden</string>
+
+    <!-- Errors -->
+    <string name="photos_error_compare_load">Eines oder beide ausgewählten Fotos konnten nicht geladen werden</string>
+    <string name="photos_error_animation_load">Es konnten nicht mindestens 2 Fotos für die Animation geladen werden</string>
+
+    <!-- Screen Titles -->
+    <string name="photos_title_compare">Vergleichen</string>
+    <string name="photos_title_animation">Animation</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_close">Schließen</string>
+    <string name="cd_captured_photo">Aufgenommenes Foto</string>
+    <string name="cd_enter_compare_mode">Vergleichsmodus starten</string>
+    <string name="cd_enter_animate_mode">Animationsmodus starten</string>
+    <string name="cd_exit_mode">Modus beenden</string>
+    <string name="cd_selected_thumbnail">Ausgewähltes Vorschaubild</string>
+    <string name="cd_animation_slower">Langsamer</string>
+    <string name="cd_animation_previous">Vorheriges Bild</string>
+    <string name="cd_animation_play">Abspielen</string>
+    <string name="cd_animation_pause">Pause</string>
+    <string name="cd_animation_next">Nächstes Bild</string>
+    <string name="cd_animation_faster">Schneller</string>
+    <string name="cd_animation_frame">Animationsbild</string>
+    <string name="cd_progress_photo">Fortschrittsfoto</string>
+    <string name="cd_selected">Ausgewählt</string>
+    <string name="cd_right_photo">Rechtes Foto</string>
+    <string name="cd_left_photo">Linkes Foto</string>
+</resources>

@@ -1,0 +1,20 @@
+<resources>
+    <string name="reminder_title_onboarding">Erinnerungen einrichten</string>
+    <string name="reminder_title_settings">Erinnerungseinstellungen</string>
+    <string name="reminder_description">Richte Erinnerungen ein, um deine Messungen regelmäßig festzuhalten und deine Ziele im Blick zu behalten. Du erhältst eine Benachrichtigung zur gewählten Zeit an den ausgewählten Wochentagen.</string>
+    <string name="reminder_label_enable">Erinnerungen aktivieren</string>
+    <string name="reminder_label_weekdays">Wochentage</string>
+    <string name="reminder_label_time">Uhrzeit</string>
+    <string name="reminder_error_no_weekday">Wähle mindestens einen Wochentag aus</string>
+    <string name="reminder_permission_denied_title">Benachrichtigungsberechtigung erforderlich</string>
+    <string name="reminder_permission_denied_body">Die Benachrichtigungsberechtigung wird benötigt, um Erinnerungen aktiv zu halten. Erinnerungen wurden vorerst deaktiviert. Um Erinnerungen zu aktivieren, erteile bitte die Benachrichtigungsberechtigung in den App-Einstellungen.</string>
+
+    <!-- Debug Toasts -->
+    <string name="reminder_toast_notifications_disabled">Benachrichtigungen sind für diese App deaktiviert.</string>
+    <string name="reminder_toast_failed">Erinnerungsbenachrichtigung konnte nicht angezeigt werden.</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_title">Messerinnerung</string>
+    <string name="notification_reminder_body">Vergiss nicht, deine Messungen aufzuzeichnen.</string>
+    <string name="notification_channel_reminders">Messerinnerungen</string>
+</resources>

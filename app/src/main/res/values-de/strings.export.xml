@@ -1,0 +1,63 @@
+<resources>
+    <string name="export_title">Export-Einstellungen</string>
+    <string name="export_description">Deine Messungen, dein Profil und deine Fotos werden in ein verschlüsseltes ZIP-Archiv im gewählten Ordner exportiert. Nächtliche automatische Exports verwenden dasselbe Ziel und benötigen die Benachrichtigungsberechtigung, damit Android den Hintergrund-Export am Laufen halten kann.</string>
+    <string name="export_password_description_prefix">Lege ein Passwort fest, um deine exportierten Daten zu verschlüsseln.  </string>
+    <string name="export_password_description_bold">Du brauchst dieses Passwort, um deine Daten später zu importieren – bewahre es sicher auf! </string>
+    <string name="export_password_description_suffix">Es gelten die üblichen Passwort-Sicherheitsregeln: Kein Wiederverwenden, lange und komplexe Passwörter sind am besten.</string>
+    <string name="export_label_password">Verschlüsselungspasswort</string>
+    <string name="export_label_device_storage">Auf Gerätespeicher exportieren</string>
+    <string name="export_enable_password_hint">Gib ein Export-Passwort ein, um Export-Ziele zu aktivieren.</string>
+    <string name="export_label_folder_prefix">Export-Ordner: </string>
+    <string name="export_folder_not_set">Nicht festgelegt</string>
+    <string name="export_button_select_folder">Ordner auswählen</string>
+    <string name="export_label_automatic">Nächtliches automatisches Backup</string>
+    <string name="export_automatic_description">Läuft gegen 3:00 Uhr, wenn sich Messungen geändert haben.</string>
+    <string name="export_label_google_drive">Auf Google Drive exportieren (kommt später)</string>
+    <string name="export_button_export_now">Jetzt exportieren</string>
+    <string name="export_button_exporting">Wird exportiert…</string>
+    <string name="export_success_message">Export-Archiv erstellt: %s</string>
+    <string name="export_error_banner_title">Automatisches Backup fehlgeschlagen</string>
+
+    <!-- Validation Errors -->
+    <string name="export_error_enable_storage">Export auf Gerätespeicher aktivieren</string>
+    <string name="export_error_select_folder">Wähle einen Export-Ordner aus</string>
+    <string name="export_error_enter_password">Gib ein Export-Passwort ein</string>
+    <string name="export_error_invalid_folder">Export-Ordner ist ungültig. Wähle den Ordner erneut aus</string>
+    <string name="export_error_permission_denied">Berechtigung für den Export-Ordner wurde entzogen. Wähle den Ordner erneut aus</string>
+    <string name="export_error_write_failed">Export-Archiv konnte nicht erstellt werden</string>
+    <string name="export_error_unknown">Export fehlgeschlagen</string>
+
+    <!-- Progress -->
+    <string name="export_progress_collecting">Daten werden gesammelt</string>
+    <string name="export_progress_writing_archive">Archivdaten werden geschrieben</string>
+    <plurals name="export_progress_writing_photo">
+        <item quantity="one">Schreibe Foto %1$d von %2$d</item>
+        <item quantity="other">Schreibe Foto %1$d von %2$d</item>
+    </plurals>
+    <string name="export_progress_cleaning">Alte Exports werden aufgeräumt</string>
+
+    <!-- Permission Dialog -->
+    <string name="export_permission_dialog_title">Benachrichtigungen für nächtliche Backups erlauben</string>
+    <string name="export_permission_dialog_body">Android benötigt eine Benachrichtigung für den nächtlichen Hintergrund-Export. Wir nutzen sie, um den Fortschritt beim Schreiben der Fotos anzuzeigen, damit das Backup zuverlässig abgeschlossen werden kann.</string>
+
+    <!-- Automatic Export Errors -->
+    <string name="auto_export_error_EnableDeviceStorage">Automatischer Export ist deaktiviert</string>
+    <string name="auto_export_error_SelectFolder">Export-Ordner nicht konfiguriert</string>
+    <string name="auto_export_error_EnterPassword">Export-Passwort nicht konfiguriert</string>
+    <string name="auto_export_error_InvalidFolder">Export-Ordner ist ungültig</string>
+    <string name="auto_export_error_PermissionDenied">Berechtigung für den Export-Ordner wurde entzogen</string>
+    <string name="auto_export_error_WriteFailed">Export-Archiv konnte nicht erstellt werden</string>
+    <string name="auto_export_error_Unknown">Automatischer Export fehlgeschlagen</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_export">Automatischer Export</string>
+    <string name="notification_export_title">Automatisches Backup</string>
+    <plurals name="notification_export_photos">
+        <item quantity="one">Exportiere Foto %1$d von %2$d</item>
+        <item quantity="other">Exportiere Fotos %1$d von %2$d</item>
+    </plurals>
+    <string name="notification_export_preparing">Fotos werden vorbereitet</string>
+    <string name="notification_export_cleaning">Alte Backups werden aufgeräumt</string>
+    <string name="notification_export_writing">Backup-Archiv wird geschrieben</string>
+    <string name="notification_export_default">Deine Daten werden gesichert…</string>
+</resources>

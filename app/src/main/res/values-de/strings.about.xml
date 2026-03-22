@@ -1,0 +1,8 @@
+<resources>
+    <string name="about_title">Über</string>
+    <string name="about_app_name">Open Source Body Tracker</string>
+    <string name="about_tagline">Eine datenschutzfreundliche App zur Körpermaßerfassung.</string>
+    <string name="about_section_project">Projekt</string>
+    <string name="about_button_github">GitHub-Repository</string>
+    <string name="about_section_contact">Kontakt</string>
+</resources>
