@@ -42,6 +42,11 @@ Translation files follow the standard Android convention: `app/src/main/res/valu
 1. Rename in the appropriate `values/strings.*.xml` file and all `values-<locale>/strings*.xml` files simultaneously.
 2. Update all Kotlin/Compose references (`R.string.<old>` → `R.string.<new>`).
 
+### When adding a new language
+
+1. Create the `app/src/main/res/values-<locale>/` directory and add translation files.
+2. **Update `app/src/main/res/xml/locales_config.xml`** to include a `<locale android:name="<locale>" />` entry for the new language. This file controls Android's per-app language picker in system settings — without the entry, users cannot select the language.
+
 ### Keeping translations in sync
 
 After any string resource change, run this checklist:
