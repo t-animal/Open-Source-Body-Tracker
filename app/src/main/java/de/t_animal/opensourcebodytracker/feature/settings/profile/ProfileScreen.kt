@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -26,7 +28,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.Sex
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.settings.components.ProfileFormSection
+import de.t_animal.opensourcebodytracker.feature.settings.components.UnitSystemSelector
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -51,7 +55,8 @@ fun ProfileRoute(
         onNavigateBack = onNavigateBack,
         onSexChanged = vm::onSexChanged,
         onDateOfBirthChanged = vm::onDateOfBirthChanged,
-        onHeightChanged = vm::onHeightChanged,
+        onHeightCmChanged = vm::onHeightCmChanged,
+        onUnitSystemChanged = vm::onUnitSystemChanged,
         onSaveClicked = vm::onSaveClicked,
     )
 }
@@ -63,7 +68,8 @@ fun ProfileScreen(
     onNavigateBack: (() -> Unit)? = null,
     onSexChanged: (Sex) -> Unit,
     onDateOfBirthChanged: (String) -> Unit,
-    onHeightChanged: (String) -> Unit,
+    onHeightCmChanged: (String) -> Unit,
+    onUnitSystemChanged: (UnitSystem) -> Unit,
     onSaveClicked: () -> Unit,
 ) {
     Scaffold(
@@ -94,15 +100,30 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
+
+            if (state.mode == ProfileMode.Onboarding) {
+                UnitSystemSelector(
+                    unitSystem = state.unitSystem,
+                    onUnitSystemChanged = onUnitSystemChanged,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.settings_item_profile_subheading),
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
+
             ProfileFormSection(
                 sex = state.sex,
                 dateOfBirthText = state.dateOfBirthText,
                 heightCmText = state.heightCmText,
+                unitSystem = state.unitSystem,
                 onSexChanged = onSexChanged,
                 onDateOfBirthChanged = onDateOfBirthChanged,
-                onHeightChanged = onHeightChanged,
+                onHeightCmChanged = onHeightCmChanged,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -144,7 +165,8 @@ private fun ProfileScreenPreview_Onboarding() {
             onNavigateBack = {},
             onSexChanged = {},
             onDateOfBirthChanged = {},
-            onHeightChanged = {},
+            onHeightCmChanged = {},
+            onUnitSystemChanged = {},
             onSaveClicked = {},
         )
     }
@@ -165,7 +187,8 @@ private fun ProfileScreenPreview_Error() {
             onNavigateBack = {},
             onSexChanged = {},
             onDateOfBirthChanged = {},
-            onHeightChanged = {},
+            onHeightCmChanged = {},
+            onUnitSystemChanged = {},
             onSaveClicked = {},
         )
     }

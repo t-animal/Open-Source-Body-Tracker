@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.Sex
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
+import de.t_animal.opensourcebodytracker.core.model.userInputToStorageValue
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
 import de.t_animal.opensourcebodytracker.core.util.formatEpochMillisAsIsoDate
@@ -13,6 +15,7 @@ import de.t_animal.opensourcebodytracker.core.util.parseLocalizedDoubleOrNull
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementCommand
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementResult
 import de.t_animal.opensourcebodytracker.domain.measurements.DeleteMeasurementUseCase
@@ -46,12 +49,13 @@ sealed interface MeasurementEditUiState {
     data class Loaded(
         val measurementId: Long? = null,
         val sex: Sex,
+        val unitSystem: UnitSystem = UnitSystem.Metric,
         val enabledMeasurements: Set<MeasuredBodyMetric>,
         val dateEpochMillis: Long? = null,
         val dateText: String = "",
         val initialDateEpochMillis: Long? = null,
-        val metricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
-        val initialMetricInputs: Map<MeasuredBodyMetric, String> = defaultMetricInputs(),
+        val bodyMetricInputs: Map<MeasuredBodyMetric, String> = defaultBodyMetricInputs(),
+        val initialMetricInputs: Map<MeasuredBodyMetric, String> = defaultBodyMetricInputs(),
         val note: String = "",
         val initialNote: String = "",
         val persistedPhotoFilePath: PersistedPhotoPath? = null,
@@ -75,6 +79,7 @@ class MeasurementEditViewModel @Inject constructor(
     private val repository: MeasurementRepository,
     private val photoStorage: InternalPhotoStorage,
     private val profileRepository: ProfileRepository,
+    private val generalSettingsRepository: GeneralSettingsRepository,
     private val deleteMeasurementUseCase: DeleteMeasurementUseCase,
     private val saveMeasurementUseCase: SaveMeasurementUseCase,
     private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
@@ -100,17 +105,20 @@ class MeasurementEditViewModel @Inject constructor(
                 profileRepository.requiredProfileFlow,
                 requiredMeasurementsResolver.effectiveMeasurementSettingsFlow,
                 observeExistingMeasurement(),
-            ) { profile, effective, measurement ->
-                Triple(profile.sex, effective.settings.enabledMeasurements, measurement)
-            }.collect { (sex, enabledMeasurements, measurement) ->
+                generalSettingsRepository.settingsFlow,
+            ) { profile, effective, measurement, generalSettings ->
+                val sex = profile.sex
+                val enabledMeasurements = effective.settings.enabledMeasurements
+                val unitSystem = generalSettings.unitSystem
 
                 val baseMeasurementId = measurementId
-                if (baseMeasurementId == null && measurement != null) return@collect
+                if (baseMeasurementId == null && measurement != null) return@combine
 
                 val currentLoaded = _uiState.value as? MeasurementEditUiState.Loaded
                 _uiState.value = if (currentLoaded == null) {
                     buildInitialLoadedState(
                         sex = sex,
+                        unitSystem = unitSystem,
                         enabledMeasurements = enabledMeasurements,
                         measurementId = baseMeasurementId,
                         measurement = measurement,
@@ -118,10 +126,11 @@ class MeasurementEditViewModel @Inject constructor(
                 } else {
                     currentLoaded.copy(
                         sex = sex,
+                        unitSystem = unitSystem,
                         enabledMeasurements = enabledMeasurements,
                     )
                 }
-            }
+            }.collect {}
         }
     }
 
@@ -138,7 +147,7 @@ class MeasurementEditViewModel @Inject constructor(
     fun onMetricChanged(metric: MeasuredBodyMetric, text: String) {
         updateUiState {
             it.copy(
-                metricInputs = it.metricInputs + (metric to text),
+                bodyMetricInputs = it.bodyMetricInputs + (metric to text),
                 error = null,
             )
         }
@@ -235,7 +244,7 @@ class MeasurementEditViewModel @Inject constructor(
                             measurementId = current.measurementId,
                             dateEpochMillis = date,
                             enabledMeasurements = current.enabledMeasurements,
-                            metricValues = parseMetricValues(current.metricInputs),
+                            metricValues = parseBodyMetricValues(current.bodyMetricInputs, current.unitSystem),
                             existingPhotoPath = current.persistedPhotoFilePath,
                             newPhotoPath = current.pendingPhotoAbsolutePath,
                             deleteExistingPhoto = current.isPhotoMarkedForDeletion,
@@ -268,12 +277,19 @@ class MeasurementEditViewModel @Inject constructor(
         )
     }
 
-    private fun parseMetricValues(metricInputs: Map<MeasuredBodyMetric, String>): Map<MeasuredBodyMetric, Double?> {
-        return metricInputs.mapValues { (_, valueText) -> parseLocalizedDoubleOrNull(valueText) }
+    private fun parseBodyMetricValues(
+        bodyMetricInputs: Map<MeasuredBodyMetric, String>,
+        unitSystem: UnitSystem,
+    ): Map<MeasuredBodyMetric, Double?> {
+        return bodyMetricInputs.mapValues { (metric, valueText) ->
+            parseLocalizedDoubleOrNull(valueText)
+                ?.userInputToStorageValue(metric.unit, unitSystem)
+        }
     }
 
     private fun buildInitialLoadedState(
         sex: Sex,
+        unitSystem: UnitSystem,
         enabledMeasurements: Set<MeasuredBodyMetric>,
         measurementId: Long?,
         measurement: BodyMeasurement?,
@@ -283,22 +299,24 @@ class MeasurementEditViewModel @Inject constructor(
             MeasurementEditUiState.Loaded(
                 measurementId = measurementId,
                 sex = sex,
+                unitSystem = unitSystem,
                 enabledMeasurements = enabledMeasurements,
                 dateEpochMillis = now,
                 dateText = formatEpochMillisAsIsoDate(now),
                 initialDateEpochMillis = now,
             )
         } else {
-            val metricInputs = MeasurementMetricMapper.toMetricInputMap(measurement)
+            val bodyMetricInputs = MeasurementMetricMapper.toBodyMetricInputMap(measurement, unitSystem)
             MeasurementEditUiState.Loaded(
                 measurementId = measurement.id,
                 sex = sex,
+                unitSystem = unitSystem,
                 enabledMeasurements = enabledMeasurements,
                 dateEpochMillis = measurement.dateEpochMillis,
                 dateText = formatEpochMillisAsIsoDate(measurement.dateEpochMillis),
                 initialDateEpochMillis = measurement.dateEpochMillis,
-                metricInputs = metricInputs,
-                initialMetricInputs = metricInputs,
+                bodyMetricInputs = bodyMetricInputs,
+                initialMetricInputs = bodyMetricInputs,
                 note = measurement.note.orEmpty(),
                 initialNote = measurement.note.orEmpty(),
                 persistedPhotoFilePath = measurement.photoFilePath,
@@ -308,7 +326,7 @@ class MeasurementEditViewModel @Inject constructor(
     }
 }
 
-private fun defaultMetricInputs(): Map<MeasuredBodyMetric, String> {
+private fun defaultBodyMetricInputs(): Map<MeasuredBodyMetric, String> {
     return MeasuredBodyMetric.entries.associateWith { "" }
 }
 
@@ -320,7 +338,7 @@ private fun calculateHasUnsavedChanges(state: MeasurementEditUiState.Loaded): Bo
 
     val hasDateChange = state.dateEpochMillis != state.initialDateEpochMillis
     val hasMetricInputChange = MeasuredBodyMetric.entries.any { metric ->
-        val currentValue = parseLocalizedDoubleOrNull(state.metricInputs[metric].orEmpty())
+        val currentValue = parseLocalizedDoubleOrNull(state.bodyMetricInputs[metric].orEmpty())
         val initialValue = parseLocalizedDoubleOrNull(state.initialMetricInputs[metric].orEmpty())
         currentValue != initialValue
     }

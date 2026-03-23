@@ -11,6 +11,7 @@ object Routes {
 
     const val Profile = "profile"
     const val Settings = "settings"
+    const val SettingsMisc = "settings/misc"
     const val SettingsMeasurements = "settings/measurements"
     const val SettingsMeasurementVisibility = "settings/measurement_visibility"
     const val Reminders = "reminders" // TODO: align name and value with other routes, e.g. "settings/reminders"

@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import de.t_animal.opensourcebodytracker.core.model.GeneralSettings
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.di.SettingsDataStore
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -39,11 +40,15 @@ class PreferencesGeneralSettingsRepository @Inject constructor(
         return GeneralSettings(
             onboardingCompleted = this[SettingsKeys.onboardingCompleted] ?: defaults.onboardingCompleted,
             isDemoMode = this[SettingsKeys.isDemoMode] ?: defaults.isDemoMode,
+            unitSystem = this[SettingsKeys.unitSystem]?.let {
+                runCatching { UnitSystem.valueOf(it) }.getOrNull()
+            } ?: defaults.unitSystem,
         )
     }
 
     private fun MutablePreferences.applyGeneralSettings(settings: GeneralSettings) {
         this[SettingsKeys.onboardingCompleted] = settings.onboardingCompleted
         this[SettingsKeys.isDemoMode] = settings.isDemoMode
+        this[SettingsKeys.unitSystem] = settings.unitSystem.name
     }
 }

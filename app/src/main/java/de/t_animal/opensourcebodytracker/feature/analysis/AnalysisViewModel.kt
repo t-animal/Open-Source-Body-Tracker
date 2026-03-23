@@ -8,6 +8,7 @@ import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.data.uisettings.UiSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateAndRateDerivedMetricsUseCase
@@ -28,6 +29,7 @@ class AnalysisViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
     measurementSettingsRepository: MeasurementSettingsRepository,
+    generalSettingsRepository: GeneralSettingsRepository,
     private val uiSettingsRepository: UiSettingsRepository,
     private val calculateMeasurementDerivedMetrics: CalculateAndRateDerivedMetricsUseCase,
     private val clock: Clock,
@@ -49,8 +51,8 @@ class AnalysisViewModel @Inject constructor(
         profileRepository.requiredProfileFlow,
         measurementSettingsRepository.settingsFlow,
         uiSettingsRepository.settingsFlow,
-        customChartOrderOverride,
-    ) { measurements, profile, settings, uiSettings, customChartOrderUntilSaved->
+        combine(customChartOrderOverride, generalSettingsRepository.settingsFlow, ::Pair),
+    ) { measurements, profile, settings, uiSettings, (customChartOrderUntilSaved, generalSettings) ->
         val withDerived = measurements.map { measurement ->
             MeasurementWithDerived(
                 measurement = measurement,
@@ -78,6 +80,7 @@ class AnalysisViewModel @Inject constructor(
             selectedDuration = uiSettings.analysisDuration,
             collapsedChartIds = uiSettings.analysisCollapsedCharts,
             metricCharts = buildMetricCharts(filteredItems, orderedMetrics),
+            unitSystem = generalSettings.unitSystem,
             isLoading = false,
         )
     }.stateIn(

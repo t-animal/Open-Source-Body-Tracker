@@ -39,6 +39,8 @@ import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
+import de.t_animal.opensourcebodytracker.core.model.toDisplayValue
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisMetricChartUiModel
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisYAxisRange
 import de.t_animal.opensourcebodytracker.feature.analysis.helpers.suffixWithLeadingSpace
@@ -61,14 +63,18 @@ internal fun MetricLineChart(
     onSelectedDateChange: (LocalDate?) -> Unit,
     onNoteSelected: (String?) -> Unit,
     modifier: Modifier = Modifier,
+    unitSystem: UnitSystem,
 ) {
     val points = chart.points
     val yAxisRange = chart.yAxisRange ?: return
+    val metricUnit = chart.definition.unit
     val modelProducer = remember(chart.definition.id) { CartesianChartModelProducer() }
     // Use epoch days as x-values: vico's AlignedHorizontalAxisItemPlacer iterates every integer
     // between min and max x, so epoch milliseconds would produce trillions of allocations.
     val xValues = remember(points) { points.map { it.epochMillis.toLocalDateInSystemZone().toEpochDay() } }
-    val yValues = remember(points) { points.map { it.value } }
+    val yValues = remember(points, unitSystem) {
+        points.map { it.value.toDisplayValue(metricUnit, unitSystem) }
+    }
 
     // Note marker data
     val notesByEpochDay = remember(points) {
@@ -77,8 +83,8 @@ internal fun MetricLineChart(
     }
     val noteEpochDays = remember(notesByEpochDay) { notesByEpochDay.keys }
 
-    val unitSuffix = remember(chart.definition.unit) {
-        chart.definition.unit.suffixWithLeadingSpace()
+    val unitSuffix = remember(chart.definition.unit, unitSystem) {
+        chart.definition.unit.suffixWithLeadingSpace(unitSystem)
     }
     val xAxisValueFormatter = remember(duration) {
         CartesianValueFormatter { _, value, _ ->
@@ -117,8 +123,14 @@ internal fun MetricLineChart(
     val selectedPersistentMarkerX = remember(selectedDate, xValues) {
         selectedDate?.let { xValues.firstOrNull { it == selectedDate.toEpochDay() } }
     }
-    val rangeProvider = remember(yAxisRange) {
-        fixedYRangeProvider(yAxisRange)
+    val displayYAxisRange = remember(yAxisRange, unitSystem) {
+        AnalysisYAxisRange(
+            min = yAxisRange.min.toDisplayValue(metricUnit, unitSystem),
+            max = yAxisRange.max.toDisplayValue(metricUnit, unitSystem),
+        )
+    }
+    val rangeProvider = remember(displayYAxisRange) {
+        fixedYRangeProvider(displayYAxisRange)
     }
     val scrollState = rememberVicoScrollState(scrollEnabled = true)
     val zoomState = rememberVicoZoomState(

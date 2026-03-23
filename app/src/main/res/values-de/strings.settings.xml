@@ -7,6 +7,13 @@
     <string name="settings_item_reminders">Erinnerungen einstellen</string>
     <string name="settings_item_export">Export</string>
     <string name="settings_item_about">Über</string>
+    <string name="settings_item_misc">Verschiedenes</string>
+    <string name="settings_misc_title">Verschiedene Einstellungen</string>
+    <string name="settings_misc_description">Einstellungen, die nicht woanders hinpassen.</string>
+    <string name="settings_item_units">Einheiten</string>
+    <string name="settings_item_profile_subheading">Profil</string>
+    <string name="settings_unit_metric">Metrisch (kg, cm)</string>
+    <string name="settings_unit_imperial">Imperial (lbs, in)</string>
     <string name="settings_measurements_analysis_title">Messungen &amp; Analysen</string>
     <string name="settings_measurements_description">Konfiguriere Messungserfassung und Analysemethoden an einem Ort. Erforderliche Messungen bleiben aktiviert, wenn ausgewählte Analysen davon abhängen.</string>
     <string name="settings_measurements_analysis_methods_header">Analysemethoden</string>

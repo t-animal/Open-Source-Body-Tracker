@@ -30,6 +30,7 @@ import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 fun SettingsRoute(
     onNavigateBack: () -> Unit,
     onOpenProfile: () -> Unit,
+    onOpenMisc: () -> Unit,
     onOpenMeasurementsAndAnalysis: () -> Unit,
     onOpenMeasurementVisibility: () -> Unit,
     onOpenReminders: () -> Unit,
@@ -39,6 +40,7 @@ fun SettingsRoute(
     SettingsScreen(
         onNavigateBack = onNavigateBack,
         onOpenProfile = onOpenProfile,
+        onOpenMisc = onOpenMisc,
         onOpenMeasurementsAndAnalysis = onOpenMeasurementsAndAnalysis,
         onOpenMeasurementVisibility = onOpenMeasurementVisibility,
         onOpenReminders = onOpenReminders,
@@ -52,6 +54,7 @@ fun SettingsRoute(
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onOpenProfile: () -> Unit,
+    onOpenMisc: () -> Unit,
     onOpenMeasurementsAndAnalysis: () -> Unit,
     onOpenMeasurementVisibility: () -> Unit,
     onOpenReminders: () -> Unit,
@@ -120,6 +123,12 @@ fun SettingsScreen(
             }
             item {
                 SettingsNavigationItem(
+                    title = stringResource(R.string.settings_item_misc),
+                    onClick = onOpenMisc,
+                )
+            }
+            item {
+                SettingsNavigationItem(
                     title = stringResource(R.string.settings_item_about),
                     onClick = onOpenAbout,
                 )
@@ -158,6 +167,7 @@ private fun SettingsScreenPreview() {
         SettingsScreen(
             onNavigateBack = {},
             onOpenProfile = {},
+            onOpenMisc = {},
             onOpenMeasurementsAndAnalysis = {},
             onOpenMeasurementVisibility = {},
             onOpenReminders = {},

@@ -1,11 +1,15 @@
 <resources>
     <string name="profile_title_onboarding">Profil einrichten</string>
     <string name="profile_title_settings">Profil</string>
+    <string name="profile_units_intro">Wähle dein bevorzugtes Einheitensystem für die Eingabe und Anzeige von Messungen. Hautfaltenmessungen verwenden immer Millimeter, da dies der Standardpraxis entspricht.</string>
+    <string name="profile_form_intro">Dein Profil wird zur Berechnung von Kennzahlen wie BMI und Körperfettanteil verwendet. Dies kann dir bei der Einordnung der Messungen helfen. Alle Daten bleiben auf deinem Gerät.</string>
     <string name="profile_label_sex">Geschlecht</string>
     <string name="profile_sex_male">Männlich</string>
     <string name="profile_sex_female">Weiblich</string>
     <string name="profile_label_dob">Geburtsdatum</string>
     <string name="profile_label_height">Größe (cm)</string>
+    <string name="profile_label_height_feet">Größe (ft)</string>
+    <string name="profile_label_height_inches">Größe (in)</string>
 
     <!-- Validation Errors -->
     <string name="profile_error_missing_sex">Bitte wähle ein Geschlecht aus</string>

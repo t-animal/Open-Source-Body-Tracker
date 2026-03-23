@@ -8,8 +8,10 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
+import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.CalculateAndRateDerivedMetricsUseCase
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,6 +25,7 @@ data class MeasurementListUiState(
     val allMeasurements: List<MeasurementListItemUiModel> = emptyList(),
     val hasMoreMeasurements: Boolean = false,
     val visibleInTableMetrics: List<BodyMetric> = BodyMetric.entries,
+    val unitSystem: UnitSystem = UnitSystem.Metric,
     val isEmpty: Boolean = true,
     val isLoading: Boolean = true,
 )
@@ -38,13 +41,15 @@ class MeasurementListViewModel @Inject constructor(
     measurementRepository: MeasurementRepository,
     profileRepository: ProfileRepository,
     measurementSettingsRepository: MeasurementSettingsRepository,
+    generalSettingsRepository: GeneralSettingsRepository,
     calculateMeasurementDerivedMetrics: CalculateAndRateDerivedMetricsUseCase,
 ) : ViewModel() {
     val uiState: StateFlow<MeasurementListUiState> = combine(
         measurementRepository.observeAll(),
         profileRepository.requiredProfileFlow,
         measurementSettingsRepository.settingsFlow,
-    ) { measurements, profile, settings ->
+        generalSettingsRepository.settingsFlow,
+    ) { measurements, profile, settings, generalSettings ->
         val items = measurements.map { measurement ->
             val analysis = calculateMeasurementDerivedMetrics(profile, measurement)
             MeasurementListItemUiModel(
@@ -62,6 +67,7 @@ class MeasurementListViewModel @Inject constructor(
             allMeasurements = items,
             hasMoreMeasurements = items.size > PREVIEW_LIMIT,
             visibleInTableMetrics = orderedVisibleInTableMetrics,
+            unitSystem = generalSettings.unitSystem,
             isEmpty = items.isEmpty(),
             isLoading = false,
         )

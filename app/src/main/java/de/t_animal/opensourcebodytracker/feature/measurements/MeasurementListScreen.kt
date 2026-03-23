@@ -141,6 +141,7 @@ fun MeasurementListScreen(
                     items = state.previewMeasurements,
                     visibleMetrics = state.visibleInTableMetrics,
                     selectedIds = selectedMeasurementIds,
+                    unitSystem = state.unitSystem,
                     onRowSelect = { id ->
                         selectedMeasurementIds = if (id in selectedMeasurementIds) {
                             selectedMeasurementIds - id
@@ -227,6 +228,7 @@ fun MeasurementFullListScreen(
                 items = state.allMeasurements,
                 visibleMetrics = state.visibleInTableMetrics,
                 selectedIds = selectedMeasurementIds,
+                unitSystem = state.unitSystem,
                 onRowSelect = { id ->
                     selectedMeasurementIds = if (id in selectedMeasurementIds) {
                         selectedMeasurementIds - id

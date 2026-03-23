@@ -38,6 +38,7 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
 import de.t_animal.opensourcebodytracker.core.model.RatingLabel
 import de.t_animal.opensourcebodytracker.core.model.RatingSeverity
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListUiState
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.buildLatestMeasurementMetrics
@@ -93,6 +94,7 @@ internal fun LatestMeasurementCard(
                             LatestMeasurementGrid(
                                 item = latest,
                                 visibleMetrics = analysisMetrics,
+                                unitSystem = state.unitSystem,
                             )
                         }
 
@@ -108,6 +110,7 @@ internal fun LatestMeasurementCard(
                             LatestMeasurementGrid(
                                 item = latest,
                                 visibleMetrics = rawMetrics,
+                                unitSystem = state.unitSystem,
                             )
                         }
                     }
@@ -181,8 +184,9 @@ private fun LatestMeasurementCardEmptyPreview() {
 private fun LatestMeasurementGrid(
     item: MeasurementListItemUiModel,
     visibleMetrics: List<BodyMetric>,
+    unitSystem: UnitSystem = UnitSystem.Metric,
 ) {
-    val metrics = buildLatestMeasurementMetrics(item, visibleMetrics)
+    val metrics = buildLatestMeasurementMetrics(item, visibleMetrics, unitSystem)
     val context = LocalContext.current
 
     FlowRow(

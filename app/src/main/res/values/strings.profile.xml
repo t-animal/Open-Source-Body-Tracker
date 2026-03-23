@@ -1,11 +1,15 @@
 <resources>
     <string name="profile_title_onboarding">Profile Setup</string>
     <string name="profile_title_settings">Profile</string>
+    <string name="profile_units_intro">Choose your preferred unit system for entering and displaying measurements. Skinfold caliper measurements always use millimeters, as is standard practice.</string>
+    <string name="profile_form_intro">Your profile is used to calculate metrics like BMI and body fat percentage. This can help you interpret your measurements. All data stays on your device.</string>
     <string name="profile_label_sex">Sex</string>
     <string name="profile_sex_male">Male</string>
     <string name="profile_sex_female">Female</string>
     <string name="profile_label_dob">Date of birth</string>
     <string name="profile_label_height">Height (cm)</string>
+    <string name="profile_label_height_feet">Height (ft)</string>
+    <string name="profile_label_height_inches">Height (in)</string>
 
     <!-- Validation Errors -->
     <string name="profile_error_missing_sex">Please select a sex</string>

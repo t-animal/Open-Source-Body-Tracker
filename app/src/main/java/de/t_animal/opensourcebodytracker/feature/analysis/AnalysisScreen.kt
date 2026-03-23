@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.analysis.components.MetricChartCard
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.LocalDate
@@ -135,6 +136,7 @@ fun AnalysisScreen(
                         isCollapsed = chart.definition.id in state.collapsedChartIds,
                         onToggleCollapsed = { onToggleCollapsed(chart.definition.id) },
                         dragHandleModifier = Modifier.draggableHandle(),
+                        unitSystem = state.unitSystem,
                     )
                 }
                 Spacer(modifier = Modifier.height(12.dp))

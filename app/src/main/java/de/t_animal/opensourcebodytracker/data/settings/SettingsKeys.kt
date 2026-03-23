@@ -30,4 +30,5 @@ object SettingsKeys {
     // General settings
     val onboardingCompleted = booleanPreferencesKey("general.onboardingCompleted")
     val isDemoMode = booleanPreferencesKey("general.isDemoMode")
+    val unitSystem = stringPreferencesKey("general.unitSystem")
 }

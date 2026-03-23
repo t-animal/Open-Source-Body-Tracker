@@ -214,7 +214,7 @@ private fun MeasurementEditLoadedScreen(
     }
 
     val hasEnteredAnyInput =
-        state.metricInputs.values.any { it.isNotBlank() } ||
+        state.bodyMetricInputs.values.any { it.isNotBlank() } ||
             state.note.isNotBlank() ||
             photoPreviewModel != null
     val hasUnsavedInput = if (isCreatingNew) hasEnteredAnyInput else state.hasUnsavedChanges
@@ -273,8 +273,9 @@ private fun MeasurementEditLoadedScreen(
 
             MetricSections(
                 metrics = visibleMetrics,
-                metricInputs = state.metricInputs,
+                bodyMetricInputs = state.bodyMetricInputs,
                 onMetricChanged = onMetricChanged,
+                unitSystem = state.unitSystem,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
