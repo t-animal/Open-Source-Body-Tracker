@@ -196,7 +196,6 @@ If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
 # Ideas for the future and tech debt
 
 * Allow reordering of measurements for table
-* measurements table spalten dynamisch breit (inhalt)
 * lazycolumn (?) ruckler auf measurement list und visibility settings
 * photo quality/size
 * Und ich würde mir überlegen, ob du bei Latest Measurements vielleicht nicht nur das 
