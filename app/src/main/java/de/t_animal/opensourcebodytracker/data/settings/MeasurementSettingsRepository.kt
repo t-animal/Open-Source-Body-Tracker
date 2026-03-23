@@ -20,7 +20,7 @@ interface MeasurementSettingsRepository {
 }
 
 class PreferencesMeasurementSettingsRepository @Inject constructor(
-    @SettingsDataStore private val dataStore: DataStore<Preferences>,
+    @param:SettingsDataStore private val dataStore: DataStore<Preferences>,
 ) : MeasurementSettingsRepository {
 
     override val settingsFlow: Flow<MeasurementSettings> = dataStore.data.map { it.toMeasurementSettings() }

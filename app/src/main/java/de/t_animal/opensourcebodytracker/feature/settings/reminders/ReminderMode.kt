@@ -4,8 +4,8 @@ import androidx.annotation.StringRes
 import de.t_animal.opensourcebodytracker.R
 
 enum class ReminderMode(
-    @StringRes val titleResourceId: Int,
-    @StringRes val primaryButtonResourceId: Int,
+    @param:StringRes val titleResourceId: Int,
+    @param:StringRes val primaryButtonResourceId: Int,
 ) {
     Onboarding(
         titleResourceId = R.string.reminder_title_onboarding,

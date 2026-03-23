@@ -20,7 +20,7 @@ interface ReminderSettingsRepository {
 }
 
 class PreferencesReminderSettingsRepository @Inject constructor(
-    @SettingsDataStore private val dataStore: DataStore<Preferences>,
+    @param:SettingsDataStore private val dataStore: DataStore<Preferences>,
 ) : ReminderSettingsRepository {
 
     override val settingsFlow: Flow<ReminderSettings> = dataStore.data.map { it.toReminderSettings() }

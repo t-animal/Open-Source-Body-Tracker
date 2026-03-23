@@ -10,7 +10,7 @@ import de.t_animal.opensourcebodytracker.R
 
 enum class MainDestination(
     val route: String,
-    @StringRes val titleResId: Int,
+    @param:StringRes val titleResId: Int,
     val icon: ImageVector,
 ) {
     Measurements(route = Routes.MeasurementList, titleResId = R.string.nav_measurements, icon = Icons.Filled.MonitorWeight),

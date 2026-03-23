@@ -2,7 +2,6 @@
     <string name="import_title">Backup importieren</string>
     <string name="import_description">Stelle deine Daten aus einem zuvor exportierten Backup wieder her. Wähle die verschlüsselte ZIP-Datei aus und gib das Passwort ein, das du beim Export verwendet hast.</string>
     <string name="import_label_password">Backup-Passwort</string>
-    <string name="import_default_file_name">Ausgewählte Datei</string>
     <string name="import_button_import">Importieren</string>
 
     <!-- Progress -->
@@ -20,7 +19,6 @@
     <string name="import_error_invalid_archive">Die ausgewählte Datei ist kein gültiges ZIP-Archiv.</string>
     <string name="import_error_incomplete">Das Backup ist unvollständig oder beschädigt. Es handelt sich möglicherweise nicht um ein gültiges Backup.</string>
     <string name="import_error_file_not_readable">Die ausgewählte Datei konnte nicht gelesen werden.</string>
-    <string name="import_error_unexpected">Ein unerwarteter Fehler ist aufgetreten.</string>
 
     <!-- Catastrophic Errors -->
     <string name="import_catastrophic_database">Daten konnten nicht in der Datenbank gespeichert werden. Die App befindet sich möglicherweise in einem inkonsistenten Zustand.</string>

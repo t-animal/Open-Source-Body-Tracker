@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
 private val Context.uiSettingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "ui_settings")
 
 class PreferencesUiSettingsRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : UiSettingsRepository {
 
     private object Keys {

@@ -17,7 +17,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class ReminderNotificationPoster @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     fun showReminderNotification(): ReminderNotificationResult {
         if (!areNotificationsEnabled()) {

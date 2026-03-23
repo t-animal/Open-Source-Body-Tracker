@@ -12,7 +12,7 @@ import java.time.ZonedDateTime
 import javax.inject.Inject
 
 class ReminderAlarmScheduler @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     fun syncWithSettings(
         settings: ReminderSettings,
