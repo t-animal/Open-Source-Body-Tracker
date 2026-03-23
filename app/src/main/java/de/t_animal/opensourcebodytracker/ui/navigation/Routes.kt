@@ -7,40 +7,42 @@ object Routes {
     const val OnboardingProfile = "onboarding/profile"
     const val OnboardingAnalysis = "onboarding/analysis"
     const val OnboardingReminders = "onboarding/reminders"
-    const val ImportBackup = "import_backup"
+    const val ImportBackup = "onboarding/import"
 
-    const val Profile = "profile"
     const val Settings = "settings"
+    const val Profile = "settings/profile"
     const val SettingsMisc = "settings/misc"
     const val SettingsMeasurements = "settings/measurements"
-    const val SettingsMeasurementVisibility = "settings/measurement_visibility"
-    const val Reminders = "reminders" // TODO: align name and value with other routes, e.g. "settings/reminders"
-    const val Export = "export"
-    const val About = "about"
-    const val FakeDataGenerator = "fake_data_generator"
-    
-    const val MeasurementList = "measurement_list"
-    const val MeasurementListAll = "measurement_list_all"
-    const val MeasurementAdd = "measurement_add"
+    const val SettingsMeasurementVisibility = "settings/measurement-visibility"
+    const val Reminders = "settings/reminders"
+    const val Export = "settings/export"
+    const val About = "settings/about"
+
+    const val MeasurementList = "measurements"
+    const val MeasurementListAll = "measurements/all"
+    const val MeasurementAdd = "measurements/add"
     const val MeasurementEditIdArg = "measurementId"
-    const val MeasurementEdit = "measurement_edit/{$MeasurementEditIdArg}"
+    const val MeasurementEdit = "measurements/edit/{$MeasurementEditIdArg}"
 
     const val Analysis = "analysis"
+
     const val Photos = "photos"
     const val PhotoCompareLeftIdArg = "leftMeasurementId"
     const val PhotoCompareRightIdArg = "rightMeasurementId"
     const val PhotoCompare =
-        "photo_compare/{$PhotoCompareLeftIdArg}/{$PhotoCompareRightIdArg}"
+        "photos/compare/{$PhotoCompareLeftIdArg}/{$PhotoCompareRightIdArg}"
     const val PhotoAnimateIdsArg = "ids"
-    const val PhotoAnimate = "photo_animate/{$PhotoAnimateIdsArg}"
+    const val PhotoAnimate = "photos/animate/{$PhotoAnimateIdsArg}"
 
-    fun measurementEditRoute(id: Long): String = "measurement_edit/$id"
+    const val FakeDataGenerator = "debug/fake-data-generator"
+
+    fun measurementEditRoute(id: Long): String = "measurements/edit/$id"
 
     fun parseMeasurementEditId(savedStateHandle: SavedStateHandle): Long? =
         savedStateHandle.get<Long>(MeasurementEditIdArg)
 
     fun photoCompareRoute(leftMeasurementId: Long, rightMeasurementId: Long): String {
-        return "photo_compare/$leftMeasurementId/$rightMeasurementId"
+        return "photos/compare/$leftMeasurementId/$rightMeasurementId"
     }
 
     fun parsePhotoCompareIds(savedStateHandle: SavedStateHandle): Pair<Long, Long> {
@@ -50,7 +52,7 @@ object Routes {
     }
 
     fun photoAnimateRoute(selectedMeasurementIds: List<Long>): String {
-        return "photo_animate/${selectedMeasurementIds.joinToString(",")}"
+        return "photos/animate/${selectedMeasurementIds.joinToString(",")}"
     }
 
     fun parsePhotoAnimateIds(savedStateHandle: SavedStateHandle): List<Long> {
