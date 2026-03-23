@@ -34,32 +34,22 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
-import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.formattedValue
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.rememberTableColumnWidths
 import de.t_animal.opensourcebodytracker.ui.components.formatEpochMillisToLocalizedNumericDate
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import kotlinx.coroutines.launch
 
-private val TABLE_DATE_CELL_WIDTH = 95.dp
 private val TABLE_NOTE_CELL_WIDTH = 180.dp
-
-private fun BodyMetric.tableCellWidth(): Dp = when (unit) {
-    BodyMetricUnit.Kilogram   -> 80.dp  // e.g. "300.00 kg"
-    BodyMetricUnit.Centimeter -> 80.dp  // e.g. "200.00 cm"
-    BodyMetricUnit.Millimeter -> 68.dp  // e.g. "50.00 mm"
-    BodyMetricUnit.Percent    -> 70.dp  // e.g. "60.00 %"
-    BodyMetricUnit.Unitless   -> 60.dp  // e.g. "60.00"
-}
 
 @Composable
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
@@ -72,6 +62,22 @@ internal fun MeasurementTable(
     unitSystem: UnitSystem,
 ) {
     val horizontalScroll = rememberScrollState()
+
+    val headerStyle = MaterialTheme.typography.labelMedium
+    val bodyStyle = MaterialTheme.typography.bodyMedium
+    val cellPadding = 16.dp // 8.dp horizontal padding on each side
+
+    val dateHeaderText = stringResource(R.string.table_header_date)
+
+    val columnWidths = rememberTableColumnWidths(
+        dateHeaderText = dateHeaderText,
+        visibleMetricHeaders = visibleMetrics.map { it.label() },
+        visibleMetrics = visibleMetrics,
+        unitSystem = unitSystem,
+        headerStyle = headerStyle,
+        bodyStyle = bodyStyle,
+        cellPadding = cellPadding,
+    )
 
     Column(
         modifier = modifier
@@ -87,26 +93,27 @@ internal fun MeasurementTable(
                 .horizontalScroll(horizontalScroll)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.Top,
         ) {
             Text(
-                text = stringResource(R.string.table_header_date),
-                style = MaterialTheme.typography.labelMedium,
+                text = dateHeaderText,
+                style = headerStyle,
                 modifier = Modifier
-                    .width(TABLE_DATE_CELL_WIDTH)
+                    .width(columnWidths.date)
                     .padding(horizontal = 8.dp),
             )
-            visibleMetrics.forEach { column ->
+            visibleMetrics.forEachIndexed { index, column ->
                 Text(
                     text = column.label(),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = headerStyle,
                     modifier = Modifier
-                        .width(column.tableCellWidth())
+                        .width(columnWidths.metrics[index])
                         .padding(horizontal = 8.dp),
                 )
             }
             Text(
                 text = stringResource(R.string.table_header_note),
-                style = MaterialTheme.typography.labelMedium,
+                style = headerStyle,
                 modifier = Modifier
                     .width(TABLE_NOTE_CELL_WIDTH)
                     .padding(horizontal = 8.dp),
@@ -139,17 +146,17 @@ internal fun MeasurementTable(
                 Text(
                     text = formatEpochMillisToLocalizedNumericDate(item.measurement.dateEpochMillis),
                     modifier = Modifier
-                        .width(TABLE_DATE_CELL_WIDTH)
+                        .width(columnWidths.date)
                         .padding(horizontal = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = bodyStyle,
                 )
-                visibleMetrics.forEach { column ->
+                visibleMetrics.forEachIndexed { index, column ->
                     Text(
                         text = column.formattedValue(item, unitSystem),
                         modifier = Modifier
-                            .width(column.tableCellWidth())
+                            .width(columnWidths.metrics[index])
                             .padding(horizontal = 8.dp),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = bodyStyle,
                     )
                 }
                 NoteCell(
