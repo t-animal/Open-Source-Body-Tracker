@@ -8,7 +8,10 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
+import de.t_animal.opensourcebodytracker.ui.helpers.displaySymbol
 import de.t_animal.opensourcebodytracker.core.model.forMetric
+import de.t_animal.opensourcebodytracker.core.model.toDisplayValue
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import java.text.NumberFormat
 
@@ -23,20 +26,24 @@ internal data class MetricDisplayItem(
 internal fun buildLatestMeasurementMetrics(
     item: MeasurementListItemUiModel,
     visibleMetrics: List<BodyMetric>,
+    unitSystem: UnitSystem,
 ): List<MetricDisplayItem> {
     return visibleMetrics.map { metric ->
         MetricDisplayItem(
             label = metric.label(),
             fullName = metric.fullName(),
-            value = metric.formattedValue(item),
+            value = metric.formattedValue(item, unitSystem),
             rating = (metric as? DerivedBodyMetric)?.let { item.derivedMetricRatings.forMetric(it) },
         )
     }
 }
 
-internal fun BodyMetric.formattedValue(item: MeasurementListItemUiModel): String {
+internal fun BodyMetric.formattedValue(
+    item: MeasurementListItemUiModel,
+    unitSystem: UnitSystem,
+): String {
     val value = valueSelector(item.measurement, item.derivedMetrics)
-    return valueWithUnit(value, unit)
+    return valueWithUnit(value, unit, unitSystem)
 }
 
 @Composable
@@ -95,10 +102,16 @@ internal fun BodyMetric.fullName(): String = when (this) {
     else -> id
 }
 
-internal fun valueWithUnit(value: Double?, unit: BodyMetricUnit): String {
+internal fun valueWithUnit(
+    value: Double?,
+    unit: BodyMetricUnit,
+    unitSystem: UnitSystem,
+): String {
     if (value == null) return MISSING_VALUE_PLACEHOLDER
-    val number = formatDecimal(value)
-    return if (unit == BodyMetricUnit.Unitless) number else "$number ${unit.symbol}"
+    val displayValue = value.toDisplayValue(unit, unitSystem)
+    val number = formatDecimal(displayValue)
+    val symbol = unit.displaySymbol(unitSystem)
+    return if (symbol.isEmpty()) number else "$number $symbol"
 }
 
 private const val MISSING_VALUE_PLACEHOLDER = "--"

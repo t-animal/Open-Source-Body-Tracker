@@ -7,6 +7,13 @@
     <string name="settings_item_reminders">Set Reminders</string>
     <string name="settings_item_export">Export</string>
     <string name="settings_item_about">About</string>
+    <string name="settings_item_misc">Miscellaneous</string>
+    <string name="settings_misc_title">Miscellaneous Settings</string>
+    <string name="settings_misc_description">Settings that don\'t fit elsewhere.</string>
+    <string name="settings_item_units">Units</string>
+    <string name="settings_item_profile_subheading">Profile</string>
+    <string name="settings_unit_metric">Metric (kg, cm)</string>
+    <string name="settings_unit_imperial">Imperial (lbs, in)</string>
     <string name="settings_measurements_analysis_title">Measurements &amp; Analysis</string>
     <string name="settings_measurements_description">Configure measurement collection and analysis methods in one place. Required measurements stay enabled when selected analyses depend on them.</string>
     <string name="settings_measurements_analysis_methods_header">Analysis Methods</string>

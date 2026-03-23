@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisDuration
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisMetricChartUiModel
 import de.t_animal.opensourcebodytracker.feature.analysis.helpers.analysisTitle
 import java.time.LocalDate
@@ -39,6 +40,7 @@ internal fun MetricChartCard(
     isCollapsed: Boolean,
     onToggleCollapsed: () -> Unit,
     dragHandleModifier: Modifier,
+    unitSystem: UnitSystem,
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -89,6 +91,7 @@ internal fun MetricChartCard(
                         selectedDate = selectedDate,
                         onSelectedDateChange = onSelectedDateChange,
                         onNoteSelected = onNoteSelected,
+                        unitSystem = unitSystem,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(CHART_HEIGHT),

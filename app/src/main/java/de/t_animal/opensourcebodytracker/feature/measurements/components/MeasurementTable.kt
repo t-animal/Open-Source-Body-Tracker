@@ -42,6 +42,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.formattedValue
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
@@ -68,6 +69,7 @@ internal fun MeasurementTable(
     onRowSelect: (Long) -> Unit,
     modifier: Modifier = Modifier,
     selectedIds: Set<Long> = emptySet(),
+    unitSystem: UnitSystem,
 ) {
     val horizontalScroll = rememberScrollState()
 
@@ -143,7 +145,7 @@ internal fun MeasurementTable(
                 )
                 visibleMetrics.forEach { column ->
                     Text(
-                        text = column.formattedValue(item),
+                        text = column.formattedValue(item, unitSystem),
                         modifier = Modifier
                             .width(column.tableCellWidth())
                             .padding(horizontal = 8.dp),
@@ -253,6 +255,7 @@ private fun MeasurementTablePreview() {
             ),
             onRowSelect = {},
             selectedIds = setOf(1L),
+            unitSystem = UnitSystem.Metric,
         )
     }
 }

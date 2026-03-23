@@ -13,13 +13,16 @@ import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
+import de.t_animal.opensourcebodytracker.ui.helpers.displaySymbol
 
 @Composable
 fun MetricSections(
     metrics: List<MeasuredBodyMetric>,
-    metricInputs: Map<MeasuredBodyMetric, String>,
+    bodyMetricInputs: Map<MeasuredBodyMetric, String>,
     onMetricChanged: (MeasuredBodyMetric, String) -> Unit,
+    unitSystem: UnitSystem,
 ) {
     if (metrics.isEmpty()) {
         return
@@ -48,8 +51,8 @@ fun MetricSections(
             val isLastMetric = metric == lastMetric
             MetricInputField(
                 isVisible = true,
-                label = metricInputLabel(metric),
-                value = metricInputs[metric].orEmpty(),
+                label = metricInputLabel(metric, unitSystem),
+                value = bodyMetricInputs[metric].orEmpty(),
                 onValueChange = { value -> onMetricChanged(metric, value) },
                 imeAction = if (isLastMetric) ImeAction.Done else ImeAction.Next,
                 addBottomSpacing = !isLastMetric,
@@ -73,11 +76,11 @@ private fun metricSectionTitle(metricType: BodyMetricType): String {
 }
 
 @Composable
-private fun metricInputLabel(metric: MeasuredBodyMetric): String {
+private fun metricInputLabel(metric: MeasuredBodyMetric, unitSystem: UnitSystem): String {
     val label = metric.label()
     return if (metric.unit == BodyMetricUnit.Unitless) {
         label
     } else {
-        stringResource(R.string.metric_input_label_with_unit, label, metric.unit.symbol)
+        stringResource(R.string.metric_input_label_with_unit, label, metric.unit.displaySymbol(unitSystem))
     }
 }

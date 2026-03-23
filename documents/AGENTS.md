@@ -61,11 +61,13 @@ Test must succeed and may only be changed if they fail because the tested behavi
 ## Agent Working Rules
 
 - Prefer minimal, targeted diffs; avoid broad refactors unless required.
+- **Do not add default parameter values for backward compatibility.** Since we own the entire codebase, make new parameters explicit and update all call sites. Only use defaults when they represent a genuinely sensible default for the parameter's semantics (e.g., `Modifier = Modifier`), not to avoid updating callers.
 - Keep behavior-compatible with existing navigation/data contracts.
 - Update tests when changing domain logic or selection/state behavior.
 - Do not edit generated outputs (`build/`, `app/build/`, generated sources).
 - Keep this file focused on stable execution guidance (no phase/progress history).
 - **When adding, removing, or changing UI strings**, read [TRANSLATIONS.md](TRANSLATIONS.md) first and follow its rules to keep all locale files in sync.
+- **Every new `@Composable` function must include a `@Preview`-annotated preview** in the same file, wrapped in `BodyTrackerTheme`. If the component behaves differently based on state (e.g., unit system, empty vs filled), add one preview per meaningful variant.
 
 ## Documents Index
 

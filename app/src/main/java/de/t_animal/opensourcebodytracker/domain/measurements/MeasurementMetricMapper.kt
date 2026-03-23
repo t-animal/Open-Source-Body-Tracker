@@ -2,6 +2,8 @@ package de.t_animal.opensourcebodytracker.domain.measurements
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
+import de.t_animal.opensourcebodytracker.core.model.toDisplayValue
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.util.formatDecimalForInput
 
@@ -38,7 +40,10 @@ object MeasurementMetricMapper {
         )
     }
 
-    fun toMetricInputMap(measurement: BodyMeasurement): Map<MeasuredBodyMetric, String> {
+    fun toBodyMetricInputMap(
+        measurement: BodyMeasurement,
+        unitSystem: UnitSystem,
+    ): Map<MeasuredBodyMetric, String> {
         return mapOf(
             MeasuredBodyMetric.Weight to measurement.weightKg,
             MeasuredBodyMetric.BodyFat to measurement.bodyFatPercent,
@@ -52,8 +57,8 @@ object MeasurementMetricMapper {
             MeasuredBodyMetric.ThighSkinfold to measurement.thighSkinfoldMm,
             MeasuredBodyMetric.TricepsSkinfold to measurement.tricepsSkinfoldMm,
             MeasuredBodyMetric.SuprailiacSkinfold to measurement.suprailiacSkinfoldMm,
-        ).mapValues { (_, value) ->
-            value?.let(::formatDecimalForInput).orEmpty()
+        ).mapValues { (metric, value) ->
+            value?.toDisplayValue(metric.unit, unitSystem)?.let(::formatDecimalForInput).orEmpty()
         }
     }
 }

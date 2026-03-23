@@ -174,6 +174,27 @@ fun DecimalNumberInputField(
     )
 }
 
+@Composable
+fun IntegerNumberInputField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    imeAction: ImeAction = ImeAction.Next,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { onValueChange(it.filter { c -> c.isDigit() }) },
+        label = { Text(label) },
+        singleLine = true,
+        modifier = modifier,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = imeAction,
+        ),
+    )
+}
+
 private fun filterDecimalInputLocalized(raw: String): String {
     if (raw.isBlank()) return ""
 
@@ -181,10 +202,20 @@ private fun filterDecimalInputLocalized(raw: String): String {
 
     val out = StringBuilder(raw.length)
     var seenSeparator = false
+    var decimalDigits = 0
 
     for (c in raw) {
         when {
-            c.isDigit() -> out.append(c)
+            c.isDigit() -> {
+                if (seenSeparator) {
+                    if (decimalDigits < 2) {
+                        out.append(c)
+                        decimalDigits++
+                    }
+                } else {
+                    out.append(c)
+                }
+            }
             (c == '.' || c == ',' || c == decimalSeparator) && !seenSeparator -> {
                 if (out.isEmpty()) out.append('0')
                 out.append(decimalSeparator)

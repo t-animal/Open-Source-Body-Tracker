@@ -46,6 +46,7 @@ import de.t_animal.opensourcebodytracker.feature.photos.PhotoAnimationRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoCompareRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
+import de.t_animal.opensourcebodytracker.feature.settings.misc.MiscSettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.about.AboutRoute
 import de.t_animal.opensourcebodytracker.feature.importbackup.ImportBackupRoute
 import de.t_animal.opensourcebodytracker.feature.settings.export.ExportSettingsRoute
@@ -253,11 +254,18 @@ fun BodyTrackerNavHost(
             SettingsRoute(
                 onNavigateBack = { navController.popBackStack() },
                 onOpenProfile = { navController.navigate(Routes.Profile) },
+                onOpenMisc = { navController.navigate(Routes.SettingsMisc) },
                 onOpenMeasurementsAndAnalysis = { navController.navigate(Routes.SettingsMeasurements) },
                 onOpenMeasurementVisibility = { navController.navigate(Routes.SettingsMeasurementVisibility) },
                 onOpenReminders = { navController.navigate(Routes.Reminders) },
                 onOpenExport = { navController.navigate(Routes.Export) },
                 onOpenAbout = { navController.navigate(Routes.About) },
+            )
+        }
+
+        composable(Routes.SettingsMisc) {
+            MiscSettingsRoute(
+                onNavigateBack = { navController.popBackStack() },
             )
         }
 

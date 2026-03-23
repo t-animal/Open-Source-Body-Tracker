@@ -7,6 +7,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.Sex
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
 import de.t_animal.opensourcebodytracker.core.util.formatDecimalForInput
 import de.t_animal.opensourcebodytracker.core.util.parseLocalizedFloatOrNull
@@ -34,6 +35,7 @@ data class ProfileUiState(
     val sex: Sex? = null,
     val dateOfBirthText: String = "",
     val heightCmText: String = "",
+    val unitSystem: UnitSystem = UnitSystem.Metric,
     val validationError: ProfileValidationError? = null,
 )
 
@@ -79,6 +81,12 @@ class ProfileViewModel @AssistedInject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            generalSettingsRepository.settingsFlow.collect { settings ->
+                _uiState.value = _uiState.value.copy(unitSystem = settings.unitSystem)
+            }
+        }
     }
 
     fun onSexChanged(sex: Sex) {
@@ -89,8 +97,14 @@ class ProfileViewModel @AssistedInject constructor(
         _uiState.value = _uiState.value.copy(dateOfBirthText = text, validationError = null)
     }
 
-    fun onHeightChanged(text: String) {
+    fun onHeightCmChanged(text: String) {
         _uiState.value = _uiState.value.copy(heightCmText = text, validationError = null)
+    }
+
+    fun onUnitSystemChanged(unitSystem: UnitSystem) {
+        viewModelScope.launch {
+            generalSettingsRepository.updateSettings { it.copy(unitSystem = unitSystem) }
+        }
     }
 
     fun onSaveClicked() {

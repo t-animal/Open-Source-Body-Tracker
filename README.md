@@ -196,9 +196,8 @@ If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
 # Ideas for the future and tech debt
 
 * Allow reordering of measurements for table
-* translation
+* measurements table spalten dynamisch breit (inhalt)
 * lazycolumn (?) ruckler auf measurement list und visibility settings
-* imperial units
 * photo quality/size
 * Und ich würde mir überlegen, ob du bei Latest Measurements vielleicht nicht nur das 
   darstellst, was zuletzt recorded wurde, sondern ggfs. das "last known value". 

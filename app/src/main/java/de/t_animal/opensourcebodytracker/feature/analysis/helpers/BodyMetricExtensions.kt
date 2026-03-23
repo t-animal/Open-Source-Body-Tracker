@@ -7,6 +7,8 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
+import de.t_animal.opensourcebodytracker.ui.helpers.displaySymbol
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
 
 @Composable
@@ -24,7 +26,9 @@ internal fun BodyMetric.analysisTitle(): String = when (this) {
     else -> id
 }
 
-internal fun BodyMetricUnit.suffixWithLeadingSpace(): String = when (this) {
-    BodyMetricUnit.Unitless -> ""
-    else -> " $symbol"
+internal fun BodyMetricUnit.suffixWithLeadingSpace(
+    unitSystem: UnitSystem,
+): String {
+    val symbol = displaySymbol(unitSystem)
+    return if (symbol.isEmpty()) "" else " $symbol"
 }
