@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
+import androidx.core.net.toUri
 import java.io.IOException
 import java.io.OutputStream
 import kotlinx.coroutines.Dispatchers
@@ -191,7 +192,7 @@ class AndroidExportDocumentTreeStorage @Inject constructor(
     }
 
     private fun resolveTree(treeUriText: String): ResolvedTree? {
-        val treeUri = runCatching { Uri.parse(treeUriText) }.getOrNull() ?: return null
+        val treeUri = runCatching { treeUriText.toUri() }.getOrNull() ?: return null
         val treeDocumentId = runCatching { DocumentsContract.getTreeDocumentId(treeUri) }.getOrNull() ?: return null
 
         val treeDocumentUri = runCatching {

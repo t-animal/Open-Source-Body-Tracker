@@ -15,7 +15,7 @@ private val Context.exportSecretsDataStore: DataStore<Preferences> by preference
 )
 
 class KeystoreExportPasswordRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val crypto: ExportPasswordCrypto,
 ) : ExportPasswordRepository {
 

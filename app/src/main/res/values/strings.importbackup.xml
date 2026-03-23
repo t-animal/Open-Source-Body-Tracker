@@ -2,7 +2,6 @@
     <string name="import_title">Import Backup</string>
     <string name="import_description">Restore your data from a previously exported backup. Select the encrypted ZIP file and enter the password you used during export.</string>
     <string name="import_label_password">Backup Password</string>
-    <string name="import_default_file_name">Selected file</string>
     <string name="import_button_import">Import</string>
 
     <!-- Progress -->
@@ -20,7 +19,6 @@
     <string name="import_error_invalid_archive">The selected file is not a valid ZIP archive.</string>
     <string name="import_error_incomplete">The backup is incomplete or corrupted. It may not be a valid backup.</string>
     <string name="import_error_file_not_readable">Could not read the selected file.</string>
-    <string name="import_error_unexpected">An unexpected error occurred.</string>
 
     <!-- Catastrophic Errors -->
     <string name="import_catastrophic_database">Failed to save data to the database. The app may be in an inconsistent state.</string>

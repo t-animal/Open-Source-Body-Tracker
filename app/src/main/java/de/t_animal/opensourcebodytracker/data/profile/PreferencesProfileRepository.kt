@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.map
 private val Context.profileDataStore: DataStore<Preferences> by preferencesDataStore(name = "profile")
 
 class PreferencesProfileRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ProfileRepository {
     private object Keys {
         val sex = stringPreferencesKey("sex")

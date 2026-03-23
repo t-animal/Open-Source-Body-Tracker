@@ -20,7 +20,7 @@ interface ExportSettingsRepository {
 }
 
 class PreferencesExportSettingsRepository @Inject constructor(
-    @SettingsDataStore private val dataStore: DataStore<Preferences>,
+    @param:SettingsDataStore private val dataStore: DataStore<Preferences>,
 ) : ExportSettingsRepository {
 
     override val settingsFlow: Flow<ExportSettings> = dataStore.data.map { it.toExportSettings() }

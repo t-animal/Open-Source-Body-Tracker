@@ -19,7 +19,7 @@ interface GeneralSettingsRepository {
 }
 
 class PreferencesGeneralSettingsRepository @Inject constructor(
-    @SettingsDataStore private val dataStore: DataStore<Preferences>,
+    @param:SettingsDataStore private val dataStore: DataStore<Preferences>,
 ) : GeneralSettingsRepository {
 
     override val settingsFlow: Flow<GeneralSettings> = dataStore.data.map { it.toGeneralSettings() }

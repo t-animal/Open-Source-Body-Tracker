@@ -25,7 +25,7 @@ import de.t_animal.opensourcebodytracker.R
 
 @Composable
 fun PasswordTextField(
-    modifier: Modifier = Modifier.Companion,
+    modifier: Modifier = Modifier,
     label: @Composable TextFieldLabelScope.() -> Unit = {},
     enabled: Boolean = true,
     value: String,
