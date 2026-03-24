@@ -127,12 +127,6 @@ class ReminderSettingsViewModel @AssistedInject constructor(
                 reminderSettingsRepository.saveSettings(updatedSettings)
             }
 
-            if (mode == ReminderMode.Onboarding) {
-                generalSettingsRepository.updateSettings {
-                    it.copy(onboardingCompleted = true, isDemoMode = false)
-                }
-            }
-
             reminderAlarmScheduler.syncWithSettings(updatedSettings)
 
             _events.emit(ReminderSettingsEvent.Saved)

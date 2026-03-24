@@ -143,15 +143,6 @@ class ProfileViewModel @AssistedInject constructor(
                 measurementSettingsRepository.saveSettings(effective.settings)
             }
 
-            if (mode == ProfileMode.Onboarding) {
-                generalSettingsRepository.updateSettings {
-                    it.copy(
-                        onboardingCompleted = false,
-                        isDemoMode = false,
-                    )
-                }
-            }
-
             _events.emit(ProfileEvent.Saved)
         }
     }

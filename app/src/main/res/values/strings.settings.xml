@@ -15,7 +15,7 @@
     <string name="settings_unit_metric">Metric (kg, cm)</string>
     <string name="settings_unit_imperial">Imperial (lbs, in)</string>
     <string name="settings_measurements_analysis_title">Measurements &amp; Analysis</string>
-    <string name="settings_measurements_description">Configure measurement collection and analysis methods in one place. Required measurements stay enabled when selected analyses depend on them.</string>
+    <string name="settings_measurements_description">Enabling analysis methods requires enabling the corresponding measurements. You don\'t have to collect each measurement every time you measure, though - enabling a measurement simply means you can collect it, not that you have to.</string>
     <string name="settings_measurements_analysis_methods_header">Analysis Methods</string>
     <string name="settings_measurements_header">Measurements</string>
     <string name="settings_measurements_error_save_failed">Could not save settings. Please try again.</string>

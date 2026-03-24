@@ -122,7 +122,7 @@ fun ReminderSettingsRoute(
 }
 
 @Composable
-private fun PermissionDeniedAlert(
+internal fun PermissionDeniedAlert(
     onDismiss: () -> Unit,
 ) {
     AlertDialog(
@@ -139,7 +139,7 @@ private fun PermissionDeniedAlert(
     )
 }
 
-private fun shouldRequestNotificationPermission(
+internal fun shouldRequestNotificationPermission(
     context: Context,
 ): Boolean {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {

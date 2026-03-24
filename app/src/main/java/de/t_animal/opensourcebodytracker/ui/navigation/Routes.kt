@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.ui.navigation
 import androidx.lifecycle.SavedStateHandle
 
 object Routes {
+    const val OnboardingGraph = "onboarding"
     const val OnboardingStart = "onboarding/start"
     const val OnboardingProfile = "onboarding/profile"
     const val OnboardingAnalysis = "onboarding/analysis"

@@ -15,7 +15,7 @@
     <string name="settings_unit_metric">Metrisch (kg, cm)</string>
     <string name="settings_unit_imperial">Imperial (lbs, in)</string>
     <string name="settings_measurements_analysis_title">Messungen &amp; Analysen</string>
-    <string name="settings_measurements_description">Konfiguriere Messungserfassung und Analysemethoden an einem Ort. Erforderliche Messungen bleiben aktiviert, wenn ausgewählte Analysen davon abhängen.</string>
+    <string name="settings_measurements_description">Wenn du eine Analysemethode anschaltest, werden die entsprechenden Messungen automatisch aktiviert. Du musst nicht jede Messung jedes Mal erfassen - das Aktivieren einer Messung bedeutet lediglich, dass du sie erfassen kannst, nicht dass du sie erfassen musst.</string>
     <string name="settings_measurements_analysis_methods_header">Analysemethoden</string>
     <string name="settings_measurements_header">Messungen</string>
     <string name="settings_measurements_error_save_failed">Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.</string>

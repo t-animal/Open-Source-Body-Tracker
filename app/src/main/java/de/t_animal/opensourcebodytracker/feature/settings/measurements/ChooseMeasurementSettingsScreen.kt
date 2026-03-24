@@ -1,12 +1,15 @@
 package de.t_animal.opensourcebodytracker.feature.settings.measurements
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
@@ -55,7 +58,8 @@ fun MeasurementSettingsRoute(
 @Composable
 fun ChooseMeasurementSettingsScreen(
     state: ChooseMeasurementSettingsUiState,
-    onNavigateBack: () -> Unit,
+    onNavigateBack: (() -> Unit)? = null,
+    onContinueClicked: (() -> Unit)? = null,
     onMeasurementEnabledChanged: (MeasuredBodyMetric, Boolean) -> Unit,
     onBmiEnabledChanged: (Boolean) -> Unit,
     onNavyBodyFatEnabledChanged: (Boolean) -> Unit,
@@ -63,16 +67,27 @@ fun ChooseMeasurementSettingsScreen(
     onWaistHipRatioEnabledChanged: (Boolean) -> Unit,
     onWaistHeightRatioEnabledChanged: (Boolean) -> Unit,
 ) {
+    val isOnboarding = state.mode == MeasurementSettingsMode.Onboarding
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.settings_measurements_analysis_title)) },
+                title = {
+                    Text(
+                        stringResource(
+                            if (isOnboarding) R.string.onboarding_analysis_title
+                            else R.string.settings_measurements_analysis_title,
+                        ),
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back),
-                        )
+                    if (onNavigateBack != null) {
+                        IconButton(onClick = onNavigateBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.cd_back),
+                            )
+                        }
                     }
                 },
             )
@@ -94,16 +109,21 @@ fun ChooseMeasurementSettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = 8.dp),
+                .padding(contentPadding),
+            contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
                 Text(
                     text = stringResource(R.string.settings_measurements_description),
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp),
                 )
+                if (isOnboarding) {
+                    Text(
+                        text = stringResource(R.string.onboarding_analysis_hint),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
 
             item {
@@ -151,8 +171,26 @@ fun ChooseMeasurementSettingsScreen(
                     Text(
                         text = stringResource(R.string.settings_measurements_error_save_failed),
                         color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(horizontal = 16.dp),
                     )
+                }
+            }
+
+            if (onContinueClicked != null) {
+                item {
+                    Column {
+                        Button(
+                            onClick = onContinueClicked,
+                            enabled = !state.isLoading && !state.isSaving,
+                        ) {
+                            if (state.isSaving) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.padding(vertical = 2.dp),
+                                )
+                            } else {
+                                Text(stringResource(R.string.common_continue))
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -161,7 +199,7 @@ fun ChooseMeasurementSettingsScreen(
 
 @Preview(showBackground = true)
 @Composable
-private fun ChooseMeasurementSettingsScreenPreview() {
+private fun ChooseMeasurementSettingsScreenSettingsPreview() {
     val settings = MeasurementSettings(
         enabledMeasurements = MeasuredBodyMetric.entries.toSet() - MeasuredBodyMetric.SuprailiacSkinfold,
     )
@@ -169,6 +207,7 @@ private fun ChooseMeasurementSettingsScreenPreview() {
     BodyTrackerTheme {
         ChooseMeasurementSettingsScreen(
             state = ChooseMeasurementSettingsUiState(
+                mode = MeasurementSettingsMode.Settings,
                 isLoading = false,
                 settings = settings,
                 requiredMeasurements = setOf(MeasuredBodyMetric.WaistCircumference),
@@ -181,6 +220,34 @@ private fun ChooseMeasurementSettingsScreenPreview() {
                 ),
             ),
             onNavigateBack = {},
+            onMeasurementEnabledChanged = { _, _ -> },
+            onBmiEnabledChanged = {},
+            onNavyBodyFatEnabledChanged = {},
+            onSkinfoldBodyFatEnabledChanged = {},
+            onWaistHipRatioEnabledChanged = {},
+            onWaistHeightRatioEnabledChanged = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ChooseMeasurementSettingsScreenOnboardingPreview() {
+    BodyTrackerTheme {
+        ChooseMeasurementSettingsScreen(
+            state = ChooseMeasurementSettingsUiState(
+                mode = MeasurementSettingsMode.Onboarding,
+                isLoading = false,
+                requiredMeasurements = setOf(MeasuredBodyMetric.WaistCircumference),
+                measurementToAnalysisMethods = mapOf(
+                    MeasuredBodyMetric.WaistCircumference to setOf(
+                        AnalysisMethod.NavyBodyFat,
+                        AnalysisMethod.WaistHipRatio,
+                        AnalysisMethod.WaistHeightRatio,
+                    ),
+                ),
+            ),
+            onContinueClicked = {},
             onMeasurementEnabledChanged = { _, _ -> },
             onBmiEnabledChanged = {},
             onNavyBodyFatEnabledChanged = {},
