@@ -2,6 +2,7 @@ package de.t_animal.opensourcebodytracker.domain.measurements
 
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
@@ -21,9 +22,10 @@ class MeasurementSaver @Inject constructor(
         enabledMeasurements: Set<MeasuredBodyMetric>,
         metricValues: Map<MeasuredBodyMetric, Double?>,
         note: String,
+        photoQuality: PhotoQuality,
     ): BodyMeasurement {
         if (currentMeasurementId == null) {
-            return saveNewMeasurement(dateEpochMillis, newPhotoPath, enabledMeasurements, metricValues, note)
+            return saveNewMeasurement(dateEpochMillis, newPhotoPath, enabledMeasurements, metricValues, note, photoQuality)
         } else {
             return updateExistingMeasurement(
                 currentMeasurementId,
@@ -34,6 +36,7 @@ class MeasurementSaver @Inject constructor(
                 enabledMeasurements,
                 metricValues,
                 note,
+                photoQuality,
             )
         }
     }
@@ -44,6 +47,7 @@ class MeasurementSaver @Inject constructor(
         enabledMeasurements: Set<MeasuredBodyMetric>,
         metricValues: Map<MeasuredBodyMetric, Double?>,
         note: String,
+        photoQuality: PhotoQuality,
     ): BodyMeasurement {
         val measurementWithoutPhoto = MeasurementMetricMapper.toBodyMeasurement(
             id = 0,
@@ -64,6 +68,7 @@ class MeasurementSaver @Inject constructor(
             measurementId = insertedId,
             measurementDateEpochMillis = dateEpochMillis,
             sourceAbsolutePath = newPhotoPath,
+            photoQuality = photoQuality,
         )
         val measurementWithPhoto = measurementWithId.copy(photoFilePath = savedPhotoPath)
         repository.update(measurementWithPhoto)
@@ -79,6 +84,7 @@ class MeasurementSaver @Inject constructor(
         enabledMeasurements: Set<MeasuredBodyMetric>,
         metricValues: Map<MeasuredBodyMetric, Double?>,
         note: String,
+        photoQuality: PhotoQuality,
     ): BodyMeasurement {
         val hasNewPhoto = newPhotoPath != null
         val hasOldPhoto = originalPhotoPath != null
@@ -88,6 +94,7 @@ class MeasurementSaver @Inject constructor(
                 measurementId = currentMeasurementId,
                 measurementDateEpochMillis = dateEpochMillis,
                 sourceAbsolutePath = newPhotoPath,
+                photoQuality = photoQuality,
             )
 
             deleteOriginalPhoto -> null

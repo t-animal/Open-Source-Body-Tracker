@@ -31,4 +31,5 @@ object SettingsKeys {
     val onboardingCompleted = booleanPreferencesKey("general.onboardingCompleted")
     val isDemoMode = booleanPreferencesKey("general.isDemoMode")
     val unitSystem = stringPreferencesKey("general.unitSystem")
+    val photoQuality = stringPreferencesKey("general.photoQuality")
 }

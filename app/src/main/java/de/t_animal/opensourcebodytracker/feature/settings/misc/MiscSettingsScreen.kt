@@ -23,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.t_animal.opensourcebodytracker.R
+import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
+import de.t_animal.opensourcebodytracker.feature.settings.components.PhotoQualitySelector
 import de.t_animal.opensourcebodytracker.feature.settings.components.UnitSystemSelector
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
@@ -32,12 +34,13 @@ fun MiscSettingsRoute(
     onNavigateBack: () -> Unit,
 ) {
     val vm: MiscSettingsViewModel = hiltViewModel()
-    val unitSystem by vm.unitSystem.collectAsStateWithLifecycle()
+    val uiState by vm.uiState.collectAsStateWithLifecycle()
 
     MiscSettingsScreen(
         onNavigateBack = onNavigateBack,
-        unitSystem = unitSystem,
+        uiState = uiState,
         onUnitSystemChanged = vm::onUnitSystemChanged,
+        onPhotoQualityChanged = vm::onPhotoQualityChanged,
     )
 }
 
@@ -45,8 +48,9 @@ fun MiscSettingsRoute(
 @Composable
 fun MiscSettingsScreen(
     onNavigateBack: () -> Unit,
-    unitSystem: UnitSystem,
+    uiState: MiscSettingsUiState,
     onUnitSystemChanged: (UnitSystem) -> Unit,
+    onPhotoQualityChanged: (PhotoQuality) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -63,26 +67,38 @@ fun MiscSettingsScreen(
             )
         },
     ) { contentPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            item {
-                Text(
-                    text = stringResource(R.string.settings_misc_description),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(bottom = 12.dp),
-                )
-            }
+        when (uiState) {
+            is MiscSettingsUiState.Loading -> null
+            is MiscSettingsUiState.Loaded -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(contentPadding),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    item {
+                        Text(
+                            text = stringResource(R.string.settings_misc_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(bottom = 12.dp),
+                        )
+                    }
 
-            item {
-                UnitSystemSelector(
-                    unitSystem = unitSystem,
-                    onUnitSystemChanged = onUnitSystemChanged,
-                )
+                    item {
+                        UnitSystemSelector(
+                            unitSystem = uiState.unitSystem,
+                            onUnitSystemChanged = onUnitSystemChanged,
+                        )
+                    }
+
+                    item {
+                        PhotoQualitySelector(
+                            photoQuality = uiState.photoQuality,
+                            onPhotoQualityChanged = onPhotoQualityChanged,
+                        )
+                    }
+                }
             }
         }
     }
@@ -94,8 +110,12 @@ private fun MiscSettingsScreenPreview() {
     BodyTrackerTheme {
         MiscSettingsScreen(
             onNavigateBack = {},
-            unitSystem = UnitSystem.Metric,
+            uiState = MiscSettingsUiState.Loaded(
+                unitSystem = UnitSystem.Metric,
+                photoQuality = PhotoQuality.High,
+            ),
             onUnitSystemChanged = {},
+            onPhotoQualityChanged = {},
         )
     }
 }

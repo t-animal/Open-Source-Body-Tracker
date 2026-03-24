@@ -320,6 +320,29 @@ When pressed:
 
 ---
 
+# Miscellaneous Settings Screen
+
+The miscellaneous screen holds settings that don't fit into other categories.
+
+## Unit System
+
+Segmented button to choose between Metric (kg, cm) and Imperial (lbs, in).
+
+## Photo Quality
+
+Controls the resolution and JPEG compression applied to measurement photos at save time.
+
+Displayed as a segmented button row with four options:
+
+- **Original** — No processing; photos saved as captured by the camera.
+- **High** — Resized to max 2560px, compressed at 90% JPEG quality.
+- **Medium** — Resized to max 1920px, compressed at 80% JPEG quality.
+- **Low** — Resized to max 1280px, compressed at 70% JPEG quality.
+
+A description below the selector updates to explain the currently selected level. The default is Original. Existing photos are not retroactively reprocessed when the setting changes.
+
+---
+
 # Settings Screen UX Principle
 
 Every settings screen follows these principles:

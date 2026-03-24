@@ -3,6 +3,7 @@ package de.t_animal.opensourcebodytracker.data.photos
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
+import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.PhotoStorageContract
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
@@ -17,6 +18,7 @@ import kotlinx.coroutines.withContext
 
 class InternalPhotoStorage @Inject constructor(
     @ApplicationContext context: Context,
+    private val photoCompressor: PhotoCompressor,
 ) {
     private val appContext = context.applicationContext
     private val photosDir: File = File(
@@ -63,6 +65,7 @@ class InternalPhotoStorage @Inject constructor(
         measurementId: Long,
         measurementDateEpochMillis: Long,
         sourceAbsolutePath: TemporaryCapturePhotoPath,
+        photoQuality: PhotoQuality,
     ): PersistedPhotoPath = withContext(Dispatchers.IO) {
         val path = pathForMeasurement(measurementId, measurementDateEpochMillis)
         val sourceFile = File(sourceAbsolutePath.value)
@@ -72,10 +75,21 @@ class InternalPhotoStorage @Inject constructor(
             return@withContext path
         }
 
-        val moved = sourceFile.renameTo(targetFile)
-        if (!moved) {
-            sourceFile.copyTo(targetFile, overwrite = true)
+        val compressed = photoQuality != PhotoQuality.Original &&
+            photoCompressor.compressPhoto(
+                sourceFile = sourceFile,
+                targetFile = targetFile,
+                photoQuality = photoQuality,
+            )
+
+        if (compressed) {
             sourceFile.delete()
+        } else {
+            val moved = sourceFile.renameTo(targetFile)
+            if (!moved) {
+                sourceFile.copyTo(targetFile, overwrite = true)
+                sourceFile.delete()
+            }
         }
 
         path

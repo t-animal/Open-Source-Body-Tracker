@@ -20,6 +20,19 @@
     <string name="settings_measurements_header">Messungen</string>
     <string name="settings_measurements_error_save_failed">Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.</string>
 
+    <!-- Photo Quality -->
+    <string name="settings_photo_quality_title">Fotoqualität</string>
+    <string name="settings_photo_quality_intro">Steuert die Auflösung und Komprimierung gespeicherter Fotos.</string>
+    <string name="settings_photo_quality_original">Original</string>
+    <string name="settings_photo_quality_high">Hoch</string>
+    <string name="settings_photo_quality_medium">Mittel</string>
+    <string name="settings_photo_quality_low">Niedrig</string>
+    <string name="settings_photo_quality_description_original">Fotos werden unverändert gespeichert, wie sie von der Kamera aufgenommen wurden.</string>
+    <string name="settings_photo_quality_description_high">Fotos werden auf max. 2560px verkleinert und komprimiert (etwa 3,5 Megapixel, 90% jpeg Qualität).</string>
+    <string name="settings_photo_quality_description_medium">Fotos werden auf max. 1920px verkleinert und stärker komprimiert (etwa 2 Megapixel, 80% jpeg Qualität).</string>
+    <string name="settings_photo_quality_description_low">Fotos werden auf max. 1280px verkleinert und am stärksten komprimiert (etwa 1 Megapixel, 70% jpeg Qualität).</string>
+    <string name="settings_photo_quality_hint_new_photos_only">Diese Einstellung gilt nur für neu aufgenommene Fotos. Bestehende Fotos werden nicht verändert.</string>
+
     <!-- Visibility -->
     <string name="settings_visibility_title">Sichtbarkeit der Messungen</string>
     <string name="settings_visibility_description">Wähle, welche aufgezeichneten Messungen in Tabellen und Analyseansichten sichtbar sind.</string>

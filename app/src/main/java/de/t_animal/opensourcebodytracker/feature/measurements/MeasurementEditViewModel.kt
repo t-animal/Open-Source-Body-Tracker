@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.core.model.userInputToStorageValue
@@ -50,6 +51,7 @@ sealed interface MeasurementEditUiState {
         val measurementId: Long? = null,
         val sex: Sex,
         val unitSystem: UnitSystem = UnitSystem.Metric,
+        val photoQuality: PhotoQuality = PhotoQuality.High,
         val enabledMeasurements: Set<MeasuredBodyMetric>,
         val dateEpochMillis: Long? = null,
         val dateText: String = "",
@@ -110,6 +112,7 @@ class MeasurementEditViewModel @Inject constructor(
                 val sex = profile.sex
                 val enabledMeasurements = effective.settings.enabledMeasurements
                 val unitSystem = generalSettings.unitSystem
+                val photoQuality = generalSettings.photoQuality
 
                 val baseMeasurementId = measurementId
                 if (baseMeasurementId == null && measurement != null) return@combine
@@ -119,6 +122,7 @@ class MeasurementEditViewModel @Inject constructor(
                     buildInitialLoadedState(
                         sex = sex,
                         unitSystem = unitSystem,
+                        photoQuality = photoQuality,
                         enabledMeasurements = enabledMeasurements,
                         measurementId = baseMeasurementId,
                         measurement = measurement,
@@ -127,6 +131,7 @@ class MeasurementEditViewModel @Inject constructor(
                     currentLoaded.copy(
                         sex = sex,
                         unitSystem = unitSystem,
+                        photoQuality = photoQuality,
                         enabledMeasurements = enabledMeasurements,
                     )
                 }
@@ -249,6 +254,7 @@ class MeasurementEditViewModel @Inject constructor(
                             newPhotoPath = current.pendingPhotoAbsolutePath,
                             deleteExistingPhoto = current.isPhotoMarkedForDeletion,
                             note = current.note,
+                            photoQuality = current.photoQuality,
                         ),
                     )
                 ) {
@@ -290,6 +296,7 @@ class MeasurementEditViewModel @Inject constructor(
     private fun buildInitialLoadedState(
         sex: Sex,
         unitSystem: UnitSystem,
+        photoQuality: PhotoQuality,
         enabledMeasurements: Set<MeasuredBodyMetric>,
         measurementId: Long?,
         measurement: BodyMeasurement?,
@@ -300,6 +307,7 @@ class MeasurementEditViewModel @Inject constructor(
                 measurementId = measurementId,
                 sex = sex,
                 unitSystem = unitSystem,
+                photoQuality = photoQuality,
                 enabledMeasurements = enabledMeasurements,
                 dateEpochMillis = now,
                 dateText = formatEpochMillisAsIsoDate(now),
@@ -311,6 +319,7 @@ class MeasurementEditViewModel @Inject constructor(
                 measurementId = measurement.id,
                 sex = sex,
                 unitSystem = unitSystem,
+                photoQuality = photoQuality,
                 enabledMeasurements = enabledMeasurements,
                 dateEpochMillis = measurement.dateEpochMillis,
                 dateText = formatEpochMillisAsIsoDate(measurement.dateEpochMillis),

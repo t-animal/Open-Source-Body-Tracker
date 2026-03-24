@@ -4,4 +4,5 @@ data class GeneralSettings(
     val onboardingCompleted: Boolean = false,
     val isDemoMode: Boolean = false,
     val unitSystem: UnitSystem = UnitSystem.Metric,
+    val photoQuality: PhotoQuality = PhotoQuality.High,
 )
