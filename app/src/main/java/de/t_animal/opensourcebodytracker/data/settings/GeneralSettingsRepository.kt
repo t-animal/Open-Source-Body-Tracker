@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import de.t_animal.opensourcebodytracker.core.model.GeneralSettings
+import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.di.SettingsDataStore
 import javax.inject.Inject
@@ -43,6 +44,9 @@ class PreferencesGeneralSettingsRepository @Inject constructor(
             unitSystem = this[SettingsKeys.unitSystem]?.let {
                 runCatching { UnitSystem.valueOf(it) }.getOrNull()
             } ?: defaults.unitSystem,
+            photoQuality = this[SettingsKeys.photoQuality]?.let {
+                runCatching { PhotoQuality.valueOf(it) }.getOrNull()
+            } ?: defaults.photoQuality,
         )
     }
 
@@ -50,5 +54,6 @@ class PreferencesGeneralSettingsRepository @Inject constructor(
         this[SettingsKeys.onboardingCompleted] = settings.onboardingCompleted
         this[SettingsKeys.isDemoMode] = settings.isDemoMode
         this[SettingsKeys.unitSystem] = settings.unitSystem.name
+        this[SettingsKeys.photoQuality] = settings.photoQuality.name
     }
 }

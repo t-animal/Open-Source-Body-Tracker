@@ -20,6 +20,19 @@
     <string name="settings_measurements_header">Measurements</string>
     <string name="settings_measurements_error_save_failed">Could not save settings. Please try again.</string>
 
+    <!-- Photo Quality -->
+    <string name="settings_photo_quality_title">Photo Quality</string>
+    <string name="settings_photo_quality_intro">Controls the resolution and compression of saved photos.</string>
+    <string name="settings_photo_quality_original">Original</string>
+    <string name="settings_photo_quality_high">High</string>
+    <string name="settings_photo_quality_medium">Medium</string>
+    <string name="settings_photo_quality_low">Low</string>
+    <string name="settings_photo_quality_description_original">Photos are saved as captured by the camera, without any processing.</string>
+    <string name="settings_photo_quality_description_high">Photos are resized to max 2560px and compressed (roughly 3.5 Megapixels, 90% jpeg quality).</string>
+    <string name="settings_photo_quality_description_medium">Photos are resized to max 1920px and compressed further (roughly 2 Megapixels, 80% jpeg quality).</string>
+    <string name="settings_photo_quality_description_low">Photos are resized to max 1280px and compressed the most (roughly 1 Megapixels, 70% jpeg quality).</string>
+    <string name="settings_photo_quality_hint_new_photos_only">This setting only applies to newly captured photos. Existing photos are not affected.</string>
+
     <!-- Visibility -->
     <string name="settings_visibility_title">Measurement Visibility</string>
     <string name="settings_visibility_description">Choose which recorded measurements are visible in tables and analysis views.</string>

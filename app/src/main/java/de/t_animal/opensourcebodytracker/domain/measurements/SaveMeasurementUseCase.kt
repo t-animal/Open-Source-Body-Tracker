@@ -1,6 +1,7 @@
 package de.t_animal.opensourcebodytracker.domain.measurements
 
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
+import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.core.photos.TemporaryCapturePhotoPath
 import de.t_animal.opensourcebodytracker.domain.export.SetAutomaticExportPendingUseCase
@@ -15,6 +16,7 @@ data class SaveMeasurementCommand(
     val newPhotoPath: TemporaryCapturePhotoPath?,
     val deleteExistingPhoto: Boolean,
     val note: String = "",
+    val photoQuality: PhotoQuality,
 )
 
 
@@ -54,6 +56,7 @@ class SaveMeasurementUseCase @Inject constructor(
             command.enabledMeasurements,
             command.metricValues,
             command.note,
+            command.photoQuality,
         )
 
         setAutomaticExportPendingUseCase.invoke(true)
