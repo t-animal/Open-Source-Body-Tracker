@@ -16,15 +16,20 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-data class ChooseMeasurementSettingsUiState(
-    val mode: MeasurementSettingsMode,
-    val isLoading: Boolean = true,
-    val isSaving: Boolean = false,
-    val settings: MeasurementSettings = MeasurementSettings(),
-    val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
-    val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>> = emptyMap(),
-    val hasError: Boolean = false,
-)
+sealed interface ChooseMeasurementSettingsUiState {
+    val mode: MeasurementSettingsMode
+
+    data class Loading(override val mode: MeasurementSettingsMode) : ChooseMeasurementSettingsUiState
+
+    data class Loaded(
+        override val mode: MeasurementSettingsMode,
+        val isSaving: Boolean,
+        val settings: MeasurementSettings,
+        val requiredMeasurements: Set<MeasuredBodyMetric>,
+        val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>>,
+        val hasError: Boolean,
+    ) : ChooseMeasurementSettingsUiState
+}
 
 @HiltViewModel
 class ChooseMeasurementSettingsViewModel @Inject constructor(
@@ -38,9 +43,9 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
         requiredMeasurementsResolver.effectiveMeasurementSettingsFlow,
         hasError,
     ) { effective, error ->
-        ChooseMeasurementSettingsUiState(
+        ChooseMeasurementSettingsUiState.Loaded(
             mode = MeasurementSettingsMode.Settings,
-            isLoading = false,
+            isSaving = false,
             settings = effective.settings,
             requiredMeasurements = effective.dependencies.requiredMeasurements,
             measurementToAnalysisMethods = effective.dependencies.measurementToAnalysisMethods,
@@ -49,7 +54,7 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ChooseMeasurementSettingsUiState(mode = MeasurementSettingsMode.Settings),
+        initialValue = ChooseMeasurementSettingsUiState.Loading(MeasurementSettingsMode.Settings),
     )
 
     fun onNavyBodyFatEnabledChanged(enabled: Boolean) {
@@ -76,7 +81,7 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
         measurementType: MeasuredBodyMetric,
         enabled: Boolean,
     ) {
-        val required = uiState.value.requiredMeasurements
+        val required = (uiState.value as? ChooseMeasurementSettingsUiState.Loaded)?.requiredMeasurements ?: return
         if (measurementType in required && !enabled) {
             return
         }
@@ -93,7 +98,7 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
     }
 
     private fun updateAndPersist(transform: (MeasurementSettings) -> MeasurementSettings) {
-        val base = uiState.value.settings
+        val base = (uiState.value as? ChooseMeasurementSettingsUiState.Loaded)?.settings ?: return
         val transformed = transform(base)
 
         viewModelScope.launch {

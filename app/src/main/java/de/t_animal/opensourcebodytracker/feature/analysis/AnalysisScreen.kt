@@ -54,18 +54,21 @@ fun AnalysisRoute(
     val vm: AnalysisViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
-    AnalysisScreen(
-        state = state,
-        onDurationSelected = vm::onDurationSelected,
-        onChartOrderChanged = vm::onChartOrderChanged,
-        onToggleCollapsed = vm::onToggleCollapsed,
-        contentPadding = contentPadding,
-    )
+    when (val state = state) {
+        is AnalysisUiState.Loading -> {}
+        is AnalysisUiState.Loaded -> AnalysisScreen(
+            state = state,
+            onDurationSelected = vm::onDurationSelected,
+            onChartOrderChanged = vm::onChartOrderChanged,
+            onToggleCollapsed = vm::onToggleCollapsed,
+            contentPadding = contentPadding,
+        )
+    }
 }
 
 @Composable
 fun AnalysisScreen(
-    state: AnalysisUiState,
+    state: AnalysisUiState.Loaded,
     onDurationSelected: (AnalysisDuration) -> Unit,
     onChartOrderChanged: (List<BodyMetric>) -> Unit,
     onToggleCollapsed: (String) -> Unit,
@@ -196,7 +199,7 @@ private fun NoteBottomSheetScaffold(
 private fun AnalysisScreenPreview() {
     BodyTrackerTheme {
         AnalysisScreen(
-            state = AnalysisUiState(
+            state = AnalysisUiState.Loaded(
                 selectedDuration = AnalysisDuration.ThreeMonths,
                 metricCharts = listOf(
                     AnalysisMetricChartUiModel(
@@ -215,7 +218,8 @@ private fun AnalysisScreenPreview() {
                         yAxisRange = null,
                     ),
                 ),
-                isLoading = false,
+                collapsedChartIds = emptySet(),
+                unitSystem = UnitSystem.Metric,
             ),
             onDurationSelected = {},
             onChartOrderChanged = {},

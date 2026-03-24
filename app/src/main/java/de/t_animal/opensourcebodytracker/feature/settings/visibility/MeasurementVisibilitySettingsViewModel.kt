@@ -23,12 +23,15 @@ enum class DisplayPlacement {
     InBoth,
 }
 
-data class SettingsUiState(
-    val isLoading: Boolean = true,
-    val settings: MeasurementSettings = MeasurementSettings(),
-    val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
-    val errorMessage: String? = null,
-)
+sealed interface SettingsUiState {
+    data object Loading : SettingsUiState
+
+    data class Loaded(
+        val settings: MeasurementSettings,
+        val requiredMeasurements: Set<MeasuredBodyMetric>,
+        val errorMessage: String?,
+    ) : SettingsUiState
+}
 
 @HiltViewModel
 class MeasurementVisibilitySettingsViewModel @Inject constructor(
@@ -42,8 +45,7 @@ class MeasurementVisibilitySettingsViewModel @Inject constructor(
         requiredMeasurementsResolver.effectiveMeasurementSettingsFlow,
         errorMessage,
     ) { effective, error ->
-        SettingsUiState(
-            isLoading = false,
+        SettingsUiState.Loaded(
             settings = effective.settings,
             requiredMeasurements = effective.dependencies.requiredMeasurements,
             errorMessage = error,
@@ -51,7 +53,7 @@ class MeasurementVisibilitySettingsViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = SettingsUiState(),
+        initialValue = SettingsUiState.Loading,
     )
 
     fun onDisplayPlacementChanged(
@@ -79,7 +81,7 @@ class MeasurementVisibilitySettingsViewModel @Inject constructor(
     }
 
     private fun updateAndPersist(transform: (MeasurementSettings) -> MeasurementSettings) {
-        val base = uiState.value.settings
+        val base = (uiState.value as? SettingsUiState.Loaded)?.settings ?: return
         val transformed = transform(base)
 
         viewModelScope.launch {

@@ -138,7 +138,7 @@ private fun OnboardingProfileRoute(
     }
 
     ProfileScreen(
-        state = ProfileUiState(
+        state = ProfileUiState.Loaded(
             mode = ProfileMode.Onboarding,
             sex = state.profile.sex,
             dateOfBirthText = state.profile.dateOfBirthText,
@@ -163,15 +163,18 @@ private fun OnboardingAnalysisRoute(
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     ChooseMeasurementSettingsScreen(
-        state = ChooseMeasurementSettingsUiState(
-            mode = MeasurementSettingsMode.Onboarding,
-            isLoading = state.analysis.isLoading,
-            isSaving = state.isSaving,
-            settings = state.analysis.settings,
-            requiredMeasurements = state.analysis.requiredMeasurements,
-            measurementToAnalysisMethods = state.analysis.measurementToAnalysisMethods,
-            hasError = state.saveError,
-        ),
+        state = if (state.analysis.isLoading) {
+            ChooseMeasurementSettingsUiState.Loading(MeasurementSettingsMode.Onboarding)
+        } else {
+            ChooseMeasurementSettingsUiState.Loaded(
+                mode = MeasurementSettingsMode.Onboarding,
+                isSaving = state.isSaving,
+                settings = state.analysis.settings,
+                requiredMeasurements = state.analysis.requiredMeasurements,
+                measurementToAnalysisMethods = state.analysis.measurementToAnalysisMethods,
+                hasError = state.saveError,
+            )
+        },
         onBmiEnabledChanged = vm::onBmiEnabledChanged,
         onNavyBodyFatEnabledChanged = vm::onNavyBodyFatEnabledChanged,
         onSkinfoldBodyFatEnabledChanged = vm::onSkinfoldBodyFatEnabledChanged,
@@ -225,9 +228,8 @@ private fun OnboardingRemindersRoute(
     }
 
     ReminderSettingsScreen(
-        state = ReminderSettingsUiState(
+        state = ReminderSettingsUiState.Loaded(
             mode = ReminderMode.Onboarding,
-            isLoading = false,
             enabled = state.reminders.enabled,
             weekdays = state.reminders.weekdays,
             time = state.reminders.time,

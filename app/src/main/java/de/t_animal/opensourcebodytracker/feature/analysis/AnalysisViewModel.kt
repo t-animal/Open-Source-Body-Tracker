@@ -76,17 +76,16 @@ class AnalysisViewModel @Inject constructor(
             zoneId = clock.zone,
         )
 
-        AnalysisUiState(
+        AnalysisUiState.Loaded(
             selectedDuration = uiSettings.analysisDuration,
             collapsedChartIds = uiSettings.analysisCollapsedCharts,
             metricCharts = buildMetricCharts(filteredItems, orderedMetrics),
             unitSystem = generalSettings.unitSystem,
-            isLoading = false,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = AnalysisUiState(),
+        initialValue = AnalysisUiState.Loading,
     )
 
     fun onDurationSelected(duration: AnalysisDuration) {

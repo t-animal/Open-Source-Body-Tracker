@@ -89,7 +89,8 @@ fun ReminderSettingsRoute(
     }
 
     val onSaveRequested = onSaveRequested@{
-        if (state.enabled && shouldRequestNotificationPermission(context)) {
+        val loadedState = state as? ReminderSettingsUiState.Loaded ?: return@onSaveRequested
+        if (loadedState.enabled && shouldRequestNotificationPermission(context)) {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             return@onSaveRequested
         }
@@ -173,20 +174,17 @@ fun ReminderSettingsScreen(
             )
         },
     ) { contentPadding ->
-        if (state.isLoading) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CircularProgressIndicator()
-            }
-            return@Scaffold
+        when (state) {
+        is ReminderSettingsUiState.Loading -> Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CircularProgressIndicator()
         }
-
-        Column(
+        is ReminderSettingsUiState.Loaded -> Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
@@ -291,6 +289,7 @@ fun ReminderSettingsScreen(
                 onSaveClicked = onSaveClicked,
             )
         }
+        }
     }
 }
 
@@ -377,12 +376,12 @@ private fun formatReminderTime(time: LocalTime): String {
 private fun ReminderSettingsScreenPreview() {
     BodyTrackerTheme {
         ReminderSettingsScreen(
-            state = ReminderSettingsUiState(
+            state = ReminderSettingsUiState.Loaded(
                 mode = ReminderMode.Settings,
-                isLoading = false,
                 enabled = true,
                 weekdays = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
                 time = LocalTime.of(20, 0),
+                validationError = null,
             ),
             onEnabledChanged = {},
             onWeekdayToggled = {},
@@ -398,12 +397,12 @@ private fun ReminderSettingsScreenPreview() {
 private fun ReminderSettingsScreenOnboardingPreview() {
     BodyTrackerTheme {
         ReminderSettingsScreen(
-            state = ReminderSettingsUiState(
+            state = ReminderSettingsUiState.Loaded(
                 mode = ReminderMode.Onboarding,
-                isLoading = false,
                 enabled = true,
                 weekdays = setOf(DayOfWeek.MONDAY, DayOfWeek.WEDNESDAY, DayOfWeek.FRIDAY),
                 time = LocalTime.of(20, 0),
+                validationError = null,
             ),
             onEnabledChanged = {},
             onWeekdayToggled = {},

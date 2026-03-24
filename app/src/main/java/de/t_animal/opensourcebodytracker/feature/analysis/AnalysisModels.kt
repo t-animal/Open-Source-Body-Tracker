@@ -21,10 +21,13 @@ data class AnalysisMetricChartUiModel(
     val yAxisRange: AnalysisYAxisRange?,
 )
 
-data class AnalysisUiState(
-    val selectedDuration: AnalysisDuration = AnalysisDuration.ThreeMonths,
-    val metricCharts: List<AnalysisMetricChartUiModel> = emptyList(),
-    val collapsedChartIds: Set<String> = emptySet(),
-    val unitSystem: UnitSystem = UnitSystem.Metric,
-    val isLoading: Boolean = true,
-)
+sealed interface AnalysisUiState {
+    data object Loading : AnalysisUiState
+
+    data class Loaded(
+        val selectedDuration: AnalysisDuration,
+        val metricCharts: List<AnalysisMetricChartUiModel>,
+        val collapsedChartIds: Set<String>,
+        val unitSystem: UnitSystem,
+    ) : AnalysisUiState
+}

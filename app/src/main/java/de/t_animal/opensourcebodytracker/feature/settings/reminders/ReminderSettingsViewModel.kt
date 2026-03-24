@@ -24,14 +24,19 @@ sealed interface ReminderValidationError {
     data object NoWeekdaySelected : ReminderValidationError
 }
 
-data class ReminderSettingsUiState(
-    val mode: ReminderMode,
-    val isLoading: Boolean = true,
-    val enabled: Boolean = false,
-    val weekdays: Set<DayOfWeek> = setOf(DayOfWeek.SUNDAY),
-    val time: LocalTime = LocalTime.of(9, 0),
-    val validationError: ReminderValidationError? = null,
-)
+sealed interface ReminderSettingsUiState {
+    val mode: ReminderMode
+
+    data class Loading(override val mode: ReminderMode) : ReminderSettingsUiState
+
+    data class Loaded(
+        override val mode: ReminderMode,
+        val enabled: Boolean,
+        val weekdays: Set<DayOfWeek>,
+        val time: LocalTime,
+        val validationError: ReminderValidationError?,
+    ) : ReminderSettingsUiState
+}
 
 sealed interface ReminderSettingsEvent {
     data object Saved : ReminderSettingsEvent
@@ -50,7 +55,7 @@ class ReminderSettingsViewModel @AssistedInject constructor(
         fun create(mode: ReminderMode): ReminderSettingsViewModel
     }
 
-    private val _uiState = MutableStateFlow(ReminderSettingsUiState(mode = mode))
+    private val _uiState = MutableStateFlow<ReminderSettingsUiState>(ReminderSettingsUiState.Loading(mode))
     val uiState: StateFlow<ReminderSettingsUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<ReminderSettingsEvent>()
@@ -59,8 +64,8 @@ class ReminderSettingsViewModel @AssistedInject constructor(
     init {
         viewModelScope.launch {
             val reminderSettings = reminderSettingsRepository.settingsFlow.first()
-            _uiState.value = _uiState.value.copy(
-                isLoading = false,
+            _uiState.value = ReminderSettingsUiState.Loaded(
+                mode = mode,
                 enabled = reminderSettings.reminderEnabled,
                 weekdays = reminderSettings.reminderWeekdays,
                 time = reminderSettings.reminderTime,
@@ -70,45 +75,30 @@ class ReminderSettingsViewModel @AssistedInject constructor(
     }
 
     fun onEnabledChanged(enabled: Boolean) {
-        _uiState.value = _uiState.value.copy(
-            enabled = enabled,
-            validationError = null,
-        )
+        updateLoadedState { it.copy(enabled = enabled, validationError = null) }
     }
 
     fun onWeekdayToggled(dayOfWeek: DayOfWeek) {
-        val currentWeekdays = _uiState.value.weekdays
-        val updatedWeekdays = if (dayOfWeek in currentWeekdays) {
-            currentWeekdays - dayOfWeek
-        } else {
-            currentWeekdays + dayOfWeek
+        updateLoadedState {
+            val updatedWeekdays = if (dayOfWeek in it.weekdays) {
+                it.weekdays - dayOfWeek
+            } else {
+                it.weekdays + dayOfWeek
+            }
+            it.copy(weekdays = updatedWeekdays, validationError = null)
         }
-
-        _uiState.value = _uiState.value.copy(
-            weekdays = updatedWeekdays,
-            validationError = null,
-        )
     }
 
     fun onTimeChanged(time: LocalTime) {
-        _uiState.value = _uiState.value.copy(
-            time = time,
-            validationError = null,
-        )
+        updateLoadedState { it.copy(time = time, validationError = null) }
     }
 
     fun onPermissionDeniedWhileSaving() {
-        _uiState.value = _uiState.value.copy(
-            enabled = false,
-            validationError = null,
-        )
+        updateLoadedState { it.copy(enabled = false, validationError = null) }
     }
 
     fun onSaveClicked() {
-        val current = _uiState.value
-        if (current.isLoading) {
-            return
-        }
+        val current = _uiState.value as? ReminderSettingsUiState.Loaded ?: return
 
         if (current.enabled && current.weekdays.isEmpty()) {
             _uiState.value = current.copy(validationError = ReminderValidationError.NoWeekdaySelected)
@@ -131,5 +121,10 @@ class ReminderSettingsViewModel @AssistedInject constructor(
 
             _events.emit(ReminderSettingsEvent.Saved)
         }
+    }
+
+    private fun updateLoadedState(transform: (ReminderSettingsUiState.Loaded) -> ReminderSettingsUiState.Loaded) {
+        val current = _uiState.value as? ReminderSettingsUiState.Loaded ?: return
+        _uiState.value = transform(current)
     }
 }
