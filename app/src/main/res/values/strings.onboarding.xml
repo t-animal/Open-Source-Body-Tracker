@@ -8,8 +8,5 @@
     <string name="onboarding_analysis_title">Select Analysis Methods</string>
     <string name="onboarding_analysis_description">Choose the analysis methods you want to use.</string>
     <string name="onboarding_analysis_hint">Additional measurements can be enabled later in settings.</string>
-    <string name="onboarding_analysis_methods_header">Analysis Methods</string>
-    <string name="onboarding_measurements_header">Measurements</string>
-    <string name="onboarding_error_save_failed">Could not save settings. Please try again.</string>
     <string name="onboarding_error_demo_failed">Could not generate demo data. Please try again.</string>
 </resources>

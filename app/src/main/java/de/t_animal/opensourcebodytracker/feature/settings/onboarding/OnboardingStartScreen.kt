@@ -14,42 +14,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
-@Composable
-fun OnboardingStartRoute(
-    onCreateProfileSelected: () -> Unit,
-    onDemoModeCompleted: () -> Unit,
-    onImportBackupClicked: () -> Unit,
-) {
-    val vm: OnboardingStartViewModel = hiltViewModel()
-    val state by vm.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(vm) {
-        vm.events.collect { event ->
-            when (event) {
-                OnboardingStartEvent.DemoModeInitializationCompleted -> onDemoModeCompleted()
-            }
-        }
-    }
-
-    OnboardingStartScreen(
-        state = state,
-        onCreateProfileClicked = onCreateProfileSelected,
-        onTryDemoDataClicked = vm::onTryDemoDataClicked,
-        onImportBackupClicked = onImportBackupClicked,
-    )
-}
+data class OnboardingStartUiState(
+    val isBusy: Boolean = false,
+    val hasError: Boolean = false,
+)
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)

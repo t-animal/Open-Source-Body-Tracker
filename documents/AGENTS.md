@@ -68,6 +68,7 @@ Test must succeed and may only be changed if they fail because the tested behavi
 - Keep this file focused on stable execution guidance (no phase/progress history).
 - **When adding, removing, or changing UI strings**, read [TRANSLATIONS.md](TRANSLATIONS.md) first and follow its rules to keep all locale files in sync.
 - **Every new `@Composable` function must include a `@Preview`-annotated preview** in the same file, wrapped in `BodyTrackerTheme`. If the component behaves differently based on state (e.g., unit system, empty vs filled), add one preview per meaningful variant.
+- When I ask a question, **answer the question**. Do not interpret questions as requests to change code. I will use imperative language when I want changes made.
 
 ## Documents Index
 
@@ -84,3 +85,5 @@ Test must succeed and may only be changed if they fail because the tested behavi
 - [REMINDER.md](REMINDER.md): Reminder phases and implementation spec (settings UI, manual trigger, scheduling).
 - [SETTINGS.md](SETTINGS.md): Settings model, method toggles, required measurement dependencies, and display config.
 - [TRANSLATIONS.md](TRANSLATIONS.md): Rules for adding, removing, and syncing string resources across all locale files.
+
+- **Very important**: If you change something so that these documents don't align any more, **adjust the documents**. If you spot that the documents have drifted from the implementation, suggest updating them.

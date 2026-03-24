@@ -51,8 +51,7 @@ import de.t_animal.opensourcebodytracker.feature.settings.about.AboutRoute
 import de.t_animal.opensourcebodytracker.feature.importbackup.ImportBackupRoute
 import de.t_animal.opensourcebodytracker.feature.settings.export.ExportSettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.measurements.MeasurementSettingsRoute
-import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingAnalysisRoute
-import de.t_animal.opensourcebodytracker.feature.settings.onboarding.OnboardingStartRoute
+import de.t_animal.opensourcebodytracker.feature.settings.onboarding.onboardingNavGraph
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileMode
 import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileRoute
 import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderMode
@@ -83,6 +82,7 @@ fun BodyTrackerNavHost(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val onboardingRoutes = setOf(
+        Routes.OnboardingGraph,
         Routes.OnboardingStart,
         Routes.OnboardingProfile,
         Routes.OnboardingAnalysis,
@@ -103,7 +103,7 @@ fun BodyTrackerNavHost(
             }
         } else if (!shouldShowOnboarding && route in onboardingRoutes && openMeasurementAddRequest <= 0L) {
             navController.navigate(Routes.MeasurementList) {
-                popUpTo(Routes.OnboardingStart) { inclusive = true }
+                popUpTo(Routes.OnboardingGraph) { inclusive = true }
                 launchSingleTop = true
             }
         }
@@ -127,7 +127,7 @@ fun BodyTrackerNavHost(
         if (route != Routes.MeasurementList) {
             navController.navigate(Routes.MeasurementList) {
                 if (route in onboardingRoutes) {
-                    popUpTo(Routes.OnboardingStart) { inclusive = true }
+                    popUpTo(Routes.OnboardingGraph) { inclusive = true }
                 }
                 launchSingleTop = true
             }
@@ -176,66 +176,33 @@ fun BodyTrackerNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Routes.OnboardingStart,
+        startDestination = Routes.OnboardingGraph,
     ) {
-        composable(Routes.OnboardingStart) {
-            OnboardingStartRoute(
-                onCreateProfileSelected = {
-                    navController.navigate(Routes.OnboardingProfile) {
-                        launchSingleTop = true
-                    }
-                },
-                onDemoModeCompleted = {
-                    navController.navigate(Routes.MeasurementList) {
-                        popUpTo(Routes.OnboardingStart) { inclusive = true }
-                    }
-                },
-                onImportBackupClicked = {
-                    navController.navigate(Routes.ImportBackup) {
-                        launchSingleTop = true
-                    }
-                },
-            )
-        }
-
-        composable(Routes.OnboardingProfile) {
-            ProfileRoute(
-                mode = ProfileMode.Onboarding,
-                onFinished = {
-                    navController.navigate(Routes.OnboardingAnalysis) {
-                        launchSingleTop = true
-                    }
-                },
-            )
-        }
-
-        composable(Routes.OnboardingAnalysis) {
-            OnboardingAnalysisRoute(
-                onFinished = {
-                    navController.navigate(Routes.OnboardingReminders) {
-                        launchSingleTop = true
-                    }
-                },
-            )
-        }
-
-        composable(Routes.OnboardingReminders) {
-            ReminderSettingsRoute(
-                mode = ReminderMode.Onboarding,
-                onNavigateBack = {
-                    navController.navigate(Routes.MeasurementList) {
-                        popUpTo(Routes.OnboardingStart) { inclusive = true }
-                    }
-                },
-            )
-        }
+        onboardingNavGraph(
+            navController = navController,
+            onDemoModeCompleted = {
+                navController.navigate(Routes.MeasurementList) {
+                    popUpTo(Routes.OnboardingGraph) { inclusive = true }
+                }
+            },
+            onImportBackupClicked = {
+                navController.navigate(Routes.ImportBackup) {
+                    launchSingleTop = true
+                }
+            },
+            onOnboardingCompleted = {
+                navController.navigate(Routes.MeasurementList) {
+                    popUpTo(Routes.OnboardingGraph) { inclusive = true }
+                }
+            },
+        )
 
         composable(Routes.ImportBackup) {
             ImportBackupRoute(
                 onNavigateBack = { navController.popBackStack() },
                 onImportCompleted = {
                     navController.navigate(Routes.MeasurementList) {
-                        popUpTo(Routes.OnboardingStart) { inclusive = true }
+                        popUpTo(Routes.OnboardingGraph) { inclusive = true }
                     }
                 },
                 onResetApp = onResetApp,

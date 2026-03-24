@@ -17,7 +17,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class ChooseMeasurementSettingsUiState(
+    val mode: MeasurementSettingsMode,
     val isLoading: Boolean = true,
+    val isSaving: Boolean = false,
     val settings: MeasurementSettings = MeasurementSettings(),
     val requiredMeasurements: Set<MeasuredBodyMetric> = emptySet(),
     val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>> = emptyMap(),
@@ -37,6 +39,7 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
         hasError,
     ) { effective, error ->
         ChooseMeasurementSettingsUiState(
+            mode = MeasurementSettingsMode.Settings,
             isLoading = false,
             settings = effective.settings,
             requiredMeasurements = effective.dependencies.requiredMeasurements,
@@ -46,7 +49,7 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ChooseMeasurementSettingsUiState(),
+        initialValue = ChooseMeasurementSettingsUiState(mode = MeasurementSettingsMode.Settings),
     )
 
     fun onNavyBodyFatEnabledChanged(enabled: Boolean) {
