@@ -93,20 +93,17 @@ fun ChooseMeasurementSettingsScreen(
             )
         },
     ) { contentPadding ->
-        if (state.isLoading) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CircularProgressIndicator()
-            }
-            return@Scaffold
+        when (state) {
+        is ChooseMeasurementSettingsUiState.Loading -> Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CircularProgressIndicator()
         }
-
-        LazyColumn(
+        is ChooseMeasurementSettingsUiState.Loaded -> LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
@@ -180,7 +177,7 @@ fun ChooseMeasurementSettingsScreen(
                     Column {
                         Button(
                             onClick = onContinueClicked,
-                            enabled = !state.isLoading && !state.isSaving,
+                            enabled = !state.isSaving,
                         ) {
                             if (state.isSaving) {
                                 CircularProgressIndicator(
@@ -194,6 +191,7 @@ fun ChooseMeasurementSettingsScreen(
                 }
             }
         }
+        }
     }
 }
 
@@ -206,9 +204,9 @@ private fun ChooseMeasurementSettingsScreenSettingsPreview() {
 
     BodyTrackerTheme {
         ChooseMeasurementSettingsScreen(
-            state = ChooseMeasurementSettingsUiState(
+            state = ChooseMeasurementSettingsUiState.Loaded(
                 mode = MeasurementSettingsMode.Settings,
-                isLoading = false,
+                isSaving = false,
                 settings = settings,
                 requiredMeasurements = setOf(MeasuredBodyMetric.WaistCircumference),
                 measurementToAnalysisMethods = mapOf(
@@ -218,6 +216,7 @@ private fun ChooseMeasurementSettingsScreenSettingsPreview() {
                         AnalysisMethod.WaistHeightRatio,
                     ),
                 ),
+                hasError = false,
             ),
             onNavigateBack = {},
             onMeasurementEnabledChanged = { _, _ -> },
@@ -235,9 +234,10 @@ private fun ChooseMeasurementSettingsScreenSettingsPreview() {
 private fun ChooseMeasurementSettingsScreenOnboardingPreview() {
     BodyTrackerTheme {
         ChooseMeasurementSettingsScreen(
-            state = ChooseMeasurementSettingsUiState(
+            state = ChooseMeasurementSettingsUiState.Loaded(
                 mode = MeasurementSettingsMode.Onboarding,
-                isLoading = false,
+                isSaving = false,
+                settings = MeasurementSettings(),
                 requiredMeasurements = setOf(MeasuredBodyMetric.WaistCircumference),
                 measurementToAnalysisMethods = mapOf(
                     MeasuredBodyMetric.WaistCircumference to setOf(
@@ -246,6 +246,7 @@ private fun ChooseMeasurementSettingsScreenOnboardingPreview() {
                         AnalysisMethod.WaistHeightRatio,
                     ),
                 ),
+                hasError = false,
             ),
             onContinueClicked = {},
             onMeasurementEnabledChanged = { _, _ -> },

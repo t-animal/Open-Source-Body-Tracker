@@ -36,7 +36,9 @@ import de.t_animal.opensourcebodytracker.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DemoModeBanner
 import de.t_animal.opensourcebodytracker.feature.measurements.components.LatestMeasurementCard
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementTable
@@ -57,15 +59,18 @@ fun MeasurementListRoute(
     val vm: MeasurementListViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
 
-    MeasurementListScreen(
-        state = state,
-        onEdit = onEdit,
-        onAdd = onAdd,
-        onOpenMore = onOpenMore,
-        showDemoBanner = showDemoBanner,
-        onResetApp = onResetApp,
-        contentPadding = contentPadding,
-    )
+    when (val state = state) {
+        is MeasurementListUiState.Loading -> {}
+        is MeasurementListUiState.Loaded -> MeasurementListScreen(
+            state = state,
+            onEdit = onEdit,
+            onAdd = onAdd,
+            onOpenMore = onOpenMore,
+            showDemoBanner = showDemoBanner,
+            onResetApp = onResetApp,
+            contentPadding = contentPadding,
+        )
+    }
 }
 
 @Composable
@@ -74,16 +79,18 @@ fun MeasurementListFullRoute(
 ) {
     val vm: MeasurementListViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
-
-    MeasurementFullListScreen(
-        state = state,
-        onEdit = onEdit,
-    )
+    when (val state = state) {
+        is MeasurementListUiState.Loading -> {}
+        is MeasurementListUiState.Loaded -> MeasurementFullListScreen(
+            state = state,
+            onEdit = onEdit,
+        )
+    }
 }
 
 @Composable
 fun MeasurementListScreen(
-    state: MeasurementListUiState,
+    state: MeasurementListUiState.Loaded,
     onEdit: (Long) -> Unit,
     onAdd: () -> Unit,
     onOpenMore: () -> Unit,
@@ -206,7 +213,7 @@ fun MeasurementListScreen(
 
 @Composable
 fun MeasurementFullListScreen(
-    state: MeasurementListUiState,
+    state: MeasurementListUiState.Loaded,
     onEdit: (Long) -> Unit,
 ) {
     var selectedMeasurementIds by remember { mutableStateOf(emptySet<Long>()) }
@@ -262,7 +269,7 @@ fun MeasurementFullListScreen(
 private fun MeasurementListScreenPreview() {
     BodyTrackerTheme {
         MeasurementListScreen(
-            state = MeasurementListUiState(
+            state = MeasurementListUiState.Loaded(
                 latestMeasurement = MeasurementListItemUiModel(
                     measurement = BodyMeasurement(
                         id = 1,
@@ -307,8 +314,9 @@ private fun MeasurementListScreenPreview() {
                     ),
                 ),
                 hasMoreMeasurements = true,
+                visibleInTableMetrics = BodyMetric.entries,
+                unitSystem = UnitSystem.Metric,
                 isEmpty = false,
-                isLoading = false,
             ),
             onEdit = {},
             onAdd = {},
@@ -324,8 +332,13 @@ private fun MeasurementListScreenPreview() {
 private fun MeasurementListScreenEmptyPreview() {
     BodyTrackerTheme {
         MeasurementListScreen(
-            state = MeasurementListUiState(
-                isLoading = false,
+            state = MeasurementListUiState.Loaded(
+                latestMeasurement = null,
+                previewMeasurements = emptyList(),
+                allMeasurements = emptyList(),
+                hasMoreMeasurements = false,
+                visibleInTableMetrics = emptyList(),
+                unitSystem = UnitSystem.Metric,
                 isEmpty = true,
             ),
             onEdit = {},
@@ -342,7 +355,9 @@ private fun MeasurementListScreenEmptyPreview() {
 private fun MeasurementFullListScreenPreview() {
     BodyTrackerTheme {
         MeasurementFullListScreen(
-            state = MeasurementListUiState(
+            state = MeasurementListUiState.Loaded(
+                latestMeasurement = null,
+                previewMeasurements = emptyList(),
                 allMeasurements = listOf(
                     MeasurementListItemUiModel(
                         measurement = BodyMeasurement(
@@ -356,7 +371,9 @@ private fun MeasurementFullListScreenPreview() {
                         ),
                     ),
                 ),
-                isLoading = false,
+                hasMoreMeasurements = false,
+                visibleInTableMetrics = BodyMetric.entries,
+                unitSystem = UnitSystem.Metric,
                 isEmpty = false,
             ),
             onEdit = {},

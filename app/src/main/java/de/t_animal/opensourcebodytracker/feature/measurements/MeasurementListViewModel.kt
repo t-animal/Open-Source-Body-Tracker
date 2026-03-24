@@ -19,16 +19,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
-data class MeasurementListUiState(
-    val latestMeasurement: MeasurementListItemUiModel? = null,
-    val previewMeasurements: List<MeasurementListItemUiModel> = emptyList(),
-    val allMeasurements: List<MeasurementListItemUiModel> = emptyList(),
-    val hasMoreMeasurements: Boolean = false,
-    val visibleInTableMetrics: List<BodyMetric> = BodyMetric.entries,
-    val unitSystem: UnitSystem = UnitSystem.Metric,
-    val isEmpty: Boolean = true,
-    val isLoading: Boolean = true,
-)
+sealed interface MeasurementListUiState {
+    data object Loading : MeasurementListUiState
+
+    data class Loaded(
+        val latestMeasurement: MeasurementListItemUiModel?,
+        val previewMeasurements: List<MeasurementListItemUiModel>,
+        val allMeasurements: List<MeasurementListItemUiModel>,
+        val hasMoreMeasurements: Boolean,
+        val visibleInTableMetrics: List<BodyMetric>,
+        val unitSystem: UnitSystem,
+        val isEmpty: Boolean,
+    ) : MeasurementListUiState
+}
 
 data class MeasurementListItemUiModel(
     val measurement: BodyMeasurement,
@@ -61,7 +64,7 @@ class MeasurementListViewModel @Inject constructor(
 
         val orderedVisibleInTableMetrics = settings.visibleInTableOrdered
 
-        MeasurementListUiState(
+        MeasurementListUiState.Loaded(
             latestMeasurement = items.firstOrNull(),
             previewMeasurements = items.take(PREVIEW_LIMIT),
             allMeasurements = items,
@@ -69,13 +72,12 @@ class MeasurementListViewModel @Inject constructor(
             visibleInTableMetrics = orderedVisibleInTableMetrics,
             unitSystem = generalSettings.unitSystem,
             isEmpty = items.isEmpty(),
-            isLoading = false,
         )
     }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = MeasurementListUiState(),
+            initialValue = MeasurementListUiState.Loading,
         )
 
     companion object {

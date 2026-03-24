@@ -85,18 +85,17 @@ fun MeasurementVisibilitySettingsScreen(
             )
         },
     ) { contentPadding ->
-        if (state.isLoading) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CircularProgressIndicator()
-            }
-            return@Scaffold
+        when (state) {
+        is SettingsUiState.Loading -> Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            CircularProgressIndicator()
         }
+        is SettingsUiState.Loaded -> {
 
         val recordedMeasurements = BodyMetric.entries.filter {
             it in state.settings.enabledMeasurements ||
@@ -154,13 +153,15 @@ fun MeasurementVisibilitySettingsScreen(
                 }
             }
         }
+        }
+        }
     }
 }
 
 
 @Composable
 private fun DisplayConfigurationSection(
-    state: SettingsUiState,
+    state: SettingsUiState.Loaded,
     metricTypes: List<BodyMetric>,
     onDisplayPlacementChanged: (BodyMetric, DisplayPlacement) -> Unit,
 ) {
@@ -264,9 +265,10 @@ private fun MeasurementVisibilitySettingsScreenPreview() {
 
     BodyTrackerTheme {
         MeasurementVisibilitySettingsScreen(
-            state = SettingsUiState(
-                isLoading = false,
+            state = SettingsUiState.Loaded(
                 settings = settings,
+                requiredMeasurements = emptySet(),
+                errorMessage = null,
             ),
             onNavigateBack = {},
             onMeasurementVisibilityChanged = { _, _ -> },

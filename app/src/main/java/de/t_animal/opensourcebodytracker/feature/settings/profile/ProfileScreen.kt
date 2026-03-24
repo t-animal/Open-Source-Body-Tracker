@@ -40,8 +40,6 @@ fun ProfileRoute(
     onNavigateBack: (() -> Unit)? = null,
 ) {
     val vm = hiltViewModel<ProfileViewModel, ProfileViewModel.Factory> { it.create(mode) }
-    val state by vm.uiState.collectAsStateWithLifecycle()
-
     LaunchedEffect(vm) {
         vm.events.collect { event ->
             when (event) {
@@ -50,21 +48,26 @@ fun ProfileRoute(
         }
     }
 
-    ProfileScreen(
-        state = state,
-        onNavigateBack = onNavigateBack,
-        onSexChanged = vm::onSexChanged,
-        onDateOfBirthChanged = vm::onDateOfBirthChanged,
-        onHeightCmChanged = vm::onHeightCmChanged,
-        onUnitSystemChanged = vm::onUnitSystemChanged,
-        onSaveClicked = vm::onSaveClicked,
-    )
+    val state by vm.uiState.collectAsStateWithLifecycle()
+
+    when (val state = state) {
+        is ProfileUiState.Loading -> {}
+        is ProfileUiState.Loaded -> ProfileScreen(
+            state = state,
+            onNavigateBack = onNavigateBack,
+            onSexChanged = vm::onSexChanged,
+            onDateOfBirthChanged = vm::onDateOfBirthChanged,
+            onHeightCmChanged = vm::onHeightCmChanged,
+            onUnitSystemChanged = vm::onUnitSystemChanged,
+            onSaveClicked = vm::onSaveClicked,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    state: ProfileUiState,
+    state: ProfileUiState.Loaded,
     onNavigateBack: (() -> Unit)? = null,
     onSexChanged: (Sex) -> Unit,
     onDateOfBirthChanged: (String) -> Unit,
@@ -103,7 +106,6 @@ fun ProfileScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
-
             if (state.mode == ProfileMode.Onboarding) {
                 UnitSystemSelector(
                     unitSystem = state.unitSystem,
@@ -156,11 +158,13 @@ fun ProfileScreen(
 private fun ProfileScreenPreview_Onboarding() {
     BodyTrackerTheme {
         ProfileScreen(
-            state = ProfileUiState(
+            state = ProfileUiState.Loaded(
                 mode = ProfileMode.Onboarding,
                 sex = Sex.Male,
                 dateOfBirthText = "1990-01-02",
                 heightCmText = "180",
+                unitSystem = UnitSystem.Metric,
+                validationError = null,
             ),
             onNavigateBack = {},
             onSexChanged = {},
@@ -177,11 +181,12 @@ private fun ProfileScreenPreview_Onboarding() {
 private fun ProfileScreenPreview_Error() {
     BodyTrackerTheme {
         ProfileScreen(
-            state = ProfileUiState(
+            state = ProfileUiState.Loaded(
                 mode = ProfileMode.Settings,
                 sex = null,
                 dateOfBirthText = "",
                 heightCmText = "",
+                unitSystem = UnitSystem.Metric,
                 validationError = ProfileValidationError.MissingSex,
             ),
             onNavigateBack = {},

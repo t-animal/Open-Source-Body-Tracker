@@ -30,14 +30,20 @@ sealed interface ProfileValidationError {
     data object InvalidHeight : ProfileValidationError
 }
 
-data class ProfileUiState(
-    val mode: ProfileMode,
-    val sex: Sex? = null,
-    val dateOfBirthText: String = "",
-    val heightCmText: String = "",
-    val unitSystem: UnitSystem = UnitSystem.Metric,
-    val validationError: ProfileValidationError? = null,
-)
+sealed interface ProfileUiState {
+    val mode: ProfileMode
+
+    data class Loading(override val mode: ProfileMode) : ProfileUiState
+
+    data class Loaded(
+        override val mode: ProfileMode,
+        val sex: Sex?,
+        val dateOfBirthText: String,
+        val heightCmText: String,
+        val unitSystem: UnitSystem,
+        val validationError: ProfileValidationError?,
+    ) : ProfileUiState
+}
 
 sealed interface ProfileEvent {
     data object Saved : ProfileEvent
@@ -57,7 +63,7 @@ class ProfileViewModel @AssistedInject constructor(
         fun create(mode: ProfileMode): ProfileViewModel
     }
 
-    private val _uiState = MutableStateFlow(ProfileUiState(mode = mode))
+    private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading(mode))
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<ProfileEvent>()
@@ -71,34 +77,54 @@ class ProfileViewModel @AssistedInject constructor(
                 repository.requiredProfileFlow.collect { profile ->
                     if (!didInitializeFromRepo) {
                         didInitializeFromRepo = true
-                        _uiState.value = _uiState.value.copy(
+                        val unitSystem = generalSettingsRepository.settingsFlow.first().unitSystem
+                        _uiState.value = ProfileUiState.Loaded(
+                            mode = mode,
                             sex = profile.sex,
                             dateOfBirthText = profile.dateOfBirth.toString(),
                             heightCmText = formatDecimalForInput(profile.heightCm.toDouble()),
+                            unitSystem = unitSystem,
                             validationError = null,
                         )
                     }
                 }
             }
+        } else {
+            viewModelScope.launch {
+                val unitSystem = generalSettingsRepository.settingsFlow.first().unitSystem
+                _uiState.value = ProfileUiState.Loaded(
+                    mode = mode,
+                    sex = null,
+                    dateOfBirthText = "",
+                    heightCmText = "",
+                    unitSystem = unitSystem,
+                    validationError = null,
+                )
+            }
         }
 
         viewModelScope.launch {
             generalSettingsRepository.settingsFlow.collect { settings ->
-                _uiState.value = _uiState.value.copy(unitSystem = settings.unitSystem)
+                updateLoadedState { it.copy(unitSystem = settings.unitSystem) }
             }
         }
     }
 
     fun onSexChanged(sex: Sex) {
-        _uiState.value = _uiState.value.copy(sex = sex, validationError = null)
+        updateLoadedState { it.copy(sex = sex, validationError = null) }
     }
 
     fun onDateOfBirthChanged(text: String) {
-        _uiState.value = _uiState.value.copy(dateOfBirthText = text, validationError = null)
+        updateLoadedState { it.copy(dateOfBirthText = text, validationError = null) }
     }
 
     fun onHeightCmChanged(text: String) {
-        _uiState.value = _uiState.value.copy(heightCmText = text, validationError = null)
+        updateLoadedState { it.copy(heightCmText = text, validationError = null) }
+    }
+
+    private fun updateLoadedState(transform: (ProfileUiState.Loaded) -> ProfileUiState.Loaded) {
+        val current = _uiState.value as? ProfileUiState.Loaded ?: return
+        _uiState.value = transform(current)
     }
 
     fun onUnitSystemChanged(unitSystem: UnitSystem) {
@@ -108,7 +134,7 @@ class ProfileViewModel @AssistedInject constructor(
     }
 
     fun onSaveClicked() {
-        val current = _uiState.value
+        val current = _uiState.value as? ProfileUiState.Loaded ?: return
         val sex = current.sex ?: run {
             _uiState.value = current.copy(validationError = ProfileValidationError.MissingSex)
             return

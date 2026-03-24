@@ -36,19 +36,22 @@ fun MiscSettingsRoute(
     val vm: MiscSettingsViewModel = hiltViewModel()
     val uiState by vm.uiState.collectAsStateWithLifecycle()
 
-    MiscSettingsScreen(
-        onNavigateBack = onNavigateBack,
-        uiState = uiState,
-        onUnitSystemChanged = vm::onUnitSystemChanged,
-        onPhotoQualityChanged = vm::onPhotoQualityChanged,
-    )
+    when (val uiState = uiState) {
+        is MiscSettingsUiState.Loading -> {}
+        is MiscSettingsUiState.Loaded -> MiscSettingsScreen(
+            onNavigateBack = onNavigateBack,
+            uiState = uiState,
+            onUnitSystemChanged = vm::onUnitSystemChanged,
+            onPhotoQualityChanged = vm::onPhotoQualityChanged,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MiscSettingsScreen(
     onNavigateBack: () -> Unit,
-    uiState: MiscSettingsUiState,
+    uiState: MiscSettingsUiState.Loaded,
     onUnitSystemChanged: (UnitSystem) -> Unit,
     onPhotoQualityChanged: (PhotoQuality) -> Unit,
 ) {
@@ -67,38 +70,33 @@ fun MiscSettingsScreen(
             )
         },
     ) { contentPadding ->
-        when (uiState) {
-            is MiscSettingsUiState.Loading -> null
-            is MiscSettingsUiState.Loaded -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    item {
-                        Text(
-                            text = stringResource(R.string.settings_misc_description),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 12.dp),
-                        )
-                    }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            item {
+                Text(
+                    text = stringResource(R.string.settings_misc_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
+            }
 
-                    item {
-                        UnitSystemSelector(
-                            unitSystem = uiState.unitSystem,
-                            onUnitSystemChanged = onUnitSystemChanged,
-                        )
-                    }
+            item {
+                UnitSystemSelector(
+                    unitSystem = uiState.unitSystem,
+                    onUnitSystemChanged = onUnitSystemChanged,
+                )
+            }
 
-                    item {
-                        PhotoQualitySelector(
-                            photoQuality = uiState.photoQuality,
-                            onPhotoQualityChanged = onPhotoQualityChanged,
-                        )
-                    }
-                }
+            item {
+                PhotoQualitySelector(
+                    photoQuality = uiState.photoQuality,
+                    onPhotoQualityChanged = onPhotoQualityChanged,
+                )
             }
         }
     }

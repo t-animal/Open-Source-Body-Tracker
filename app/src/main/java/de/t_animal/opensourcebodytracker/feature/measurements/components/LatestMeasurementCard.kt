@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
@@ -38,7 +39,6 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
 import de.t_animal.opensourcebodytracker.core.model.RatingLabel
 import de.t_animal.opensourcebodytracker.core.model.RatingSeverity
-import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListUiState
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.buildLatestMeasurementMetrics
@@ -46,7 +46,7 @@ import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
 internal fun LatestMeasurementCard(
-    state: MeasurementListUiState,
+    state: MeasurementListUiState.Loaded,
     onAdd: () -> Unit,
 ) {
     Card(
@@ -64,10 +64,6 @@ internal fun LatestMeasurementCard(
             Spacer(modifier = Modifier.height(12.dp))
 
             when {
-                state.isLoading -> {
-                    Text(stringResource(R.string.common_loading_ellipsis))
-                }
-
                 state.isEmpty -> {
                     Text(
                         text = stringResource(R.string.measurement_latest_empty),
@@ -125,7 +121,7 @@ internal fun LatestMeasurementCard(
 private fun LatestMeasurementCardPreview() {
     BodyTrackerTheme {
         LatestMeasurementCard(
-            state = MeasurementListUiState(
+            state = MeasurementListUiState.Loaded(
                 latestMeasurement = MeasurementListItemUiModel(
                     measurement = BodyMeasurement(
                         id = 1,
@@ -156,9 +152,12 @@ private fun LatestMeasurementCardPreview() {
                         waistHeightRatio = MetricRating(RatingLabel.IncreasedRisk, RatingSeverity.Fair),
                     ),
                 ),
+                previewMeasurements = emptyList(),
+                allMeasurements = emptyList(),
+                hasMoreMeasurements = false,
                 visibleInTableMetrics = MeasuredBodyMetric.entries + DerivedBodyMetric.entries,
+                unitSystem = UnitSystem.Metric,
                 isEmpty = false,
-                isLoading = false,
             ),
             onAdd = {},
         )
@@ -170,9 +169,14 @@ private fun LatestMeasurementCardPreview() {
 private fun LatestMeasurementCardEmptyPreview() {
     BodyTrackerTheme {
         LatestMeasurementCard(
-            state = MeasurementListUiState(
+            state = MeasurementListUiState.Loaded(
+                latestMeasurement = null,
+                previewMeasurements = emptyList(),
+                allMeasurements = emptyList(),
+                hasMoreMeasurements = false,
+                visibleInTableMetrics = emptyList(),
+                unitSystem = UnitSystem.Metric,
                 isEmpty = true,
-                isLoading = false,
             ),
             onAdd = {},
         )
