@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
 import de.t_animal.opensourcebodytracker.domain.reminders.ReminderScheduleCalculator
+import de.t_animal.opensourcebodytracker.infra.NotificationChannels
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.ZonedDateTime
 import javax.inject.Inject
@@ -22,6 +23,8 @@ class ReminderAlarmScheduler @Inject constructor(
             cancelScheduledReminder()
             return
         }
+
+        NotificationChannels.ensureReminderChannel(context)
 
         val nextReminderAt = ReminderScheduleCalculator.nextReminderAt(
             now = now,

@@ -1,11 +1,14 @@
 package de.t_animal.opensourcebodytracker.domain.export
 
+import android.content.Context
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import dagger.hilt.android.qualifiers.ApplicationContext
 import de.t_animal.opensourcebodytracker.data.export.AutomaticExportWorker
 import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
+import de.t_animal.opensourcebodytracker.infra.NotificationChannels
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit
@@ -13,6 +16,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 
 class AutomaticExportScheduler @Inject constructor(
+    @param:ApplicationContext private val context: Context,
     private val workManager: WorkManager,
     private val exportSettingsRepository: ExportSettingsRepository,
 ) {
@@ -26,6 +30,8 @@ class AutomaticExportScheduler @Inject constructor(
             cancelScheduledExport()
             return
         }
+
+        NotificationChannels.ensureExportChannel(context)
 
         val exportWorkRequest = PeriodicWorkRequestBuilder<AutomaticExportWorker>(
             Duration.ofDays(1),

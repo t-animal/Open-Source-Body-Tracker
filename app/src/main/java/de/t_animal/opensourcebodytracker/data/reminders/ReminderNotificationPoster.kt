@@ -1,8 +1,6 @@
 package de.t_animal.opensourcebodytracker.data.reminders
 
 import android.Manifest
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -13,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import de.t_animal.opensourcebodytracker.MainActivity
 import de.t_animal.opensourcebodytracker.R
+import de.t_animal.opensourcebodytracker.infra.NotificationChannels
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -23,8 +22,6 @@ class ReminderNotificationPoster @Inject constructor(
         if (!areNotificationsEnabled()) {
             return ReminderNotificationResult.NotificationsDisabled
         }
-
-        createChannelIfNeeded()
 
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             action = ReminderNotificationContract.OpenAddMeasurementScreenAction
@@ -38,7 +35,7 @@ class ReminderNotificationPoster @Inject constructor(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        val notification = NotificationCompat.Builder(context, ReminderNotificationContract.ReminderChannelId)
+        val notification = NotificationCompat.Builder(context, NotificationChannels.REMINDER_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(context.getString(R.string.notification_reminder_title))
             .setContentText(context.getString(R.string.notification_reminder_body))
@@ -72,21 +69,6 @@ class ReminderNotificationPoster @Inject constructor(
             context,
             Manifest.permission.POST_NOTIFICATIONS,
         ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun createChannelIfNeeded() {
-        val manager = context.getSystemService(NotificationManager::class.java) ?: return
-        val existingChannel = manager.getNotificationChannel(ReminderNotificationContract.ReminderChannelId)
-        if (existingChannel != null) {
-            return
-        }
-
-        val channel = NotificationChannel(
-            ReminderNotificationContract.ReminderChannelId,
-            context.getString(R.string.notification_channel_reminders),
-            NotificationManager.IMPORTANCE_DEFAULT,
-        )
-        manager.createNotificationChannel(channel)
     }
 }
 
