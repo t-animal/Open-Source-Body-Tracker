@@ -17,6 +17,7 @@ import dagger.assisted.AssistedInject
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportProgress
+import de.t_animal.opensourcebodytracker.infra.NotificationChannels
 
 @HiltWorker
 class AutomaticExportWorker @AssistedInject constructor(
@@ -72,7 +73,7 @@ class AutomaticExportWorker @AssistedInject constructor(
         progress.toNotificationState().let { notificationState ->
             NotificationCompat.Builder(
                 applicationContext,
-                EXPORT_NOTIFICATION_CHANNEL_ID,
+                NotificationChannels.EXPORT_CHANNEL_ID,
             )
                 .setContentTitle(applicationContext.getString(R.string.notification_export_title))
                 .setContentText(notificationState.message)
@@ -125,7 +126,6 @@ class AutomaticExportWorker @AssistedInject constructor(
     }
 
     companion object {
-        const val EXPORT_NOTIFICATION_CHANNEL_ID = "automatic_export_channel"
         const val EXPORT_NOTIFICATION_ID = 4224
     }
 }
