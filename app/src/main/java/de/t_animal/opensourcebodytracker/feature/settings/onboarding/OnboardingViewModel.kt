@@ -10,7 +10,7 @@ import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.reminders.ReminderAlarmScheduler
+import de.t_animal.opensourcebodytracker.domain.reminders.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository

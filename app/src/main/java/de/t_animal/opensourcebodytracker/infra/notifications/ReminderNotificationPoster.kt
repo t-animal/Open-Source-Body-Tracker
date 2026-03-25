@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.data.reminders
+package de.t_animal.opensourcebodytracker.infra.notifications
 
 import android.Manifest
 import android.app.PendingIntent
@@ -11,7 +11,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import de.t_animal.opensourcebodytracker.MainActivity
 import de.t_animal.opensourcebodytracker.R
-import de.t_animal.opensourcebodytracker.infra.NotificationChannels
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

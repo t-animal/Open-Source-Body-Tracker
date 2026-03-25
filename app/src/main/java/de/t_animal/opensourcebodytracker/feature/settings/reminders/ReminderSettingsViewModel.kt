@@ -6,7 +6,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.t_animal.opensourcebodytracker.data.reminders.ReminderAlarmScheduler
+import de.t_animal.opensourcebodytracker.domain.reminders.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository

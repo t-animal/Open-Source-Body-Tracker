@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.data.export
+package de.t_animal.opensourcebodytracker.infra.export
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -17,7 +17,7 @@ import dagger.assisted.AssistedInject
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportProgress
-import de.t_animal.opensourcebodytracker.infra.NotificationChannels
+import de.t_animal.opensourcebodytracker.infra.notifications.NotificationChannels
 
 @HiltWorker
 class AutomaticExportWorker @AssistedInject constructor(

@@ -33,8 +33,8 @@ import androidx.navigation.navArgument
 import androidx.compose.ui.res.stringResource
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.GeneralSettings
-import de.t_animal.opensourcebodytracker.data.reminders.ReminderNotificationPoster
-import de.t_animal.opensourcebodytracker.data.reminders.ReminderNotificationResult
+import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationPoster
+import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationResult
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute

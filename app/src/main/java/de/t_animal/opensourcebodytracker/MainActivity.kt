@@ -8,8 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import de.t_animal.opensourcebodytracker.data.reminders.ReminderNotificationContract
-import de.t_animal.opensourcebodytracker.data.reminders.ReminderNotificationPoster
+import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationContract
+import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost

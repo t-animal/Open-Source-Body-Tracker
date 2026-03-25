@@ -49,11 +49,11 @@
         </activity>
 
         <receiver
-            android:name=".data.reminders.ReminderAlarmReceiver"
+            android:name=".infra.notifications.ReminderAlarmReceiver"
             android:exported="false" />
 
         <receiver
-            android:name=".data.reminders.ReminderRescheduleReceiver"
+            android:name=".infra.notifications.ReminderRescheduleReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
