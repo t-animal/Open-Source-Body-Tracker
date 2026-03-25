@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.infra
+package de.t_animal.opensourcebodytracker.infra.notifications
 
 import android.app.NotificationChannel
 import android.app.NotificationManager

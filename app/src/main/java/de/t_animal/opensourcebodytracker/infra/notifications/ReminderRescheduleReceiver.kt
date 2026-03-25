@@ -1,15 +1,16 @@
-package de.t_animal.opensourcebodytracker.data.reminders
+package de.t_animal.opensourcebodytracker.infra.notifications
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository
+import de.t_animal.opensourcebodytracker.domain.reminders.ReminderAlarmScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ReminderRescheduleReceiver : BroadcastReceiver() {

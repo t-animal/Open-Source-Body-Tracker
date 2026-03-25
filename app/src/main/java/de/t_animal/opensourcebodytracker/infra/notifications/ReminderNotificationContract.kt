@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.data.reminders
+package de.t_animal.opensourcebodytracker.infra.notifications
 
 object ReminderNotificationContract {
     const val ReminderNotificationId = 4223

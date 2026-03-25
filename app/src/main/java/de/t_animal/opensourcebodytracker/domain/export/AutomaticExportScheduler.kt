@@ -6,9 +6,9 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.qualifiers.ApplicationContext
-import de.t_animal.opensourcebodytracker.data.export.AutomaticExportWorker
+import de.t_animal.opensourcebodytracker.infra.export.AutomaticExportWorker
 import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
-import de.t_animal.opensourcebodytracker.infra.NotificationChannels
+import de.t_animal.opensourcebodytracker.infra.notifications.NotificationChannels
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.concurrent.TimeUnit

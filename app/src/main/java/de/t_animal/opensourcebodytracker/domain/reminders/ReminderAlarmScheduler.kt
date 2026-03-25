@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.data.reminders
+package de.t_animal.opensourcebodytracker.domain.reminders
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -6,8 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
-import de.t_animal.opensourcebodytracker.domain.reminders.ReminderScheduleCalculator
-import de.t_animal.opensourcebodytracker.infra.NotificationChannels
+import de.t_animal.opensourcebodytracker.infra.notifications.NotificationChannels
+import de.t_animal.opensourcebodytracker.infra.notifications.ReminderAlarmReceiver
+import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationContract
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.ZonedDateTime
 import javax.inject.Inject
