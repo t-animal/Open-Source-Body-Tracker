@@ -5,15 +5,7 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -21,9 +13,10 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -78,65 +71,22 @@ fun BodyTrackerNavHost(
     val openMeasurementAddRequest by openMeasurementAddSignal.collectAsStateWithLifecycle(
         initialValue = 0L,
     )
-    var handledOpenMeasurementAddRequest by remember { mutableLongStateOf(0L) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val onboardingRoutes = setOf(
-        Routes.OnboardingGraph,
-        Routes.OnboardingStart,
-        Routes.OnboardingProfile,
-        Routes.OnboardingAnalysis,
-        Routes.OnboardingReminders,
-        Routes.ImportBackup,
+
+    OnboardingGuard(
+        navController = navController,
+        generalSettings = generalSettings,
+        currentRoute = currentRoute,
+        openMeasurementAddRequest = openMeasurementAddRequest,
     )
 
-    LaunchedEffect(generalSettings, currentRoute) {
-        val route = currentRoute ?: return@LaunchedEffect
-
-        val shouldShowOnboarding = !generalSettings.onboardingCompleted
-
-        if (shouldShowOnboarding && route !in onboardingRoutes) {
-            while (navController.popBackStack()) {
-            }
-            navController.navigate(Routes.OnboardingStart) {
-                launchSingleTop = true
-            }
-        } else if (!shouldShowOnboarding && route in onboardingRoutes && openMeasurementAddRequest <= 0L) {
-            navController.navigate(Routes.MeasurementList) {
-                popUpTo(Routes.OnboardingGraph) { inclusive = true }
-                launchSingleTop = true
-            }
-        }
-    }
-
-    LaunchedEffect(openMeasurementAddRequest, generalSettings.onboardingCompleted, currentRoute) {
-        if (openMeasurementAddRequest <= handledOpenMeasurementAddRequest) {
-            return@LaunchedEffect
-        }
-        if (!generalSettings.onboardingCompleted) {
-            return@LaunchedEffect
-        }
-
-        val route = currentRoute ?: return@LaunchedEffect
-        handledOpenMeasurementAddRequest = openMeasurementAddRequest
-
-        if (route == Routes.MeasurementAdd) {
-            return@LaunchedEffect
-        }
-
-        if (route != Routes.MeasurementList) {
-            navController.navigate(Routes.MeasurementList) {
-                if (route in onboardingRoutes) {
-                    popUpTo(Routes.OnboardingGraph) { inclusive = true }
-                }
-                launchSingleTop = true
-            }
-        }
-
-        navController.navigate(Routes.MeasurementAdd) {
-            launchSingleTop = true
-        }
-    }
+    MeasurementAddDeepLinkHandler(
+        navController = navController,
+        openMeasurementAddRequest = openMeasurementAddRequest,
+        onboardingCompleted = generalSettings.onboardingCompleted,
+        currentRoute = currentRoute,
+    )
 
     val reminderDisabledMessage = stringResource(R.string.reminder_toast_notifications_disabled)
     val reminderFailedMessage = stringResource(R.string.reminder_toast_failed)
@@ -209,284 +159,326 @@ fun BodyTrackerNavHost(
             )
         }
 
-        composable(Routes.Profile) {
-            ProfileRoute(
-                mode = ProfileMode.Settings,
-                onFinished = { navController.popBackStack() },
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
+        mainTabRoutes(
+            navController = navController,
+            generalSettings = generalSettings,
+            onResetApp = onResetApp,
+            onDebugTriggerReminder = onDebugTriggerReminder,
+            onDebugResetApp = onDebugResetApp,
+            onDebugOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
+            onDebugScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
+        )
 
-        composable(Routes.Settings) {
-            SettingsRoute(
-                onNavigateBack = { navController.popBackStack() },
-                onOpenProfile = { navController.navigate(Routes.Profile) },
-                onOpenMisc = { navController.navigate(Routes.SettingsMisc) },
-                onOpenMeasurementsAndAnalysis = { navController.navigate(Routes.SettingsMeasurements) },
-                onOpenMeasurementVisibility = { navController.navigate(Routes.SettingsMeasurementVisibility) },
-                onOpenReminders = { navController.navigate(Routes.Reminders) },
-                onOpenExport = { navController.navigate(Routes.Export) },
-                onOpenAbout = { navController.navigate(Routes.About) },
-            )
-        }
-
-        composable(Routes.SettingsMisc) {
-            MiscSettingsRoute(
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-
-        composable(Routes.SettingsMeasurements) {
-            MeasurementSettingsRoute(
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-
-        composable(Routes.SettingsMeasurementVisibility) {
-            MeasurementVisibilitySettingsRoute(
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-
-        composable(Routes.About) {
-            AboutRoute(
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-
-        composable(Routes.Reminders) {
-            ReminderSettingsRoute(
-                mode = ReminderMode.Settings,
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-
-        composable(Routes.Export) {
-            ExportSettingsRoute(
-                onNavigateBack = { navController.popBackStack() },
-            )
-        }
-
-        composable(Routes.MeasurementList) {
-            MainScreenScaffold(
-                selectedDestination = MainDestination.Measurements,
-                onMainDestinationSelected = { destination ->
-                    navController.navigate(destination.route) {
-                        launchSingleTop = true
-                    }
-                },
-                onOpenSettings = { navController.navigate(Routes.Settings) },
-                onOpenAbout = { navController.navigate(Routes.About) },
-                onTriggerReminder = onDebugTriggerReminder,
-                onResetApp = onDebugResetApp,
-                onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
-                onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
-            ) { contentPadding ->
-                MeasurementListRoute(
-                    onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
-                    onAdd = { navController.navigate(Routes.MeasurementAdd) },
-                    onOpenMore = { navController.navigate(Routes.MeasurementListAll) },
-                    showDemoBanner = generalSettings.isDemoMode,
-                    onResetApp = onResetApp,
-                    contentPadding = contentPadding,
-                )
-            }
-        }
-
-        composable(Routes.MeasurementListAll) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(stringResource(R.string.measurement_list_title)) },
-                        navigationIcon = {
-                            IconButton(onClick = { navController.popBackStack() }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.cd_back),
-                                )
-                            }
-                        },
-                    )
-                },
-            ) { contentPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                ) {
-                    MeasurementListFullRoute(
-                        onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
-                    )
-                }
-            }
-        }
-
-        composable(Routes.Analysis) {
-            MainScreenScaffold(
-                selectedDestination = MainDestination.Analysis,
-                onMainDestinationSelected = { destination ->
-                    navController.navigate(destination.route) {
-                        launchSingleTop = true
-                    }
-                },
-                onOpenSettings = { navController.navigate(Routes.Settings) },
-                onOpenAbout = { navController.navigate(Routes.About) },
-                onTriggerReminder = onDebugTriggerReminder,
-                onResetApp = onDebugResetApp,
-                onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
-                onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
-            ) { contentPadding ->
-                AnalysisRoute(
-                    contentPadding = contentPadding,
-                )
-            }
-        }
-
-        composable(Routes.Photos) {
-            MainScreenScaffold(
-                selectedDestination = MainDestination.Photos,
-                onMainDestinationSelected = { destination ->
-                    navController.navigate(destination.route) {
-                        launchSingleTop = true
-                    }
-                },
-                onOpenSettings = { navController.navigate(Routes.Settings) },
-                onOpenAbout = { navController.navigate(Routes.About) },
-                onTriggerReminder = onDebugTriggerReminder,
-                onResetApp = onDebugResetApp,
-                onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
-                onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
-            ) { contentPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                ) {
-                    PhotosRoute(
-                        onOpenCompare = { leftMeasurementId, rightMeasurementId ->
-                            navController.navigate(
-                                Routes.photoCompareRoute(
-                                    leftMeasurementId = leftMeasurementId,
-                                    rightMeasurementId = rightMeasurementId,
-                                ),
-                            )
-                        },
-                        onOpenAnimate = { selectedMeasurementIds ->
-                            navController.navigate(Routes.photoAnimateRoute(selectedMeasurementIds))
-                        },
-                    )
-                }
-            }
-        }
-
-        composable(
-            route = Routes.PhotoCompare,
-            arguments = listOf(
-                navArgument(Routes.PhotoCompareLeftIdArg) { type = NavType.LongType },
-                navArgument(Routes.PhotoCompareRightIdArg) { type = NavType.LongType },
-            ),
-        ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(stringResource(R.string.photos_title_compare)) },
-                        navigationIcon = {
-                            IconButton(onClick = { navController.popBackStack() }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.cd_back),
-                                )
-                            }
-                        },
-                    )
-                },
-            ) { contentPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                ) {
-                    PhotoCompareRoute()
-                }
-            }
-        }
-
-        composable(
-            route = Routes.PhotoAnimate,
-            arguments = listOf(
-                navArgument(Routes.PhotoAnimateIdsArg) { type = NavType.StringType },
-            ),
-        ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(stringResource(R.string.photos_title_animation)) },
-                        navigationIcon = {
-                            IconButton(onClick = { navController.popBackStack() }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = stringResource(R.string.cd_back),
-                                )
-                            }
-                        },
-                    )
-                },
-            ) { contentPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(contentPadding),
-                ) {
-                    PhotoAnimationRoute()
-                }
-            }
-        }
+        measurementRoutes(navController)
+        photoRoutes(navController)
+        settingsRoutes(navController)
 
         if (isDebuggable) {
-            composable(Routes.FakeDataGenerator) {
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            title = { Text("Fake data generator") },
-                            navigationIcon = {
-                                IconButton(onClick = { navController.popBackStack() }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "Back",
-                                    )
-                                }
-                            },
-                        )
-                    },
-                ) { contentPadding ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding),
-                    ) {
-                        FakeDataGeneratorRoute()
-                    }
-                }
-            }
-        }
-
-        composable(Routes.MeasurementAdd) {
-            MeasurementEditRoute(
-                onFinished = { navController.popBackStack() },
-                onCancel = { navController.popBackStack() },
-            )
-        }
-
-        composable(
-            route = Routes.MeasurementEdit,
-            arguments = listOf(
-                navArgument(Routes.MeasurementEditIdArg) { type = NavType.LongType },
-            ),
-        ) {
-            MeasurementEditRoute(
-                onFinished = { navController.popBackStack() },
-                onCancel = { navController.popBackStack() },
-            )
+            debugRoutes(navController)
         }
     }
 }
+
+private fun NavGraphBuilder.mainTabRoutes(
+    navController: NavController,
+    generalSettings: GeneralSettings,
+    onResetApp: () -> Unit,
+    onDebugTriggerReminder: (() -> Unit)?,
+    onDebugResetApp: (() -> Unit)?,
+    onDebugOpenFakeDataGenerator: (() -> Unit)?,
+    onDebugScheduleExportIn2Minutes: (() -> Unit)?,
+) {
+    composable(Routes.MeasurementList) {
+        MainScreenScaffold(
+            selectedDestination = MainDestination.Measurements,
+            onMainDestinationSelected = { destination ->
+                navController.navigate(destination.route) {
+                    launchSingleTop = true
+                }
+            },
+            onOpenSettings = { navController.navigate(Routes.Settings) },
+            onOpenAbout = { navController.navigate(Routes.About) },
+            onTriggerReminder = onDebugTriggerReminder,
+            onResetApp = onDebugResetApp,
+            onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
+            onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
+        ) { contentPadding ->
+            MeasurementListRoute(
+                onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
+                onAdd = { navController.navigate(Routes.MeasurementAdd) },
+                onOpenMore = { navController.navigate(Routes.MeasurementListAll) },
+                showDemoBanner = generalSettings.isDemoMode,
+                onResetApp = onResetApp,
+                contentPadding = contentPadding,
+            )
+        }
+    }
+
+    composable(Routes.Analysis) {
+        MainScreenScaffold(
+            selectedDestination = MainDestination.Analysis,
+            onMainDestinationSelected = { destination ->
+                navController.navigate(destination.route) {
+                    launchSingleTop = true
+                }
+            },
+            onOpenSettings = { navController.navigate(Routes.Settings) },
+            onOpenAbout = { navController.navigate(Routes.About) },
+            onTriggerReminder = onDebugTriggerReminder,
+            onResetApp = onDebugResetApp,
+            onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
+            onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
+        ) { contentPadding ->
+            AnalysisRoute(
+                contentPadding = contentPadding,
+            )
+        }
+    }
+
+    composable(Routes.Photos) {
+        MainScreenScaffold(
+            selectedDestination = MainDestination.Photos,
+            onMainDestinationSelected = { destination ->
+                navController.navigate(destination.route) {
+                    launchSingleTop = true
+                }
+            },
+            onOpenSettings = { navController.navigate(Routes.Settings) },
+            onOpenAbout = { navController.navigate(Routes.About) },
+            onTriggerReminder = onDebugTriggerReminder,
+            onResetApp = onDebugResetApp,
+            onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
+            onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
+        ) { contentPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+            ) {
+                PhotosRoute(
+                    onOpenCompare = { leftMeasurementId, rightMeasurementId ->
+                        navController.navigate(
+                            Routes.photoCompareRoute(
+                                leftMeasurementId = leftMeasurementId,
+                                rightMeasurementId = rightMeasurementId,
+                            ),
+                        )
+                    },
+                    onOpenAnimate = { selectedMeasurementIds ->
+                        navController.navigate(Routes.photoAnimateRoute(selectedMeasurementIds))
+                    },
+                )
+            }
+        }
+    }
+}
+
+private fun NavGraphBuilder.measurementRoutes(navController: NavController) {
+    composable(Routes.MeasurementListAll) {
+        SecondaryScreenScaffold(
+            title = stringResource(R.string.measurement_list_title),
+            onNavigateBack = { navController.popBackStack() },
+        ) {
+            MeasurementListFullRoute(
+                onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
+            )
+        }
+    }
+
+    composable(Routes.MeasurementAdd) {
+        MeasurementEditRoute(
+            onFinished = { navController.popBackStack() },
+            onCancel = { navController.popBackStack() },
+        )
+    }
+
+    composable(
+        route = Routes.MeasurementEdit,
+        arguments = listOf(
+            navArgument(Routes.MeasurementEditIdArg) { type = NavType.LongType },
+        ),
+    ) {
+        MeasurementEditRoute(
+            onFinished = { navController.popBackStack() },
+            onCancel = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.photoRoutes(navController: NavController) {
+    composable(
+        route = Routes.PhotoCompare,
+        arguments = listOf(
+            navArgument(Routes.PhotoCompareLeftIdArg) { type = NavType.LongType },
+            navArgument(Routes.PhotoCompareRightIdArg) { type = NavType.LongType },
+        ),
+    ) {
+        SecondaryScreenScaffold(
+            title = stringResource(R.string.photos_title_compare),
+            onNavigateBack = { navController.popBackStack() },
+        ) {
+            PhotoCompareRoute()
+        }
+    }
+
+    composable(
+        route = Routes.PhotoAnimate,
+        arguments = listOf(
+            navArgument(Routes.PhotoAnimateIdsArg) { type = NavType.StringType },
+        ),
+    ) {
+        SecondaryScreenScaffold(
+            title = stringResource(R.string.photos_title_animation),
+            onNavigateBack = { navController.popBackStack() },
+        ) {
+            PhotoAnimationRoute()
+        }
+    }
+}
+
+private fun NavGraphBuilder.settingsRoutes(navController: NavController) {
+    composable(Routes.Settings) {
+        SettingsRoute(
+            onNavigateBack = { navController.popBackStack() },
+            onOpenProfile = { navController.navigate(Routes.Profile) },
+            onOpenMisc = { navController.navigate(Routes.SettingsMisc) },
+            onOpenMeasurementsAndAnalysis = { navController.navigate(Routes.SettingsMeasurements) },
+            onOpenMeasurementVisibility = { navController.navigate(Routes.SettingsMeasurementVisibility) },
+            onOpenReminders = { navController.navigate(Routes.Reminders) },
+            onOpenExport = { navController.navigate(Routes.Export) },
+            onOpenAbout = { navController.navigate(Routes.About) },
+        )
+    }
+
+    composable(Routes.Profile) {
+        ProfileRoute(
+            mode = ProfileMode.Settings,
+            onFinished = { navController.popBackStack() },
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
+
+    composable(Routes.SettingsMisc) {
+        MiscSettingsRoute(
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
+
+    composable(Routes.SettingsMeasurements) {
+        MeasurementSettingsRoute(
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
+
+    composable(Routes.SettingsMeasurementVisibility) {
+        MeasurementVisibilitySettingsRoute(
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
+
+    composable(Routes.Reminders) {
+        ReminderSettingsRoute(
+            mode = ReminderMode.Settings,
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
+
+    composable(Routes.Export) {
+        ExportSettingsRoute(
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
+
+    composable(Routes.About) {
+        AboutRoute(
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.debugRoutes(navController: NavController) {
+    composable(Routes.FakeDataGenerator) {
+        SecondaryScreenScaffold(
+            title = "Fake data generator",
+            onNavigateBack = { navController.popBackStack() },
+        ) {
+            FakeDataGeneratorRoute()
+        }
+    }
+}
+
+private val onboardingRoutes = setOf(
+    Routes.OnboardingGraph,
+    Routes.OnboardingStart,
+    Routes.OnboardingProfile,
+    Routes.OnboardingAnalysis,
+    Routes.OnboardingReminders,
+    Routes.ImportBackup,
+)
+
+@Composable
+private fun OnboardingGuard(
+    navController: androidx.navigation.NavHostController,
+    generalSettings: GeneralSettings,
+    currentRoute: String?,
+    openMeasurementAddRequest: Long,
+) {
+    LaunchedEffect(generalSettings, currentRoute) {
+        val route = currentRoute ?: return@LaunchedEffect
+
+        val shouldShowOnboarding = !generalSettings.onboardingCompleted
+
+        if (shouldShowOnboarding && route !in onboardingRoutes) {
+            while (navController.popBackStack()) {
+            }
+            navController.navigate(Routes.OnboardingStart) {
+                launchSingleTop = true
+            }
+        } else if (!shouldShowOnboarding && route in onboardingRoutes && openMeasurementAddRequest <= 0L) {
+            navController.navigate(Routes.MeasurementList) {
+                popUpTo(Routes.OnboardingGraph) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
+    }
+}
+
+@Composable
+private fun MeasurementAddDeepLinkHandler(
+    navController: androidx.navigation.NavHostController,
+    openMeasurementAddRequest: Long,
+    onboardingCompleted: Boolean,
+    currentRoute: String?,
+) {
+    var handledRequest by remember { mutableLongStateOf(0L) }
+
+    LaunchedEffect(openMeasurementAddRequest, onboardingCompleted, currentRoute) {
+        if (openMeasurementAddRequest <= handledRequest) {
+            return@LaunchedEffect
+        }
+        if (!onboardingCompleted) {
+            return@LaunchedEffect
+        }
+
+        val route = currentRoute ?: return@LaunchedEffect
+        handledRequest = openMeasurementAddRequest
+
+        if (route == Routes.MeasurementAdd) {
+            return@LaunchedEffect
+        }
+
+        if (route != Routes.MeasurementList) {
+            navController.navigate(Routes.MeasurementList) {
+                if (route in onboardingRoutes) {
+                    popUpTo(Routes.OnboardingGraph) { inclusive = true }
+                }
+                launchSingleTop = true
+            }
+        }
+
+        navController.navigate(Routes.MeasurementAdd) {
+            launchSingleTop = true
+        }
+    }
+}
+
