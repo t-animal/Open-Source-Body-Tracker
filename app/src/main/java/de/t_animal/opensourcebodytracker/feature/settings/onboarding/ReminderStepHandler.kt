@@ -1,6 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.settings.onboarding
 
-import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderValidationError
+import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
 import java.time.DayOfWeek
 import java.time.LocalTime
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,11 +44,15 @@ internal class ReminderStepHandler(
 
     fun validate(): Boolean {
         val current = uiState.value.reminders
-        if (current.enabled && current.weekdays.isEmpty()) {
+        val settings = ReminderSettings(
+            reminderEnabled = current.enabled,
+            reminderWeekdays = current.weekdays,
+            reminderTime = current.time,
+        )
+        val error = settings.validate()
+        if (error != null) {
             uiState.value = uiState.value.copy(
-                reminders = current.copy(
-                    validationError = ReminderValidationError.NoWeekdaySelected,
-                ),
+                reminders = current.copy(validationError = error),
             )
             return false
         }

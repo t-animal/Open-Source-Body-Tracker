@@ -1,12 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.settings.onboarding
 
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataLeanBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMaxFatBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.demodata.DefaultDemoDataMinFatBodyWeightKg
-import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
-import de.t_animal.opensourcebodytracker.domain.demodata.defaultDemoDataProfile
+import de.t_animal.opensourcebodytracker.domain.demodata.StartDemoModeUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,9 +10,7 @@ internal class StartStepHandler(
     private val uiState: MutableStateFlow<OnboardingUiState>,
     private val events: MutableSharedFlow<OnboardingEvent>,
     private val coroutineScope: CoroutineScope,
-    private val profileRepository: ProfileRepository,
-    private val generalSettingsRepository: GeneralSettingsRepository,
-    private val generateDemoDataUseCase: GenerateDemoDataUseCase,
+    private val startDemoModeUseCase: StartDemoModeUseCase,
 ) {
 
     fun onTryDemoDataClicked() {
@@ -29,17 +21,7 @@ internal class StartStepHandler(
                 start = StartStepState(isDemoModeBusy = true, demoModeError = false),
             )
             runCatching {
-                val profile = defaultDemoDataProfile()
-                profileRepository.saveProfile(profile)
-                generateDemoDataUseCase(
-                    profile = profile,
-                    leanBodyWeightKg = DefaultDemoDataLeanBodyWeightKg,
-                    minFatBodyWeightKg = DefaultDemoDataMinFatBodyWeightKg,
-                    maxFatBodyWeightKg = DefaultDemoDataMaxFatBodyWeightKg,
-                )
-                generalSettingsRepository.updateSettings {
-                    it.copy(onboardingCompleted = true, isDemoMode = true)
-                }
+                startDemoModeUseCase()
                 events.emit(OnboardingEvent.DemoModeCompleted)
             }.onFailure {
                 uiState.value = uiState.value.copy(

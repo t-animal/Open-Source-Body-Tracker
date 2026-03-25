@@ -1,11 +1,9 @@
 package de.t_animal.opensourcebodytracker.feature.settings.onboarding
 
+import de.t_animal.opensourcebodytracker.core.model.ProfileParseResult
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.core.model.UserProfile
-import de.t_animal.opensourcebodytracker.core.util.parseLocalizedFloatOrNull
-import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileValidationError
-import java.time.LocalDate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,41 +45,20 @@ internal class ProfileStepHandler(
 
     fun validateProfile() {
         val currentProfile = uiState.value.profile
-        val sex = currentProfile.sex ?: run {
-            uiState.value = uiState.value.copy(
-                profile = currentProfile.copy(
-                    validationError = ProfileValidationError.MissingSex,
-                ),
-            )
-            return
-        }
-
-        val date = runCatching { LocalDate.parse(currentProfile.dateOfBirthText.trim()) }.getOrNull()
-        if (date == null) {
-            uiState.value = uiState.value.copy(
-                profile = currentProfile.copy(
-                    validationError = ProfileValidationError.InvalidDateOfBirth,
-                ),
-            )
-            return
-        }
-
-        val height = parseLocalizedFloatOrNull(currentProfile.heightCmText)
-        if (height == null || height <= 0f) {
-            uiState.value = uiState.value.copy(
-                profile = currentProfile.copy(
-                    validationError = ProfileValidationError.InvalidHeight,
-                ),
-            )
-            return
-        }
-
-        val profile = UserProfile(sex = sex, dateOfBirth = date, heightCm = height)
-        validatedProfile = profile
-        analysisStepHandler.recomputeDependencies(profile)
-
-        coroutineScope.launch {
-            events.emit(OnboardingEvent.ProfileValid)
+        when (val result = UserProfile.parse(currentProfile.sex, currentProfile.dateOfBirthText, currentProfile.heightCmText)) {
+            is ProfileParseResult.Error -> {
+                uiState.value = uiState.value.copy(
+                    profile = currentProfile.copy(validationError = result.error),
+                )
+            }
+            is ProfileParseResult.Success -> {
+                val profile = result.profile
+                validatedProfile = profile
+                analysisStepHandler.recomputeDependencies(profile)
+                coroutineScope.launch {
+                    events.emit(OnboardingEvent.ProfileValid)
+                }
+            }
         }
     }
 }

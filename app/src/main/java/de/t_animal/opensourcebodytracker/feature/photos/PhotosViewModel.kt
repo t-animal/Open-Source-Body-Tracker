@@ -9,6 +9,7 @@ import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotoMode
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosSnackbarMessage
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.toPhotoItemOrNull
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosUiState
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedAnimationSelection
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.orderedCompareSelection
@@ -36,17 +37,7 @@ class PhotosViewModel @Inject constructor(
 
     private val photoItems: StateFlow<List<PhotosItemUiModel>> = measurementRepository.observeAll()
         .map { measurements ->
-            measurements
-                .asSequence()
-                .mapNotNull { measurement ->
-                    val photoPath = measurement.photoFilePath ?: return@mapNotNull null
-                    PhotosItemUiModel(
-                        measurementId = measurement.id,
-                        dateEpochMillis = measurement.dateEpochMillis,
-                        photoFile = photoStorage.resolvePhotoFile(photoPath),
-                    )
-                }
-                .toList()
+            measurements.mapNotNull { it.toPhotoItemOrNull(photoStorage) }
         }
         .stateIn(
             scope = viewModelScope,
@@ -108,11 +99,7 @@ class PhotosViewModel @Inject constructor(
                 return@update currentState
             }
 
-            val maxSelection = if (currentState.mode == PhotoMode.COMPARE) {
-                2
-            } else {
-                null
-            }
+            val maxSelection = currentState.mode.maxSelection
             val selectionResult = togglePhotoSelection(
                 selectedMeasurementIds = currentState.selectedMeasurementIds,
                 clickedMeasurementId = measurementId,
@@ -149,7 +136,7 @@ class PhotosViewModel @Inject constructor(
             items = uiState.value.items,
         )
 
-        if (orderedIds.size >= 2) {
+        if (orderedIds.size >= PhotoMode.ANIMATE.minSelection) {
             return orderedIds
         }
 

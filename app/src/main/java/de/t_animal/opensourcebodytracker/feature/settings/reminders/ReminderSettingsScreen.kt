@@ -51,6 +51,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.R
+import de.t_animal.opensourcebodytracker.core.model.ReminderValidationError
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.DayOfWeek
 import java.time.LocalTime

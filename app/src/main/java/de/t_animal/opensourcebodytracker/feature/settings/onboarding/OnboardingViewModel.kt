@@ -6,18 +6,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
+import de.t_animal.opensourcebodytracker.core.model.ProfileValidationError
 import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
+import de.t_animal.opensourcebodytracker.core.model.ReminderValidationError
 import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
-import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
-import de.t_animal.opensourcebodytracker.domain.reminders.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
-import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.demodata.GenerateDemoDataUseCase
+import de.t_animal.opensourcebodytracker.domain.SaveProfileUseCase
+import de.t_animal.opensourcebodytracker.domain.demodata.StartDemoModeUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.RequiredMeasurementsResolver
-import de.t_animal.opensourcebodytracker.feature.settings.profile.ProfileValidationError
-import de.t_animal.opensourcebodytracker.feature.settings.reminders.ReminderValidationError
+import de.t_animal.opensourcebodytracker.domain.reminders.SaveReminderSettingsUseCase
 import java.time.DayOfWeek
 import java.time.LocalTime
 import javax.inject.Inject
@@ -72,13 +70,11 @@ sealed interface OnboardingEvent {
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository,
-    private val measurementSettingsRepository: MeasurementSettingsRepository,
     private val generalSettingsRepository: GeneralSettingsRepository,
-    private val reminderSettingsRepository: ReminderSettingsRepository,
     private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
-    generateDemoDataUseCase: GenerateDemoDataUseCase,
-    private val reminderAlarmScheduler: ReminderAlarmScheduler,
+    private val saveProfileUseCase: SaveProfileUseCase,
+    private val saveReminderSettingsUseCase: SaveReminderSettingsUseCase,
+    private val startDemoModeUseCase: StartDemoModeUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
@@ -104,9 +100,7 @@ class OnboardingViewModel @Inject constructor(
         uiState = _uiState,
         events = _events,
         coroutineScope = viewModelScope,
-        profileRepository = profileRepository,
-        generalSettingsRepository = generalSettingsRepository,
-        generateDemoDataUseCase = generateDemoDataUseCase,
+        startDemoModeUseCase = startDemoModeUseCase,
     )
 
     private val reminderHandler: ReminderStepHandler = ReminderStepHandler(uiState = _uiState)
@@ -140,28 +134,21 @@ class OnboardingViewModel @Inject constructor(
     fun validateAndFinish() {
         val current = _uiState.value
         if (current.isSaving) return
-        
+
         if (!reminderHandler.validate()) return
         val profile = profileHandler.validatedProfile ?: return
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true, saveError = false)
             runCatching {
-                profileRepository.saveProfile(profile)
-
-                val effective = requiredMeasurementsResolver.ensureRequired(
-                    current.analysis.settings,
-                    profile,
-                )
-                measurementSettingsRepository.saveSettings(effective.settings)
+                saveProfileUseCase(profile, current.analysis.settings)
 
                 val reminderSettings = ReminderSettings(
                     reminderEnabled = current.reminders.enabled,
                     reminderWeekdays = current.reminders.weekdays,
                     reminderTime = current.reminders.time,
                 )
-                reminderSettingsRepository.saveSettings(reminderSettings)
-                reminderAlarmScheduler.syncWithSettings(reminderSettings)
+                saveReminderSettingsUseCase(reminderSettings)
 
                 generalSettingsRepository.updateSettings {
                     it.copy(

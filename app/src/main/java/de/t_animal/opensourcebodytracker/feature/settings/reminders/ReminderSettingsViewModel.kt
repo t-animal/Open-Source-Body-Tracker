@@ -6,10 +6,11 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.t_animal.opensourcebodytracker.domain.reminders.ReminderAlarmScheduler
 import de.t_animal.opensourcebodytracker.core.model.ReminderSettings
+import de.t_animal.opensourcebodytracker.core.model.ReminderValidationError
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.data.settings.ReminderSettingsRepository
+import de.t_animal.opensourcebodytracker.domain.reminders.SaveReminderSettingsUseCase
 import java.time.DayOfWeek
 import java.time.LocalTime
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,10 +20,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-
-sealed interface ReminderValidationError {
-    data object NoWeekdaySelected : ReminderValidationError
-}
 
 sealed interface ReminderSettingsUiState {
     val mode: ReminderMode
@@ -47,7 +44,7 @@ class ReminderSettingsViewModel @AssistedInject constructor(
     @Assisted val mode: ReminderMode,
     private val reminderSettingsRepository: ReminderSettingsRepository,
     private val generalSettingsRepository: GeneralSettingsRepository,
-    private val reminderAlarmScheduler: ReminderAlarmScheduler,
+    private val saveReminderSettingsUseCase: SaveReminderSettingsUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -100,25 +97,20 @@ class ReminderSettingsViewModel @AssistedInject constructor(
     fun onSaveClicked() {
         val current = _uiState.value as? ReminderSettingsUiState.Loaded ?: return
 
-        if (current.enabled && current.weekdays.isEmpty()) {
-            _uiState.value = current.copy(validationError = ReminderValidationError.NoWeekdaySelected)
+        val settings = ReminderSettings(
+            reminderEnabled = current.enabled,
+            reminderWeekdays = current.weekdays,
+            reminderTime = current.time,
+        )
+
+        val validationError = settings.validate()
+        if (validationError != null) {
+            _uiState.value = current.copy(validationError = validationError)
             return
         }
 
         viewModelScope.launch {
-            val currentSettings = reminderSettingsRepository.settingsFlow.first()
-            val updatedSettings = ReminderSettings(
-                reminderEnabled = current.enabled,
-                reminderWeekdays = current.weekdays,
-                reminderTime = current.time,
-            )
-
-            if (updatedSettings != currentSettings) {
-                reminderSettingsRepository.saveSettings(updatedSettings)
-            }
-
-            reminderAlarmScheduler.syncWithSettings(updatedSettings)
-
+            saveReminderSettingsUseCase(settings)
             _events.emit(ReminderSettingsEvent.Saved)
         }
     }
