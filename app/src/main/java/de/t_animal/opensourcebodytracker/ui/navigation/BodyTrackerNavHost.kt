@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BodyTrackerNavHost(
+    startDestination: String,
     generalSettingsRepository: GeneralSettingsRepository,
     automaticExportScheduler: AutomaticExportScheduler,
     reminderNotificationPoster: ReminderNotificationPoster,
@@ -71,21 +72,11 @@ fun BodyTrackerNavHost(
     val openMeasurementAddRequest by openMeasurementAddSignal.collectAsStateWithLifecycle(
         initialValue = 0L,
     )
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
-    OnboardingGuard(
-        navController = navController,
-        generalSettings = generalSettings,
-        currentRoute = currentRoute,
-        openMeasurementAddRequest = openMeasurementAddRequest,
-    )
 
     MeasurementAddDeepLinkHandler(
         navController = navController,
         openMeasurementAddRequest = openMeasurementAddRequest,
         onboardingCompleted = generalSettings.onboardingCompleted,
-        currentRoute = currentRoute,
     )
 
     val reminderDisabledMessage = stringResource(R.string.reminder_toast_notifications_disabled)
@@ -126,7 +117,7 @@ fun BodyTrackerNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = Routes.OnboardingGraph,
+        startDestination = startDestination,
     ) {
         onboardingNavGraph(
             navController = navController,
@@ -407,50 +398,15 @@ private fun NavGraphBuilder.debugRoutes(navController: NavController) {
     }
 }
 
-private val onboardingRoutes = setOf(
-    Routes.OnboardingGraph,
-    Routes.OnboardingStart,
-    Routes.OnboardingProfile,
-    Routes.OnboardingAnalysis,
-    Routes.OnboardingReminders,
-    Routes.ImportBackup,
-)
-
-@Composable
-private fun OnboardingGuard(
-    navController: androidx.navigation.NavHostController,
-    generalSettings: GeneralSettings,
-    currentRoute: String?,
-    openMeasurementAddRequest: Long,
-) {
-    LaunchedEffect(generalSettings, currentRoute) {
-        val route = currentRoute ?: return@LaunchedEffect
-
-        val shouldShowOnboarding = !generalSettings.onboardingCompleted
-
-        if (shouldShowOnboarding && route !in onboardingRoutes) {
-            while (navController.popBackStack()) {
-            }
-            navController.navigate(Routes.OnboardingStart) {
-                launchSingleTop = true
-            }
-        } else if (!shouldShowOnboarding && route in onboardingRoutes && openMeasurementAddRequest <= 0L) {
-            navController.navigate(Routes.MeasurementList) {
-                popUpTo(Routes.OnboardingGraph) { inclusive = true }
-                launchSingleTop = true
-            }
-        }
-    }
-}
-
 @Composable
 private fun MeasurementAddDeepLinkHandler(
     navController: androidx.navigation.NavHostController,
     openMeasurementAddRequest: Long,
     onboardingCompleted: Boolean,
-    currentRoute: String?,
 ) {
     var handledRequest by remember { mutableLongStateOf(0L) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
     LaunchedEffect(openMeasurementAddRequest, onboardingCompleted, currentRoute) {
         if (openMeasurementAddRequest <= handledRequest) {
@@ -469,9 +425,6 @@ private fun MeasurementAddDeepLinkHandler(
 
         if (route != Routes.MeasurementList) {
             navController.navigate(Routes.MeasurementList) {
-                if (route in onboardingRoutes) {
-                    popUpTo(Routes.OnboardingGraph) { inclusive = true }
-                }
                 launchSingleTop = true
             }
         }
