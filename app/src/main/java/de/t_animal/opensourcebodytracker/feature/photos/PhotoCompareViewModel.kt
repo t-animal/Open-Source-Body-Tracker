@@ -3,10 +3,10 @@ package de.t_animal.opensourcebodytracker.feature.photos
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.toPhotoItemOrNull
 import de.t_animal.opensourcebodytracker.ui.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -50,18 +50,8 @@ class PhotoCompareViewModel @Inject constructor(
             val leftMeasurement = measurementRepository.getById(leftMeasurementId)
             val rightMeasurement = measurementRepository.getById(rightMeasurementId)
 
-            fun itemFromMeasurement(measurement: BodyMeasurement?) =
-                measurement?.photoFilePath?.let { photoPath ->
-                    PhotosItemUiModel(
-                        measurementId = measurement.id,
-                        dateEpochMillis = measurement.dateEpochMillis,
-                        photoFile = photoStorage.resolvePhotoFile(photoPath),
-                    )
-                }
-
-
-            val leftItem = itemFromMeasurement(leftMeasurement)
-            val rightItem = itemFromMeasurement(rightMeasurement)
+            val leftItem = leftMeasurement?.toPhotoItemOrNull(photoStorage)
+            val rightItem = rightMeasurement?.toPhotoItemOrNull(photoStorage)
 
             val missingPhoto = leftItem == null || rightItem == null ||
                 !leftItem.photoFile.exists() ||

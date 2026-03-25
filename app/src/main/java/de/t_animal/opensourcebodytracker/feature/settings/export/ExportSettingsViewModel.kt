@@ -7,13 +7,14 @@ import javax.inject.Inject
 import de.t_animal.opensourcebodytracker.core.model.AutomaticExportErrorKey
 import de.t_animal.opensourcebodytracker.data.export.ExportPasswordRepository
 import de.t_animal.opensourcebodytracker.data.settings.ExportSettingsRepository
-import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionError
 import de.t_animal.opensourcebodytracker.domain.export.ExportActionResult
 import de.t_animal.opensourcebodytracker.domain.export.ExportExecutionCommand
-import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportProgress
+import de.t_animal.opensourcebodytracker.domain.export.ExportToFilesystemUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportValidationError
+import de.t_animal.opensourcebodytracker.domain.export.SaveExportSettingsCommand
+import de.t_animal.opensourcebodytracker.domain.export.SaveExportSettingsUseCase
 import de.t_animal.opensourcebodytracker.domain.export.validateExportCommandForSave
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,7 +60,47 @@ data class ExportSettingsUiState(
     val exportedFileName: String? = null,
     val exportError: ExportSettingsError? = null,
     val lastAutomaticExportError: AutomaticExportErrorKey? = null,
-)
+) {
+    fun withDeviceStorageEnabled(enabled: Boolean): ExportSettingsUiState {
+        val canEnable = enabled && exportPassword.isNotBlank()
+        return copy(
+            exportToDeviceStorageEnabled = canEnable,
+            exportFolderUri = if (canEnable) exportFolderUri else null,
+            automaticExportEnabled = if (canEnable) automaticExportEnabled else false,
+            exportProgress = null,
+            exportedFileName = null,
+            exportError = null,
+        )
+    }
+
+    fun withAutomaticExportEnabled(enabled: Boolean): ExportSettingsUiState {
+        val canEnable = enabled && exportToDeviceStorageEnabled && exportPassword.isNotBlank()
+        return copy(
+            automaticExportEnabled = canEnable,
+            exportedFileName = null,
+            exportError = null,
+        )
+    }
+
+    fun withPasswordChanged(password: String): ExportSettingsUiState {
+        val hasPassword = password.isNotBlank()
+        return copy(
+            exportPassword = password,
+            exportToDeviceStorageEnabled = exportToDeviceStorageEnabled && hasPassword,
+            automaticExportEnabled = automaticExportEnabled && hasPassword,
+            exportProgress = null,
+            exportedFileName = null,
+            exportError = null,
+        )
+    }
+
+    fun withFolderSelected(uri: String): ExportSettingsUiState = copy(
+        exportFolderUri = uri,
+        exportProgress = null,
+        exportedFileName = null,
+        exportError = null,
+    )
+}
 
 sealed interface ExportSettingsEvent {
     data object Saved : ExportSettingsEvent
@@ -70,7 +111,7 @@ class ExportSettingsViewModel @Inject constructor(
     private val exportSettingsRepository: ExportSettingsRepository,
     private val exportPasswordRepository: ExportPasswordRepository,
     private val exportToFileSystemUseCase: ExportToFilesystemUseCase,
-    private val automaticExportScheduler: AutomaticExportScheduler,
+    private val saveExportSettingsUseCase: SaveExportSettingsUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ExportSettingsUiState())
     val uiState: StateFlow<ExportSettingsUiState> = _uiState.asStateFlow()
@@ -99,47 +140,19 @@ class ExportSettingsViewModel @Inject constructor(
     }
 
     fun onExportToDeviceStorageEnabledChanged(enabled: Boolean) {
-        val canEnable = enabled && _uiState.value.exportPassword.isNotBlank()
-        _uiState.value = _uiState.value.copy(
-            exportToDeviceStorageEnabled = canEnable,
-            exportFolderUri = if (canEnable) _uiState.value.exportFolderUri else null,
-            automaticExportEnabled = if (canEnable) _uiState.value.automaticExportEnabled else false,
-            exportProgress = null,
-            exportedFileName = null,
-            exportError = null,
-        )
+        _uiState.value = _uiState.value.withDeviceStorageEnabled(enabled)
     }
 
     fun onAutomaticExportEnabledChanged(enabled: Boolean) {
-        val canEnableAutomatic = enabled &&
-            _uiState.value.exportToDeviceStorageEnabled &&
-            _uiState.value.exportPassword.isNotBlank()
-        _uiState.value = _uiState.value.copy(
-            automaticExportEnabled = canEnableAutomatic,
-            exportedFileName = null,
-            exportError = null,
-        )
+        _uiState.value = _uiState.value.withAutomaticExportEnabled(enabled)
     }
 
     fun onExportFolderSelected(uri: String) {
-        _uiState.value = _uiState.value.copy(
-            exportFolderUri = uri,
-            exportProgress = null,
-            exportedFileName = null,
-            exportError = null,
-        )
+        _uiState.value = _uiState.value.withFolderSelected(uri)
     }
 
     fun onExportPasswordChanged(password: String) {
-        val hasPassword = password.isNotBlank()
-        _uiState.value = _uiState.value.copy(
-            exportPassword = password,
-            exportToDeviceStorageEnabled = _uiState.value.exportToDeviceStorageEnabled && hasPassword,
-            automaticExportEnabled = _uiState.value.automaticExportEnabled && hasPassword,
-            exportProgress = null,
-            exportedFileName = null,
-            exportError = null,
-        )
+        _uiState.value = _uiState.value.withPasswordChanged(password)
     }
 
     fun onExportNowClicked() {
@@ -169,7 +182,7 @@ class ExportSettingsViewModel @Inject constructor(
             }
             _uiState.value = when (result) {
                 is ExportActionResult.Success -> {
-                    clearAutomaticExportPendingAndError()
+                    saveExportSettingsUseCase.clearAutomaticExportState()
                     _uiState.value.copy(
                         isExporting = false,
                         exportProgress = null,
@@ -196,17 +209,8 @@ class ExportSettingsViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val settings = exportSettingsRepository.settingsFlow.first()
-            exportSettingsRepository.saveSettings(
-                settings.copy(
-                    lastAutomaticExportError = null,
-                ),
-            )
-            _uiState.update { state ->
-                state.copy(
-                    lastAutomaticExportError = null,
-                )
-            }
+            saveExportSettingsUseCase.dismissAutomaticExportError()
+            _uiState.update { it.copy(lastAutomaticExportError = null) }
         }
     }
 
@@ -229,51 +233,16 @@ class ExportSettingsViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val settings = exportSettingsRepository.settingsFlow.first()
-            val automaticExportEnabled = current.automaticExportEnabled
-
-            val updatedSettings = settings.copy(
-                exportToDeviceStorageEnabled = current.exportToDeviceStorageEnabled,
-                exportFolderUri = current.exportFolderUri,
-                automaticExportEnabled = automaticExportEnabled,
-                automaticExportPending = if (automaticExportEnabled) {
-                    settings.automaticExportPending
-                } else {
-                    false
-                },
-                lastAutomaticExportError = if (automaticExportEnabled) {
-                    settings.lastAutomaticExportError
-                } else {
-                    null
-                },
+            saveExportSettingsUseCase.save(
+                SaveExportSettingsCommand(
+                    exportToDeviceStorageEnabled = current.exportToDeviceStorageEnabled,
+                    exportFolderUri = current.exportFolderUri,
+                    exportPassword = current.exportPassword,
+                    automaticExportEnabled = current.automaticExportEnabled,
+                ),
             )
-            if (updatedSettings != settings) {
-                exportSettingsRepository.saveSettings(updatedSettings)
-            }
-            exportPasswordRepository.savePassword(current.exportPassword)
-
-            if (automaticExportEnabled) {
-                automaticExportScheduler.scheduleNightlyExportAtThreeAm()
-            } else {
-                automaticExportScheduler.cancelScheduledExport()
-            }
-
             _events.emit(ExportSettingsEvent.Saved)
         }
-    }
-
-    private suspend fun clearAutomaticExportPendingAndError() {
-        val settings = exportSettingsRepository.settingsFlow.first()
-        if (!settings.automaticExportPending && settings.lastAutomaticExportError == null) {
-            return
-        }
-
-        exportSettingsRepository.saveSettings(
-            settings.copy(
-                automaticExportPending = false,
-                lastAutomaticExportError = null,
-            ),
-        )
     }
 
     private fun ExportSettingsUiState.toExportExecutionCommand(): ExportExecutionCommand {

@@ -7,6 +7,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.photos.PersistedPhotoPath
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.photos.InternalPhotoStorage
+import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotoMode
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
 import de.t_animal.opensourcebodytracker.ui.navigation.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,7 +55,7 @@ class PhotoAnimationViewModel @Inject constructor(
                 resolvePhotoFile = photoStorage::resolvePhotoFile,
             )
 
-            if (frames.size < 2) {
+            if (frames.size < PhotoMode.ANIMATE.minSelection) {
                 mutableUiState.update {
                     PhotoAnimationUiState.Loaded(
                         hasError = true,

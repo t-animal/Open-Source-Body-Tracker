@@ -6,8 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
-import de.t_animal.opensourcebodytracker.data.settings.MeasurementSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.RequiredMeasurementsResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.SaveMeasurementSettingsUseCase
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,7 +33,7 @@ sealed interface ChooseMeasurementSettingsUiState {
 
 @HiltViewModel
 class ChooseMeasurementSettingsViewModel @Inject constructor(
-    private val measurementSettingsRepository: MeasurementSettingsRepository,
+    private val saveMeasurementSettingsUseCase: SaveMeasurementSettingsUseCase,
     private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
 ) : ViewModel() {
 
@@ -102,8 +102,7 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
         val transformed = transform(base)
 
         viewModelScope.launch {
-            val effective = requiredMeasurementsResolver.ensureRequiredWithCurrentProfile(transformed)
-            measurementSettingsRepository.saveSettings(effective.settings)
+            saveMeasurementSettingsUseCase(transformed)
         }
     }
 }
