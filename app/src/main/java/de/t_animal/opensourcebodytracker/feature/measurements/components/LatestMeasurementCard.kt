@@ -2,11 +2,10 @@ package de.t_animal.opensourcebodytracker.feature.measurements.components
 
 import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Indication
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -23,14 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
-import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
@@ -39,6 +36,7 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
 import de.t_animal.opensourcebodytracker.core.model.RatingLabel
 import de.t_animal.opensourcebodytracker.core.model.RatingSeverity
+import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListUiState
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.buildLatestMeasurementMetrics
@@ -49,68 +47,63 @@ internal fun LatestMeasurementCard(
     state: MeasurementListUiState.Loaded,
     onAdd: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.measurement_latest_title),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.measurement_latest_title),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
 
-            when {
-                state.isEmpty -> {
-                    Text(
-                        text = stringResource(R.string.measurement_latest_empty),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Button(onClick = onAdd) {
-                        Text(stringResource(R.string.common_add))
-                    }
+        when {
+            state.isEmpty -> {
+                Text(
+                    text = stringResource(R.string.measurement_latest_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(onClick = onAdd) {
+                    Text(stringResource(R.string.common_add))
                 }
+            }
 
-                else -> {
-                    val latest = state.latestMeasurement
-                    if (latest != null) {
-                        val analysisMetrics = state.visibleInTableMetrics.filterIsInstance<DerivedBodyMetric>()
-                        val rawMetrics = state.visibleInTableMetrics.filterIsInstance<MeasuredBodyMetric>()
+            else -> {
+                val latest = state.latestMeasurement
+                if (latest != null) {
+                    val analysisMetrics = state.visibleInTableMetrics.filterIsInstance<DerivedBodyMetric>()
+                    val rawMetrics = state.visibleInTableMetrics.filterIsInstance<MeasuredBodyMetric>()
 
+                    if (analysisMetrics.isNotEmpty()) {
+                        Text(
+                            text = stringResource(R.string.measurement_latest_section_analyses),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LatestMeasurementGrid(
+                            item = latest,
+                            visibleMetrics = analysisMetrics,
+                            allMeasurements = state.allMeasurements,
+                            unitSystem = state.unitSystem,
+                        )
+                    }
+
+                    if (rawMetrics.isNotEmpty()) {
                         if (analysisMetrics.isNotEmpty()) {
-                            Text(
-                                text = stringResource(R.string.measurement_latest_section_analyses),
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            LatestMeasurementGrid(
-                                item = latest,
-                                visibleMetrics = analysisMetrics,
-                                allMeasurements = state.allMeasurements,
-                                unitSystem = state.unitSystem,
-                            )
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-
-                        if (rawMetrics.isNotEmpty()) {
-                            if (analysisMetrics.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
-                            Text(
-                                text = stringResource(R.string.measurement_latest_section_measurements),
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            LatestMeasurementGrid(
-                                item = latest,
-                                visibleMetrics = rawMetrics,
-                                allMeasurements = state.allMeasurements,
-                                unitSystem = state.unitSystem,
-                            )
-                        }
+                        Text(
+                            text = stringResource(R.string.measurement_latest_section_measurements),
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LatestMeasurementGrid(
+                            item = latest,
+                            visibleMetrics = rawMetrics,
+                            allMeasurements = state.allMeasurements,
+                            unitSystem = state.unitSystem,
+                        )
                     }
                 }
             }
@@ -208,8 +201,8 @@ private fun LatestMeasurementGrid(
 
     FlowRow(
         maxItemsInEachRow = 2,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
         visibleMetrics.zip(displayMetrics).forEach { (bodyMetric, displayItem) ->
@@ -222,41 +215,56 @@ private fun LatestMeasurementGrid(
                     .take(10)
                     .reversed()
             }
-            Column(
+            Card(
                 modifier = Modifier
                     .width(0.dp)
                     .weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = displayItem.value,
-                    style = MaterialTheme.typography.titleLarge,
-                )
-                Text(
-                    text = displayItem.label,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Toast.makeText(context, displayItem.fullName, Toast.LENGTH_SHORT).show()
+                        Text(
+                            text = displayItem.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier
+                                .align(Alignment.Start)
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                ) {
+                                    Toast.makeText(context, displayItem.fullName, Toast.LENGTH_SHORT).show()
+                                }
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = displayItem.value,
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        displayItem.rating?.let { rating ->
+                            Text(
+                                text = stringResource(rating.label.labelResourceId),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = when (rating.severity) {
+                                    RatingSeverity.Good -> MaterialTheme.colorScheme.tertiary
+                                    RatingSeverity.Fair -> MaterialTheme.colorScheme.secondary
+                                    RatingSeverity.Poor -> MaterialTheme.colorScheme.error
+                                    RatingSeverity.Severe -> MaterialTheme.colorScheme.error
+                                },
+                            )
+                        }
                     }
-                )
-                displayItem.rating?.let { rating ->
-                    Text(
-                        text = stringResource(rating.label.labelResourceId),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = when (rating.severity) {
-                            RatingSeverity.Good -> MaterialTheme.colorScheme.tertiary
-                            RatingSeverity.Fair -> MaterialTheme.colorScheme.secondary
-                            RatingSeverity.Poor -> MaterialTheme.colorScheme.error
-                            RatingSeverity.Severe -> MaterialTheme.colorScheme.error
-                        },
+                    MetricSparkline(
+                        points = sparklinePoints,
                     )
                 }
-                MetricSparkline(
-                    points = sparklinePoints,
-                )
             }
         }
     }
