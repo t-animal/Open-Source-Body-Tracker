@@ -18,21 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.ReminderValidationError
+import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -154,7 +148,6 @@ internal fun shouldRequestNotificationPermission(
     ) != PackageManager.PERMISSION_GRANTED
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReminderSettingsScreen(
     state: ReminderSettingsUiState,
@@ -167,19 +160,14 @@ fun ReminderSettingsScreen(
     val context = LocalContext.current
     val latestOnTimeChanged by rememberUpdatedState(onTimeChanged)
 
-    Scaffold(
-        topBar = {
-            ReminderSettingsTopAppBar(
-                mode = state.mode,
-                onBackClicked = onBackClicked,
-            )
-        },
-    ) { contentPadding ->
+    SecondaryScreenScaffold(
+        title = stringResource(state.mode.titleResourceId),
+        onNavigateBack = onBackClicked,
+        backEnabled = state.mode.showsBackNavigation(),
+    ) {
         when (state) {
         is ReminderSettingsUiState.Loading -> Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding),
+            modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -188,7 +176,6 @@ fun ReminderSettingsScreen(
         is ReminderSettingsUiState.Loaded -> Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
                 .padding(16.dp),
         ) {
             Text(
@@ -292,27 +279,6 @@ fun ReminderSettingsScreen(
         }
         }
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ReminderSettingsTopAppBar(
-    mode: ReminderMode,
-    onBackClicked: () -> Unit,
-) {
-    TopAppBar(
-        title = { Text(stringResource(mode.titleResourceId)) },
-        navigationIcon = {
-            if (mode.showsBackNavigation()) {
-                IconButton(onClick = onBackClicked) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                    )
-                }
-            }
-        },
-    )
 }
 
 @Composable

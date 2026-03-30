@@ -13,18 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -38,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.domain.importbackup.ImportResult
 import de.t_animal.opensourcebodytracker.ui.components.PasswordTextField
+import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -103,7 +97,6 @@ private fun resolveFileName(context: android.content.Context, uri: Uri): String?
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImportBackupScreen(
     state: ImportBackupUiState,
@@ -112,25 +105,14 @@ fun ImportBackupScreen(
     onImportClicked: () -> Unit,
     onCancelClicked: () -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.import_title)) },
-                navigationIcon = {
-                    IconButton(onClick = onCancelClicked, enabled = !state.isImporting) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back),
-                        )
-                    }
-                },
-            )
-        },
-    ) { contentPadding ->
+    SecondaryScreenScaffold(
+        title = stringResource(R.string.import_title),
+        onNavigateBack = onCancelClicked,
+        backEnabled = !state.isImporting,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
                 .padding(16.dp),
         ) {
             Text(

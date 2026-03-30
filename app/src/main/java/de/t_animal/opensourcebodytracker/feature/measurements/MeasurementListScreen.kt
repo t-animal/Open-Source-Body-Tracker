@@ -43,6 +43,7 @@ import de.t_animal.opensourcebodytracker.feature.measurements.components.DemoMod
 import de.t_animal.opensourcebodytracker.feature.measurements.components.LatestMeasurementCard
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementTable
 import de.t_animal.opensourcebodytracker.feature.measurements.components.ResetAppConfirmationDialog
+import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 private val MEASUREMENT_LIST_FAB_CLEARANCE = 96.dp
@@ -75,6 +76,7 @@ fun MeasurementListRoute(
 
 @Composable
 fun MeasurementListFullRoute(
+    onNavigateBack: () -> Unit,
     onEdit: (Long) -> Unit,
 ) {
     val vm: MeasurementListViewModel = hiltViewModel()
@@ -83,6 +85,7 @@ fun MeasurementListFullRoute(
         is MeasurementListUiState.Loading -> {}
         is MeasurementListUiState.Loaded -> MeasurementFullListScreen(
             state = state,
+            onNavigateBack = onNavigateBack,
             onEdit = onEdit,
         )
     }
@@ -214,51 +217,57 @@ fun MeasurementListScreen(
 @Composable
 fun MeasurementFullListScreen(
     state: MeasurementListUiState.Loaded,
+    onNavigateBack: () -> Unit,
     onEdit: (Long) -> Unit,
 ) {
     var selectedMeasurementIds by remember { mutableStateOf(emptySet<Long>()) }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.measurement_list_title),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-
-            MeasurementTable(
-                items = state.allMeasurements,
-                visibleMetrics = state.visibleInTableMetrics,
-                selectedIds = selectedMeasurementIds,
-                unitSystem = state.unitSystem,
-                onRowSelect = { id ->
-                    selectedMeasurementIds = if (id in selectedMeasurementIds) {
-                        selectedMeasurementIds - id
-                    } else {
-                        selectedMeasurementIds + id
-                    }
-                },
-            )
-
-            Spacer(modifier = Modifier.height(MEASUREMENT_LIST_FAB_CLEARANCE))
-        }
-
-        if (selectedMeasurementIds.size == 1) {
-            FloatingActionButton(
-                onClick = { selectedMeasurementIds.singleOrNull()?.let { onEdit(it) } },
+    SecondaryScreenScaffold(
+        title = stringResource(R.string.measurement_list_title),
+        onNavigateBack = onNavigateBack,
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = stringResource(R.string.cd_edit_measurement),
+                Text(
+                    text = stringResource(R.string.measurement_list_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
+
+                MeasurementTable(
+                    items = state.allMeasurements,
+                    visibleMetrics = state.visibleInTableMetrics,
+                    selectedIds = selectedMeasurementIds,
+                    unitSystem = state.unitSystem,
+                    onRowSelect = { id ->
+                        selectedMeasurementIds = if (id in selectedMeasurementIds) {
+                            selectedMeasurementIds - id
+                        } else {
+                            selectedMeasurementIds + id
+                        }
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(MEASUREMENT_LIST_FAB_CLEARANCE))
+            }
+
+            if (selectedMeasurementIds.size == 1) {
+                FloatingActionButton(
+                    onClick = { selectedMeasurementIds.singleOrNull()?.let { onEdit(it) } },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = stringResource(R.string.cd_edit_measurement),
+                    )
+                }
             }
         }
     }
@@ -376,6 +385,7 @@ private fun MeasurementFullListScreenPreview() {
                 unitSystem = UnitSystem.Metric,
                 isEmpty = false,
             ),
+            onNavigateBack = {},
             onEdit = {},
         )
     }

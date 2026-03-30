@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -46,12 +44,12 @@ import de.t_animal.opensourcebodytracker.data.photos.NewPhotoCaptureTarget
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DeleteMeasurementDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DiscardChangesDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditFabColumn
-import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditTopBar
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MetricSections
 import de.t_animal.opensourcebodytracker.feature.measurements.components.PhotoPreviewCard
 import de.t_animal.opensourcebodytracker.ui.components.PhotoPreviewDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.resolveVisibleMeasuredMetrics
 import de.t_animal.opensourcebodytracker.ui.components.DateInputField
+import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.io.File
 import kotlinx.coroutines.launch
@@ -134,7 +132,6 @@ fun MeasurementEditRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeasurementEditScreen(
     state: MeasurementEditUiState,
@@ -150,18 +147,12 @@ fun MeasurementEditScreen(
     onBackClicked: () -> Unit,
 ) {
     if (state is MeasurementEditUiState.Loading) {
-        Scaffold(
-            topBar = {
-                MeasurementEditTopBar(
-                    title = stringResource(R.string.common_loading),
-                    onBackClicked = onBackClicked,
-                )
-            },
-        ) { padding ->
+        SecondaryScreenScaffold(
+            title = stringResource(R.string.common_loading),
+            onNavigateBack = onBackClicked,
+        ) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
@@ -186,7 +177,6 @@ fun MeasurementEditScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MeasurementEditLoadedScreen(
     state: MeasurementEditUiState.Loaded,
@@ -233,13 +223,9 @@ private fun MeasurementEditLoadedScreen(
         handleBackClick()
     }
 
-    Scaffold(
-        topBar = {
-            MeasurementEditTopBar(
-                title = title,
-                onBackClicked = handleBackClick,
-            )
-        },
+    SecondaryScreenScaffold(
+        title = title,
+        onNavigateBack = handleBackClick,
         floatingActionButton = {
             MeasurementEditFabColumn(
                 isCreatingNew = isCreatingNew,
@@ -250,13 +236,12 @@ private fun MeasurementEditLoadedScreen(
                 onSaveClicked = onSaveClicked,
             )
         },
-    ) { padding ->
+    ) {
         val scrollState = rememberScrollState()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .imePadding()
                 .verticalScroll(scrollState)
                 .padding(16.dp),

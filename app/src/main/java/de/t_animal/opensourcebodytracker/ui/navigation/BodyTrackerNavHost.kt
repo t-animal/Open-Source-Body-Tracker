@@ -30,6 +30,8 @@ import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificatio
 import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationResult
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
+import de.t_animal.opensourcebodytracker.ui.components.DebugCallbacks
+import de.t_animal.opensourcebodytracker.ui.components.MainScreenScaffold
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRoute
@@ -102,15 +104,13 @@ fun BodyTrackerNavHost(
         }
     }
 
-    val onDebugTriggerReminder: (() -> Unit)? = if (isDebuggable) onTriggerReminder else null
-    val onDebugResetApp: (() -> Unit)? = if (isDebuggable) onResetApp else null
-    val onDebugOpenFakeDataGenerator: (() -> Unit)? = if (isDebuggable) {
-        { navController.navigate(Routes.FakeDataGenerator) }
-    } else {
-        null
-    }
-    val onDebugScheduleExportIn2Minutes: (() -> Unit)? = if (isDebuggable) {
-        { automaticExportScheduler.scheduleExportInMinutes(2) }
+    val debugCallbacks: DebugCallbacks? = if (isDebuggable) {
+        DebugCallbacks(
+            onTriggerReminder = onTriggerReminder,
+            onResetApp = onResetApp,
+            onOpenFakeDataGenerator = { navController.navigate(Routes.FakeDataGenerator) },
+            onScheduleExportIn2Minutes = { automaticExportScheduler.scheduleExportInMinutes(2) },
+        )
     } else {
         null
     }
@@ -154,10 +154,7 @@ fun BodyTrackerNavHost(
             navController = navController,
             generalSettings = generalSettings,
             onResetApp = onResetApp,
-            onDebugTriggerReminder = onDebugTriggerReminder,
-            onDebugResetApp = onDebugResetApp,
-            onDebugOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
-            onDebugScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
+            debugCallbacks = debugCallbacks,
         )
 
         measurementRoutes(navController)
@@ -174,10 +171,7 @@ private fun NavGraphBuilder.mainTabRoutes(
     navController: NavController,
     generalSettings: GeneralSettings,
     onResetApp: () -> Unit,
-    onDebugTriggerReminder: (() -> Unit)?,
-    onDebugResetApp: (() -> Unit)?,
-    onDebugOpenFakeDataGenerator: (() -> Unit)?,
-    onDebugScheduleExportIn2Minutes: (() -> Unit)?,
+    debugCallbacks: DebugCallbacks?,
 ) {
     composable(Routes.MeasurementList) {
         MainScreenScaffold(
@@ -189,10 +183,7 @@ private fun NavGraphBuilder.mainTabRoutes(
             },
             onOpenSettings = { navController.navigate(Routes.Settings) },
             onOpenAbout = { navController.navigate(Routes.About) },
-            onTriggerReminder = onDebugTriggerReminder,
-            onResetApp = onDebugResetApp,
-            onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
-            onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
+            debugCallbacks = debugCallbacks,
         ) { contentPadding ->
             MeasurementListRoute(
                 onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
@@ -215,10 +206,7 @@ private fun NavGraphBuilder.mainTabRoutes(
             },
             onOpenSettings = { navController.navigate(Routes.Settings) },
             onOpenAbout = { navController.navigate(Routes.About) },
-            onTriggerReminder = onDebugTriggerReminder,
-            onResetApp = onDebugResetApp,
-            onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
-            onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
+            debugCallbacks = debugCallbacks,
         ) { contentPadding ->
             AnalysisRoute(
                 contentPadding = contentPadding,
@@ -236,10 +224,7 @@ private fun NavGraphBuilder.mainTabRoutes(
             },
             onOpenSettings = { navController.navigate(Routes.Settings) },
             onOpenAbout = { navController.navigate(Routes.About) },
-            onTriggerReminder = onDebugTriggerReminder,
-            onResetApp = onDebugResetApp,
-            onOpenFakeDataGenerator = onDebugOpenFakeDataGenerator,
-            onScheduleExportIn2Minutes = onDebugScheduleExportIn2Minutes,
+            debugCallbacks = debugCallbacks,
         ) { contentPadding ->
             Box(
                 modifier = Modifier
@@ -266,14 +251,10 @@ private fun NavGraphBuilder.mainTabRoutes(
 
 private fun NavGraphBuilder.measurementRoutes(navController: NavController) {
     composable(Routes.MeasurementListAll) {
-        SecondaryScreenScaffold(
-            title = stringResource(R.string.measurement_list_title),
+        MeasurementListFullRoute(
             onNavigateBack = { navController.popBackStack() },
-        ) {
-            MeasurementListFullRoute(
-                onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
-            )
-        }
+            onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
+        )
     }
 
     composable(Routes.MeasurementAdd) {
@@ -304,12 +285,9 @@ private fun NavGraphBuilder.photoRoutes(navController: NavController) {
             navArgument(Routes.PhotoCompareRightIdArg) { type = NavType.LongType },
         ),
     ) {
-        SecondaryScreenScaffold(
-            title = stringResource(R.string.photos_title_compare),
+        PhotoCompareRoute(
             onNavigateBack = { navController.popBackStack() },
-        ) {
-            PhotoCompareRoute()
-        }
+        )
     }
 
     composable(
@@ -318,12 +296,9 @@ private fun NavGraphBuilder.photoRoutes(navController: NavController) {
             navArgument(Routes.PhotoAnimateIdsArg) { type = NavType.StringType },
         ),
     ) {
-        SecondaryScreenScaffold(
-            title = stringResource(R.string.photos_title_animation),
+        PhotoAnimationRoute(
             onNavigateBack = { navController.popBackStack() },
-        ) {
-            PhotoAnimationRoute()
-        }
+        )
     }
 }
 
@@ -389,12 +364,9 @@ private fun NavGraphBuilder.settingsRoutes(navController: NavController) {
 
 private fun NavGraphBuilder.debugRoutes(navController: NavController) {
     composable(Routes.FakeDataGenerator) {
-        SecondaryScreenScaffold(
-            title = "Fake data generator",
+        FakeDataGeneratorRoute(
             onNavigateBack = { navController.popBackStack() },
-        ) {
-            FakeDataGeneratorRoute()
-        }
+        )
     }
 }
 
