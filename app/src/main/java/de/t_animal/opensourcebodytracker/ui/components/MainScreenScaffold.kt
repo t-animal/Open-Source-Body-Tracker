@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.ui.navigation
+package de.t_animal.opensourcebodytracker.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +28,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.t_animal.opensourcebodytracker.R
+import de.t_animal.opensourcebodytracker.ui.navigation.MainDestination
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
+
+data class DebugCallbacks(
+    val onTriggerReminder: (() -> Unit)? = null,
+    val onResetApp: (() -> Unit)? = null,
+    val onOpenFakeDataGenerator: (() -> Unit)? = null,
+    val onScheduleExportIn2Minutes: (() -> Unit)? = null,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,10 +45,7 @@ fun MainScreenScaffold(
     onMainDestinationSelected: (MainDestination) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
-    onTriggerReminder: (() -> Unit)? = null,
-    onResetApp: (() -> Unit)? = null,
-    onOpenFakeDataGenerator: (() -> Unit)? = null,
-    onScheduleExportIn2Minutes: (() -> Unit)? = null,
+    debugCallbacks: DebugCallbacks? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     var overflowExpanded by remember { mutableStateOf(false) }
@@ -77,39 +82,39 @@ fun MainScreenScaffold(
                                 onOpenAbout()
                             },
                         )
-                        if (onTriggerReminder != null) {
+                        if (debugCallbacks?.onTriggerReminder != null) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.menu_trigger_reminder)) },
                                 onClick = {
                                     overflowExpanded = false
-                                    onTriggerReminder()
+                                    debugCallbacks.onTriggerReminder()
                                 },
                             )
                         }
-                        if (onOpenFakeDataGenerator != null) {
+                        if (debugCallbacks?.onOpenFakeDataGenerator != null) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.menu_fake_data)) },
                                 onClick = {
                                     overflowExpanded = false
-                                    onOpenFakeDataGenerator()
+                                    debugCallbacks.onOpenFakeDataGenerator()
                                 },
                             )
                         }
-                        if (onResetApp != null) {
+                        if (debugCallbacks?.onResetApp != null) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.menu_reset_app)) },
                                 onClick = {
                                     overflowExpanded = false
-                                    onResetApp()
+                                    debugCallbacks.onResetApp()
                                 },
                             )
                         }
-                        if (onScheduleExportIn2Minutes != null) {
+                        if (debugCallbacks?.onScheduleExportIn2Minutes != null) {
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.menu_schedule_export)) },
                                 onClick = {
                                     overflowExpanded = false
-                                    onScheduleExportIn2Minutes()
+                                    debugCallbacks.onScheduleExportIn2Minutes()
                                 },
                             )
                         }

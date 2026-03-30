@@ -1,4 +1,4 @@
-package de.t_animal.opensourcebodytracker.ui.navigation
+package de.t_animal.opensourcebodytracker.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +21,8 @@ import de.t_animal.opensourcebodytracker.R
 fun SecondaryScreenScaffold(
     title: String,
     onNavigateBack: () -> Unit,
+    backEnabled: Boolean = true,
+    floatingActionButton: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
     Scaffold(
@@ -28,7 +30,7 @@ fun SecondaryScreenScaffold(
             TopAppBar(
                 title = { Text(title) },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = onNavigateBack, enabled = backEnabled) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back),
@@ -37,9 +39,10 @@ fun SecondaryScreenScaffold(
                 },
             )
         },
+        floatingActionButton = floatingActionButton,
     ) { contentPadding ->
         Box(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
         ) {

@@ -20,48 +20,60 @@ import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.feature.photos.components.AnimatedPhotos
 import de.t_animal.opensourcebodytracker.feature.photos.components.PhotoAnimationControls
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
-fun PhotoAnimationRoute() {
+fun PhotoAnimationRoute(
+    onNavigateBack: () -> Unit,
+) {
     val viewModel: PhotoAnimationViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    PhotoAnimationScreen(state = state)
+    PhotoAnimationScreen(
+        state = state,
+        onNavigateBack = onNavigateBack,
+    )
 }
 
 @Composable
 fun PhotoAnimationScreen(
     state: PhotoAnimationUiState,
+    onNavigateBack: () -> Unit,
 ) {
-    when (state) {
-        PhotoAnimationUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-
-        is PhotoAnimationUiState.Loaded -> {
-            if (state.hasError) {
+    SecondaryScreenScaffold(
+        title = stringResource(R.string.photos_title_animation),
+        onNavigateBack = onNavigateBack,
+    ) {
+        when (state) {
+            PhotoAnimationUiState.Loading -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = stringResource(R.string.photos_error_animation_load),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
+                    CircularProgressIndicator()
+                }
+            }
+
+            is PhotoAnimationUiState.Loaded -> {
+                if (state.hasError) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.photos_error_animation_load),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else {
+                    PhotoAnimationContent(
+                        frames = state.frames,
                     )
                 }
-            } else {
-                PhotoAnimationContent(
-                    frames = state.frames,
-                )
             }
         }
     }
@@ -109,6 +121,7 @@ private fun PhotoAnimationLoadedPreview() {
                     ),
                 ),
             ),
+            onNavigateBack = {},
         )
     }
 }
@@ -121,6 +134,7 @@ private fun PhotoAnimationErrorPreview() {
             state = PhotoAnimationUiState.Loaded(
                 hasError = true,
             ),
+            onNavigateBack = {},
         )
     }
 }

@@ -40,49 +40,63 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import de.t_animal.opensourcebodytracker.feature.photos.helpers.PhotosItemUiModel
+import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.components.formatEpochMillisToLocalizedNumericDate
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 import java.io.File
 
 @Composable
-fun PhotoCompareRoute() {
+fun PhotoCompareRoute(
+    onNavigateBack: () -> Unit,
+) {
     val viewModel: PhotoCompareViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    PhotoCompareScreen(state = state)
+    PhotoCompareScreen(
+        state = state,
+        onNavigateBack = onNavigateBack,
+    )
 }
 
 @Composable
-fun PhotoCompareScreen(state: PhotoCompareUiState) {
-    when (state) {
-        PhotoCompareUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-
-        is PhotoCompareUiState.Loaded -> {
-            if (state.hasError) {
+fun PhotoCompareScreen(
+    state: PhotoCompareUiState,
+    onNavigateBack: () -> Unit,
+) {
+    SecondaryScreenScaffold(
+        title = stringResource(R.string.photos_title_compare),
+        onNavigateBack = onNavigateBack,
+    ) {
+        when (state) {
+            PhotoCompareUiState.Loading -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = stringResource(R.string.photos_error_compare_load),
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
+                    CircularProgressIndicator()
+                }
+            }
+
+            is PhotoCompareUiState.Loaded -> {
+                if (state.hasError) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = stringResource(R.string.photos_error_compare_load),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                } else if (state.left != null && state.right != null) {
+                    PhotoCompareContent(
+                        left = state.left,
+                        right = state.right,
                     )
                 }
-            } else if (state.left != null && state.right != null) {
-                PhotoCompareContent(
-                    left = state.left,
-                    right = state.right,
-                )
             }
         }
     }
@@ -186,6 +200,7 @@ private fun PhotoCompareScreenPreview() {
                     photoFile = File("/tmp/photo_2.jpg"),
                 ),
             ),
+            onNavigateBack = {},
         )
     }
 }

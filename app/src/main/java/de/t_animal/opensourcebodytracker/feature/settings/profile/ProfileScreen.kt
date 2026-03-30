@@ -7,16 +7,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,6 +25,7 @@ import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.settings.components.ProfileFormSection
 import de.t_animal.opensourcebodytracker.feature.settings.components.UnitSystemSelector
+import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
 @Composable
@@ -65,7 +59,6 @@ fun ProfileRoute(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     state: ProfileUiState.Loaded,
@@ -76,34 +69,16 @@ fun ProfileScreen(
     onUnitSystemChanged: (UnitSystem) -> Unit,
     onSaveClicked: () -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(
-                            if (state.mode == ProfileMode.Onboarding) R.string.profile_title_onboarding
-                            else R.string.profile_title_settings,
-                        ),
-                    )
-                },
-                navigationIcon = {
-                    if (state.mode == ProfileMode.Settings && onNavigateBack != null) {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = stringResource(R.string.cd_back),
-                            )
-                        }
-                    }
-                },
-            )
-        },
-    ) { padding ->
+    SecondaryScreenScaffold(
+        title = stringResource(
+            if (state.mode == ProfileMode.Onboarding) R.string.profile_title_onboarding
+            else R.string.profile_title_settings,
+        ),
+        onNavigateBack = onNavigateBack ?: {},
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         ) {
