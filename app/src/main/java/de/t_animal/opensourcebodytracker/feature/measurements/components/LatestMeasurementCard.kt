@@ -90,6 +90,7 @@ internal fun LatestMeasurementCard(
                             LatestMeasurementGrid(
                                 item = latest,
                                 visibleMetrics = analysisMetrics,
+                                allMeasurements = state.allMeasurements,
                                 unitSystem = state.unitSystem,
                             )
                         }
@@ -106,6 +107,7 @@ internal fun LatestMeasurementCard(
                             LatestMeasurementGrid(
                                 item = latest,
                                 visibleMetrics = rawMetrics,
+                                allMeasurements = state.allMeasurements,
                                 unitSystem = state.unitSystem,
                             )
                         }
@@ -120,40 +122,50 @@ internal fun LatestMeasurementCard(
 @Composable
 private fun LatestMeasurementCardPreview() {
     BodyTrackerTheme {
+        fun previewMeasurement(id: Long, epochMillis: Long, weightKg: Double, bodyFatPercent: Double) =
+            MeasurementListItemUiModel(
+                measurement = BodyMeasurement(
+                    id = id,
+                    dateEpochMillis = epochMillis,
+                    weightKg = weightKg,
+                    bodyFatPercent = bodyFatPercent,
+                    neckCircumferenceCm = 38.0,
+                    chestCircumferenceCm = 100.0,
+                    waistCircumferenceCm = 86.0,
+                    abdomenCircumferenceCm = 88.0,
+                    hipCircumferenceCm = 95.0,
+                    chestSkinfoldMm = 12.0,
+                    abdomenSkinfoldMm = 18.0,
+                    thighSkinfoldMm = 15.0,
+                ),
+                derivedMetrics = DerivedMetrics(
+                    bmi = weightKg / (1.75 * 1.75),
+                    navyBodyFatPercent = 18.3,
+                    skinfold3SiteBodyFatPercent = 17.8,
+                    waistHipRatio = 0.91,
+                    waistHeightRatio = 0.5,
+                ),
+                derivedMetricRatings = DerivedMetricRatings(
+                    bmi = MetricRating(RatingLabel.Normal, RatingSeverity.Good),
+                    navyBodyFatPercent = MetricRating(RatingLabel.Fit, RatingSeverity.Good),
+                    skinfold3SiteBodyFatPercent = MetricRating(RatingLabel.Fit, RatingSeverity.Good),
+                    waistHipRatio = MetricRating(RatingLabel.ModerateRisk, RatingSeverity.Fair),
+                    waistHeightRatio = MetricRating(RatingLabel.IncreasedRisk, RatingSeverity.Fair),
+                ),
+            )
+        // allMeasurements is DESC (most recent first)
+        val previewMeasurements = listOf(
+            previewMeasurement(5, 1_712_000_000_000, weightKg = 79.2, bodyFatPercent = 19.1),
+            previewMeasurement(4, 1_711_200_000_000, weightKg = 79.6, bodyFatPercent = 19.4),
+            previewMeasurement(3, 1_710_400_000_000, weightKg = 79.9, bodyFatPercent = 19.7),
+            previewMeasurement(2, 1_710_000_000_000, weightKg = 80.4, bodyFatPercent = 19.9),
+            previewMeasurement(1, 1_709_200_000_000, weightKg = 81.0, bodyFatPercent = 20.0),
+        )
         LatestMeasurementCard(
             state = MeasurementListUiState.Loaded(
-                latestMeasurement = MeasurementListItemUiModel(
-                    measurement = BodyMeasurement(
-                        id = 1,
-                        dateEpochMillis = 1_710_000_000_000,
-                        weightKg = 80.0,
-                        bodyFatPercent = 20.0,
-                        neckCircumferenceCm = 38.0,
-                        chestCircumferenceCm = 100.0,
-                        waistCircumferenceCm = 86.0,
-                        abdomenCircumferenceCm = 88.0,
-                        hipCircumferenceCm = 95.0,
-                        chestSkinfoldMm = 12.0,
-                        abdomenSkinfoldMm = 18.0,
-                        thighSkinfoldMm = 15.0,
-                    ),
-                    derivedMetrics = DerivedMetrics(
-                        bmi = 24.69,
-                        navyBodyFatPercent = 18.3,
-                        skinfold3SiteBodyFatPercent = 17.8,
-                        waistHipRatio = 0.91,
-                        waistHeightRatio = 0.5,
-                    ),
-                    derivedMetricRatings = DerivedMetricRatings(
-                        bmi = MetricRating(RatingLabel.Normal, RatingSeverity.Good),
-                        navyBodyFatPercent = MetricRating(RatingLabel.Fit, RatingSeverity.Good),
-                        skinfold3SiteBodyFatPercent = MetricRating(RatingLabel.Fit, RatingSeverity.Good),
-                        waistHipRatio = MetricRating(RatingLabel.ModerateRisk, RatingSeverity.Fair),
-                        waistHeightRatio = MetricRating(RatingLabel.IncreasedRisk, RatingSeverity.Fair),
-                    ),
-                ),
-                previewMeasurements = emptyList(),
-                allMeasurements = emptyList(),
+                latestMeasurement = previewMeasurements.first(),
+                previewMeasurements = previewMeasurements,
+                allMeasurements = previewMeasurements,
                 hasMoreMeasurements = false,
                 visibleInTableMetrics = MeasuredBodyMetric.entries + DerivedBodyMetric.entries,
                 unitSystem = UnitSystem.Metric,
@@ -188,9 +200,10 @@ private fun LatestMeasurementCardEmptyPreview() {
 private fun LatestMeasurementGrid(
     item: MeasurementListItemUiModel,
     visibleMetrics: List<BodyMetric>,
-    unitSystem: UnitSystem = UnitSystem.Metric,
+    allMeasurements: List<MeasurementListItemUiModel>,
+    unitSystem: UnitSystem,
 ) {
-    val metrics = buildLatestMeasurementMetrics(item, visibleMetrics, unitSystem)
+    val displayMetrics = buildLatestMeasurementMetrics(item, visibleMetrics, unitSystem)
     val context = LocalContext.current
 
     FlowRow(
@@ -199,7 +212,16 @@ private fun LatestMeasurementGrid(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        metrics.forEach { metric ->
+        visibleMetrics.zip(displayMetrics).forEach { (bodyMetric, displayItem) ->
+            val sparklinePoints = remember(allMeasurements, bodyMetric) {
+                allMeasurements
+                    .mapNotNull { listItem ->
+                        bodyMetric.valueSelector(listItem.measurement, listItem.derivedMetrics)
+                            ?.let { listItem.measurement.dateEpochMillis to it }
+                    }
+                    .take(10)
+                    .reversed()
+            }
             Column(
                 modifier = Modifier
                     .width(0.dp)
@@ -207,20 +229,20 @@ private fun LatestMeasurementGrid(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = metric.value,
+                    text = displayItem.value,
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Text(
-                    text = metric.label,
+                    text = displayItem.label,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
                     ) {
-                        Toast.makeText(context, metric.fullName, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, displayItem.fullName, Toast.LENGTH_SHORT).show()
                     }
                 )
-                metric.rating?.let { rating ->
+                displayItem.rating?.let { rating ->
                     Text(
                         text = stringResource(rating.label.labelResourceId),
                         style = MaterialTheme.typography.labelSmall,
@@ -232,6 +254,9 @@ private fun LatestMeasurementGrid(
                         },
                     )
                 }
+                MetricSparkline(
+                    points = sparklinePoints,
+                )
             }
         }
     }
