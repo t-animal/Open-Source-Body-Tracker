@@ -1,336 +1,159 @@
-# Navigation Structure
+# Navigation
 
-This document describes the currently implemented navigation behavior.
+## Scaffolds
 
----
+The app uses two scaffold types:
 
-## Main Shell
+- **`MainScreenScaffold`** — Used by the three main tabs. Provides a top app bar (dynamic title, overflow menu), and a bottom navigation bar.
+- **`SecondaryScreenScaffold`** — Used by all other screens. Provides a top app bar with a back arrow and title. No bottom navigation.
 
-The app uses a shared `MainScreenScaffold` for main tabs:
-
-- top app bar with dynamic title
-- overflow menu
-- bottom navigation
-
-Main destinations:
-
-- Measurements (`measurement_list`)
-- Analysis (`analysis`)
-- Photos (`photos`)
-
-Tab navigation uses a single `NavController` stack with `launchSingleTop = true` for tab selections.
-
----
+During onboarding, some screens (Profile, Analysis, Reminders) reuse their settings-mode composable but hide the back button; navigation is driven by the onboarding flow instead.
 
 ## Overflow Menu
 
-Main tabs expose overflow actions:
+The overflow menu on main tab screens contains:
 
-- Profile
-- Settings
-- Reminders
-- Export
-- Trigger Reminder
+| Entry | Route |
+|-------|-------|
+| Settings | `settings` |
+| About | `settings/about` |
 
-In debug builds, a fake data generator action is also available.
+In debug builds, additional entries appear: Trigger Reminder, Reset App, Fake Data Generator, Schedule Export.
 
----
+## Bottom Navigation
 
-## Onboarding Gate
+| Tab | Icon | Route |
+|-----|------|-------|
+| Measurements | MonitorWeight | `measurements` |
+| Analysis | SsidChart | `analysis` |
+| Photos | CameraAlt | `photos` |
 
-Start destination is onboarding.
+Tab selection uses `launchSingleTop = true`.
 
-If a profile exists while the current route is onboarding, navigation automatically moves to Measurements and removes onboarding from back stack.
+## Route Map
 
----
+### Onboarding (nested graph: `onboarding`)
 
-## Route Overview
+| Route | Screen | Next |
+|-------|--------|------|
+| `onboarding/start` | Welcome — Create Profile, Try Demo Data, Import Backup | Profile or Demo or Import |
+| `onboarding/profile` | Profile form (Sex, DOB, Height) | `onboarding/analysis` |
+| `onboarding/analysis` | Analysis method + measurement toggles | `onboarding/reminders` |
+| `onboarding/reminders` | Reminder schedule setup | Completes onboarding -> `measurements` |
+| `onboarding/import` | Import encrypted backup ZIP | Completes onboarding -> `measurements` |
 
-### Main-tab routes
+On completion (demo, import, or full flow), navigates to `measurements` and removes the onboarding graph from the back stack.
 
-- `measurement_list`: implemented measurement overview with latest card, table preview, and FAB.
-- `analysis`: implemented chart screen with duration filtering and Vico line charts.
-- `photos`: implemented photo gallery with compare/animate mode entry.
+### Main Tabs
 
-### Secondary routes
+| Route | Scaffold |
+|-------|----------|
+| `measurements` | MainScreenScaffold |
+| `analysis` | MainScreenScaffold |
+| `photos` | MainScreenScaffold |
 
-- `profile`: editable profile form.
-- `settings`: implemented settings configuration screen.
-- `reminders`: reminder configuration screen.
-- `export`: export settings screen with folder/password draft save.
-- `measurement_add`: add measurement flow.
-- `measurement_edit/{id}`: edit measurement flow.
-- `measurement_list_all`: full measurement table screen with back button.
-- `photo_compare/{leftMeasurementId}/{rightMeasurementId}`: compare screen with draggable before/after slider.
-- `photo_animate`: animation playback screen for selected photos.
-- `fake_data_generator` (debug only): fake data screen.
+### Measurement Sub-Routes
 
-`BodyTrackerNavHost` now passes `SettingsRepository` into:
+| Route | Screen |
+|-------|--------|
+| `measurements/all` | Full measurement table |
+| `measurements/add` | Add new measurement |
+| `measurements/edit/{measurementId}` | Edit existing measurement |
 
-- `ProfileRoute`
-- `SettingsRoute`
-- `MeasurementListRoute` / `MeasurementListFullRoute`
-- `MeasurementEditRoute`
-- `AnalysisRoute`
+### Photo Sub-Routes
 
----
+| Route | Screen |
+|-------|--------|
+| `photos/compare/{leftMeasurementId}/{rightMeasurementId}` | Side-by-side comparison with slider |
+| `photos/animate/{ids}` | Sequential playback of selected photos |
+
+### Settings Sub-Routes
+
+| Route | Screen |
+|-------|--------|
+| `settings` | Settings hub (navigation list) |
+| `settings/profile` | Profile editor |
+| `settings/misc` | Unit system, photo quality |
+| `settings/measurements` | Analysis method + measurement toggles |
+| `settings/measurement-visibility` | Show/hide metrics in charts and tables |
+| `settings/reminders` | Reminder schedule |
+| `settings/export` | Export configuration and manual export |
+| `settings/about` | App info, links |
+
+### Debug (debug builds only)
+
+| Route | Screen |
+|-------|--------|
+| `debug/fake-data-generator` | Seed fake measurement data |
+
+## Start Destination
+
+Determined by `GeneralSettings.onboardingCompleted`:
+- `false` -> `onboarding` (the nested graph, starting at `onboarding/start`)
+- `true` -> `measurements`
+
+## Deep Link: Notification -> Add Measurement
+
+Tapping a reminder notification triggers the measurement-add deep link handler. If onboarding is incomplete, the request is ignored. Otherwise, the app navigates to `measurements` then `measurements/add`.
 
 ## Back Behavior
 
-- Add/edit/full-list screens are pushed onto the main stack and return with system/back icon.
-- Profile/settings/reminders are opened from overflow and return to previous screen on back.
-- Export is opened from overflow and returns to previous screen on back.
-- Main tabs remain top-level destinations selected via bottom navigation.
+- Main tabs are top-level; bottom nav switches between them.
+- All sub-routes (measurement add/edit/all, photo compare/animate, settings/*) push onto the stack and pop on back.
+- Onboarding steps are sequential; completing the final step replaces the entire onboarding graph.
 
----
+## Navigation Graph
 
-## Screen Status Summary
+```mermaid
+graph
+    subgraph Onboarding
+        Start[onboarding/start] -->|Create Profile| Profile[onboarding/profile]
+        Start -->|Import Backup| Import[onboarding/import]
+        Profile --> AnalysisSetup[onboarding/analysis]
+        AnalysisSetup --> RemindersSetup[onboarding/reminders]
+    end
 
-- Measurements: implemented
-- Analysis: implemented
-- Photos: implemented
-- Profile: implemented
-- Settings: implemented
-- Reminders: implemented
+    subgraph MainTabs
+        direction LR
+        MeasurementsTab[measurements]
+        AnalysisTab[analysis]
+        PhotosTab[photos]
 
----
+        MeasurementsTab <--> AnalysisTab
+        AnalysisTab <--> PhotosTab
+        MeasurementsTab <--> PhotosTab
 
-# 🧭 Navigation Structure
+        MeasurementsTab --> MeasurementSecondary
+        PhotosTab --> PhotosSecondary
 
-The app uses:
+        subgraph MeasurementSecondary
+            Add[measurements/add]
+            Edit[measurements/edit/id]
+            All[measurements/all]
+        end
 
-* **Top App Bar**
-* **Overflow Menu (3-dot menu)**
-* **Bottom Navigation Bar**
+        subgraph PhotosSecondary
+            Compare[photos/compare/l/r]
+            Animate[photos/animate/ids]
+        end
+    end
 
-All main screens share the same layout structure.
+    Start -->|Try Demo| MeasurementsTab
+    RemindersSetup --> MeasurementsTab
+    Import --> MeasurementsTab
 
----
+    subgraph Settings
+        SettingsHub[settings] --> SettingsLeaves[profile / misc / measurements\nmeasurement-visibility\nreminders / export / about]
+    end
 
-## 🔝 Top App Bar
-
-Each main screen contains a top navigation bar with:
-
-* **Dynamic page title**
-
-  * "Measurements"
-  * "Analysis"
-  * "Photos"
-* **Three-dot overflow menu (⋮)**
-
-### Overflow Menu Entries
-
-* **Profile**
-* **Settings**
-* **Reminders**
-* **Export**
-* **Trigger Reminder**
-
-### Navigation Behavior
-
-| Menu Item | Destination / Behavior                        |
-| --------- | --------------------------------------------- |
-| Profile   | Profile screen                                |
-| Settings  | Settings configuration screen                 |
-| Reminders | Reminder settings screen                      |
-| Export | Export settings screen (folder + password config) |
-| Trigger Reminder | Shows a notification that opens Add Measurement on tap |
-
----
-
-## 🔽 Bottom Navigation Bar
-
-The bottom navigation contains three entries:
-
-| Label | Meaning      | Destination                         |
-| ----- | ------------ | ----------------------------------- |
-| M     | Measurements | Measurement list screen             |
-| A     | Analysis     | Analysis screen                     |
-| P     | Photos       | Photos gallery + compare/animate modes |
-
-Icons will later replace the letters.
-
----
-
-# 📱 Screens (Current Scope)
-
-## 1️⃣ Measurements Screen (Default Start Destination)
-
-* Top bar: Title = "Measurements"
-* Overflow menu available
-* Bottom navigation visible
-* Content: Measurement list (implemented)
-
----
-
-## 2️⃣ Analysis Screen
-
-* Top bar: Title = "Analysis"
-* Overflow menu available
-* Bottom navigation visible
-* Content: duration selector + chart cards based on settings visibility
-
----
-
-## 3️⃣ Photos Screen (Implemented)
-
-* Top bar: Title = "Photos"
-* Overflow menu available
-* Bottom navigation visible
-* Content:
-   - scrollable photo gallery
-   - compare mode selection + compare route
-   - animate mode selection + animation route
-
----
-
-## 4️⃣ Profile Screen
-
-* Accessible via overflow menu. 
-* Same top bar layout
-* No bottom navigation (optional design decision — recommended: no bottom nav)
-
-Contains:
-
-* Sex
-* Date of birth
-* Height
-
-Editable form layout.
-
----
-
-## 5️⃣ Settings Screen
-
-* Accessible via overflow menu. 
-* Same top bar layout
-* No bottom navigation (optional design decision — recommended: no bottom nav)
-* Configurable sections:
-
-   * Analysis Methods
-   * Measurement Collection
-   * Display Configuration
-
----
-
-# 🖥 ASCII Mockup – Measurements Screen
-
-```
-+--------------------------------------------------+
-| Measurements                              ⋮     |
-+--------------------------------------------------+
-
-|                                                  |
-|   [ 2026-02-20 ]                                |
-|   Weight: 82.4 kg                                |
-|   Waist: 89 cm                                   |
-|                                                  |
-|   --------------------------------------------   |
-|                                                  |
-|   [ 2026-02-15 ]                                |
-|   Weight: 83.1 kg                                |
-|   Waist: 90 cm                                   |
-|                                                  |
-|                                                  |
-|                                                  |
-|                                                  |
-+--------------------------------------------------+
-|     M              A              P             |
-+--------------------------------------------------+
+    MainTabs -->|overflow menu| SettingsHub
 ```
 
----
+## Key Source Files
 
-# 🖥 ASCII Mockup – Analysis Screen (Empty Placeholder)
-
-```
-+--------------------------------------------------+
-| Analysis                                   ⋮    |
-+--------------------------------------------------+
-
-|                                                  |
-|                                                  |
-|              Analysis Coming Soon                |
-|                                                  |
-|                                                  |
-|                                                  |
-|                                                  |
-|                                                  |
-+--------------------------------------------------+
-|     M              A              P             |
-+--------------------------------------------------+
-```
-
----
-
-# 🖥 ASCII Mockup – Photos Screen (Gallery)
-
-```
-+--------------------------------------------------+
-| Photos                                     ⋮    |
-+--------------------------------------------------+
-
-|                                                  |
-|                                                  |
-|              [Photo feed content]               |
-|                                                  |
-|                                                  |
-|                                                  |
-|                                                  |
-|                                                  |
-+--------------------------------------------------+
-|     M              A              P             |
-+--------------------------------------------------+
-```
-
----
-
-# 🖥 ASCII Mockup – Overflow Menu
-
-```
-        ⋮
-        |
-        |  Profile
-        |  Settings
-```
-
----
-
-# 🧠 Navigation Behavior Rules
-
-1. Bottom navigation switches between:
-
-   * Measurements
-   * Analysis
-   * Photos
-
-2. Overflow menu is available on:
-
-   * Measurements
-   * Analysis
-   * Photos
-
-3. Profile and Settings:
-
-   * Open as separate screens
-   * Accessible from any main screen
-   * Do not replace bottom navigation state
-
-4. Back navigation:
-
-   * Bottom navigation maintains its own back stack (recommended)
-   * System back returns to previous screen
-
----
-
-# 🎯 Goals of Phase 3.1
-
-* Establish consistent navigation structure
-* Prepare placeholder screens for upcoming features
-* Ensure scalability for future feature expansion
-* Follow Material 3 navigation guidelines
-* Maintain clean MVVM separation
-
----
-
-This reflects the current navigation structure, including the implemented Photos compare and animation routes.
+- `ui/navigation/Routes.kt` — All route string constants
+- `ui/navigation/BodyTrackerNavHost.kt` — NavHost wiring
+- `ui/navigation/MainDestination.kt` — Tab enum (routes, icons, titles)
+- `ui/components/MainScreenScaffold.kt` — Tab scaffold with overflow menu
+- `ui/components/SecondaryScreenScaffold.kt` — Sub-screen scaffold with back arrow
+- `feature/settings/onboarding/OnboardingNavGraph.kt` — Onboarding nested graph
