@@ -1,372 +1,138 @@
-# Unified Settings Architecture
+# Settings
 
-The current app contains multiple settings screens that are accessed separately through the overflow menu.  
-To improve usability and consistency, all configuration options will be **consolidated into a unified Settings structure**.
+## Settings Hub
 
-The goal is to provide:
+The settings screen (`settings`) is a navigation hub. Each entry opens a dedicated sub-screen.
 
-- A **single entry point for all configuration**
-- A **clear hierarchy of settings**
-- Consistent UI patterns across all settings screens
+| Entry | Route | Purpose |
+|-------|-------|---------|
+| Profile | `settings/profile` | Sex, date of birth, height |
+| Miscellaneous | `settings/misc` | Unit system, photo quality |
+| Measurements & Analysis | `settings/measurements` | Analysis method toggles + measurement collection toggles |
+| Measurement Visibility | `settings/measurement-visibility` | Show/hide metrics in charts and tables |
+| Reminders | `settings/reminders` | Reminder schedule |
+| Export | `settings/export` | Backup configuration, manual export |
+| About | `settings/about` | App info, GitHub link, contact email |
 
-The **debug options in the overflow menu remain unchanged**.
-
----
-
-# Overview
-
-Instead of accessing configuration screens directly from the overflow menu, there will be **one main Settings screen** with submenus.
-
-Existing settings that will be integrated:
-
-- Profile
-- Analysis settings
-- Measurement settings
-- Measurement visibility settings
-- Export settings
-
-Additionally, a new screen will be added:
-
-- About
+All settings screens use `SecondaryScreenScaffold` (back arrow + title). During onboarding, Profile, Measurements & Analysis, and Reminders screens are reused with the back button hidden.
 
 ---
 
-# Settings Entry Point
+## Analysis Methods
 
-The overflow menu will now contain:
+Five analysis methods can be independently enabled or disabled:
 
-```
-⋮
-Settings
-About
-Debug options (unchanged)
-```
+| Method | Enum value |
+|--------|-----------|
+| BMI | `Bmi` |
+| Navy Body Fat % | `NavyBodyFat` |
+| Skinfold Body Fat % (3-site) | `Skinfold3SiteBodyFat` |
+| Waist-Hip Ratio | `WaistHipRatio` |
+| Waist-Height Ratio | `WaistHeightRatio` |
 
-Selecting **Settings** opens the **Main Settings Screen**.
-
----
-
-# Main Settings Screen
-
-The main screen acts as a **navigation hub** for all configuration pages.
-
-Example layout:
-
-```
-Settings
-
-Profile
->
-
-Analysis Methods
->
-
-Measurements
->
-
-Measurement Visibility
->
-
-Export
->
-
-About
->
-```
-
-Each item opens a dedicated settings screen.
+Enabling a method auto-requires its dependent measurements. Required measurements are locked on and cannot be disabled.
 
 ---
 
-# General Settings Screen Behavior
+## Measurement Dependencies
 
-All settings screens follow the same UI structure.
-
-### Top Navigation
-
-Each screen contains a **top navigation bar** with:
-
-- Page title
-- Back arrow
-
+```mermaid
+graph TB
+    BMI --> Weight
+    WHtR[Waist-Height Ratio] --> Waist
+    WHR[Waist-Hip Ratio] --> Waist
+    WHR --> Hip
+    Navy[Navy Body Fat] --> Neck[Neck Circ.]
+    Navy --> Waist[Waist Circ.]
+    Navy -->|Female only| Hip[Hip Circ.]
+    Skinfold[Skinfold 3-Site] -->|Male| ChestSF[Chest Skinfold]
+    Skinfold -->|Male| AbdomenSF[Abdomen Skinfold]
+    Skinfold --> ThighSF[Thigh Skinfold]
+    Skinfold -->|Female| TricepsSF[Triceps Skinfold]
+    Skinfold -->|Female| SuprailiacSF[Suprailiac Skinfold]
 ```
-←  Screen Title
-```
 
-Pressing the arrow returns to the previous screen.
+Full dependency table:
 
-### Onboarding Exception
+| Analysis Method | Required Measurements | Sex-specific |
+|----------------|----------------------|-------------|
+| BMI | Weight | No |
+| Navy Body Fat | Neck, Waist | + Hip for Female |
+| Skinfold 3-Site | Thigh Skinfold | + Chest & Abdomen Skinfold (Male), + Triceps & Suprailiac Skinfold (Female) |
+| Waist-Hip Ratio | Waist, Hip | No |
+| Waist-Height Ratio | Waist | No |
 
-Some screens are reused during onboarding.
-
-In those cases:
-
-- **The back button is not shown**
-- Navigation is handled by the onboarding flow
+When the user changes their sex on the profile screen, measurements needed for currently enabled analysis methods are auto-enabled (additive only — nothing is disabled).
 
 ---
 
-# Profile Screen
+## Measurement Collection
 
-The profile screen contains the user's basic personal data.
+All 11 measured body metrics can be toggled on or off:
 
-Fields include:
+**Circumferences (cm):** Neck, Chest, Waist, Abdomen, Hip
 
-- Gender
-- Height
-- Date of Birth
+**Skinfolds (mm):** Chest, Abdomen, Thigh, Triceps, Suprailiac
 
-### Gender Selection
+Measurements required by an enabled analysis method are locked on and visually marked as required. Optional measurements can be freely toggled.
 
-Gender options are displayed **horizontally**.
-
-Example:
-
-```
-Sex
-
-[ Male ]   [ Female ] 
-```
-
-This improves clarity and reduces vertical space usage.
+Disabled measurements do not appear on the Add/Edit Measurement screen.
 
 ---
 
-# Analysis Settings Screen
+## Measurement Visibility
 
-This screen defines **which body composition analyses are enabled**.
+Controls which metrics appear in:
+- Analysis screen (charts)
+- Measurement tables (latest card, all-measurements table)
 
-Example analyses:
-
-- Navy Body Fat %
-- Skinfold Body Fat %
-
-Enabling an analysis automatically activates the **required measurements**.
-
-### Description Text
-
-At the top of the screen a short explanation is shown:
-
-> Select which body composition analysis methods should be calculated.  
-> Enabling an analysis may automatically activate required measurements.
+Each metric has independent visibility for analysis and table views. Derived metrics from disabled analysis methods are automatically hidden. Visibility does not affect data collection.
 
 ---
 
-# Measurement Settings Screen
+## Profile
 
-This screen controls **which measurements are recorded**.
-
-Measurements required for enabled analyses **cannot be disabled**.
-
-Optional measurements can be toggled on or off.
-
-### Description Text
-
-At the top of the screen:
-
-> Configure which measurements should be collected when recording a measurement entry.  
-> Some measurements are required for selected analysis methods and cannot be disabled.
+Fields: Sex (Male/Female segmented button), Date of Birth, Height (cm or ft/in based on unit system).
 
 ---
 
-# Measurement Visibility Screen
+## Miscellaneous
 
-Previously, measurement visibility was part of another settings screen.  
-It is now **moved to its own dedicated screen**.
+**Unit System** — Segmented button: Metric (kg, cm) or Imperial (lbs, in). Affects display only; storage is always metric.
 
-This screen controls **which measurements are visible in tables and analysis views**.
+**Photo Quality** — Controls resolution and JPEG compression at save time:
 
----
+| Level | Max dimension | JPEG quality |
+|-------|-------------|-------------|
+| Original | As captured | No compression |
+| High | 2560 px | 90% |
+| Medium | 1920 px | 80% |
+| Low | 1280 px | 70% |
 
-## Visible Measurements
-
-Measurements currently being recorded are listed with toggles.
-
-Example:
-
-```
-Visible Measurements
-
-[✓] Weight
-[✓] Waist
-[✓] Hip
-[ ] Chest
-```
+Default is Original. Existing photos are not retroactively reprocessed.
 
 ---
 
-## Measurements Not Currently Recorded
+## Reminders
 
-Measurements that are **not currently collected** are displayed in a separate section.
+See the Reminders section in [INDEX.md](INDEX.md) for scheduling behavior.
 
-Example:
-
-```
-Measurements Not Currently Collected
-
-Neck
-Chest
-Thigh
-```
-
-A hint text is displayed above this section:
-
-> These measurements are currently not recorded.  
-> They may still appear in the app if historical data exists.
-
-This allows users to **hide measurements they do not actively track** while still preserving historical information.
+Settings: enabled toggle, weekday selection (at least one required when enabled), time picker.
 
 ---
 
-# Export Settings Screen
+## Export
 
-The export screen manages data backup and transfer.
+See [EXPORT.md](EXPORT.md) for archive format and import flow.
 
-### Description Text
-
-At the top:
-
-> Configure how your data can be exported for backup or device transfer.
+Settings: password, device storage toggle, folder selection, manual export button.
 
 ---
 
-## Password Placement
+## Key Source Files
 
-The **export password field is placed at the top of the screen**.
-
-```
-Export Password
-[ ******** ]
-```
-
-The export feature can only be enabled if a password is provided.
-
-If the password field is empty:
-
-- Export options remain disabled
-- Export cannot be activated
-
----
-
-## Export Options
-
-Below the password field:
-
-```
-Export Destination
-
-[✓] Export to Device Storage
-[ ] Export to Google Drive (coming later)
-```
-
----
-
-## Folder Selection
-
-```
-Export Folder
-[ Select Folder ]
-```
-
-The folder selection is enabled only when export is activated.
-
----
-
-# About Screen
-
-A new **About screen** provides information about the project.
-
-It contains:
-
-- App description
-- Project information
-- Links for support and contribution
-
-Example layout:
-
-```
-About
-
-Body Measurement Tracker
-
-A privacy-focused body measurement tracking app.
-
-Project
-[ GitHub Repository ]
-
-Contact
-support@example.com
-```
-
----
-
-## GitHub Link
-
-The GitHub link:
-
-- Opens the project repository in the browser
-- Allows users to view the source code or report issues
-
----
-
-## Contact Email
-
-The contact email is clickable.
-
-When pressed:
-
-- The default **mail client opens**
-- A new email draft is created
-
----
-
-# Miscellaneous Settings Screen
-
-The miscellaneous screen holds settings that don't fit into other categories.
-
-## Unit System
-
-Segmented button to choose between Metric (kg, cm) and Imperial (lbs, in).
-
-## Photo Quality
-
-Controls the resolution and JPEG compression applied to measurement photos at save time.
-
-Displayed as a segmented button row with four options:
-
-- **Original** — No processing; photos saved as captured by the camera.
-- **High** — Resized to max 2560px, compressed at 90% JPEG quality.
-- **Medium** — Resized to max 1920px, compressed at 80% JPEG quality.
-- **Low** — Resized to max 1280px, compressed at 70% JPEG quality.
-
-A description below the selector updates to explain the currently selected level. The default is Original. Existing photos are not retroactively reprocessed when the setting changes.
-
----
-
-# Settings Screen UX Principle
-
-Every settings screen follows these principles:
-
-- Clear title
-- Short explanation text at the top
-- Simple toggle-based configuration
-- Consistent back navigation
-
----
-
-# Summary
-
-This phase introduces a **unified settings architecture**.
-
-Key improvements:
-
-✔ Single Settings entry point  
-✔ Structured settings navigation  
-✔ Dedicated Measurement Visibility screen  
-✔ Improved Export configuration logic  
-✔ Horizontal gender selection  
-✔ Informational text on all settings pages  
-✔ New About screen with GitHub and contact email  
-✔ Consistent back navigation across settings screens  
-
-The debug options in the overflow menu **remain unchanged**.
+- `feature/settings/SettingsScreen.kt` — Hub screen
+- `core/model/MeasurementSettings.kt` — Settings data model
+- `domain/metrics/DerivedMetricsDependencyResolver.kt` — Dependency resolution logic
+- `core/model/PhotoQuality.kt` — Photo quality levels
+- `data/settings/MeasurementSettingsRepository.kt` — Settings persistence

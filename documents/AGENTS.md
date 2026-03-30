@@ -19,7 +19,7 @@ Maintain and extend the Android app safely and quickly with consistent architect
 
 ## Source of Truth (Code Areas)
 
-- DI modules: `app/src/main/java/de/t_animal/opensourcebodytracker/di/` (DatabaseModule, BindingsModule, AppModule)
+- DI modules: `app/src/main/java/de/t_animal/opensourcebodytracker/di/` (DatabaseModule, DataStoreModule, BindingsModule, AppModule)
 - Entry/UI host: `app/src/main/java/de/t_animal/opensourcebodytracker/MainActivity.kt`
 - Navigation: `app/src/main/java/de/t_animal/opensourcebodytracker/ui/navigation/BodyTrackerNavHost.kt`
 - Routes: `app/src/main/java/de/t_animal/opensourcebodytracker/ui/navigation/Routes.kt`
@@ -72,18 +72,13 @@ Test must succeed and may only be changed if they fail because the tested behavi
 
 ## Documents Index
 
+- [INDEX.md](INDEX.md): Project overview, glossary, feature summaries, and links to all documentation.
 - [ARCHITECTURE.md](ARCHITECTURE.md): Package layout, layer responsibilities, dependency direction, and design trade-offs.
-- [ANALYSIS.md](ANALYSIS.md): Analysis tab behavior, data flow, chart rules, and transforms.
-- [ANALYSIS_RATING.md](ANALYSIS_RATING.md): Health rating thresholds and severity levels for derived metrics (BMI, body fat %, WHR, WHtR).
-- [EXPORT.md](EXPORT.md): Data export for backup and synchronization.
-- [FORMULAS.md](FORMULAS.md): Forward formulas for derived body metrics and implementation notes.
-- [FORMULAS_INVERTED.md](FORMULAS_INVERTED.md): Inverted formula math for generating target-compatible measurements.
-- [MEASUREMENT-SCREEN.md](MEASUREMENT-SCREEN.md): Measurements UI structure, layout rules, and behavior details.
-- [NAVIGATION.md](NAVIGATION.md): Route map, scaffold behavior, gating, and back-stack notes.
-- [ONBOARDING.md](ONBOARDING.md): Onboarding flow, demo mode, reset behavior, and completion conditions.
-- [PHOTOS.md](PHOTOS.md): Photo capture/storage/gallery/compare/animate feature specification.
-- [REMINDER.md](REMINDER.md): Reminder phases and implementation spec (settings UI, manual trigger, scheduling).
-- [SETTINGS.md](SETTINGS.md): Settings model, method toggles, required measurement dependencies, and display config.
+- [NAVIGATION.md](NAVIGATION.md): Route map, scaffolds, overflow menu, and back behavior.
+- [FORMULAS.md](FORMULAS.md): Derived metric formulas (BMI, Navy, Skinfold, WHR, WHtR).
+- [HEALTH_RATINGS.md](HEALTH_RATINGS.md): Health rating thresholds and severity levels for derived metrics.
+- [SETTINGS.md](SETTINGS.md): Settings hub, analysis methods, measurement dependencies, and visibility config.
+- [EXPORT.md](EXPORT.md): Export archive format, encryption, auto-export scheduling, and import flow.
 - [TRANSLATIONS.md](TRANSLATIONS.md): Rules for adding, removing, and syncing string resources across all locale files.
 
 - **Very important**: If you change something so that these documents don't align any more, **adjust the documents**. If you spot that the documents have drifted from the implementation, suggest updating them.

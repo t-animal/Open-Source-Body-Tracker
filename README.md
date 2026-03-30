@@ -200,5 +200,4 @@ If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
   darstellst, was zuletzt recorded wurde, sondern ggfs. das "last known value".
   Kannst es ja irgendwie ausgrauen oder so, und bei tap oder long tap anzeigen, wie alt der Wert ist
 * demo data use case statt aussteuern im viewmodel onboardtingstartviewmodel
-* nightly export broken?
 * custom measurements
