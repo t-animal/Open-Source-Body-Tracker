@@ -45,6 +45,17 @@ android {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
+        create("screenshot") {
+            initWith(getByName("debug"))
+
+            applicationIdSuffix = ".screenshot"
+            versionNameSuffix = "-screenshot"
+
+            matchingFallbacks += listOf("debug")
+            ndk {
+                abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
+            }
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
@@ -60,6 +71,12 @@ android {
         resValues = true
         buildConfig = true
     }
+
+    testOptions {
+        animationsDisabled = true
+    }
+
+    testBuildType = "screenshot"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -111,9 +128,13 @@ dependencies {
     ksp(libs.hilt.work.compiler)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.uiautomator)
 }

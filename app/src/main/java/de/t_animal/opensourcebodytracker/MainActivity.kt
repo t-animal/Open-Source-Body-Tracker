@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +18,7 @@ import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificatio
 import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationPoster
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
+import de.t_animal.opensourcebodytracker.ScreenshotModeOrchestrator
 import de.t_animal.opensourcebodytracker.ui.navigation.BodyTrackerNavHost
 import de.t_animal.opensourcebodytracker.ui.navigation.Routes
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -30,10 +32,13 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private val openMeasurementAddSignal = MutableStateFlow(0L)
     private var startDestination by mutableStateOf<String?>(null)
+    private var forcedDarkTheme by mutableStateOf<Boolean?>(null)
+    private var useDynamicColor by mutableStateOf(true)
 
     @Inject lateinit var generalSettingsRepository: GeneralSettingsRepository
     @Inject lateinit var automaticExportScheduler: AutomaticExportScheduler
     @Inject lateinit var reminderNotificationPoster: ReminderNotificationPoster
+    @Inject lateinit var screenshotModeOrchestrator: ScreenshotModeOrchestrator
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -42,18 +47,28 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { startDestination == null }
 
         lifecycleScope.launch {
-            val settings = generalSettingsRepository.settingsFlow.first()
-            startDestination = if (settings.onboardingCompleted) {
-                Routes.MeasurementList
+            val screenshotResult = screenshotModeOrchestrator.tryInitialize(intent)
+            if (screenshotResult != null) {
+                forcedDarkTheme = screenshotResult.darkTheme
+                useDynamicColor = false
+                startDestination = screenshotResult.startDestination
             } else {
-                Routes.OnboardingGraph
+                val settings = generalSettingsRepository.settingsFlow.first()
+                startDestination = if (settings.onboardingCompleted) {
+                    Routes.MeasurementList
+                } else {
+                    Routes.OnboardingGraph
+                }
             }
         }
 
         handleNotificationIntent(intent)
 
         setContent {
-            BodyTrackerTheme {
+            BodyTrackerTheme(
+                darkTheme = forcedDarkTheme ?: isSystemInDarkTheme(),
+                dynamicColor = useDynamicColor,
+            ) {
                 val destination = startDestination
                 if (destination != null) {
                     Surface(modifier = Modifier) {
