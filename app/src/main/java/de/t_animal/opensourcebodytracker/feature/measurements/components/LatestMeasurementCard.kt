@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -154,18 +155,20 @@ private fun LatestMeasurementCardPreview() {
             previewMeasurement(2, 1_710_000_000_000, weightKg = 80.4, bodyFatPercent = 19.9),
             previewMeasurement(1, 1_709_200_000_000, weightKg = 81.0, bodyFatPercent = 20.0),
         )
-        LatestMeasurementCard(
-            state = MeasurementListUiState.Loaded(
-                latestMeasurement = previewMeasurements.first(),
-                previewMeasurements = previewMeasurements,
-                allMeasurements = previewMeasurements,
-                hasMoreMeasurements = false,
-                visibleInTableMetrics = MeasuredBodyMetric.entries + DerivedBodyMetric.entries,
-                unitSystem = UnitSystem.Metric,
-                isEmpty = false,
-            ),
-            onAdd = {},
-        )
+        Box(modifier = Modifier.fillMaxSize()){
+            LatestMeasurementCard(
+                state = MeasurementListUiState.Loaded(
+                    latestMeasurement = previewMeasurements.first(),
+                    previewMeasurements = previewMeasurements,
+                    allMeasurements = previewMeasurements,
+                    hasMoreMeasurements = false,
+                    visibleInTableMetrics = MeasuredBodyMetric.entries + DerivedBodyMetric.entries,
+                    unitSystem = UnitSystem.Metric,
+                    isEmpty = false,
+                ),
+                onAdd = {},
+            )
+        }
     }
 }
 
@@ -243,7 +246,6 @@ private fun LatestMeasurementGrid(
                                     Toast.makeText(context, displayItem.fullName, Toast.LENGTH_SHORT).show()
                                 }
                         )
-                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = displayItem.value,
                             style = MaterialTheme.typography.titleMedium,

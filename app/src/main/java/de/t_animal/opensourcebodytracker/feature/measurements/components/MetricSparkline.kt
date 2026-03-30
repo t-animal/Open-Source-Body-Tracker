@@ -21,7 +21,7 @@ import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import kotlin.math.abs
 
-private val SPARKLINE_HEIGHT = 38.dp
+private val SPARKLINE_HEIGHT = 30.dp
 private const val SPARKLINE_AREA_ALPHA = 0.15f
 private const val SPARKLINE_VERTICAL_PADDING_FRACTION = 0.1
 private const val SPARKLINE_MIN_VERTICAL_PADDING = 0.5
@@ -52,7 +52,7 @@ internal fun MetricSparkline(
 
             override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore): Double {
                 val padding = computeVerticalPadding(minY, maxY)
-                return maxY + padding
+                return maxY
             }
         }
     }
