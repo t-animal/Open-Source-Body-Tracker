@@ -1,0 +1,47 @@
+## Plan: Automatic Screenshot CI
+
+Implement a main-only screenshot pipeline by adding a deterministic screenshot launch path to the debug app, driving it from a lightweight instrumented test harness, then publishing outputs through the existing CI workflow to both artifacts and GitHub Pages. This avoids building a parallel rendering harness, keeps capture rooted in the real runtime app and demo-mode data, and minimizes test setup complexity by not introducing Hilt instrumentation unless needed.
+
+**Steps**
+1. Phase 1: Define the screenshot runtime seam in the app. Add a debug-safe launch contract so the app can start in screenshot mode, seed demo mode through existing runtime logic, force light or dark theme, and resolve the requested target screen before rendering. This blocks later capture work.
+2. Phase 1 details: Reuse `StartDemoModeUseCase.invoke()` in `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/domain/demodata/StartDemoModeUseCase.kt`, keep `MainActivity` as the launch entry point in `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/MainActivity.kt`, and introduce a small screenshot-target resolver that can translate the four requested screen types into routes, including a concrete compare route via `Routes.photoCompareRoute(...)` in `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/ui/navigation/Routes.kt`.
+3. Phase 1 details: Add the smallest possible theme override seam. Preferred approach: pass an explicit dark-mode flag from `MainActivity` into `BodyTrackerTheme(darkTheme = ...)` in `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/ui/theme/Theme.kt`. This is lower-risk than toggling emulator-wide dark mode from CI and avoids doubling flakiness.
+4. Phase 2: Add the screenshot capture harness under `/workspaces/2026-03--open-source-body-tracker/app/src/androidTest/`. Add Compose UI test dependencies in `/workspaces/2026-03--open-source-body-tracker/app/build.gradle.kts`, replace the placeholder instrumentation test with a dedicated screenshot test suite, and add helper code to launch the app eight times, once per screen-theme pair, waiting with bounded retries for the target screen to stabilize before capture.
+5. Phase 2 details: Use full-screen runtime capture rather than a preview or fake renderer. Prefer Compose root capture if it reliably captures the rendered app content; otherwise fall back to device-level screenshot capture. Persist PNGs to a deterministic output folder with fixed filenames: `measurement_list_light.png`, `measurement_list_dark.png`, `analysis_light.png`, `analysis_dark.png`, `photo_light.png`, `photo_dark.png`, `photo_compare_light.png`, `photo_compare_dark.png`.
+6. Phase 2 details: Make the harness best-effort. Each target should run independently, record success or failure, and continue regardless of prior failures. Add a small result-summary artifact or console summary so CI can show which screenshots were produced without failing the entire workflow by default.
+7. Phase 3: Extend the existing workflow in `/workspaces/2026-03--open-source-body-tracker/.github/workflows/ci.yml` with a `screenshots` job that runs only on pushes to `main`, after build success. Use a fixed emulator profile and locale, build and run the debug/instrumented test target, collect the screenshot directory, and upload it with `actions/upload-artifact`.
+8. Phase 3 details: In the same job, publish the screenshot directory to GitHub Pages. Write the artifact layout so `screenshots/latest/` always contains the current fixed filenames and `screenshots/commits/<sha>/` stores best-effort versioned copies. Add workflow concurrency so only one `main` screenshot publish runs at a time.
+9. Phase 4: Add the one-time README wiring in `/workspaces/2026-03--open-source-body-tracker/README.md` to display all 8 stable GitHub Pages URLs. The README itself should never be modified by later CI runs. If needed, add a short note to developer docs about how screenshot publishing works and where the stable URLs live.
+10. Phase 5: Validate end-to-end. Confirm demo-mode seeding uses the real app path and photo assets from `/workspaces/2026-03--open-source-body-tracker/app/src/main/assets/ordered`, confirm the photo compare route opens with seeded photo-backed measurements, confirm CI artifacts contain all produced images, and confirm GitHub Pages serves the latest set and optional commit-SHA history.
+
+**Relevant files**
+- `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/MainActivity.kt` — add screenshot launch handling, call demo seeding, and feed explicit theme/start-target overrides into the app shell.
+- `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/ui/theme/Theme.kt` — reuse the existing `BodyTrackerTheme(darkTheme, dynamicColor)` seam to support deterministic light and dark captures.
+- `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/domain/demodata/StartDemoModeUseCase.kt` — reuse the production demo-mode flow instead of creating screenshot-only test data.
+- `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/ui/navigation/Routes.kt` — reuse `photoCompareRoute(leftMeasurementId, rightMeasurementId)` and the existing main route constants as the capture source of truth.
+- `/workspaces/2026-03--open-source-body-tracker/app/src/main/java/de/t_animal/opensourcebodytracker/ui/navigation/BodyTrackerNavHost.kt` — verify how screenshot start targets flow into Measurements, Analysis, Photos, and Photo Compare.
+- `/workspaces/2026-03--open-source-body-tracker/app/build.gradle.kts` — add androidTest dependencies and any screenshot test configuration.
+- `/workspaces/2026-03--open-source-body-tracker/app/src/androidTest/java/de/t_animal/opensourcebodytracker/ExampleInstrumentedTest.kt` — replace or supersede the placeholder test with the screenshot suite and helpers.
+- `/workspaces/2026-03--open-source-body-tracker/.github/workflows/ci.yml` — add the `main`-only screenshot capture and GitHub Pages deployment job.
+- `/workspaces/2026-03--open-source-body-tracker/README.md` — one-time static image references to the published latest screenshot URLs.
+- `/workspaces/2026-03--open-source-body-tracker/documents/plans/2026-03-30-automatic-release-screenshot-pipeline-requirements.md` — implementation source of truth for accepted scope and test scenarios.
+
+**Verification**
+1. Local Android verification: run the debug/instrumented screenshot test against a single fixed emulator and confirm 8 PNGs are emitted with the expected names and English content.
+2. Functional verification: confirm each output corresponds to the requested screen and theme, and that photo compare uses two seeded measurements with actual photos.
+3. Resilience verification: intentionally break one target route or capture step and confirm the harness still attempts the remaining screenshots and emits a partial-success summary.
+4. CI verification: push a branch or test the workflow in a safe branch variant, then confirm the `screenshots` job uploads artifact outputs and does not run on pull requests or non-`main` pushes.
+5. Publish verification: confirm GitHub Pages serves `screenshots/latest/*` from stable URLs and, if enabled, also serves `screenshots/commits/<sha>/*`.
+6. README verification: confirm the README renders all 8 remote images without any CI-side README edits after the one-time integration.
+7. Regression verification: run the project’s required validation commands after implementation, especially `./gradlew :app:compileDebugKotlin --console=plain`, `./gradlew :app:lintDebug --console=plain`, `./gradlew :app:testDebugUnitTest --console=plain`, and the new instrumentation/screenshot task used by CI.
+
+**Decisions**
+- Included scope: one phone profile, English only, four screens, both themes, main-branch only, artifact upload, GitHub Pages latest publishing, optional commit-SHA copies, one-time README wiring.
+- Excluded scope: multi-locale capture, tablet/device matrix, onboarding/settings screenshots, automated Play Store upload, visual diff approval flow, README rewriting on each CI run.
+- Recommended architecture: use the real app with demo-mode seeding and a small debug-safe screenshot launch seam rather than a separate screenshot renderer or a complex Hilt-based instrumentation setup.
+- Recommended workflow placement: extend the existing CI workflow rather than creating a separate workflow unless future runtime or permissions complexity justifies splitting it.
+
+**Further Considerations**
+1. If explicit theme forcing inside the app is rejected, fallback to two emulator passes with system dark-mode toggling; this reduces app code changes but increases runtime and flakiness.
+2. If Compose root capture misses system-level rendering details needed for store assets, switch the harness to device-level screenshots while keeping the same launch and routing logic.
+3. If GitHub Pages history becomes noisy, keep `latest/` mandatory and downgrade commit-SHA archival from full copy to best-effort retention or periodic cleanup.

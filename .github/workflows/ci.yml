@@ -1,5 +1,8 @@
 name: CI
 
+env:
+  SCREENSHOT_PAGES_BASE_URL: https://t-animal.github.io/Open-Source-Body-Tracker/screenshots
+
 on:
   push:
   pull_request:
@@ -10,16 +13,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Run checks
         run: ./gradlew --no-daemon check
@@ -32,23 +35,135 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build debug APK
         run: ./gradlew --no-daemon assembleDebug
 
       - name: Upload debug APK
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+  screenshots:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      id-token: write
+      pages: write
+    concurrency:
+      group: screenshots-pages
+      cancel-in-progress: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy-pages.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Capture release screenshots
+        uses: reactivecircus/android-emulator-runner@v2.37.0
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -no-boot-anim -camera-back none -camera-front none
+          disable-animations: true
+          script: |
+            ./scripts/capture-screenshots.sh
+            cat app/build/outputs/test-screenshots/summary.txt >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+
+      - name: Upload screenshots artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-screenshots
+          path: app/build/outputs/test-screenshots
+          if-no-files-found: warn
+
+      - name: Prepare Pages content
+        if: always()
+        id: prepare-pages
+        run: |
+          SCREENSHOT_DIR="app/build/outputs/test-screenshots"
+          SITE_DIR="site"
+          BRANCH_SLUG="$(printf '%s' "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]' | sed 's#[^a-z0-9._-]#-#g')"
+          BRANCH_DIR="${SITE_DIR}/screenshots/branches/${BRANCH_SLUG}"
+
+          rm -rf "${SITE_DIR}"
+          mkdir -p "${BRANCH_DIR}"
+
+          SCREENSHOTS_EXIST="false"
+          if compgen -G "${SCREENSHOT_DIR}/*.png" > /dev/null; then
+            cp "${SCREENSHOT_DIR}"/*.png "${BRANCH_DIR}/"
+            SCREENSHOTS_EXIST="true"
+          fi
+
+          if [ -f "${SCREENSHOT_DIR}/summary.txt" ]; then
+            cp "${SCREENSHOT_DIR}/summary.txt" "${BRANCH_DIR}/summary.txt"
+          fi
+
+          {
+            echo "preview_url=${SCREENSHOT_PAGES_BASE_URL}/branches/${BRANCH_SLUG}/"
+            echo "branch_slug=${BRANCH_SLUG}"
+            echo "screenshots_exist=${SCREENSHOTS_EXIST}"
+          } >> "$GITHUB_OUTPUT"
+
+          if [ "${SCREENSHOTS_EXIST}" = "true" ]; then
+            mkdir -p "${SITE_DIR}/screenshots/latest"
+            cp "${SCREENSHOT_DIR}"/*.png "${SITE_DIR}/screenshots/latest/"
+          fi
+
+      - name: Add preview links to summary
+        if: always()
+        run: |
+          echo "Branch preview: ${{ steps.prepare-pages.outputs.preview_url }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.prepare-pages.outputs.screenshots_exist }}" = "true" ]; then
+            echo "Stable latest: ${SCREENSHOT_PAGES_BASE_URL}/latest/" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload Pages artifact
+        if: steps.prepare-pages.outputs.screenshots_exist == 'true'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+      - name: Deploy Pages
+        if: success() && steps.prepare-pages.outputs.screenshots_exist == 'true'
+        id: deploy-pages
+        uses: actions/deploy-pages@v5

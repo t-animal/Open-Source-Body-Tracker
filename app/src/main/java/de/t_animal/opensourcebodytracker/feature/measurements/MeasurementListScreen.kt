@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -114,7 +115,10 @@ fun MeasurementListScreen(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -226,7 +230,10 @@ fun MeasurementFullListScreen(
         title = stringResource(R.string.measurement_list_title),
         onNavigateBack = onNavigateBack,
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()

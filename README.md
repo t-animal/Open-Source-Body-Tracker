@@ -97,6 +97,88 @@ The app is built around the following principles:
 
 The app provides a **private, reliable, and scientifically grounded tool for body measurement tracking and body composition analysis**, while ensuring that **all sensitive user data remains securely stored on the device itself**.
 
+## Screenshots
+
+<table>
+<tr>
+<td valign="top">
+
+**Measurement List**
+
+Chronological log of all recorded body measurements.
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/measurement_list_light.png" alt="Measurement list screenshot" width="80">
+<details><summary><br>enlarge</summary>
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/measurement_list_light.png" alt="Measurement list screenshot" width="400">
+
+</details>
+
+</td>
+<td valign="top">
+
+**All Measurements**
+
+Full table of every measurement value recorded across all entries.
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/measurement_list_all_light.png" alt="All measurements screenshot" width="80">
+<details><summary><br>enlarge</summary>
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/measurement_list_all_light.png" alt="All measurements screenshot" width="400">
+
+</details>
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+**Photos**
+
+Gallery of progress photos to visualize physical changes over time.
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/photo_light.png" alt="Photos screenshot" width="80">
+<details><summary><br>enlarge</summary>
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/photo_light.png" alt="Photos screenshot" width="400">
+
+</details>
+
+</td>
+<td valign="top">
+
+**Photo Compare**
+
+Side-by-side comparison of two progress photos.
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/photo_compare_light.png" alt="Photo compare screenshot" width="80">
+<details><summary><br>enlarge</summary>
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/photo_compare_light.png" alt="Photo compare screenshot" width="400">
+
+</details>
+
+</td>
+</tr>
+<tr>
+
+<td valign="top">
+
+**Analysis**
+
+Charts and trend indicators for your tracked metrics over time.
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/analysis_light.png" alt="Analysis screenshot" width="80">
+<details><summary><br>enlarge</summary>
+
+<img src="https://t-animal.github.io/Open-Source-Body-Tracker/screenshots/latest/analysis_light.png" alt="Analysis screenshot" width="400">
+
+</details>
+
+</td>
+<td></td>
+</tr>
+</table>
 
 # Development
 
