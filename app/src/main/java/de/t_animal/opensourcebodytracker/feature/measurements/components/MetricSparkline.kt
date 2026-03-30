@@ -2,7 +2,6 @@ package de.t_animal.opensourcebodytracker.feature.measurements.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,7 +18,6 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.Fill
-import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import kotlin.math.abs
 
@@ -27,8 +25,8 @@ private val SPARKLINE_HEIGHT = 38.dp
 private const val SPARKLINE_AREA_ALPHA = 0.15f
 private const val SPARKLINE_VERTICAL_PADDING_FRACTION = 0.1
 private const val SPARKLINE_MIN_VERTICAL_PADDING = 0.5
-private val SPARKLINE_POINT_SIZE = 4.dp
 private val SPARKLINE_POINT_SPACING = 8.dp
+private val SPARKLINE_STROKE_THICKNESS = 1.dp
 
 
 @Composable
@@ -44,10 +42,6 @@ internal fun MetricSparkline(
 
     val lineColor = MaterialTheme.colorScheme.primary
     val areaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = SPARKLINE_AREA_ALPHA)
-    val pointComponent = rememberShapeComponent(
-        fill = Fill(lineColor),
-        shape = CircleShape,
-    )
 
     val rangeProvider = remember {
         object : CartesianLayerRangeProvider {
@@ -66,14 +60,8 @@ internal fun MetricSparkline(
         lineProvider = LineCartesianLayer.LineProvider.series(
             LineCartesianLayer.Line(
                 fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
+                stroke = LineCartesianLayer.LineStroke.Continuous(SPARKLINE_STROKE_THICKNESS),
                 areaFill = LineCartesianLayer.AreaFill.single(Fill(areaColor)),
-
-                pointProvider = LineCartesianLayer.PointProvider.single(
-                    LineCartesianLayer.Point(
-                        component = pointComponent,
-                        size = SPARKLINE_POINT_SIZE,
-                    ),
-                ),
             ),
         ),
         pointSpacing = SPARKLINE_POINT_SPACING,
