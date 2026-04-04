@@ -30,8 +30,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -79,6 +83,9 @@ internal fun MeasurementTable(
         cellPadding = cellPadding,
     )
 
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val fadeWidthPx = with(LocalDensity.current) { 12.dp.toPx() }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -86,7 +93,28 @@ internal fun MeasurementTable(
             .border(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 shape = RoundedCornerShape(12.dp),
-            ),
+            )
+            .drawWithContent {
+                drawContent()
+                if (horizontalScroll.maxValue > 0 && horizontalScroll.value < horizontalScroll.maxValue) {
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(Color.Transparent, surfaceColor),
+                            startX = size.width - fadeWidthPx,
+                            endX = size.width,
+                        )
+                    )
+                }
+                if (horizontalScroll.value > 0) {
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(surfaceColor, Color.Transparent),
+                            startX = 0f,
+                            endX = fadeWidthPx,
+                        )
+                    )
+                }
+            },
     ) {
         Row(
             modifier = Modifier
