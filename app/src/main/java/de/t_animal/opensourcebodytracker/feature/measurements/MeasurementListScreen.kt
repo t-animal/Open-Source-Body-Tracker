@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MonitorWeight
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -62,7 +63,16 @@ fun MeasurementListRoute(
     val state by vm.uiState.collectAsStateWithLifecycle()
 
     when (val state = state) {
-        is MeasurementListUiState.Loading -> {}
+        is MeasurementListUiState.Loading -> {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
         is MeasurementListUiState.Loaded -> MeasurementListScreen(
             state = state,
             onEdit = onEdit,
@@ -83,7 +93,19 @@ fun MeasurementListFullRoute(
     val vm: MeasurementListViewModel = hiltViewModel()
     val state by vm.uiState.collectAsStateWithLifecycle()
     when (val state = state) {
-        is MeasurementListUiState.Loading -> {}
+        is MeasurementListUiState.Loading -> {
+            SecondaryScreenScaffold(
+                title = stringResource(R.string.common_loading),
+                onNavigateBack = onNavigateBack,
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
         is MeasurementListUiState.Loaded -> MeasurementFullListScreen(
             state = state,
             onNavigateBack = onNavigateBack,
@@ -240,12 +262,6 @@ fun MeasurementFullListScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp, vertical = 8.dp),
             ) {
-                Text(
-                    text = stringResource(R.string.measurement_list_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-
                 MeasurementTable(
                     items = state.allMeasurements,
                     visibleMetrics = state.visibleInTableMetrics,
