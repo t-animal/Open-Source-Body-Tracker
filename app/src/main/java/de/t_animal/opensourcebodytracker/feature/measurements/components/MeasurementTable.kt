@@ -82,6 +82,7 @@ internal fun MeasurementTable(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
             .border(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 shape = RoundedCornerShape(12.dp),
@@ -91,7 +92,7 @@ internal fun MeasurementTable(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(horizontalScroll)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.Top,
         ) {

@@ -184,7 +184,7 @@ fun AnimatedPhotos(
                     }
                 }
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
         ) {
             val errorMessage = (decodedAnimationState as? DecodedAnimationState.Error)?.message
 

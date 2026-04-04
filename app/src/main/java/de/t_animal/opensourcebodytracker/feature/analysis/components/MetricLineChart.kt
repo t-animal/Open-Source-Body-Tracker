@@ -152,7 +152,7 @@ internal fun MetricLineChart(
         rangeProvider = rangeProvider,
     )
 
-    val noteMarkerColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+    val noteMarkerColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
     val noteDecoration = remember(noteEpochDays, noteMarkerColor) {
         NoteMarkerDecoration(
             noteEpochDays = noteEpochDays,
