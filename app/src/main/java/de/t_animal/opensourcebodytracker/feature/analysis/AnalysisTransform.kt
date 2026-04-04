@@ -6,6 +6,11 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 
 internal data class MeasurementWithDerived(
     val measurement: BodyMeasurement,
@@ -66,17 +71,32 @@ internal fun buildMetricCharts(
 internal fun calculateYAxisRange(points: List<AnalysisChartPoint>): AnalysisYAxisRange? {
     if (points.isEmpty()) return null
 
-    val minValue = points.minOf { it.value }
-    val maxValue = points.maxOf { it.value }
+    var minValue = points.minOf { it.value }
+    var maxValue = points.maxOf { it.value }
 
-    val padding = if (minValue == maxValue) {
-        maxOf(kotlin.math.abs(minValue) * 0.05, 0.5)
-    } else {
-        (maxValue - minValue) * 0.05
+    // For a flat line, widen the range upfront so the step logic below needs no special-casing.
+    if (minValue == maxValue) {
+        val halfRange = maxOf(abs(minValue) * 0.05, 0.5)
+        minValue -= halfRange
+        maxValue += halfRange
     }
 
+    // Pick a "nice" step: round a rough estimate up to the nearest 1, 2, or 5 × power of ten.
+    // magnitude is the largest power of ten ≤ roughStep, giving the order of magnitude to work
+    // with (e.g. roughStep = 3.7 → magnitude = 1, so we pick 5).
+    val roughStep = (maxValue - minValue) / 4.0
+    val magnitude = 10.0.pow(floor(log10(roughStep)))
+    val step = when {
+        roughStep / magnitude <= 1.0 -> 1.0
+        roughStep / magnitude <= 2.0 -> 2.0
+        roughStep / magnitude <= 5.0 -> 5.0
+        else -> 10.0
+    } * magnitude
+
+    // Snap the axis bounds outward to the nearest step multiple so tick labels are whole numbers.
     return AnalysisYAxisRange(
-        min = minValue - padding,
-        max = maxValue + padding,
+        min = floor(minValue / step) * step,
+        max = ceil(maxValue / step) * step,
+        estimatedStepSize = step,
     )
 }

@@ -86,13 +86,25 @@ internal fun MetricLineChart(
     val unitSuffix = remember(chart.definition.unit, unitSystem) {
         chart.definition.unit.suffixWithLeadingSpace(unitSystem)
     }
+    val displayYAxisRange = remember(yAxisRange, unitSystem) {
+        AnalysisYAxisRange(
+            min = yAxisRange.min.toDisplayValue(metricUnit, unitSystem),
+            max = yAxisRange.max.toDisplayValue(metricUnit, unitSystem),
+            estimatedStepSize = yAxisRange.estimatedStepSize.toDisplayValue(metricUnit, unitSystem),
+        )
+    }
     val xAxisValueFormatter = remember(duration) {
         CartesianValueFormatter { _, value, _ ->
             formatXAxisLabel(LocalDate.ofEpochDay(value.toLong()), duration)
         }
     }
-    val yAxisValueFormatter = remember(unitSuffix) {
-        CartesianValueFormatter.decimal(decimalCount = 2, suffix = unitSuffix)
+    val yAxisValueFormatter = remember(unitSuffix, displayYAxisRange) {
+        val decimalCount = when {
+            displayYAxisRange.estimatedStepSize >= 1.0 -> 0
+            displayYAxisRange.estimatedStepSize >= 0.1 -> 1
+            else -> 2
+        }
+        CartesianValueFormatter.decimal(decimalCount = decimalCount, suffix = unitSuffix)
     }
     val markerValueFormatter = remember(unitSuffix) {
         DefaultCartesianMarker.ValueFormatter.default(suffix = unitSuffix)
@@ -122,12 +134,6 @@ internal fun MetricLineChart(
     )
     val selectedPersistentMarkerX = remember(selectedDate, xValues) {
         selectedDate?.let { xValues.firstOrNull { it == selectedDate.toEpochDay() } }
-    }
-    val displayYAxisRange = remember(yAxisRange, unitSystem) {
-        AnalysisYAxisRange(
-            min = yAxisRange.min.toDisplayValue(metricUnit, unitSystem),
-            max = yAxisRange.max.toDisplayValue(metricUnit, unitSystem),
-        )
     }
     val rangeProvider = remember(displayYAxisRange) {
         fixedYRangeProvider(displayYAxisRange)

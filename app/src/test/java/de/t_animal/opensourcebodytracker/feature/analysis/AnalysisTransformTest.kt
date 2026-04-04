@@ -68,7 +68,7 @@ class AnalysisTransformTest {
     }
 
     @Test
-    fun calculateYAxisRange_addsFivePercentPaddingForNonFlatSeries() {
+    fun calculateYAxisRange_snapsToNiceStepBoundsForNonFlatSeries() {
         val points = listOf(
             AnalysisChartPoint(epochMillis = 1_736_380_800_000, value = 70.0),
             AnalysisChartPoint(epochMillis = 1_736_467_200_000, value = 90.0),
@@ -78,8 +78,9 @@ class AnalysisTransformTest {
 
         assertNotNull(range)
         val nonNullRange = checkNotNull(range)
-        assertEquals(69.0, nonNullRange.min, 0.0001)
-        assertEquals(91.0, nonNullRange.max, 0.0001)
+        // range=20 → step=5; floor(70/5)*5=70, ceil(90/5)*5=90
+        assertEquals(70.0, nonNullRange.min, 0.0001)
+        assertEquals(90.0, nonNullRange.max, 0.0001)
     }
 
     @Test
