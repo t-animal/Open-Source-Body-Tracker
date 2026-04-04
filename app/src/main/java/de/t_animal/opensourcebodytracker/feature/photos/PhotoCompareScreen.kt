@@ -121,7 +121,7 @@ private fun PhotoCompareContent(
                 .fillMaxWidth()
                 .weight(1f)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures { change, dragAmount ->
                         change.consume()

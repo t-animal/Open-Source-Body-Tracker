@@ -56,9 +56,9 @@ fun MainScreenScaffold(
                 title = { Text(stringResource(selectedDestination.titleResId)) },
                 modifier = Modifier.shadow(4.dp),
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 ),
                 actions = {
                     IconButton(onClick = { overflowExpanded = true }) {

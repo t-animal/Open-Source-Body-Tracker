@@ -22,12 +22,11 @@ import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import kotlin.math.abs
 
 private val SPARKLINE_HEIGHT = 30.dp
-private const val SPARKLINE_AREA_ALPHA = 0.15f
 private const val SPARKLINE_VERTICAL_PADDING_FRACTION = 0.1
 private const val SPARKLINE_MIN_VERTICAL_PADDING = 0.5
 private val SPARKLINE_POINT_SPACING = 8.dp
 private val SPARKLINE_STROKE_THICKNESS = 1.dp
-
+private const val SPARKLINE_AREA_ALPHA = 0.5f
 
 @Composable
 internal fun MetricSparkline(
@@ -41,7 +40,7 @@ internal fun MetricSparkline(
     val modelProducer = remember { CartesianChartModelProducer() }
 
     val lineColor = MaterialTheme.colorScheme.primary
-    val areaColor = MaterialTheme.colorScheme.onSurface.copy(alpha = SPARKLINE_AREA_ALPHA)
+    val areaColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha=SPARKLINE_AREA_ALPHA)
 
     val rangeProvider = remember {
         object : CartesianLayerRangeProvider {
