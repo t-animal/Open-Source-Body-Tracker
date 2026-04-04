@@ -6,6 +6,11 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 
 internal data class MeasurementWithDerived(
     val measurement: BodyMeasurement,
@@ -69,14 +74,35 @@ internal fun calculateYAxisRange(points: List<AnalysisChartPoint>): AnalysisYAxi
     val minValue = points.minOf { it.value }
     val maxValue = points.maxOf { it.value }
 
-    val padding = if (minValue == maxValue) {
-        maxOf(kotlin.math.abs(minValue) * 0.05, 0.5)
+    // For a flat line, manufacture a small range so the chart isn't empty.
+    val rawRange = if (minValue == maxValue) {
+        maxOf(abs(minValue) * 0.1, 1.0)
     } else {
-        (maxValue - minValue) * 0.05
+        maxValue - minValue
     }
 
+    // Pick a "nice" step size by rounding a rough estimate up to the nearest 1, 2, or 5
+    // times a power of ten (e.g. 0.2, 5, 20, 500, …). This ensures that axis bounds
+    // (which are snapped to a multiple of the step below) land on human-readable values
+    // regardless of how many ticks Vico actually places.
+    //
+    // magnitude is the largest power of ten that fits inside roughStep — it gives us the
+    // order of magnitude to work with (e.g. roughStep = 3.7 → magnitude = 1, so we
+    // search among 1, 2, 5, 10 and pick 5).
+    val roughStep = rawRange / 4.0
+    val magnitude = 10.0.pow(floor(log10(roughStep)))
+    val niceFactor = when {
+        roughStep / magnitude <= 1.0 -> 1.0
+        roughStep / magnitude <= 2.0 -> 2.0
+        roughStep / magnitude <= 5.0 -> 5.0
+        else -> 10.0
+    }
+    val step = niceFactor * magnitude
+
+    // Snap the axis bounds outward to the nearest step multiple so tick labels are whole numbers.
     return AnalysisYAxisRange(
-        min = minValue - padding,
-        max = maxValue + padding,
+        min = floor(minValue / step) * step,
+        max = ceil(maxValue / step) * step,
+        step = step,
     )
 }

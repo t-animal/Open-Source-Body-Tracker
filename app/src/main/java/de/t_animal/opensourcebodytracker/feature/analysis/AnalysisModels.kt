@@ -13,6 +13,7 @@ data class AnalysisChartPoint(
 data class AnalysisYAxisRange(
     val min: Double,
     val max: Double,
+    val step: Double = 1.0,
 )
 
 data class AnalysisMetricChartUiModel(
