@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v-[0-9][0-9][0-9][0-9].[0-9][0-9]-[0-9][0-9]'
+      - 'v-[0-9][0-9][0-9][0-9].[0-9][0-9]-[0-9][0-9]beta'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: release
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+
+      - name: Determine action from tag
+        id: action
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "$TAG" == *beta ]]; then
+            echo "play_track=beta"
+            echo "promote=false"
+          else
+            BETA_TAG="${TAG}beta"
+            if git tag -l "$BETA_TAG" | grep -qF "$BETA_TAG"; then
+              echo "Matching beta tag '$BETA_TAG' found — will promote instead of rebuilding."
+              echo "play_track=production"
+              echo "promote=true"
+            else
+              echo "No matching beta tag '$BETA_TAG' found — will build and publish."
+              echo "play_track=production"
+              echo "promote=false"
+            fi
+          fi >> "$GITHUB_OUTPUT"
+
+      - name: Write Play service account
+        run: echo '${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}' > "$RUNNER_TEMP/play-account.json"
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Promote beta to production
+        if: steps.action.outputs.promote == 'true'
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON_PATH: ${{ runner.temp }}/play-account.json
+          PLAY_TRACK: production
+        run: ./gradlew --no-daemon promoteArtifact --from-track=beta --promote-track=production
+
+      - name: Decode keystore
+        if: steps.action.outputs.promote == 'false'
+        run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: Build and publish release bundle
+        if: steps.action.outputs.promote == 'false'
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          PLAY_SERVICE_ACCOUNT_JSON_PATH: ${{ runner.temp }}/play-account.json
+          PLAY_TRACK: ${{ steps.action.outputs.play_track }}
+        run: ./gradlew --no-daemon bundleRelease publishReleaseBundle
+
+      - name: Upload AAB artifact
+        if: steps.action.outputs.promote == 'false' && success()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-bundle
+          path: app/build/outputs/bundle/release/*.aab

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.play.publisher)
 }
 
 val aboutProjectUrl =
@@ -40,6 +41,15 @@ android {
         buildConfigField("String", "ABOUT_CONTACT_EMAIL", aboutContactEmail.toBuildConfigString())
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = System.getenv("KEYSTORE_PATH")?.let { file(it) }
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -57,6 +67,7 @@ android {
             }
         }
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
@@ -86,6 +97,15 @@ android {
 
 ksp {
     arg("room.generateKotlin", "true")
+}
+
+play {
+    val credentialsPath = System.getenv("PLAY_SERVICE_ACCOUNT_JSON_PATH")
+    if (credentialsPath != null) {
+        serviceAccountCredentials.set(file(credentialsPath))
+    }
+    track.set(System.getenv("PLAY_TRACK") ?: "internal")
+    defaultToAppBundles.set(true)
 }
 
 dependencies {
