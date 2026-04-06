@@ -57,7 +57,7 @@ jobs:
           path: app/build/outputs/apk/debug/*.apk
 
   screenshots:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref_name == 'main'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 45
