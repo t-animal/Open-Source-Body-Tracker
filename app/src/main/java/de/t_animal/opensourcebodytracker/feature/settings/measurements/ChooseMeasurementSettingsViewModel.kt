@@ -6,6 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
+import de.t_animal.opensourcebodytracker.core.model.Sex
+import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
 import de.t_animal.opensourcebodytracker.domain.metrics.RequiredMeasurementsResolver
 import de.t_animal.opensourcebodytracker.domain.metrics.SaveMeasurementSettingsUseCase
 import javax.inject.Inject
@@ -28,6 +30,7 @@ sealed interface ChooseMeasurementSettingsUiState {
         val requiredMeasurements: Set<MeasuredBodyMetric>,
         val measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>>,
         val hasError: Boolean,
+        val sex: Sex?,
     ) : ChooseMeasurementSettingsUiState
 }
 
@@ -35,6 +38,7 @@ sealed interface ChooseMeasurementSettingsUiState {
 class ChooseMeasurementSettingsViewModel @Inject constructor(
     private val saveMeasurementSettingsUseCase: SaveMeasurementSettingsUseCase,
     private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val hasError = MutableStateFlow(false)
@@ -42,7 +46,8 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
     val uiState: StateFlow<ChooseMeasurementSettingsUiState> = combine(
         requiredMeasurementsResolver.effectiveMeasurementSettingsFlow,
         hasError,
-    ) { effective, error ->
+        profileRepository.profileFlow,
+    ) { effective, error, profile ->
         ChooseMeasurementSettingsUiState.Loaded(
             mode = MeasurementSettingsMode.Settings,
             isSaving = false,
@@ -50,6 +55,7 @@ class ChooseMeasurementSettingsViewModel @Inject constructor(
             requiredMeasurements = effective.dependencies.requiredMeasurements,
             measurementToAnalysisMethods = effective.dependencies.measurementToAnalysisMethods,
             hasError = error,
+            sex = profile?.sex,
         )
     }.stateIn(
         scope = viewModelScope,

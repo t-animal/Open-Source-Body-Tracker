@@ -173,6 +173,7 @@ private fun OnboardingAnalysisRoute(
                 requiredMeasurements = state.analysis.requiredMeasurements,
                 measurementToAnalysisMethods = state.analysis.measurementToAnalysisMethods,
                 hasError = state.saveError,
+                sex = state.profile.sex,
             )
         },
         onBmiEnabledChanged = vm::onBmiEnabledChanged,

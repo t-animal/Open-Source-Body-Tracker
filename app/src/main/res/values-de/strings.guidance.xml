@@ -3,6 +3,10 @@
     <string name="menu_measurement_guidance">So messen</string>
     <string name="measurement_guidance_screen_title">So messen</string>
     <string name="cd_metric_info">Messtipp anzeigen</string>
+    <string name="measurement_guidance_side_front">Vorne</string>
+    <string name="measurement_guidance_side_back">Hinten</string>
+    <string name="measurement_guidance_sex_abbreviation_male">M</string>
+    <string name="measurement_guidance_sex_abbreviation_female">W</string>
 
     <string name="measurement_guidance_weight">Wiege dich möglichst <b>zur gleichen Tageszeit (idealerweise morgens nach dem Aufstehen und nach dem Toilettengang)</b> und ohne Kleidung oder mit sehr leichter Kleidung. Stelle dich mittig auf die Waage und bleibe ruhig stehen, bis der Wert stabil ist.</string>
     <string name="measurement_guidance_body_fat">Verwende eine Körperfettwaage und stelle sicher, dass du <b>barfuß mit sauberen, trockenen Füßen auf den Elektroden stehst</b>. Miss möglichst unter gleichen Bedingungen (Zeitpunkt, Hydration), da die Messung stark davon beeinflusst wird.</string>

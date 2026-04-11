@@ -27,7 +27,8 @@ import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
-import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementGuidanceDialog
+import de.t_animal.opensourcebodytracker.core.model.Sex
+import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementGuidanceDialog
 import de.t_animal.opensourcebodytracker.feature.settings.components.AnalysisMethodsSection
 import de.t_animal.opensourcebodytracker.feature.settings.components.MeasurementCollectionSection
 import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
@@ -66,9 +67,11 @@ fun ChooseMeasurementSettingsScreen(
 ) {
     val isOnboarding = state.mode == MeasurementSettingsMode.Onboarding
     var guidanceMetric by remember { mutableStateOf<MeasuredBodyMetric?>(null) }
+    val sex = (state as? ChooseMeasurementSettingsUiState.Loaded)?.sex
 
     MeasurementGuidanceDialog(
         metric = guidanceMetric,
+        sex = sex,
         onDismiss = { guidanceMetric = null },
     )
 
@@ -201,6 +204,7 @@ private fun ChooseMeasurementSettingsScreenSettingsPreview() {
                     ),
                 ),
                 hasError = false,
+                sex = Sex.Male,
             ),
             onNavigateBack = {},
             onMeasurementEnabledChanged = { _, _ -> },
@@ -231,6 +235,7 @@ private fun ChooseMeasurementSettingsScreenOnboardingPreview() {
                     ),
                 ),
                 hasError = false,
+                sex = null,
             ),
             onContinueClicked = {},
             onMeasurementEnabledChanged = { _, _ -> },

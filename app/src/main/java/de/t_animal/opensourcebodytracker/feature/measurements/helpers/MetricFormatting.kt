@@ -8,7 +8,9 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
+import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
+import de.t_animal.opensourcebodytracker.feature.measurements.components.GuidanceImageSide
 import de.t_animal.opensourcebodytracker.ui.helpers.displaySymbol
 import de.t_animal.opensourcebodytracker.core.model.forMetric
 import de.t_animal.opensourcebodytracker.core.model.toDisplayValue
@@ -129,6 +131,75 @@ internal fun MeasuredBodyMetric.guidanceResId(): Int = when (this) {
     MeasuredBodyMetric.TricepsSkinfold -> R.string.measurement_guidance_triceps_skinfold
     MeasuredBodyMetric.SuprailiacSkinfold -> R.string.measurement_guidance_suprailiac_skinfold
 }
+
+internal fun MeasuredBodyMetric.initialGuidanceOrientation(): GuidanceImageSide =
+    if (this == MeasuredBodyMetric.TricepsSkinfold) GuidanceImageSide.Back
+    else GuidanceImageSide.Front
+
+@androidx.annotation.DrawableRes
+internal fun MeasuredBodyMetric.guidanceImageResId(sex: Sex, side: GuidanceImageSide): Int =
+    when (sex) {
+        Sex.Male -> when (side) {
+            GuidanceImageSide.Front -> when (this) {
+                MeasuredBodyMetric.Weight -> R.drawable.measurement_guidance_weight_male_front
+                MeasuredBodyMetric.BodyFat -> R.drawable.measurement_guidance_body_fat_male_front
+                MeasuredBodyMetric.NeckCircumference -> R.drawable.measurement_guidance_neck_circumference_male_front
+                MeasuredBodyMetric.ChestCircumference -> R.drawable.measurement_guidance_chest_circumference_male_front
+                MeasuredBodyMetric.WaistCircumference -> R.drawable.measurement_guidance_waist_circumference_male_front
+                MeasuredBodyMetric.AbdomenCircumference -> R.drawable.measurement_guidance_abdomen_circumference_male_front
+                MeasuredBodyMetric.HipCircumference -> R.drawable.measurement_guidance_hip_circumference_male_front
+                MeasuredBodyMetric.ChestSkinfold -> R.drawable.measurement_guidance_chest_skinfold_male_front
+                MeasuredBodyMetric.AbdomenSkinfold -> R.drawable.measurement_guidance_abdomen_skinfold_male_front
+                MeasuredBodyMetric.ThighSkinfold -> R.drawable.measurement_guidance_thigh_skinfold_male_front
+                MeasuredBodyMetric.TricepsSkinfold -> R.drawable.measurement_guidance_triceps_skinfold_male_front
+                MeasuredBodyMetric.SuprailiacSkinfold -> R.drawable.measurement_guidance_suprailiac_skinfold_male_front
+            }
+            GuidanceImageSide.Back -> when (this) {
+                MeasuredBodyMetric.Weight -> R.drawable.measurement_guidance_weight_male_back
+                MeasuredBodyMetric.BodyFat -> R.drawable.measurement_guidance_body_fat_male_back
+                MeasuredBodyMetric.NeckCircumference -> R.drawable.measurement_guidance_neck_circumference_male_back
+                MeasuredBodyMetric.ChestCircumference -> R.drawable.measurement_guidance_chest_circumference_male_back
+                MeasuredBodyMetric.WaistCircumference -> R.drawable.measurement_guidance_waist_circumference_male_back
+                MeasuredBodyMetric.AbdomenCircumference -> R.drawable.measurement_guidance_abdomen_circumference_male_back
+                MeasuredBodyMetric.HipCircumference -> R.drawable.measurement_guidance_hip_circumference_male_back
+                MeasuredBodyMetric.ChestSkinfold -> R.drawable.measurement_guidance_chest_skinfold_male_back
+                MeasuredBodyMetric.AbdomenSkinfold -> R.drawable.measurement_guidance_abdomen_skinfold_male_back
+                MeasuredBodyMetric.ThighSkinfold -> R.drawable.measurement_guidance_thigh_skinfold_male_back
+                MeasuredBodyMetric.TricepsSkinfold -> R.drawable.measurement_guidance_triceps_skinfold_male_back
+                MeasuredBodyMetric.SuprailiacSkinfold -> R.drawable.measurement_guidance_suprailiac_skinfold_male_back
+            }
+        }
+        Sex.Female -> when (side) {
+            GuidanceImageSide.Front -> when (this) {
+                MeasuredBodyMetric.Weight -> R.drawable.measurement_guidance_weight_female_front
+                MeasuredBodyMetric.BodyFat -> R.drawable.measurement_guidance_body_fat_female_front
+                MeasuredBodyMetric.NeckCircumference -> R.drawable.measurement_guidance_neck_circumference_female_front
+                MeasuredBodyMetric.ChestCircumference -> R.drawable.measurement_guidance_chest_circumference_female_front
+                MeasuredBodyMetric.WaistCircumference -> R.drawable.measurement_guidance_waist_circumference_female_front
+                MeasuredBodyMetric.AbdomenCircumference -> R.drawable.measurement_guidance_abdomen_circumference_female_front
+                MeasuredBodyMetric.HipCircumference -> R.drawable.measurement_guidance_hip_circumference_female_front
+                MeasuredBodyMetric.ChestSkinfold -> R.drawable.measurement_guidance_chest_skinfold_female_front
+                MeasuredBodyMetric.AbdomenSkinfold -> R.drawable.measurement_guidance_abdomen_skinfold_female_front
+                MeasuredBodyMetric.ThighSkinfold -> R.drawable.measurement_guidance_thigh_skinfold_female_front
+                MeasuredBodyMetric.TricepsSkinfold -> R.drawable.measurement_guidance_triceps_skinfold_female_front
+                MeasuredBodyMetric.SuprailiacSkinfold -> R.drawable.measurement_guidance_suprailiac_skinfold_female_front
+            }
+            GuidanceImageSide.Back -> when (this) {
+                MeasuredBodyMetric.Weight -> R.drawable.measurement_guidance_weight_female_back
+                MeasuredBodyMetric.BodyFat -> R.drawable.measurement_guidance_body_fat_female_back
+                MeasuredBodyMetric.NeckCircumference -> R.drawable.measurement_guidance_neck_circumference_female_back
+                MeasuredBodyMetric.ChestCircumference -> R.drawable.measurement_guidance_chest_circumference_female_back
+                MeasuredBodyMetric.WaistCircumference -> R.drawable.measurement_guidance_waist_circumference_female_back
+                MeasuredBodyMetric.AbdomenCircumference -> R.drawable.measurement_guidance_abdomen_circumference_female_back
+                MeasuredBodyMetric.HipCircumference -> R.drawable.measurement_guidance_hip_circumference_female_back
+                MeasuredBodyMetric.ChestSkinfold -> R.drawable.measurement_guidance_chest_skinfold_female_back
+                MeasuredBodyMetric.AbdomenSkinfold -> R.drawable.measurement_guidance_abdomen_skinfold_female_back
+                MeasuredBodyMetric.ThighSkinfold -> R.drawable.measurement_guidance_thigh_skinfold_female_back
+                MeasuredBodyMetric.TricepsSkinfold -> R.drawable.measurement_guidance_triceps_skinfold_female_back
+                MeasuredBodyMetric.SuprailiacSkinfold -> R.drawable.measurement_guidance_suprailiac_skinfold_female_back
+            }
+        }
+    }
 
 private const val MISSING_VALUE_PLACEHOLDER = "--"
 

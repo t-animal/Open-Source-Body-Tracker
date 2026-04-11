@@ -44,6 +44,7 @@ import de.t_animal.opensourcebodytracker.data.photos.NewPhotoCaptureTarget
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DeleteMeasurementDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DiscardChangesDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementEditFabColumn
+import de.t_animal.opensourcebodytracker.feature.measurements.components.MeasurementGuidanceDialog
 import de.t_animal.opensourcebodytracker.feature.measurements.components.MetricSections
 import de.t_animal.opensourcebodytracker.feature.measurements.components.PhotoPreviewCard
 import de.t_animal.opensourcebodytracker.ui.components.PhotoPreviewDialog
@@ -326,6 +327,7 @@ private fun MeasurementEditLoadedScreen(
 
     MeasurementGuidanceDialog(
         metric = guidanceMetric,
+        sex = state.sex,
         onDismiss = { guidanceMetric = null },
     )
 

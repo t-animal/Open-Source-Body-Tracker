@@ -3,6 +3,10 @@
     <string name="menu_measurement_guidance">How to measure</string>
     <string name="measurement_guidance_screen_title">How to measure</string>
     <string name="cd_metric_info">Show measurement guidance</string>
+    <string name="measurement_guidance_side_front">Front</string>
+    <string name="measurement_guidance_side_back">Back</string>
+    <string name="measurement_guidance_sex_abbreviation_male">M</string>
+    <string name="measurement_guidance_sex_abbreviation_female">F</string>
 
     <string name="measurement_guidance_weight">Weigh yourself at <b>the same time of day (ideally in the morning after getting up and after using the toilet)</b> and without clothing or with very light clothing. Stand centered on the scale and remain still until the reading is stable.</string>
     <string name="measurement_guidance_body_fat">Use a body fat scale and make sure you <b>stand barefoot with clean, dry feet on the electrodes</b>. Measure under the same conditions whenever possible (time of day, hydration), as the reading is strongly influenced by these factors.</string>
