@@ -2,6 +2,8 @@
 
 This app is a **body measurement and body composition tracking tool** designed to help users monitor physical progress over time. It allows users to record anthropometric measurements and apply established analysis methods to estimate body composition and related metrics.
 
+[![Get it on Google Play](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=de.t_animal.opensourcebodytracker)
+
 ## Purpose
 
 The primary purpose of the app is to provide a **simple, structured, and privacy-focused way** to track body measurements and analyze body composition using scientifically recognized formulas.
@@ -180,106 +182,3 @@ Charts and trend indicators for your tracked metrics over time.
 </tr>
 </table>
 
-# Development
-
-An Android application for tracking personal body measurements over time.
-The app enables users to record key anthropometric data, monitor changes, and calculate derived health indicators such as BMI and body composition ratios.
-It is translated into English and German.
-
-The project is built using **MVVM architecture**, **Jetpack Compose** for the UI layer,
-**Hilt** for dependency injection, **Room** for measurement storage and **DataStore** for profile/settings persistence.
-
-This is also a test for AI-driven development, so don't expect much. It might kill your cat or whatever.
-
-
-## Implementation hints
-
-The development follows a structured, multi-phase approach, starting with a minimal core feature set and expanding toward advanced analytics and visualization.
-
-The minimal android version to support is Android 10 (API level 29) target is Android 16.
-
-All UI elements (components and screens) have a preview.
-
-Code is linted using ktlint.
----
-
-## 🏗 Architecture
-
-The application is implemented using:
-
-* **MVVM (Model–View–ViewModel)** architectural pattern
-* Android Jetpack components
-* Jetpack Compose for UI
-* Repository pattern for data handling
-* Local persistence (Room)
-* State management using StateFlow or LiveData
-
-### Architecture Layers
-
-**Model**
-
-* Data classes representing user profile and body measurements
-* Business logic for derived metric calculations
-
-**View**
-
-* Jetpack Compose UI
-* Stateless composables observing ViewModel state
-
-**ViewModel**
-
-* State management
-* Validation logic
-* Coordination between UI and domain layer
-
----
-
-# 📊 Data Model
-
-Derived metrics are computed in the domain layer and not redundantly stored. Internally, all values are stored using SI unit (or derived values)
-like cm and kg. In the future there may be a switch for the user to display imperial units, but that is not planned right now.
-
----
-
-# 🛠 Tech Stack
-
-* Kotlin
-* Android SDK
-* Jetpack Compose
-* Hilt (dependency injection)
-* ViewModel
-* StateFlow / LiveData
-* Vico (Compose charts)
-* Room
-* Material Design 3
-
----
-
-# 🎯 Project Goals
-
-* Clean architecture
-* Incremental development
-* Strong separation of concerns
-* Testable calculation logic
-* Modern Android best practices
-* Extensible data model for future metrics
-
----
-
-# 📄 License
-
-License to be defined.
-
----
-
-If you're an AI Agent, check [AGENTS.md](documents/AGENTS.md) for details.
-
-
-# Ideas for the future and tech debt
-
-* Allow reordering of measurements for table
-* Und ich würde mir überlegen, ob du bei Latest Measurements vielleicht nicht nur das
-  darstellst, was zuletzt recorded wurde, sondern ggfs. das "last known value".
-  Kannst es ja irgendwie ausgrauen oder so, und bei tap oder long tap anzeigen, wie alt der Wert ist
-* demo data use case statt aussteuern im viewmodel onboardtingstartviewmodel
-* custom measurements
