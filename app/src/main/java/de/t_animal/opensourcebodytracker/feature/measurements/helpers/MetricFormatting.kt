@@ -114,6 +114,22 @@ internal fun valueWithUnit(
     return if (symbol.isEmpty()) number else "$number $symbol"
 }
 
+@androidx.annotation.StringRes
+internal fun MeasuredBodyMetric.guidanceResId(): Int = when (this) {
+    MeasuredBodyMetric.Weight -> R.string.measurement_guidance_weight
+    MeasuredBodyMetric.BodyFat -> R.string.measurement_guidance_body_fat
+    MeasuredBodyMetric.NeckCircumference -> R.string.measurement_guidance_neck_circumference
+    MeasuredBodyMetric.ChestCircumference -> R.string.measurement_guidance_chest_circumference
+    MeasuredBodyMetric.WaistCircumference -> R.string.measurement_guidance_waist_circumference
+    MeasuredBodyMetric.AbdomenCircumference -> R.string.measurement_guidance_abdomen_circumference
+    MeasuredBodyMetric.HipCircumference -> R.string.measurement_guidance_hip_circumference
+    MeasuredBodyMetric.ChestSkinfold -> R.string.measurement_guidance_chest_skinfold
+    MeasuredBodyMetric.AbdomenSkinfold -> R.string.measurement_guidance_abdomen_skinfold
+    MeasuredBodyMetric.ThighSkinfold -> R.string.measurement_guidance_thigh_skinfold
+    MeasuredBodyMetric.TricepsSkinfold -> R.string.measurement_guidance_triceps_skinfold
+    MeasuredBodyMetric.SuprailiacSkinfold -> R.string.measurement_guidance_suprailiac_skinfold
+}
+
 private const val MISSING_VALUE_PLACEHOLDER = "--"
 
 private fun formatDecimal(value: Double): String {

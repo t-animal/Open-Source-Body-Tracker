@@ -45,6 +45,7 @@ fun MainScreenScaffold(
     onMainDestinationSelected: (MainDestination) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenAbout: () -> Unit,
+    onOpenMeasurementGuidance: () -> Unit,
     debugCallbacks: DebugCallbacks? = null,
     content: @Composable (PaddingValues) -> Unit,
 ) {
@@ -80,6 +81,13 @@ fun MainScreenScaffold(
                             onClick = {
                                 overflowExpanded = false
                                 onOpenAbout()
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.menu_measurement_guidance)) },
+                            onClick = {
+                                overflowExpanded = false
+                                onOpenMeasurementGuidance()
                             },
                         )
                         if (debugCallbacks?.onTriggerReminder != null) {
@@ -147,6 +155,7 @@ private fun MainScreenScaffoldPreview() {
             onMainDestinationSelected = {},
             onOpenSettings = {},
             onOpenAbout = {},
+            onOpenMeasurementGuidance = {},
         ) { contentPadding ->
             Text(
                 text = "Preview Content",

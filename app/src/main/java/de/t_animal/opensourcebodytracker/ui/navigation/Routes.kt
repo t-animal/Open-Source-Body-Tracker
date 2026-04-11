@@ -35,6 +35,8 @@ object Routes {
     const val PhotoAnimateIdsArg = "ids"
     const val PhotoAnimate = "photos/animate/{$PhotoAnimateIdsArg}"
 
+    const val MeasurementGuidance = "measurement-guidance"
+
     const val FakeDataGenerator = "debug/fake-data-generator"
 
     fun measurementEditRoute(id: Long): String = "measurements/edit/$id"

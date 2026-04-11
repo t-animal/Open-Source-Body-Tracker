@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -91,6 +95,7 @@ fun MeasurementCollectionSection(
     requiredMeasurements: Set<MeasuredBodyMetric>,
     measurementToAnalysisMethods: Map<MeasuredBodyMetric, Set<AnalysisMethod>>,
     onMeasurementEnabledChanged: (MeasuredBodyMetric, Boolean) -> Unit,
+    onShowInfo: ((MeasuredBodyMetric) -> Unit)? = null,
 ) {
     Card {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -111,6 +116,16 @@ fun MeasurementCollectionSection(
                     checked = measurement in enabledMeasurements,
                     enabled = !required,
                     onCheckedChange = { onMeasurementEnabledChanged(measurement, it) },
+                    trailingContent = if (onShowInfo != null) {
+                        {
+                            IconButton(onClick = { onShowInfo(measurement) }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.HelpOutline,
+                                    contentDescription = stringResource(R.string.cd_metric_info),
+                                )
+                            }
+                        }
+                    } else null,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -125,6 +140,7 @@ private fun SettingsCheckRow(
     checked: Boolean,
     enabled: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    trailingContent: @Composable (() -> Unit)? = null,
 ) {
     Row(
         modifier = Modifier
@@ -156,6 +172,7 @@ private fun SettingsCheckRow(
             onCheckedChange = if (enabled) onCheckedChange else null,
             enabled = enabled,
         )
+        trailingContent?.invoke()
     }
 }
 

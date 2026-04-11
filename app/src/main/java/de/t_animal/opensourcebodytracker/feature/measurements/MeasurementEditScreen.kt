@@ -196,6 +196,7 @@ private fun MeasurementEditLoadedScreen(
     val title = stringResource(if (isCreatingNew) R.string.measurement_edit_title_add else R.string.measurement_edit_title_edit)
     var showDiscardDialog by remember { mutableStateOf(false) }
     var showDeleteMeasurementDialog by remember { mutableStateOf(false) }
+    var guidanceMetric by remember { mutableStateOf<MeasuredBodyMetric?>(null) }
     val visibleMetrics = remember(enabledMeasurements, state.sex) {
         resolveVisibleMeasuredMetrics(
             enabledMeasurements = enabledMeasurements,
@@ -218,7 +219,7 @@ private fun MeasurementEditLoadedScreen(
     }
 
     val isOverlayVisible =
-        state.isPhotoPreviewDialogVisible || showDiscardDialog || showDeleteMeasurementDialog
+        state.isPhotoPreviewDialogVisible || showDiscardDialog || showDeleteMeasurementDialog || guidanceMetric != null
     BackHandler(enabled = !isOverlayVisible) {
         handleBackClick()
     }
@@ -261,6 +262,7 @@ private fun MeasurementEditLoadedScreen(
                 bodyMetricInputs = state.bodyMetricInputs,
                 onMetricChanged = onMetricChanged,
                 unitSystem = state.unitSystem,
+                onShowInfo = { metric -> guidanceMetric = metric },
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -320,6 +322,11 @@ private fun MeasurementEditLoadedScreen(
         isVisible = state.isPhotoPreviewDialogVisible,
         photoPreviewModel = photoPreviewModel,
         onDismiss = { onPhotoPreviewDialogVisibilityChanged(false) },
+    )
+
+    MeasurementGuidanceDialog(
+        metric = guidanceMetric,
+        onDismiss = { guidanceMetric = null },
     )
 
     if (showDiscardDialog) {

@@ -23,6 +23,7 @@ fun MetricSections(
     bodyMetricInputs: Map<MeasuredBodyMetric, String>,
     onMetricChanged: (MeasuredBodyMetric, String) -> Unit,
     unitSystem: UnitSystem,
+    onShowInfo: ((MeasuredBodyMetric) -> Unit)? = null,
 ) {
     if (metrics.isEmpty()) {
         return
@@ -56,6 +57,7 @@ fun MetricSections(
                 onValueChange = { value -> onMetricChanged(metric, value) },
                 imeAction = if (isLastMetric) ImeAction.Done else ImeAction.Next,
                 addBottomSpacing = !isLastMetric,
+                onShowInfo = if (onShowInfo != null) { { onShowInfo(metric) } } else null,
             )
         }
 

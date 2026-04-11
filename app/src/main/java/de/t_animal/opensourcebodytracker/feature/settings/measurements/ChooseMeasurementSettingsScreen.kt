@@ -13,6 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,6 +27,7 @@ import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.AnalysisMethod
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
+import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementGuidanceDialog
 import de.t_animal.opensourcebodytracker.feature.settings.components.AnalysisMethodsSection
 import de.t_animal.opensourcebodytracker.feature.settings.components.MeasurementCollectionSection
 import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
@@ -61,6 +65,12 @@ fun ChooseMeasurementSettingsScreen(
     onWaistHeightRatioEnabledChanged: (Boolean) -> Unit,
 ) {
     val isOnboarding = state.mode == MeasurementSettingsMode.Onboarding
+    var guidanceMetric by remember { mutableStateOf<MeasuredBodyMetric?>(null) }
+
+    MeasurementGuidanceDialog(
+        metric = guidanceMetric,
+        onDismiss = { guidanceMetric = null },
+    )
 
     SecondaryScreenScaffold(
         title = stringResource(
@@ -133,6 +143,7 @@ fun ChooseMeasurementSettingsScreen(
                     requiredMeasurements = state.requiredMeasurements,
                     measurementToAnalysisMethods = state.measurementToAnalysisMethods,
                     onMeasurementEnabledChanged = onMeasurementEnabledChanged,
+                    onShowInfo = { guidanceMetric = it },
                 )
             }
 

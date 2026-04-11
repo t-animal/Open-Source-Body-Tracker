@@ -5,6 +5,8 @@ import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -160,7 +162,10 @@ fun DecimalNumberInputField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     imeAction: ImeAction = ImeAction.Next,
+    trailingIcon: @Composable (() -> Unit)? = null,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
     OutlinedTextField(
         value = value,
         onValueChange = { onValueChange(filterDecimalInputLocalized(it)) },
@@ -171,6 +176,8 @@ fun DecimalNumberInputField(
             keyboardType = KeyboardType.Decimal,
             imeAction = imeAction,
         ),
+        interactionSource = interactionSource,
+        trailingIcon = if (isFocused && trailingIcon != null) trailingIcon else null,
     )
 }
 

@@ -35,6 +35,7 @@ import de.t_animal.opensourcebodytracker.ui.components.MainScreenScaffold
 import de.t_animal.opensourcebodytracker.feature.analysis.AnalysisRoute
 import de.t_animal.opensourcebodytracker.feature.debug.FakeDataGeneratorRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementEditRoute
+import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementGuidanceRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListFullRoute
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListRoute
 import de.t_animal.opensourcebodytracker.feature.photos.PhotoAnimationRoute
@@ -183,6 +184,7 @@ private fun NavGraphBuilder.mainTabRoutes(
             },
             onOpenSettings = { navController.navigate(Routes.Settings) },
             onOpenAbout = { navController.navigate(Routes.About) },
+            onOpenMeasurementGuidance = { navController.navigate(Routes.MeasurementGuidance) },
             debugCallbacks = debugCallbacks,
         ) { contentPadding ->
             MeasurementListRoute(
@@ -206,6 +208,7 @@ private fun NavGraphBuilder.mainTabRoutes(
             },
             onOpenSettings = { navController.navigate(Routes.Settings) },
             onOpenAbout = { navController.navigate(Routes.About) },
+            onOpenMeasurementGuidance = { navController.navigate(Routes.MeasurementGuidance) },
             debugCallbacks = debugCallbacks,
         ) { contentPadding ->
             AnalysisRoute(
@@ -224,6 +227,7 @@ private fun NavGraphBuilder.mainTabRoutes(
             },
             onOpenSettings = { navController.navigate(Routes.Settings) },
             onOpenAbout = { navController.navigate(Routes.About) },
+            onOpenMeasurementGuidance = { navController.navigate(Routes.MeasurementGuidance) },
             debugCallbacks = debugCallbacks,
         ) { contentPadding ->
             Box(
@@ -250,6 +254,12 @@ private fun NavGraphBuilder.mainTabRoutes(
 }
 
 private fun NavGraphBuilder.measurementRoutes(navController: NavController) {
+    composable(Routes.MeasurementGuidance) {
+        MeasurementGuidanceRoute(
+            onNavigateBack = { navController.popBackStack() },
+        )
+    }
+
     composable(Routes.MeasurementListAll) {
         MeasurementListFullRoute(
             onNavigateBack = { navController.popBackStack() },
