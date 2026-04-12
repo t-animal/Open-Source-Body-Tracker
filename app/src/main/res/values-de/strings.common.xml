@@ -70,6 +70,25 @@
     <string name="metric_label_whr">THV</string>
     <string name="metric_label_whtr">TGV</string>
 
+    <!-- Body Metric Long Labels (used in measurement card grid) -->
+    <string name="metric_long_label_weight">Gewicht</string>
+    <string name="metric_long_label_body_fat">Körperfett</string>
+    <string name="metric_long_label_neck">Hals</string>
+    <string name="metric_long_label_waist">Taille</string>
+    <string name="metric_long_label_hip">Hüfte</string>
+    <string name="metric_long_label_chest">Brust</string>
+    <string name="metric_long_label_abdomen">Bauch</string>
+    <string name="metric_long_label_chest_skinfold">Brust-Hautfalte</string>
+    <string name="metric_long_label_abdomen_skinfold">Bauch-Hautfalte</string>
+    <string name="metric_long_label_thigh_skinfold">Oberschenkel-Hautfalte</string>
+    <string name="metric_long_label_triceps_skinfold">Trizeps-Hautfalte</string>
+    <string name="metric_long_label_suprailiac_skinfold">Hüft-Hautfalte</string>
+    <string name="metric_long_label_bmi">Body-Mass-Index</string>
+    <string name="metric_long_label_navy_body_fat">Körperfett Navy</string>
+    <string name="metric_long_label_skinfold_body_fat">Körperfett Hautfalten</string>
+    <string name="metric_long_label_whr">Taille/Hüfte-Verh.</string>
+    <string name="metric_long_label_whtr">Taille/Größe-Verh.</string>
+
     <!-- Body Metric Full Names (used in measurements + settings) -->
     <string name="metric_fullname_weight">Gewicht</string>
     <string name="metric_fullname_body_fat">Körperfett</string>

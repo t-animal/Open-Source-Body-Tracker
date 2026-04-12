@@ -235,7 +235,7 @@ private fun LatestMeasurementGrid(
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Text(
-                            text = displayItem.label,
+                            text = displayItem.longLabel,
                             style = MaterialTheme.typography.labelSmall,
                             modifier = Modifier
                                 .align(Alignment.Start)

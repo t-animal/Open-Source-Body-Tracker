@@ -9,11 +9,11 @@ import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.ui.helpers.displaySymbol
-import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.shortLabel
 
 @Composable
 internal fun BodyMetric.analysisTitle(): String = when (this) {
-    is MeasuredBodyMetric -> label()
+    is MeasuredBodyMetric -> shortLabel()
 
     is DerivedBodyMetric -> when (this) {
         DerivedBodyMetric.Bmi -> stringResource(R.string.analysis_chart_title_bmi)

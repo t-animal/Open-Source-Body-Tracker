@@ -41,7 +41,7 @@ import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasurementSettings
-import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.shortLabel
 import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 
@@ -148,7 +148,7 @@ private fun DisplayConfigurationSection(
     Column(modifier = Modifier.padding(16.dp)) {
         metricTypes.forEach { metric ->
             DisplayPlacementRow(
-                label = metric.label(),
+                label = metric.shortLabel(),
                 placement = when {
                     metric in state.settings.visibleInAnalysis && metric in state.settings.visibleInTable ->
                         DisplayPlacement.InBoth

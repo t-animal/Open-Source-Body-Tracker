@@ -70,6 +70,25 @@
     <string name="metric_label_whr">WHR</string>
     <string name="metric_label_whtr">WHtR</string>
 
+    <!-- Body Metric Long Labels (used in measurement card grid) -->
+    <string name="metric_long_label_weight">Weight</string>
+    <string name="metric_long_label_body_fat">Body Fat</string>
+    <string name="metric_long_label_neck">Neck</string>
+    <string name="metric_long_label_waist">Waist</string>
+    <string name="metric_long_label_hip">Hip</string>
+    <string name="metric_long_label_chest">Chest</string>
+    <string name="metric_long_label_abdomen">Abdomen</string>
+    <string name="metric_long_label_chest_skinfold">Chest Skinfold</string>
+    <string name="metric_long_label_abdomen_skinfold">Abdomen Skinfold</string>
+    <string name="metric_long_label_thigh_skinfold">Thigh Skinfold</string>
+    <string name="metric_long_label_triceps_skinfold">Triceps Skinfold</string>
+    <string name="metric_long_label_suprailiac_skinfold">Suprailiac Skinfold</string>
+    <string name="metric_long_label_bmi">Body Mass Index</string>
+    <string name="metric_long_label_navy_body_fat">Navy Body Fat</string>
+    <string name="metric_long_label_skinfold_body_fat">Skinfold Body Fat</string>
+    <string name="metric_long_label_whr">Waist/Hip R.</string>
+    <string name="metric_long_label_whtr">Waist/Height R.</string>
+
     <!-- Body Metric Full Names (used in measurements + settings) -->
     <string name="metric_fullname_weight">Weight</string>
     <string name="metric_fullname_body_fat">Body Fat</string>

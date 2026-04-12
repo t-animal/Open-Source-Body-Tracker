@@ -14,7 +14,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetricType
 import de.t_animal.opensourcebodytracker.core.model.BodyMetricUnit
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
-import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.shortLabel
 import de.t_animal.opensourcebodytracker.ui.helpers.displaySymbol
 
 @Composable
@@ -79,7 +79,7 @@ private fun metricSectionTitle(metricType: BodyMetricType): String {
 
 @Composable
 private fun metricInputLabel(metric: MeasuredBodyMetric, unitSystem: UnitSystem): String {
-    val label = metric.label()
+    val label = metric.shortLabel()
     return if (metric.unit == BodyMetricUnit.Unitless) {
         label
     } else {

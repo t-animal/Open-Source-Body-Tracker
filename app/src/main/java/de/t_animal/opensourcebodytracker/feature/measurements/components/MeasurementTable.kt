@@ -47,7 +47,7 @@ import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.formattedValue
-import de.t_animal.opensourcebodytracker.feature.measurements.helpers.label
+import de.t_animal.opensourcebodytracker.feature.measurements.helpers.shortLabel
 import de.t_animal.opensourcebodytracker.feature.measurements.helpers.rememberTableColumnWidths
 import de.t_animal.opensourcebodytracker.ui.components.formatEpochMillisToLocalizedNumericDate
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -75,7 +75,7 @@ internal fun MeasurementTable(
 
     val columnWidths = rememberTableColumnWidths(
         dateHeaderText = dateHeaderText,
-        visibleMetricHeaders = visibleMetrics.map { it.label() },
+        visibleMetricHeaders = visibleMetrics.map { it.shortLabel() },
         visibleMetrics = visibleMetrics,
         unitSystem = unitSystem,
         headerStyle = headerStyle,
@@ -133,7 +133,7 @@ internal fun MeasurementTable(
             )
             visibleMetrics.forEachIndexed { index, column ->
                 Text(
-                    text = column.label(),
+                    text = column.shortLabel(),
                     style = headerStyle,
                     modifier = Modifier
                         .width(columnWidths.metrics[index])
