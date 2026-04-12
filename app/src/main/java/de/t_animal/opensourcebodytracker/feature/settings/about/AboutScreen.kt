@@ -38,6 +38,7 @@ fun AboutScreen(
     onNavigateBack: () -> Unit,
     projectUrl: String,
     contactEmail: String,
+    versionName: String = BuildConfig.VERSION_NAME,
 ) {
     val uriHandler = LocalUriHandler.current
     val normalizedProjectUrl = if (projectUrl.startsWith("http://") || projectUrl.startsWith("https://")) {
@@ -63,6 +64,10 @@ fun AboutScreen(
             )
             Text(
                 text = stringResource(R.string.about_tagline),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = stringResource(R.string.about_version, versionName),
                 style = MaterialTheme.typography.bodyMedium,
             )
 
