@@ -33,8 +33,8 @@ android {
         applicationId = "de.t_animal.opensourcebodytracker"
         minSdk = 29
         targetSdk = 36
-        versionCode = 20260402
-        versionName = "2026.04-02"
+        versionCode = 20260403
+        versionName = "2026.04-03"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "ABOUT_PROJECT_URL", aboutProjectUrl.toBuildConfigString())
