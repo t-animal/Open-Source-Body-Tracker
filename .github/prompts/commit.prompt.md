@@ -1,6 +1,6 @@
 ---
 agent: 'agent'
-model: 'Claude Haiku 4.5'
+model: 'GPT-5 mini'
 description: 'Commit changes with a concise and meaningful message'
 ---
 
