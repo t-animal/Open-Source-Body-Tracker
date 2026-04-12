@@ -30,6 +30,7 @@ sealed interface MeasurementListUiState {
         val visibleInTableMetrics: List<BodyMetric>,
         val unitSystem: UnitSystem,
         val isEmpty: Boolean,
+        val isDemoMode: Boolean,
     ) : MeasurementListUiState
 }
 
@@ -71,6 +72,7 @@ class MeasurementListViewModel @Inject constructor(
             hasMoreMeasurements = items.size > PREVIEW_LIMIT,
             visibleInTableMetrics = orderedVisibleInTableMetrics,
             unitSystem = generalSettings.unitSystem,
+            isDemoMode = generalSettings.isDemoMode,
             isEmpty = items.isEmpty(),
         )
     }

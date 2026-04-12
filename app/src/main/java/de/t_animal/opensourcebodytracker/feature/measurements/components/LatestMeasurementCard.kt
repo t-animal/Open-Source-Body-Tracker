@@ -165,6 +165,7 @@ private fun LatestMeasurementCardPreview() {
                     visibleInTableMetrics = MeasuredBodyMetric.entries + DerivedBodyMetric.entries,
                     unitSystem = UnitSystem.Metric,
                     isEmpty = false,
+                    isDemoMode = false,
                 ),
                 onAdd = {},
             )
@@ -185,6 +186,7 @@ private fun LatestMeasurementCardEmptyPreview() {
                 visibleInTableMetrics = emptyList(),
                 unitSystem = UnitSystem.Metric,
                 isEmpty = true,
+                isDemoMode = false,
             ),
             onAdd = {},
         )

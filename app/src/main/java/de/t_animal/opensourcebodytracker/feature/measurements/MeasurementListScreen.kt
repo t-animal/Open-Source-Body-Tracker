@@ -55,7 +55,6 @@ fun MeasurementListRoute(
     onEdit: (Long) -> Unit,
     onAdd: () -> Unit,
     onOpenMore: () -> Unit,
-    showDemoBanner: Boolean = false,
     onResetApp: () -> Unit,
     contentPadding: PaddingValues,
 ) {
@@ -78,7 +77,6 @@ fun MeasurementListRoute(
             onEdit = onEdit,
             onAdd = onAdd,
             onOpenMore = onOpenMore,
-            showDemoBanner = showDemoBanner,
             onResetApp = onResetApp,
             contentPadding = contentPadding,
         )
@@ -120,7 +118,6 @@ fun MeasurementListScreen(
     onEdit: (Long) -> Unit,
     onAdd: () -> Unit,
     onOpenMore: () -> Unit,
-    showDemoBanner: Boolean = false,
     onResetApp: () -> Unit,
     contentPadding: PaddingValues,
 ) {
@@ -147,7 +144,7 @@ fun MeasurementListScreen(
                 .padding(contentPadding),
             contentPadding = PaddingValues(16.dp),
         ) {
-            if (showDemoBanner) {
+            if (state.isDemoMode) {
                 item {
                     DemoModeBanner(
                         onResetApp = { showResetConfirmationDialog = true },
@@ -349,6 +346,7 @@ private fun MeasurementListScreenPreview() {
                 visibleInTableMetrics = BodyMetric.entries,
                 unitSystem = UnitSystem.Metric,
                 isEmpty = false,
+                isDemoMode = false,
             ),
             onEdit = {},
             onAdd = {},
@@ -372,6 +370,7 @@ private fun MeasurementListScreenEmptyPreview() {
                 visibleInTableMetrics = emptyList(),
                 unitSystem = UnitSystem.Metric,
                 isEmpty = true,
+                isDemoMode = false,
             ),
             onEdit = {},
             onAdd = {},
@@ -407,6 +406,7 @@ private fun MeasurementFullListScreenPreview() {
                 visibleInTableMetrics = BodyMetric.entries,
                 unitSystem = UnitSystem.Metric,
                 isEmpty = false,
+                isDemoMode = false,
             ),
             onNavigateBack = {},
             onEdit = {},

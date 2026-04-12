@@ -153,7 +153,6 @@ fun BodyTrackerNavHost(
 
         mainTabRoutes(
             navController = navController,
-            generalSettings = generalSettings,
             onResetApp = onResetApp,
             debugCallbacks = debugCallbacks,
         )
@@ -170,7 +169,6 @@ fun BodyTrackerNavHost(
 
 private fun NavGraphBuilder.mainTabRoutes(
     navController: NavController,
-    generalSettings: GeneralSettings,
     onResetApp: () -> Unit,
     debugCallbacks: DebugCallbacks?,
 ) {
@@ -191,7 +189,6 @@ private fun NavGraphBuilder.mainTabRoutes(
                 onEdit = { id -> navController.navigate(Routes.measurementEditRoute(id)) },
                 onAdd = { navController.navigate(Routes.MeasurementAdd) },
                 onOpenMore = { navController.navigate(Routes.MeasurementListAll) },
-                showDemoBanner = generalSettings.isDemoMode,
                 onResetApp = onResetApp,
                 contentPadding = contentPadding,
             )
