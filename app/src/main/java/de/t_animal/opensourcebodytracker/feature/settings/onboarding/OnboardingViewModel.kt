@@ -15,6 +15,7 @@ import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.SaveProfileUseCase
 import de.t_animal.opensourcebodytracker.domain.demodata.StartDemoModeUseCase
 import de.t_animal.opensourcebodytracker.domain.metrics.RequiredMeasurementsResolver
+import de.t_animal.opensourcebodytracker.domain.metrics.SaveMeasurementSettingsUseCase
 import de.t_animal.opensourcebodytracker.domain.reminders.SaveReminderSettingsUseCase
 import java.time.DayOfWeek
 import java.time.LocalTime
@@ -73,6 +74,7 @@ class OnboardingViewModel @Inject constructor(
     private val generalSettingsRepository: GeneralSettingsRepository,
     private val requiredMeasurementsResolver: RequiredMeasurementsResolver,
     private val saveProfileUseCase: SaveProfileUseCase,
+    private val saveMeasurementSettingsUseCase: SaveMeasurementSettingsUseCase,
     private val saveReminderSettingsUseCase: SaveReminderSettingsUseCase,
     private val startDemoModeUseCase: StartDemoModeUseCase,
 ) : ViewModel() {
@@ -141,7 +143,8 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSaving = true, saveError = false)
             runCatching {
-                saveProfileUseCase(profile, current.analysis.settings)
+                saveProfileUseCase(profile)
+                saveMeasurementSettingsUseCase(current.analysis.settings)
 
                 val reminderSettings = ReminderSettings(
                     reminderEnabled = current.reminders.enabled,
