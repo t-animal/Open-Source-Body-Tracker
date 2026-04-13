@@ -1,7 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.measurements.components
 
 import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -14,13 +13,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,10 +41,12 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
+import de.t_animal.opensourcebodytracker.core.model.forMetric
 import de.t_animal.opensourcebodytracker.core.model.MeasuredBodyMetric
 import de.t_animal.opensourcebodytracker.core.model.MetricRating
 import de.t_animal.opensourcebodytracker.core.model.RatingLabel
 import de.t_animal.opensourcebodytracker.core.model.RatingSeverity
+import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListItemUiModel
 import de.t_animal.opensourcebodytracker.feature.measurements.MeasurementListUiState
@@ -48,6 +58,17 @@ internal fun LatestMeasurementCard(
     state: MeasurementListUiState.Loaded,
     onAdd: () -> Unit,
 ) {
+    var selectedMetricForExplanation by remember { mutableStateOf<DerivedBodyMetric?>(null) }
+
+    selectedMetricForExplanation?.let { metric ->
+        RatingInfoBottomSheet(
+            metric = metric,
+            currentRating = state.latestMeasurement?.derivedMetricRatings?.forMetric(metric),
+            userSex = state.userSex,
+            onDismiss = { selectedMetricForExplanation = null },
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -87,6 +108,7 @@ internal fun LatestMeasurementCard(
                             visibleMetrics = analysisMetrics,
                             allMeasurements = state.allMeasurements,
                             unitSystem = state.unitSystem,
+                            onRatingInfoClicked = { selectedMetricForExplanation = it },
                         )
                     }
 
@@ -104,6 +126,7 @@ internal fun LatestMeasurementCard(
                             visibleMetrics = rawMetrics,
                             allMeasurements = state.allMeasurements,
                             unitSystem = state.unitSystem,
+                            onRatingInfoClicked = { selectedMetricForExplanation = it },
                         )
                     }
                 }
@@ -164,6 +187,7 @@ private fun LatestMeasurementCardPreview() {
                     hasMoreMeasurements = false,
                     visibleInTableMetrics = MeasuredBodyMetric.entries + DerivedBodyMetric.entries,
                     unitSystem = UnitSystem.Metric,
+                    userSex = Sex.Male,
                     isEmpty = false,
                     isDemoMode = false,
                 ),
@@ -185,6 +209,7 @@ private fun LatestMeasurementCardEmptyPreview() {
                 hasMoreMeasurements = false,
                 visibleInTableMetrics = emptyList(),
                 unitSystem = UnitSystem.Metric,
+                userSex = Sex.Male,
                 isEmpty = true,
                 isDemoMode = false,
             ),
@@ -200,6 +225,7 @@ private fun LatestMeasurementGrid(
     visibleMetrics: List<BodyMetric>,
     allMeasurements: List<MeasurementListItemUiModel>,
     unitSystem: UnitSystem,
+    onRatingInfoClicked: (DerivedBodyMetric) -> Unit,
 ) {
     val displayMetrics = buildLatestMeasurementMetrics(item, visibleMetrics, unitSystem)
     val context = LocalContext.current
@@ -236,18 +262,36 @@ private fun LatestMeasurementGrid(
                             .padding(6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
-                        Text(
-                            text = displayItem.longLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier
-                                .align(Alignment.Start)
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = displayItem.longLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null,
+                                    ) {
+                                        Toast.makeText(context, displayItem.fullName, Toast.LENGTH_SHORT).show()
+                                    }
+                            )
+                            if (displayItem.rating != null && bodyMetric is DerivedBodyMetric) {
+                                IconButton(
+                                    onClick = { onRatingInfoClicked(bodyMetric) },
+                                    modifier = Modifier.size(24.dp),
                                 ) {
-                                    Toast.makeText(context, displayItem.fullName, Toast.LENGTH_SHORT).show()
+                                    Icon(
+                                        imageVector = Icons.Outlined.Info,
+                                        contentDescription = stringResource(R.string.cd_metric_rating_info),
+                                        modifier = Modifier.size(16.dp),
+                                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                    )
                                 }
-                        )
+                            }
+                        }
                         Text(
                             text = displayItem.value,
                             style = MaterialTheme.typography.titleMedium,
@@ -256,12 +300,7 @@ private fun LatestMeasurementGrid(
                             Text(
                                 text = stringResource(rating.label.labelResourceId),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = when (rating.severity) {
-                                    RatingSeverity.Good -> MaterialTheme.colorScheme.tertiary
-                                    RatingSeverity.Fair -> MaterialTheme.colorScheme.secondary
-                                    RatingSeverity.Poor -> MaterialTheme.colorScheme.error
-                                    RatingSeverity.Severe -> MaterialTheme.colorScheme.error
-                                },
+                                color = rating.severity.toColor(),
                             )
                         }
                     }
@@ -274,27 +313,5 @@ private fun LatestMeasurementGrid(
     }
 }
 
-private val RatingLabel.labelResourceId: Int
-    @StringRes get() = when (this) {
-        RatingLabel.SevereUnderweight -> R.string.rating_severe_underweight
-        RatingLabel.Underweight -> R.string.rating_underweight
-        RatingLabel.Normal -> R.string.rating_normal
-        RatingLabel.Overweight -> R.string.rating_overweight
-        RatingLabel.ObeseClassI -> R.string.rating_obese_class_i
-        RatingLabel.ObeseClassII -> R.string.rating_obese_class_ii
-        RatingLabel.ObeseClassIII -> R.string.rating_obese_class_iii
-        RatingLabel.DangerouslyLow -> R.string.rating_dangerously_low
-        RatingLabel.EssentialFat -> R.string.rating_essential_fat
-        RatingLabel.Athletic -> R.string.rating_athletic
-        RatingLabel.Fit -> R.string.rating_fit
-        RatingLabel.Acceptable -> R.string.rating_acceptable
-        RatingLabel.Obese -> R.string.rating_obese
-        RatingLabel.LowRisk -> R.string.rating_low_risk
-        RatingLabel.ModerateRisk -> R.string.rating_moderate_risk
-        RatingLabel.HighRisk -> R.string.rating_high_risk
-        RatingLabel.VeryHighRisk -> R.string.rating_very_high_risk
-        RatingLabel.UnderweightRisk -> R.string.rating_underweight_risk
-        RatingLabel.Healthy -> R.string.rating_healthy
-        RatingLabel.IncreasedRisk -> R.string.rating_increased_risk
-    }
+
 

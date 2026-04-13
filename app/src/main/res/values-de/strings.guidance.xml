@@ -2,7 +2,59 @@
 <resources>
     <string name="menu_measurement_guidance">So messen</string>
     <string name="measurement_guidance_screen_title">So messen</string>
+    <string name="menu_health_rating_guide">Erklärung Analyseergebnisse</string>
+    <string name="health_rating_guide_title">Erklärung Analyseergebnisse</string>
     <string name="cd_metric_info">Messtipp anzeigen</string>
+
+    <!-- Health Rating Guide Section Titles -->
+    <string name="health_rating_section_body_fat_male">Körperfettanteil (männlich)</string>
+    <string name="health_rating_section_body_fat_female">Körperfettanteil (weiblich)</string>
+    <string name="health_rating_section_whr_male">Taille-Hüfte-Verhältnis (männlich)</string>
+    <string name="health_rating_section_whr_female">Taille-Hüfte-Verhältnis (weiblich)</string>
+
+    <!-- Rating Descriptions — BMI -->
+    <string name="rating_desc_bmi_severe_underweight">Steht im Zusammenhang mit sehr niedrigem Körpergewicht und einem erhöhten Risiko für Schwäche, Energiemangel und eingeschränkte Immunfunktion. BMI berücksichtigt jedoch weder Muskelmasse noch Fettverteilung.</string>
+    <string name="rating_desc_bmi_underweight">Steht im Zusammenhang mit niedrigem Körpergewicht und kann das Risiko für Müdigkeit, Nährstoffmängel und verringerte körperliche Belastbarkeit erhöhen. BMI berücksichtigt jedoch weder Muskelmasse noch Fettverteilung.</string>
+    <string name="rating_desc_bmi_normal">Steht im Zusammenhang mit einem gesunden Gewichtsbereich und einem geringeren Risiko für gewichtsbedingte Gesundheitsprobleme. BMI berücksichtigt jedoch weder Muskelmasse noch Fettverteilung.</string>
+    <string name="rating_desc_bmi_overweight">Steht im Zusammenhang mit erhöhtem Körpergewicht und kann das Gesundheitsrisiko langfristig steigern, insbesondere für Herz und Stoffwechsel. BMI berücksichtigt jedoch weder Muskelmasse noch Fettverteilung.</string>
+    <string name="rating_desc_bmi_obese_class_i">Steht im Zusammenhang mit erhöhtem Körpergewicht und einem gesteigerten Risiko für Erkrankungen wie Herzerkrankungen und Typ-2-Diabetes. BMI berücksichtigt jedoch weder Muskelmasse noch Fettverteilung.</string>
+    <string name="rating_desc_bmi_obese_class_ii">Steht im Zusammenhang mit deutlich erhöhtem Körpergewicht und einer höheren Wahrscheinlichkeit für ernsthafte Erkrankungen. BMI berücksichtigt jedoch weder Muskelmasse noch Fettverteilung.</string>
+    <string name="rating_desc_bmi_obese_class_iii">Steht im Zusammenhang mit sehr hohem Körpergewicht und einem erheblich gesteigerten Risiko für schwerwiegende gesundheitliche Komplikationen. BMI berücksichtigt jedoch weder Muskelmasse noch Fettverteilung.</string>
+
+    <!-- Rating Descriptions — Body Fat % (Male) -->
+    <string name="rating_desc_bodyfat_male_dangerously_low">Steht im Zusammenhang mit extrem niedrigem Körperfett und einem erhöhten Risiko für hormonelle Dysbalancen und eingeschränkte Körperfunktionen. Der Körperfettanteil allein berücksichtigt jedoch nicht die Fettverteilung.</string>
+    <string name="rating_desc_bodyfat_male_essential_fat">Steht im Zusammenhang mit sehr niedrigem Körperfett und kann die Energieverfügbarkeit und körperliche Belastbarkeit verringern. Der Körperfettanteil allein berücksichtigt jedoch nicht die Fettverteilung.</string>
+    <string name="rating_desc_bodyfat_male_athletic">Steht im Zusammenhang mit niedrigem Körperfett und tritt häufig bei körperlich trainierten Personen auf.</string>
+    <string name="rating_desc_bodyfat_male_fit">Steht im Zusammenhang mit einem gesunden und nachhaltigen Körperfettanteil.</string>
+    <string name="rating_desc_bodyfat_male_acceptable">Steht im Zusammenhang mit einem typischen Körperfettbereich und einem leichten bis mäßigen Gesundheitsrisiko.</string>
+    <string name="rating_desc_bodyfat_male_high_body_fat">Steht im Zusammenhang mit hohem Körperfett und einem erhöhten Risiko für Stoffwechsel- und Herz-Kreislauf-Erkrankungen. Der Körperfettanteil allein berücksichtigt jedoch nicht die Fettverteilung.</string>
+
+    <!-- Rating Descriptions — Body Fat % (Female) -->
+    <string name="rating_desc_bodyfat_female_dangerously_low">Steht im Zusammenhang mit extrem niedrigem Körperfett und einem erhöhten Risiko für hormonelle Störungen und Menstruationsunregelmäßigkeiten. Der Körperfettanteil allein berücksichtigt jedoch nicht die Fettverteilung.</string>
+    <string name="rating_desc_bodyfat_female_essential_fat">Steht im Zusammenhang mit sehr niedrigem Körperfett und kann den Hormonhaushalt und die Energieversorgung beeinflussen. Der Körperfettanteil allein berücksichtigt jedoch nicht die Fettverteilung.</string>
+    <string name="rating_desc_bodyfat_female_athletic">Steht im Zusammenhang mit niedrigem Körperfett und tritt häufig bei körperlich trainierten Personen auf.</string>
+    <string name="rating_desc_bodyfat_female_fit">Steht im Zusammenhang mit einem gesunden und nachhaltigen Körperfettanteil.</string>
+    <string name="rating_desc_bodyfat_female_acceptable">Steht im Zusammenhang mit einem typischen Körperfettbereich und einem leichten bis mäßigen Gesundheitsrisiko.</string>
+    <string name="rating_desc_bodyfat_female_high_body_fat">Steht im Zusammenhang mit hohem Körperfett und einem erhöhten Risiko für chronische Erkrankungen. Der Körperfettanteil allein berücksichtigt jedoch nicht die Fettverteilung.</string>
+
+    <!-- Rating Descriptions — Waist-Hip Ratio (Male) -->
+    <string name="rating_desc_whr_male_low_risk">Steht im Zusammenhang mit geringem Bauchfett und einem reduzierten Risiko für Herz-Kreislauf-Erkrankungen.</string>
+    <string name="rating_desc_whr_male_moderate_risk">Steht im Zusammenhang mit mäßigem Bauchfett und einem leicht erhöhten Gesundheitsrisiko.</string>
+    <string name="rating_desc_whr_male_high_risk">Steht im Zusammenhang mit höherem Bauchfett und einem gesteigerten Risiko für Herz- und Stoffwechselerkrankungen.</string>
+    <string name="rating_desc_whr_male_very_high_risk">Steht im Zusammenhang mit hohem Bauchfett und einem deutlich erhöhten Risiko für ernsthafte Erkrankungen.</string>
+
+    <!-- Rating Descriptions — Waist-Hip Ratio (Female) -->
+    <string name="rating_desc_whr_female_low_risk">Steht im Zusammenhang mit geringem Bauchfett und einem reduzierten Gesundheitsrisiko.</string>
+    <string name="rating_desc_whr_female_moderate_risk">Steht im Zusammenhang mit mäßigem Bauchfett und einem leicht erhöhten Gesundheitsrisiko.</string>
+    <string name="rating_desc_whr_female_high_risk">Steht im Zusammenhang mit erhöhtem Bauchfett und einem gesteigerten Risiko für Stoffwechsel- und Herz-Kreislauf-Erkrankungen.</string>
+    <string name="rating_desc_whr_female_very_high_risk">Steht im Zusammenhang mit hohem Bauchfett und einem deutlich erhöhten Risiko für ernsthafte Gesundheitsprobleme.</string>
+
+    <!-- Rating Descriptions — Waist-Height Ratio -->
+    <string name="rating_desc_whtr_underweight_risk">Steht im Zusammenhang mit einem niedrigen Taillenumfang im Verhältnis zur Körpergröße und kann auf niedrigen Körperfettanteil oder Untergewicht hinweisen. Das Gesundheitsrisiko lässt sich aus diesem Wert allein jedoch nicht bestimmen.</string>
+    <string name="rating_desc_whtr_healthy">Steht im Zusammenhang mit einem gesunden Taillenumfang und einem geringeren Risiko für Stoffwechselerkrankungen.</string>
+    <string name="rating_desc_whtr_increased_risk">Steht im Zusammenhang mit erhöhtem Bauchfett und einem leichten bis mäßigen Gesundheitsrisiko.</string>
+    <string name="rating_desc_whtr_high_risk">Steht im Zusammenhang mit hohem Bauchfett und einer erhöhten Wahrscheinlichkeit für gesundheitliche Probleme.</string>
+    <string name="rating_desc_whtr_very_high_risk">Steht im Zusammenhang mit sehr hohem Bauchfett und einem deutlichen Zusammenhang mit ernsthaften Gesundheitsrisiken.</string>
     <string name="measurement_guidance_side_front">Vorne</string>
     <string name="measurement_guidance_side_back">Hinten</string>
     <string name="measurement_guidance_sex_abbreviation_male">M</string>

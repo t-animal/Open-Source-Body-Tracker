@@ -36,6 +36,7 @@ object Routes {
     const val PhotoAnimate = "photos/animate/{$PhotoAnimateIdsArg}"
 
     const val MeasurementGuidance = "measurement-guidance"
+    const val HealthRatingGuide = "health-rating-guide"
 
     const val FakeDataGenerator = "debug/fake-data-generator"
 

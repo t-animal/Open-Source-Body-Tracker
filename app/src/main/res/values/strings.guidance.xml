@@ -2,6 +2,58 @@
 <resources>
     <string name="menu_measurement_guidance">How to measure</string>
     <string name="measurement_guidance_screen_title">How to measure</string>
+    <string name="menu_health_rating_guide">Analysis result guide</string>
+    <string name="health_rating_guide_title">Analysis Result Guide</string>
+
+    <!-- Health Rating Guide Section Titles -->
+    <string name="health_rating_section_body_fat_male">Body Fat % (Male)</string>
+    <string name="health_rating_section_body_fat_female">Body Fat % (Female)</string>
+    <string name="health_rating_section_whr_male">Waist-Hip Ratio (Male)</string>
+    <string name="health_rating_section_whr_female">Waist-Hip Ratio (Female)</string>
+
+    <!-- Rating Descriptions — BMI -->
+    <string name="rating_desc_bmi_severe_underweight">Is associated with very low body weight and increased risk of weakness, low energy, and impaired immune function. BMI does not account for muscle mass or fat distribution, though.</string>
+    <string name="rating_desc_bmi_underweight">Is associated with low body weight and may increase the risk of fatigue, nutrient deficiencies, and reduced physical resilience. BMI does not account for muscle mass or fat distribution, though.</string>
+    <string name="rating_desc_bmi_normal">Is associated with a healthy weight range and lower risk of weight-related health problems. BMI does not account for muscle mass or fat distribution, though.</string>
+    <string name="rating_desc_bmi_overweight">Is associated with increased body weight and may increase health risks over time, especially for heart and metabolic health. BMI does not account for muscle mass or fat distribution, though.</string>
+    <string name="rating_desc_bmi_obese_class_i">Is associated with higher body weight and increased risk of conditions such as heart disease and type 2 diabetes. BMI does not account for muscle mass or fat distribution, though.</string>
+    <string name="rating_desc_bmi_obese_class_ii">Is associated with significantly increased body weight and a higher likelihood of serious health conditions. BMI does not account for muscle mass or fat distribution, though.</string>
+    <string name="rating_desc_bmi_obese_class_iii">Is associated with very high body weight and a substantially increased risk of severe health complications. BMI does not account for muscle mass or fat distribution, though.</string>
+
+    <!-- Rating Descriptions — Body Fat % (Male) -->
+    <string name="rating_desc_bodyfat_male_dangerously_low">Is associated with extremely low body fat and increased risk of hormonal imbalance and impaired body function. However, body fat percentage alone does not take fat distribution into account.</string>
+    <string name="rating_desc_bodyfat_male_essential_fat">Is associated with very low body fat and may reduce energy availability and physical resilience. However, body fat percentage alone does not take fat distribution into account.</string>
+    <string name="rating_desc_bodyfat_male_athletic">Is associated with low body fat and is commonly seen in physically trained individuals.</string>
+    <string name="rating_desc_bodyfat_male_fit">Is associated with a healthy level of body fat and good overall physical condition.</string>
+    <string name="rating_desc_bodyfat_male_acceptable">Is associated with a typical body fat range and mild to moderate health risk.</string>
+    <string name="rating_desc_bodyfat_male_high_body_fat">Is associated with high body fat and increased risk of metabolic and cardiovascular conditions. However, body fat percentage alone does not take fat distribution into account.</string>
+
+    <!-- Rating Descriptions — Body Fat % (Female) -->
+    <string name="rating_desc_bodyfat_female_dangerously_low">Is associated with extremely low body fat and increased risk of hormonal disruption and menstrual irregularities. However, body fat percentage alone does not take fat distribution into account.</string>
+    <string name="rating_desc_bodyfat_female_essential_fat">Is associated with very low body fat and may impact hormone balance and energy levels. However, body fat percentage alone does not take fat distribution into account.</string>
+    <string name="rating_desc_bodyfat_female_athletic">Is associated with low body fat and is commonly seen in physically trained individuals.</string>
+    <string name="rating_desc_bodyfat_female_fit">Is associated with a healthy and sustainable body fat level.</string>
+    <string name="rating_desc_bodyfat_female_acceptable">Is associated with a typical body fat range and mild to moderate health risk.</string>
+    <string name="rating_desc_bodyfat_female_high_body_fat">Is associated with high body fat and increased risk of chronic health conditions. However, body fat percentage alone does not take fat distribution into account.</string>
+
+    <!-- Rating Descriptions — Waist-Hip Ratio (Male) -->
+    <string name="rating_desc_whr_male_low_risk">Is associated with lower abdominal fat and reduced risk of cardiovascular disease.</string>
+    <string name="rating_desc_whr_male_moderate_risk">Is associated with moderate abdominal fat and mild increase in health risk.</string>
+    <string name="rating_desc_whr_male_high_risk">Is associated with higher abdominal fat and increased risk of heart and metabolic conditions.</string>
+    <string name="rating_desc_whr_male_very_high_risk">Is associated with high abdominal fat and a significantly increased risk of serious health conditions.</string>
+
+    <!-- Rating Descriptions — Waist-Hip Ratio (Female) -->
+    <string name="rating_desc_whr_female_low_risk">Is associated with lower abdominal fat and reduced health risk.</string>
+    <string name="rating_desc_whr_female_moderate_risk">Is associated with moderate abdominal fat and mild increase in health risk.</string>
+    <string name="rating_desc_whr_female_high_risk">Is associated with increased abdominal fat and higher risk of metabolic and cardiovascular conditions.</string>
+    <string name="rating_desc_whr_female_very_high_risk">Is associated with high abdominal fat and a significantly increased risk of serious health issues.</string>
+
+    <!-- Rating Descriptions — Waist-Height Ratio -->
+    <string name="rating_desc_whtr_underweight_risk">Is associated with a low waist size relative to height and might indicate low body fat or underweight status. However, health risk cannot be determined from this measure alone.</string>
+    <string name="rating_desc_whtr_healthy">Is associated with a healthy waist size and lower risk of metabolic disease.</string>
+    <string name="rating_desc_whtr_increased_risk">Is associated with increased abdominal fat and mild to moderate health risk.</string>
+    <string name="rating_desc_whtr_high_risk">Is associated with high abdominal fat and increased likelihood of health problems.</string>
+    <string name="rating_desc_whtr_very_high_risk">Is associated with very high abdominal fat and a strong link to serious health risks.</string>
     <string name="cd_metric_info">Show measurement guidance</string>
     <string name="measurement_guidance_side_front">Front</string>
     <string name="measurement_guidance_side_back">Back</string>

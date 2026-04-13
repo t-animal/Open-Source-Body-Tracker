@@ -8,6 +8,7 @@ import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetricRatings
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
+import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.data.measurements.MeasurementRepository
 import de.t_animal.opensourcebodytracker.data.profile.ProfileRepository
@@ -29,6 +30,7 @@ sealed interface MeasurementListUiState {
         val hasMoreMeasurements: Boolean,
         val visibleInTableMetrics: List<BodyMetric>,
         val unitSystem: UnitSystem,
+        val userSex: Sex,
         val isEmpty: Boolean,
         val isDemoMode: Boolean,
     ) : MeasurementListUiState
@@ -72,6 +74,7 @@ class MeasurementListViewModel @Inject constructor(
             hasMoreMeasurements = items.size > PREVIEW_LIMIT,
             visibleInTableMetrics = orderedVisibleInTableMetrics,
             unitSystem = generalSettings.unitSystem,
+            userSex = profile.sex,
             isDemoMode = generalSettings.isDemoMode,
             isEmpty = items.isEmpty(),
         )

@@ -48,6 +48,11 @@
     <string name="demo_reset_dialog_body_before_bold">This will delete all app data and close the app. </string>
     <string name="demo_reset_dialog_body_bold">You will have to restart it manually.</string>
 
+    <!-- Rating Info Bottom Sheet -->
+    <string name="rating_info_sheet_intro">This list explains the rating values for %1$s.</string>
+    <string name="rating_info_sheet_disclaimer">Please note that this is only a guide and does not constitute medical advice or replace consultation with a doctor!</string>
+    <string name="rating_info_sheet_current_rating">Your current rating is: "%1$s".</string>
+
     <!-- Rating Labels -->
     <string name="rating_severe_underweight">Severe underweight</string>
     <string name="rating_underweight">Underweight</string>
@@ -61,7 +66,7 @@
     <string name="rating_athletic">Athletic</string>
     <string name="rating_fit">Fit</string>
     <string name="rating_acceptable">Acceptable</string>
-    <string name="rating_obese">Obese</string>
+    <string name="rating_obese">High Body Fat</string>
     <string name="rating_low_risk">Low risk</string>
     <string name="rating_moderate_risk">Moderate risk</string>
     <string name="rating_high_risk">High risk</string>
@@ -82,6 +87,7 @@
     <string name="cd_edit_measurement">Edit measurement</string>
     <string name="cd_add_measurement">Add measurement</string>
     <string name="cd_hide_note">Hide note</string>
+    <string name="cd_metric_rating_info">Show rating guide for this metric</string>
     <string name="cd_show_full_note">Show full note</string>
     <string name="cd_photo_preview">Captured photo preview</string>
 </resources>

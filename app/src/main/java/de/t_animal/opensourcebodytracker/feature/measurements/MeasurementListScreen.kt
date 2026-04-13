@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.BodyMeasurement
 import de.t_animal.opensourcebodytracker.core.model.BodyMetric
 import de.t_animal.opensourcebodytracker.core.model.DerivedMetrics
+import de.t_animal.opensourcebodytracker.core.model.Sex
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.measurements.components.DemoModeBanner
 import de.t_animal.opensourcebodytracker.feature.measurements.components.LatestMeasurementCard
@@ -345,6 +346,7 @@ private fun MeasurementListScreenPreview() {
                 hasMoreMeasurements = true,
                 visibleInTableMetrics = BodyMetric.entries,
                 unitSystem = UnitSystem.Metric,
+                userSex = Sex.Male,
                 isEmpty = false,
                 isDemoMode = false,
             ),
@@ -369,6 +371,7 @@ private fun MeasurementListScreenEmptyPreview() {
                 hasMoreMeasurements = false,
                 visibleInTableMetrics = emptyList(),
                 unitSystem = UnitSystem.Metric,
+                userSex = Sex.Male,
                 isEmpty = true,
                 isDemoMode = false,
             ),
@@ -405,6 +408,7 @@ private fun MeasurementFullListScreenPreview() {
                 hasMoreMeasurements = false,
                 visibleInTableMetrics = BodyMetric.entries,
                 unitSystem = UnitSystem.Metric,
+                userSex = Sex.Male,
                 isEmpty = false,
                 isDemoMode = false,
             ),
