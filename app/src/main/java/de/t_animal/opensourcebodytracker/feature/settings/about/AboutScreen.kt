@@ -25,9 +25,11 @@ import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 @Composable
 fun AboutRoute(
     onNavigateBack: () -> Unit,
+    onOpenLibraries: () -> Unit,
 ) {
     AboutScreen(
         onNavigateBack = onNavigateBack,
+        onOpenLibraries = onOpenLibraries,
         projectUrl = BuildConfig.ABOUT_PROJECT_URL,
         contactEmail = BuildConfig.ABOUT_CONTACT_EMAIL,
     )
@@ -36,6 +38,7 @@ fun AboutRoute(
 @Composable
 fun AboutScreen(
     onNavigateBack: () -> Unit,
+    onOpenLibraries: () -> Unit,
     projectUrl: String,
     contactEmail: String,
     versionName: String = BuildConfig.VERSION_NAME,
@@ -94,6 +97,18 @@ fun AboutScreen(
             ) {
                 Text(contactEmail)
             }
+
+            Text(
+                text = stringResource(R.string.about_section_oss_libraries),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+            OutlinedButton(
+                onClick = onOpenLibraries,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.about_button_oss_licenses))
+            }
         }
     }
 }
@@ -104,6 +119,7 @@ private fun AboutScreenPreview() {
     BodyTrackerTheme {
         AboutScreen(
             onNavigateBack = {},
+            onOpenLibraries = {},
             projectUrl = "example.com",
             contactEmail = "contact@example.com",
         )

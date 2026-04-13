@@ -6,4 +6,7 @@
     <string name="about_section_project">Projekt</string>
     <string name="about_button_github">GitHub-Repository</string>
     <string name="about_section_contact">Kontakt</string>
+    <string name="about_section_oss_libraries">Open-Source-Bibliotheken</string>
+    <string name="about_button_oss_licenses">Open-Source-Lizenzen anzeigen</string>
+    <string name="about_libraries_title">Open-Source-Bibliotheken</string>
 </resources>

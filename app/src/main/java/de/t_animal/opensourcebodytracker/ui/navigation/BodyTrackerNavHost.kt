@@ -45,6 +45,7 @@ import de.t_animal.opensourcebodytracker.feature.photos.PhotosRoute
 import de.t_animal.opensourcebodytracker.feature.settings.SettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.misc.MiscSettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.about.AboutRoute
+import de.t_animal.opensourcebodytracker.feature.settings.about.LibrariesRoute
 import de.t_animal.opensourcebodytracker.feature.importbackup.ImportBackupRoute
 import de.t_animal.opensourcebodytracker.feature.settings.export.ExportSettingsRoute
 import de.t_animal.opensourcebodytracker.feature.settings.measurements.MeasurementSettingsRoute
@@ -374,6 +375,13 @@ private fun NavGraphBuilder.settingsRoutes(navController: NavController) {
 
     composable(Routes.About) {
         AboutRoute(
+            onNavigateBack = { navController.popBackStack() },
+            onOpenLibraries = { navController.navigate(Routes.Libraries) },
+        )
+    }
+
+    composable(Routes.Libraries) {
+        LibrariesRoute(
             onNavigateBack = { navController.popBackStack() },
         )
     }

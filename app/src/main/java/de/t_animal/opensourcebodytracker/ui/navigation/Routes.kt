@@ -18,6 +18,7 @@ object Routes {
     const val Reminders = "settings/reminders"
     const val Export = "settings/export"
     const val About = "settings/about"
+    const val Libraries = "settings/about/libraries"
 
     const val MeasurementList = "measurements"
     const val MeasurementListAll = "measurements/all"

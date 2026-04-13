@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.play.publisher)
+    alias(libs.plugins.aboutlibraries.android)
 }
 
 val aboutProjectUrl =
@@ -124,6 +125,7 @@ dependencies {
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
     implementation(libs.reorderable)
+    implementation(libs.aboutlibraries.compose.m3)
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
