@@ -182,3 +182,11 @@ Charts and trend indicators for your tracked metrics over time.
 </tr>
 </table>
 
+
+## License
+
+The source code of this project is licensed under GPL v3.
+
+The license applies to the code in this repository only.
+It does **not** grant rights to the project's branding, logo
+or name.
