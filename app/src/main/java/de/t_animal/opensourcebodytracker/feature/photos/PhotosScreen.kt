@@ -90,8 +90,8 @@ fun PhotosScreen(
     val isSelectionMode = state.mode != PhotoMode.NORMAL
     val isCompareMode = state.mode == PhotoMode.COMPARE
     val isAnimateMode = state.mode == PhotoMode.ANIMATE
-    val isCompareBottomBarVisible = isCompareMode && selectedItems.isNotEmpty()
-    val isAnimateBottomBarVisible = isAnimateMode && selectedItems.isNotEmpty()
+    val isCompareBottomBarVisible = isCompareMode
+    val isAnimateBottomBarVisible = isAnimateMode
     val isSelectionBottomBarVisible = isCompareBottomBarVisible || isAnimateBottomBarVisible
 
     val compareEnabled = isCompareMode && selectedItems.size == 2

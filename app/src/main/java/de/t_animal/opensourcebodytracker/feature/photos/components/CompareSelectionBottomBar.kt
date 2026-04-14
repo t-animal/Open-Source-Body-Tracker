@@ -1,5 +1,6 @@
 package de.t_animal.opensourcebodytracker.feature.photos.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,42 +28,53 @@ fun CompareSelectionBottomBar(
     compareEnabled: Boolean,
     onCompareClicked: () -> Unit,
 ) {
-    if (selectedItems.isEmpty()) {
-        return
-    }
-
     Surface(
         tonalElevation = 3.dp,
         shadowElevation = 3.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(modifier = Modifier.weight(1f)) {
-                selectedItems.forEachIndexed { index, item ->
-                    if (index > 0) {
-                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                    }
-                    AsyncImage(
-                        model = item.photoFile,
-                        contentDescription = stringResource(R.string.cd_selected_thumbnail),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(52.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-            Button(
-                onClick = onCompareClicked,
-                enabled = compareEnabled,
+        if (selectedItems.isEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 18.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(stringResource(R.string.photos_button_compare))
+                Text(
+                    text = stringResource(R.string.photos_selection_start_prompt),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(modifier = Modifier.weight(1f)) {
+                    selectedItems.forEachIndexed { index, item ->
+                        if (index > 0) {
+                            Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                        }
+                        AsyncImage(
+                            model = item.photoFile,
+                            contentDescription = stringResource(R.string.cd_selected_thumbnail),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(52.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                Button(
+                    onClick = onCompareClicked,
+                    enabled = compareEnabled,
+                ) {
+                    Text(stringResource(R.string.photos_button_compare))
+                }
             }
         }
     }

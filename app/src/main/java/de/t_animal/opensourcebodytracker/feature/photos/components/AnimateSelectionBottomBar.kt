@@ -22,31 +22,42 @@ fun AnimateSelectionBottomBar(
     playEnabled: Boolean,
     onPlayClicked: () -> Unit,
 ) {
-    if (selectedCount <= 0) {
-        return
-    }
-
     Surface(
         tonalElevation = 3.dp,
         shadowElevation = 3.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = pluralStringResource(R.plurals.photos_selected_count, selectedCount, selectedCount),
-                style = MaterialTheme.typography.bodyLarge,
-            )
-            Button(
-                onClick = onPlayClicked,
-                enabled = playEnabled,
+        if (selectedCount == 0) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 18.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(stringResource(R.string.photos_button_play))
+                Text(
+                    text = stringResource(R.string.photos_selection_start_prompt),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = pluralStringResource(R.plurals.photos_selected_count, selectedCount, selectedCount),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Button(
+                    onClick = onPlayClicked,
+                    enabled = playEnabled,
+                ) {
+                    Text(stringResource(R.string.photos_button_play))
+                }
             }
         }
     }

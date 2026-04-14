@@ -2,6 +2,7 @@
     <string name="photos_empty">No photos yet</string>
     <string name="photos_snackbar_selection_limit">You can select at most 2 photos</string>
     <string name="photos_snackbar_minimum_selection">Select at least 2 photos to animate</string>
+    <string name="photos_selection_start_prompt">Select images to start</string>
     <string name="photos_button_compare">Compare</string>
     <string name="photos_button_play">Play</string>
     <plurals name="photos_selected_count">
