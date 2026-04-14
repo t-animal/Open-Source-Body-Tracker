@@ -11,12 +11,13 @@ jobs:
     timeout-minutes: 30
     environment: google-play-production
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-tags: true
+          fetch-depth: 0
 
       - name: Check for matching beta tag
         id: check_beta
@@ -69,3 +70,14 @@ jobs:
         with:
           name: release-bundle
           path: app/build/outputs/bundle/release/*.aab
+
+      - name: Create draft GitHub Release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES=$(git log -1 --pretty=format:"%b" "$GITHUB_REF_NAME")
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Release $GITHUB_REF_NAME" \
+            --notes "$NOTES" \
+            --draft

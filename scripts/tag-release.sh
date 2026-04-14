@@ -36,6 +36,8 @@ echo "  Tag:         $TAG"
 echo "  versionCode: $VERSION_CODE"
 echo "  versionName: $VERSION_NAME"
 echo ""
+read -rp "Release description (optional, becomes GitHub release notes, consider using /release-notes skill to generate): " DESCRIPTION
+echo ""
 read -rp "Confirm? [y/N]: " CONFIRM
 [[ "$CONFIRM" =~ ^[yY]$ ]] || { echo "Aborted."; exit 0; }
 
@@ -44,7 +46,11 @@ sed -i "s/versionCode = [0-9]*/versionCode = ${VERSION_CODE}/" "$BUILD_GRADLE"
 sed -i "s/versionName = \"[^\"]*\"/versionName = \"${VERSION_NAME}\"/" "$BUILD_GRADLE"
 
 git add "$BUILD_GRADLE"
-git commit -m "Release ${TAG}"
+if [ -n "$DESCRIPTION" ]; then
+  git commit -m "Release ${TAG}" -m "$DESCRIPTION"
+else
+  git commit -m "Release ${TAG}"
+fi
 git tag "$TAG"
 
 echo ""

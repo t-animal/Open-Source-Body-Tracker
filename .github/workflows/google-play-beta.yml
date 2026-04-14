@@ -11,7 +11,7 @@ jobs:
     timeout-minutes: 30
     environment: google-play-beta
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - uses: actions/checkout@v6
@@ -47,3 +47,15 @@ jobs:
         with:
           name: release-bundle
           path: app/build/outputs/bundle/release/*.aab
+
+      - name: Create draft GitHub Pre-Release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOTES=$(git log -1 --pretty=format:"%b" "$GITHUB_REF_NAME")
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Beta $GITHUB_REF_NAME" \
+            --notes "$NOTES" \
+            --draft \
+            --prerelease
