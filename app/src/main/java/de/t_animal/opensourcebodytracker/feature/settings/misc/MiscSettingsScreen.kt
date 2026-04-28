@@ -17,8 +17,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.t_animal.opensourcebodytracker.R
 import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
+import de.t_animal.opensourcebodytracker.core.model.ThemePreference
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.feature.settings.components.PhotoQualitySelector
+import de.t_animal.opensourcebodytracker.feature.settings.components.ThemeSection
 import de.t_animal.opensourcebodytracker.feature.settings.components.UnitSystemSelector
 import de.t_animal.opensourcebodytracker.ui.components.SecondaryScreenScaffold
 import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
@@ -37,6 +39,7 @@ fun MiscSettingsRoute(
             uiState = uiState,
             onUnitSystemChanged = vm::onUnitSystemChanged,
             onPhotoQualityChanged = vm::onPhotoQualityChanged,
+            onThemePreferenceChanged = vm::onThemePreferenceChanged,
         )
     }
 }
@@ -47,6 +50,7 @@ fun MiscSettingsScreen(
     uiState: MiscSettingsUiState.Loaded,
     onUnitSystemChanged: (UnitSystem) -> Unit,
     onPhotoQualityChanged: (PhotoQuality) -> Unit,
+    onThemePreferenceChanged: (ThemePreference) -> Unit,
 ) {
     SecondaryScreenScaffold(
         title = stringResource(R.string.settings_misc_title),
@@ -78,22 +82,49 @@ fun MiscSettingsScreen(
                     onPhotoQualityChanged = onPhotoQualityChanged,
                 )
             }
+
+            item {
+                ThemeSection(
+                    themePreference = uiState.themePreference,
+                    onThemePreferenceChanged = onThemePreferenceChanged,
+                )
+            }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun MiscSettingsScreenPreview() {
+private fun MiscSettingsScreenSystemThemePreview() {
     BodyTrackerTheme {
         MiscSettingsScreen(
             onNavigateBack = {},
             uiState = MiscSettingsUiState.Loaded(
                 unitSystem = UnitSystem.Metric,
                 photoQuality = PhotoQuality.High,
+                themePreference = ThemePreference.SystemDefault,
             ),
             onUnitSystemChanged = {},
             onPhotoQualityChanged = {},
+            onThemePreferenceChanged = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MiscSettingsScreenPresetThemePreview() {
+    BodyTrackerTheme {
+        MiscSettingsScreen(
+            onNavigateBack = {},
+            uiState = MiscSettingsUiState.Loaded(
+                unitSystem = UnitSystem.Metric,
+                photoQuality = PhotoQuality.High,
+                themePreference = ThemePreference.Preset(de.t_animal.opensourcebodytracker.core.model.ThemePreset.Ocean),
+            ),
+            onUnitSystemChanged = {},
+            onPhotoQualityChanged = {},
+            onThemePreferenceChanged = {},
         )
     }
 }

@@ -126,6 +126,8 @@ dependencies {
     implementation(libs.vico.compose.m3)
     implementation(libs.reorderable)
     implementation(libs.aboutlibraries.compose.m3)
+    implementation(libs.materialkolor)
+    implementation(libs.colorpicker.compose)
 
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

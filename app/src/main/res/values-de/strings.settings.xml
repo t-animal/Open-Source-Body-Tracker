@@ -33,6 +33,28 @@
     <string name="settings_photo_quality_description_low">Fotos werden auf max. 1280px verkleinert und am stärksten komprimiert (etwa 1 Megapixel, 70% jpeg Qualität).</string>
     <string name="settings_photo_quality_hint_new_photos_only">Diese Einstellung gilt nur für neu aufgenommene Fotos. Bestehende Fotos werden nicht verändert.</string>
 
+    <!-- Theme -->
+    <string name="settings_theme_title">Design</string>
+    <string name="settings_theme_mode_system">System</string>
+    <string name="settings_theme_mode_preset">Vorlage</string>
+    <string name="settings_theme_mode_custom">Eigenes</string>
+    <string name="settings_theme_preset_ocean">Ozean</string>
+    <string name="settings_theme_preset_jungle">Dschungel</string>
+    <string name="settings_theme_preset_sunset">Sonnenuntergang</string>
+    <string name="settings_theme_preset_berry">Beere</string>
+    <string name="settings_theme_preset_desert">Wüste</string>
+    <string name="settings_theme_preset_rose">Rose</string>
+    <string name="settings_theme_preset_slate">Schiefer</string>
+    <string name="settings_theme_preset_mono">Mono</string>
+    <string name="settings_theme_picker_title">Farbe wählen</string>
+    <string name="settings_theme_palette_style_tonal_spot">Tonal</string>
+    <string name="settings_theme_palette_style_vibrant">Leuchtkräftig</string>
+    <string name="settings_theme_palette_style_expressive">Ausdrucksstark</string>
+    <string name="settings_theme_palette_style_monochrome">Mono</string>
+    <string name="settings_theme_preview_title">Design-Vorschau</string>
+    <string name="cd_settings_theme_edit_custom">Eigenes Design bearbeiten</string>
+    <string name="cd_settings_theme_preview_fab">Messung hinzufügen</string>
+
     <!-- Visibility -->
     <string name="settings_visibility_title">Sichtbarkeit der Messungen</string>
     <string name="settings_visibility_description">Wähle, welche aufgezeichneten Messungen in Tabellen und Analyseansichten sichtbar sind.</string>

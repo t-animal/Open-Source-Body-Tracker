@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
+import de.t_animal.opensourcebodytracker.core.model.ThemePreference
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import javax.inject.Inject
@@ -19,6 +20,7 @@ sealed interface MiscSettingsUiState {
     data class Loaded(
         val unitSystem: UnitSystem,
         val photoQuality: PhotoQuality,
+        val themePreference: ThemePreference,
     ) : MiscSettingsUiState
 }
 
@@ -32,6 +34,7 @@ class MiscSettingsViewModel @Inject constructor(
             MiscSettingsUiState.Loaded(
                 unitSystem = settings.unitSystem,
                 photoQuality = settings.photoQuality,
+                themePreference = settings.themePreference,
             )
         }
         .stateIn(
@@ -49,6 +52,12 @@ class MiscSettingsViewModel @Inject constructor(
     fun onPhotoQualityChanged(photoQuality: PhotoQuality) {
         viewModelScope.launch {
             generalSettingsRepository.updateSettings { it.copy(photoQuality = photoQuality) }
+        }
+    }
+
+    fun onThemePreferenceChanged(themePreference: ThemePreference) {
+        viewModelScope.launch {
+            generalSettingsRepository.updateSettings { it.copy(themePreference = themePreference) }
         }
     }
 }

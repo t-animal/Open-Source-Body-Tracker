@@ -16,6 +16,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationContract
 import de.t_animal.opensourcebodytracker.infra.notifications.ReminderNotificationPoster
+import de.t_animal.opensourcebodytracker.core.model.ThemePreference
 import de.t_animal.opensourcebodytracker.data.settings.GeneralSettingsRepository
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportScheduler
 import de.t_animal.opensourcebodytracker.ScreenshotModeOrchestrator
@@ -26,6 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -34,6 +36,7 @@ class MainActivity : ComponentActivity() {
     private var startDestination by mutableStateOf<String?>(null)
     private var forcedDarkTheme by mutableStateOf<Boolean?>(null)
     private var useDynamicColor by mutableStateOf(true)
+    private var themePreference by mutableStateOf<ThemePreference>(ThemePreference.SystemDefault)
 
     @Inject lateinit var generalSettingsRepository: GeneralSettingsRepository
     @Inject lateinit var automaticExportScheduler: AutomaticExportScheduler
@@ -59,6 +62,11 @@ class MainActivity : ComponentActivity() {
                 } else {
                     Routes.OnboardingGraph
                 }
+                launch {
+                    generalSettingsRepository.settingsFlow
+                        .map { it.themePreference }
+                        .collect { themePreference = it }
+                }
             }
         }
 
@@ -68,6 +76,7 @@ class MainActivity : ComponentActivity() {
             BodyTrackerTheme(
                 darkTheme = forcedDarkTheme ?: isSystemInDarkTheme(),
                 dynamicColor = useDynamicColor,
+                themePreference = themePreference,
             ) {
                 val destination = startDestination
                 if (destination != null) {

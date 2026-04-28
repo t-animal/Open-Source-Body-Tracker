@@ -6,6 +6,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import de.t_animal.opensourcebodytracker.core.model.GeneralSettings
 import de.t_animal.opensourcebodytracker.core.model.PhotoQuality
+import de.t_animal.opensourcebodytracker.core.model.ThemePaletteStyle
+import de.t_animal.opensourcebodytracker.core.model.ThemePreference
+import de.t_animal.opensourcebodytracker.core.model.ThemePreset
 import de.t_animal.opensourcebodytracker.core.model.UnitSystem
 import de.t_animal.opensourcebodytracker.di.SettingsDataStore
 import javax.inject.Inject
@@ -47,7 +50,28 @@ class PreferencesGeneralSettingsRepository @Inject constructor(
             photoQuality = this[SettingsKeys.photoQuality]?.let {
                 runCatching { PhotoQuality.valueOf(it) }.getOrNull()
             } ?: defaults.photoQuality,
+            themePreference = this.toThemePreference() ?: defaults.themePreference,
         )
+    }
+
+    private fun Preferences.toThemePreference(): ThemePreference? {
+        val modeStr = this[SettingsKeys.themeMode] ?: return null
+        return when (modeStr) {
+            "SystemDefault" -> ThemePreference.SystemDefault
+            "Preset" -> {
+                val presetName = this[SettingsKeys.themePresetName] ?: return null
+                val preset = runCatching { ThemePreset.valueOf(presetName) }.getOrNull() ?: return null
+                ThemePreference.Preset(preset)
+            }
+            "Custom" -> {
+                val colorArgb = this[SettingsKeys.themeCustomColorArgb]
+                    ?.let { runCatching { it.toInt() }.getOrNull() } ?: return null
+                val paletteStyle = this[SettingsKeys.themePaletteStyle]
+                    ?.let { runCatching { ThemePaletteStyle.valueOf(it) }.getOrNull() } ?: return null
+                ThemePreference.Custom(colorArgb, paletteStyle)
+            }
+            else -> null
+        }
     }
 
     private fun MutablePreferences.applyGeneralSettings(settings: GeneralSettings) {
@@ -55,5 +79,19 @@ class PreferencesGeneralSettingsRepository @Inject constructor(
         this[SettingsKeys.isDemoMode] = settings.isDemoMode
         this[SettingsKeys.unitSystem] = settings.unitSystem.name
         this[SettingsKeys.photoQuality] = settings.photoQuality.name
+        when (val pref = settings.themePreference) {
+            is ThemePreference.SystemDefault -> {
+                this[SettingsKeys.themeMode] = "SystemDefault"
+            }
+            is ThemePreference.Preset -> {
+                this[SettingsKeys.themeMode] = "Preset"
+                this[SettingsKeys.themePresetName] = pref.preset.name
+            }
+            is ThemePreference.Custom -> {
+                this[SettingsKeys.themeMode] = "Custom"
+                this[SettingsKeys.themeCustomColorArgb] = pref.seedColorArgb.toString()
+                this[SettingsKeys.themePaletteStyle] = pref.paletteStyle.name
+            }
+        }
     }
 }

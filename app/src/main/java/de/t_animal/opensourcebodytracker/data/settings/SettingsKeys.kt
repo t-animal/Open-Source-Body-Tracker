@@ -32,4 +32,8 @@ object SettingsKeys {
     val isDemoMode = booleanPreferencesKey("general.isDemoMode")
     val unitSystem = stringPreferencesKey("general.unitSystem")
     val photoQuality = stringPreferencesKey("general.photoQuality")
+    val themeMode = stringPreferencesKey("general.themeMode")
+    val themePresetName = stringPreferencesKey("general.themePresetName")
+    val themeCustomColorArgb = stringPreferencesKey("general.themeCustomColorArgb")
+    val themePaletteStyle = stringPreferencesKey("general.themePaletteStyle")
 }

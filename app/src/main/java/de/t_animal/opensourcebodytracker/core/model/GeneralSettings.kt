@@ -5,4 +5,5 @@ data class GeneralSettings(
     val isDemoMode: Boolean = false,
     val unitSystem: UnitSystem = UnitSystem.Metric,
     val photoQuality: PhotoQuality = PhotoQuality.High,
+    val themePreference: ThemePreference = ThemePreference.SystemDefault,
 )
