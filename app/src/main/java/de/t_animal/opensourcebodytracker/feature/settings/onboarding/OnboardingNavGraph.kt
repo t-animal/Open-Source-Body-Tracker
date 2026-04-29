@@ -146,6 +146,7 @@ private fun OnboardingProfileRoute(
             unitSystem = state.profile.unitSystem,
             validationError = state.profile.validationError,
         ),
+        onNavigateBack = { navController.popBackStack() },
         onSexChanged = vm::onSexChanged,
         onDateOfBirthChanged = vm::onDateOfBirthChanged,
         onHeightCmChanged = vm::onHeightCmChanged,
@@ -176,6 +177,7 @@ private fun OnboardingAnalysisRoute(
                 sex = state.profile.sex,
             )
         },
+        onNavigateBack = { navController.popBackStack() },
         onBmiEnabledChanged = vm::onBmiEnabledChanged,
         onNavyBodyFatEnabledChanged = vm::onNavyBodyFatEnabledChanged,
         onSkinfoldBodyFatEnabledChanged = vm::onSkinfoldBodyFatEnabledChanged,
@@ -240,7 +242,7 @@ private fun OnboardingRemindersRoute(
         onWeekdayToggled = vm::onWeekdayToggled,
         onTimeChanged = vm::onTimeChanged,
         onSaveClicked = onSaveRequested,
-        onBackClicked = onOnboardingCompleted,
+        onBackClicked = { navController.popBackStack() },
     )
 
     if (showPermissionDeniedAlert) {

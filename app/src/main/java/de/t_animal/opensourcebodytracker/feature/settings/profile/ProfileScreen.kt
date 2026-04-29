@@ -32,7 +32,7 @@ import de.t_animal.opensourcebodytracker.ui.theme.BodyTrackerTheme
 fun ProfileRoute(
     mode: ProfileMode,
     onFinished: () -> Unit,
-    onNavigateBack: (() -> Unit)? = null,
+    onNavigateBack: () -> Unit,
 ) {
     val vm = hiltViewModel<ProfileViewModel, ProfileViewModel.Factory> { it.create(mode) }
     LaunchedEffect(vm) {
@@ -62,7 +62,7 @@ fun ProfileRoute(
 @Composable
 fun ProfileScreen(
     state: ProfileUiState.Loaded,
-    onNavigateBack: (() -> Unit)? = null,
+    onNavigateBack: () -> Unit,
     onSexChanged: (Sex) -> Unit,
     onDateOfBirthChanged: (String) -> Unit,
     onHeightCmChanged: (String) -> Unit,
@@ -74,7 +74,7 @@ fun ProfileScreen(
             if (state.mode == ProfileMode.Onboarding) R.string.profile_title_onboarding
             else R.string.profile_title_settings,
         ),
-        onNavigateBack = onNavigateBack ?: {},
+        onNavigateBack = onNavigateBack,
     ) {
         Column(
             modifier = Modifier

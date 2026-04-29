@@ -163,7 +163,6 @@ fun ReminderSettingsScreen(
     SecondaryScreenScaffold(
         title = stringResource(state.mode.titleResourceId),
         onNavigateBack = onBackClicked,
-        backEnabled = state.mode.showsBackNavigation(),
     ) {
         when (state) {
         is ReminderSettingsUiState.Loading -> Row(
@@ -330,9 +329,6 @@ private fun ReminderSaveButton(
         Text(label)
     }
 }
-
-private fun ReminderMode.showsBackNavigation(): Boolean = this == ReminderMode.Settings
-
 
 private fun formatReminderTime(time: LocalTime): String {
     return time.format(DateTimeFormatter.ofPattern("HH:mm"))

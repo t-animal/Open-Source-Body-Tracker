@@ -56,7 +56,7 @@ fun MeasurementSettingsRoute(
 @Composable
 fun ChooseMeasurementSettingsScreen(
     state: ChooseMeasurementSettingsUiState,
-    onNavigateBack: (() -> Unit)? = null,
+    onNavigateBack: () -> Unit,
     onContinueClicked: (() -> Unit)? = null,
     onMeasurementEnabledChanged: (MeasuredBodyMetric, Boolean) -> Unit,
     onBmiEnabledChanged: (Boolean) -> Unit,
@@ -80,8 +80,7 @@ fun ChooseMeasurementSettingsScreen(
             if (isOnboarding) R.string.onboarding_analysis_title
             else R.string.settings_measurements_analysis_title,
         ),
-        onNavigateBack = onNavigateBack ?: {},
-        backEnabled = onNavigateBack != null,
+        onNavigateBack = onNavigateBack,
     ) {
         when (state) {
         is ChooseMeasurementSettingsUiState.Loading -> Row(
@@ -237,6 +236,7 @@ private fun ChooseMeasurementSettingsScreenOnboardingPreview() {
                 hasError = false,
                 sex = null,
             ),
+            onNavigateBack = {},
             onContinueClicked = {},
             onMeasurementEnabledChanged = { _, _ -> },
             onBmiEnabledChanged = {},
