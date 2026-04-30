@@ -56,7 +56,7 @@ class AutomaticExportWorker @AssistedInject constructor(
                 NotificationCompat.Builder(applicationContext, NotificationChannels.EXPORT_CHANNEL_ID)
                     .setContentTitle(applicationContext.getString(R.string.export_error_banner_title))
                     .setContentText(applicationContext.getString(error.toNotificationStringRes()))
-                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setSmallIcon(R.drawable.ic_launcher_monochrome)
                     .setAutoCancel(true)
                     .build(),
             )
@@ -104,7 +104,7 @@ class AutomaticExportWorker @AssistedInject constructor(
             )
                 .setContentTitle(applicationContext.getString(R.string.notification_export_title))
                 .setContentText(notificationState.message)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.ic_launcher_monochrome)
                 .setOnlyAlertOnce(true)
                 .setSilent(true)
                 .setProgress(

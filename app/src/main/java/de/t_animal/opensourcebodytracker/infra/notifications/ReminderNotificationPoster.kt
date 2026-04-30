@@ -35,7 +35,7 @@ class ReminderNotificationPoster @Inject constructor(
         )
 
         val notification = NotificationCompat.Builder(context, NotificationChannels.REMINDER_CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_launcher_monochrome)
             .setContentTitle(context.getString(R.string.notification_reminder_title))
             .setContentText(context.getString(R.string.notification_reminder_body))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
