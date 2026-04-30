@@ -15,6 +15,8 @@ import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import de.t_animal.opensourcebodytracker.R
+import de.t_animal.opensourcebodytracker.core.model.AutomaticExportErrorKey
+import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportResult
 import de.t_animal.opensourcebodytracker.domain.export.AutomaticExportUseCase
 import de.t_animal.opensourcebodytracker.domain.export.ExportProgress
 import de.t_animal.opensourcebodytracker.infra.notifications.NotificationChannels
@@ -28,12 +30,37 @@ class AutomaticExportWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         runCatching { setForeground(createForegroundInfo()) }
-        automaticExportUseCase { progress -> updateNotification(progress) }
+        when (val result = automaticExportUseCase { progress -> updateNotification(progress) }) {
+            AutomaticExportResult.Success,
+            AutomaticExportResult.Skipped -> cancelNotification()
+            is AutomaticExportResult.Failed -> showErrorNotification(result.error)
+        }
         return Result.success()
     }
 
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return createForegroundInfo()
+    }
+
+    private fun cancelNotification() {
+        NotificationManagerCompat.from(applicationContext).cancel(EXPORT_NOTIFICATION_ID)
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun showErrorNotification(error: AutomaticExportErrorKey) {
+        if (!canPostNotificationUpdates()) return
+
+        runCatching {
+            NotificationManagerCompat.from(applicationContext).notify(
+                EXPORT_NOTIFICATION_ID,
+                NotificationCompat.Builder(applicationContext, NotificationChannels.EXPORT_CHANNEL_ID)
+                    .setContentTitle(applicationContext.getString(R.string.export_error_banner_title))
+                    .setContentText(applicationContext.getString(error.toNotificationStringRes()))
+                    .setSmallIcon(android.R.drawable.ic_dialog_info)
+                    .setAutoCancel(true)
+                    .build(),
+            )
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -128,6 +155,16 @@ class AutomaticExportWorker @AssistedInject constructor(
     companion object {
         const val EXPORT_NOTIFICATION_ID = 4224
     }
+}
+
+private fun AutomaticExportErrorKey.toNotificationStringRes(): Int = when (this) {
+    AutomaticExportErrorKey.EnableDeviceStorage -> R.string.auto_export_error_EnableDeviceStorage
+    AutomaticExportErrorKey.SelectFolder -> R.string.auto_export_error_SelectFolder
+    AutomaticExportErrorKey.EnterPassword -> R.string.auto_export_error_EnterPassword
+    AutomaticExportErrorKey.InvalidFolder -> R.string.auto_export_error_InvalidFolder
+    AutomaticExportErrorKey.PermissionDenied -> R.string.auto_export_error_PermissionDenied
+    AutomaticExportErrorKey.WriteFailed -> R.string.auto_export_error_WriteFailed
+    AutomaticExportErrorKey.Unknown -> R.string.auto_export_error_Unknown
 }
 
 private data class NotificationState(
